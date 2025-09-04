@@ -1,0 +1,11 @@
+{
+  "name": "root-cause-power-backend-clean",
+  "version": "1.0.0",
+  "description": "Clean backend for Root Cause Power Platform",
+  "dependencies": {
+    "groq-sdk": "^0.3.0"
+  },
+  "engines": {
+    "node": "18.x"
+  }
+}
