@@ -839,7 +839,8 @@ class RootCausePowerApp {
                                 ${isDisabled ? 'Not Available for First Purchase' : 'Buy Credits'}
                             </button>
                         </div>
-                    `).join('')}
+                        `;
+                    }).join('')}
                 </div>
                 
                 <div class="bg-gradient-to-r from-blue-50 to-purple-50 p-6 rounded-lg mb-6">
