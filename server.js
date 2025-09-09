@@ -1,18 +1,78 @@
 const express = require('express');
 const path = require('path');
 const cors = require('cors');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
+const { body, validationResult } = require('express-validator');
 require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middleware
-app.use(cors());
-app.use(express.json());
+// Enhanced Security Middleware
+app.use(helmet({
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'"],
+            styleSrc: ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net", "https://cdnjs.cloudflare.com"],
+            scriptSrc: ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net", "https://js.stripe.com"],
+            imgSrc: ["'self'", "data:", "https:"],
+            connectSrc: ["'self'", "https://api.groq.com", "https://api.hume.ai", "wss:", "ws:"],
+            fontSrc: ["'self'", "https://cdnjs.cloudflare.com"],
+            objectSrc: ["'none'"],
+            mediaSrc: ["'self'", "blob:", "data:"],
+            frameSrc: ["'self'", "https://js.stripe.com"],
+            upgradeInsecureRequests: []
+        }
+    },
+    crossOriginEmbedderPolicy: false
+}));
+
+// Rate limiting for voice AI endpoints (stricter limits)
+const voiceApiLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 50, // Limit each IP to 50 voice requests per windowMs
+    message: {
+        error: 'Too many voice requests, please try again later',
+        retryAfter: '15 minutes'
+    },
+    standardHeaders: true,
+    legacyHeaders: false
+});
+
+// General API rate limiting
+const apiLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // Limit each IP to 100 requests per windowMs
+    message: {
+        error: 'Too many requests, please try again later'
+    },
+    standardHeaders: true,
+    legacyHeaders: false
+});
+
+// Apply rate limiting to API routes
+app.use('/api/voice/', voiceApiLimiter);
+app.use('/api/', apiLimiter);
+
+// CORS with specific origins (enhance for production)
+app.use(cors({
+    origin: process.env.NODE_ENV === 'production' 
+        ? ['https://your-domain.com', 'https://www.your-domain.com'] 
+        : true,
+    credentials: true,
+    optionsSuccessStatus: 200
+}));
+
+// Body parsing with size limits
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Static file serving
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/src', express.static(path.join(__dirname, 'src')));
 
-// Security headers for PWA
+// Enhanced security headers for PWA
 app.use((req, res, next) => {
     // HTTPS redirect (in production)
     if (process.env.NODE_ENV === 'production' && req.header('x-forwarded-proto') !== 'https') {
@@ -208,6 +268,106 @@ app.post('/api/voice/session/end', (req, res) => {
             follow_up_recommended: true
         },
         message: '💜 Session completed successfully. Your progress has been recorded and support continues to be available.'
+    });
+});
+
+// Voice credits validation and tracking
+app.post('/api/voice/validate-credit', [
+    body('userId').isString().notEmpty(),
+    body('sessionId').isString().optional(),
+    body('creditType').isIn(['speech_to_speech', 'text_to_speech', 'speech_recognition'])
+], (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({
+            success: false,
+            errors: errors.array(),
+            message: 'Invalid request parameters'
+        });
+    }
+
+    const { userId, sessionId, creditType } = req.body;
+    
+    console.log('🔐 Voice credit validation request:', {
+        userId: userId.substring(0, 8) + '...',
+        creditType,
+        timestamp: new Date().toISOString()
+    });
+
+    // In production, validate against database
+    // For now, return validation success
+    res.json({
+        success: true,
+        creditValid: true,
+        remaining: 999, // Would be fetched from database
+        message: 'Credit validated successfully',
+        rateLimit: {
+            remaining: res.getHeader('X-RateLimit-Remaining'),
+            reset: new Date(Date.now() + 15 * 60 * 1000).toISOString()
+        }
+    });
+});
+
+app.post('/api/voice/consume-credit', [
+    body('userId').isString().notEmpty(),
+    body('sessionId').isString().notEmpty(),
+    body('duration').isNumeric(),
+    body('creditType').isIn(['speech_to_speech', 'text_to_speech', 'speech_recognition'])
+], (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({
+            success: false,
+            errors: errors.array()
+        });
+    }
+
+    const { userId, sessionId, duration, creditType } = req.body;
+    
+    console.log('💳 Voice credit consumption:', {
+        userId: userId.substring(0, 8) + '...',
+        sessionId,
+        duration,
+        creditType,
+        timestamp: new Date().toISOString()
+    });
+
+    // In production:
+    // 1. Validate session exists and is active
+    // 2. Deduct credit from user account
+    // 3. Log transaction for billing
+    // 4. Update usage analytics
+
+    res.json({
+        success: true,
+        creditConsumed: true,
+        remainingCredits: 998, // Would be updated from database
+        transactionId: 'txn_' + Date.now(),
+        message: 'Credit consumed successfully'
+    });
+});
+
+app.get('/api/voice/credit-balance/:userId', (req, res) => {
+    const { userId } = req.params;
+    
+    if (!userId || userId.length < 8) {
+        return res.status(400).json({
+            success: false,
+            message: 'Invalid user ID'
+        });
+    }
+
+    console.log('📊 Credit balance check:', {
+        userId: userId.substring(0, 8) + '...',
+        timestamp: new Date().toISOString()
+    });
+
+    // In production, fetch from database
+    res.json({
+        success: true,
+        balance: 999,
+        plan: 'premium',
+        lastUpdated: new Date().toISOString()
     });
 });
 

@@ -17,6 +17,7 @@ class RootCausePowerApp {
             lastUsedDate: new Date().toDateString(),
             subscriptionActive: false,
             voiceCredits: 0, // New voice credits system
+            isAdmin: false, // Admin access flag
             planLimits: {
                 'Free': { dailyCredits: 5, features: ['basic_assessment', 'emdr', 'crisis_support'] },
                 'Standard': { dailyCredits: -1, features: ['unlimited_ai', 'nutrition_analysis', 'meal_planning', 'progress_tracking', 'voice_credits_purchase'] },
@@ -709,57 +710,57 @@ class RootCausePowerApp {
     getVoiceCreditPackages() {
         return [
             { 
-                credits: 30, 
-                price: "£9.99", 
-                minutes: "~30 minutes",
-                description: "Perfect for trying voice coaching",
+                credits: 50, 
+                price: "£14.99", 
+                minutes: "~50 minutes",
+                description: "MINIMUM PURCHASE - Try voice coaching",
                 popular: false,
-                stripeUrl: "https://buy.stripe.com/voice-credits-30" // You'll need to create this
+                minPurchase: true,
+                pricePerCredit: "£0.30",
+                stripeUrl: "https://buy.stripe.com/voice-credits-50"
             },
             { 
-                credits: 100, 
-                price: "£24.99", 
-                minutes: "~100 minutes",
-                description: "Great value for regular users", 
+                credits: 150, 
+                price: "£34.99", 
+                minutes: "~150 minutes",
+                description: "Most popular - Best value per credit", 
                 popular: true,
                 save: "Save £10!",
-                stripeUrl: "https://buy.stripe.com/voice-credits-100"
+                pricePerCredit: "£0.23",
+                stripeUrl: "https://buy.stripe.com/voice-credits-150"
             },
             { 
-                credits: 250, 
-                price: "£49.99", 
-                minutes: "~250 minutes",
-                description: "For intensive voice therapy",
+                credits: 300, 
+                price: "£59.99", 
+                minutes: "~300 minutes",
+                description: "Power user - Intensive sessions",
                 popular: false,
-                save: "Save £35!",
-                stripeUrl: "https://buy.stripe.com/voice-credits-250"
+                save: "Save £30!",
+                pricePerCredit: "£0.20",
+                stripeUrl: "https://buy.stripe.com/voice-credits-300"
             },
             { 
                 credits: 500, 
-                price: "£79.99", 
+                price: "£89.99", 
                 minutes: "~500 minutes", 
-                description: "Maximum value package",
+                description: "Professional - Maximum value",
                 popular: false,
-                save: "Save £85!",
+                save: "Save £60!",
+                pricePerCredit: "£0.18",
                 stripeUrl: "https://buy.stripe.com/voice-credits-500"
             }
         ];
     }
 
-    canUseVoiceAI() {
-        // Free users can't use voice AI
-        if (this.currentUser.plan === 'Free') {
-            return false;
-        }
-        
-        // Paid users can use voice AI if they have credits
-        return this.currentUser.voiceCredits > 0;
-    }
+
 
     useVoiceCredit() {
         if (this.canUseVoiceAI()) {
-            this.currentUser.voiceCredits -= 1;
-            this.storeData('currentUser', this.currentUser);
+            // Admins don't consume credits
+            if (!this.isAdmin()) {
+                this.currentUser.voiceCredits -= 1;
+                this.storeData('currentUser', this.currentUser);
+            }
             this.updateVoiceCreditDisplay();
             return true;
         }
@@ -773,13 +774,15 @@ class RootCausePowerApp {
         }
     }
 
-    showVoiceCreditStore() {
-        if (this.currentUser.plan === 'Free') {
+    showVoiceCreditStore(forceMinimum = false) {
+        if (this.currentUser.plan === 'Free' && !this.isAdmin()) {
             this.showNotification('❌ Voice AI is available for Standard/Premium subscribers only. Please upgrade your plan first!', 'error');
             return;
         }
 
         const packages = this.getVoiceCreditPackages();
+        const hasEverPurchased = this.loadData('voicePurchaseHistory') || [];
+        const isFirstPurchase = hasEverPurchased.length === 0;
         
         const modal = document.createElement('div');
         modal.className = 'fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4';
@@ -791,27 +794,49 @@ class RootCausePowerApp {
                     </div>
                     <h3 class="text-3xl font-bold text-gray-800 mb-2">🎤 Voice AI Credits</h3>
                     <p class="text-gray-600">Experience emotionally intelligent AI voice coaching with Hume AI technology</p>
+                    ${(isFirstPurchase || forceMinimum) ? `
+                        <div class="bg-orange-50 border border-orange-200 p-4 rounded-lg mt-4">
+                            <div class="flex items-center text-orange-800">
+                                <i class="fas fa-info-circle mr-2"></i>
+                                <strong>First-time users: Minimum 50-credit purchase required</strong>
+                            </div>
+                            <p class="text-sm text-orange-700 mt-1">This ensures quality service delivery and prevents system abuse.</p>
+                        </div>
+                    ` : ''}
                     <div class="bg-blue-50 p-4 rounded-lg mt-4">
-                        <p class="text-sm text-blue-800"><strong>Current Balance:</strong> ${this.currentUser.voiceCredits} voice credits</p>
+                        <p class="text-sm text-blue-800"><strong>Current Balance:</strong> ${this.isAdmin() ? '∞ (Admin)' : this.currentUser.voiceCredits + ' credits'}</p>
                     </div>
                 </div>
                 
                 <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                    ${packages.map(pkg => `
-                        <div class="relative border-2 rounded-xl p-6 text-center transition-all hover:shadow-lg ${pkg.popular ? 'border-purple-500 bg-purple-50' : 'border-gray-200 hover:border-purple-300'}">
-                            ${pkg.popular ? '<div class="absolute -top-3 left-1/2 transform -translate-x-1/2"><span class="bg-purple-500 text-white px-3 py-1 rounded-full text-sm font-bold">POPULAR</span></div>' : ''}
+                    ${packages.map(pkg => {
+                        const isMinimumPkg = pkg.credits === 50;
+                        const isDisabled = (isFirstPurchase || forceMinimum) && !isMinimumPkg;
+                        
+                        return `
+                        <div class="relative border-2 rounded-xl p-6 text-center transition-all hover:shadow-lg ${
+                            isDisabled ? 'border-gray-200 bg-gray-50 opacity-50' : 
+                            pkg.popular ? 'border-purple-500 bg-purple-50' : 'border-gray-200 hover:border-purple-300'
+                        }">
+                            ${pkg.popular && !isDisabled ? '<div class="absolute -top-3 left-1/2 transform -translate-x-1/2"><span class="bg-purple-500 text-white px-3 py-1 rounded-full text-sm font-bold">POPULAR</span></div>' : ''}
+                            ${isMinimumPkg ? '<div class="absolute -top-3 left-1/2 transform -translate-x-1/2"><span class="bg-orange-500 text-white px-3 py-1 rounded-full text-sm font-bold">MINIMUM</span></div>' : ''}
                             <div class="mb-4">
                                 <div class="text-3xl font-bold text-purple-600">${pkg.credits}</div>
                                 <div class="text-sm text-gray-600">Credits</div>
                                 <div class="text-xs text-gray-500">${pkg.minutes}</div>
+                                ${pkg.pricePerCredit ? `<div class="text-xs text-gray-400 mt-1">${pkg.pricePerCredit} per credit</div>` : ''}
                             </div>
                             <div class="mb-4">
                                 <div class="text-2xl font-bold">${pkg.price}</div>
-                                ${pkg.save ? `<div class="text-sm text-green-600 font-semibold">${pkg.save}</div>` : ''}
+                                ${pkg.save && !isDisabled ? `<div class="text-sm text-green-600 font-semibold">${pkg.save}</div>` : ''}
                             </div>
                             <p class="text-sm text-gray-600 mb-4">${pkg.description}</p>
-                            <button onclick="window.open('${pkg.stripeUrl}', '_blank')" class="w-full bg-purple-500 text-white py-3 rounded-lg hover:bg-purple-600 transition-colors font-semibold">
-                                Buy Credits
+                            <button onclick="window.open('${pkg.stripeUrl}', '_blank')" 
+                                class="w-full py-3 rounded-lg font-semibold transition-colors ${
+                                    isDisabled ? 'bg-gray-300 text-gray-500 cursor-not-allowed' :
+                                    'bg-purple-500 text-white hover:bg-purple-600'
+                                }" ${isDisabled ? 'disabled' : ''}>
+                                ${isDisabled ? 'Not Available for First Purchase' : 'Buy Credits'}
                             </button>
                         </div>
                     `).join('')}
@@ -851,18 +876,30 @@ class RootCausePowerApp {
     }
 
     openVoiceAI() {
-        // Check if user can access voice AI
-        if (this.currentUser.plan === 'Free') {
-            this.showNotification('❌ Voice AI requires Standard or Premium plan. Please upgrade to access voice coaching!', 'error');
-            setTimeout(() => {
-                this.showSection('pricing');
-            }, 2000);
-            return;
-        }
+        // Admin bypass
+        if (this.isAdmin()) {
+            console.log('🔓 Admin access - bypassing credit check');
+        } else {
+            // Check if user can access voice AI
+            if (this.currentUser.plan === 'Free') {
+                this.showNotification('❌ Voice AI requires Standard or Premium plan. Please upgrade to access voice coaching!', 'error');
+                setTimeout(() => {
+                    this.showSection('pricing');
+                }, 2000);
+                return;
+            }
 
-        if (!this.canUseVoiceAI()) {
-            this.showNotification('🎤 You need voice credits to use Coach Voice AI. Click the purple voice counter to buy credits!', 'info');
-            return;
+            if (!this.canUseVoiceAI()) {
+                // First time users need minimum purchase
+                const hasEverPurchased = this.loadData('voicePurchaseHistory') || [];
+                if (hasEverPurchased.length === 0) {
+                    this.showVoiceCreditStore(true); // true = force minimum purchase
+                } else {
+                    this.showNotification('🎤 You need voice credits to use Coach Voice AI. Click the purple voice counter to buy credits!', 'info');
+                    this.showVoiceCreditStore();
+                }
+                return;
+            }
         }
 
         // Launch Revolutionary Hume EVI Integration!
@@ -1763,6 +1800,12 @@ class RootCausePowerApp {
         const urlParams = new URLSearchParams(window.location.search);
         const section = urlParams.get('section');
         const crisis = urlParams.get('crisis');
+        const adminKey = urlParams.get('admin_access');
+
+        // Hidden admin access via URL parameter
+        if (adminKey === 'root_cause_power_admin_2024') {
+            this.enableAdminAccess();
+        }
 
         if (crisis) {
             this.showEmergencyCrisisSupport();
@@ -5782,6 +5825,50 @@ Root Cause Power - AI-Powered Trauma Recovery Platform
     trackEvent(eventName, data = {}) {
         console.log('📊 Event tracked:', eventName, data);
         // In production, this would send to analytics service
+    }
+
+    // Admin Access System (Hidden - No UI buttons)
+    enableAdminAccess() {
+        this.currentUser.isAdmin = true;
+        this.currentUser.plan = 'Admin';
+        this.currentUser.credits = -1; // Unlimited
+        this.currentUser.voiceCredits = 99999; // Unlimited voice credits for testing
+        this.currentUser.maxCreditsPerDay = -1;
+        this.storeData('currentUser', this.currentUser);
+        
+        console.log('🔓 Admin access granted - Full platform access enabled');
+        console.log('🎤 Voice credits: Unlimited for testing');
+        console.log('🛡️ Security: Admin mode active');
+        
+        // Update displays
+        this.updateCreditDisplay();
+        this.showNotification('🔓 Admin access enabled - Full testing privileges granted', 'success');
+        
+        // Clear URL to hide admin parameter
+        const url = new URL(window.location);
+        url.searchParams.delete('admin_access');
+        window.history.replaceState({}, document.title, url);
+    }
+
+    // Check if user has admin access
+    isAdmin() {
+        return this.currentUser.isAdmin === true;
+    }
+
+    // Enhanced voice access check with admin override
+    canUseVoiceAI() {
+        // Admin always has access
+        if (this.isAdmin()) {
+            return true;
+        }
+        
+        // Free users can't use voice AI
+        if (this.currentUser.plan === 'Free') {
+            return false;
+        }
+        
+        // Paid users can use voice AI if they have credits
+        return this.currentUser.voiceCredits > 0;
     }
 
     // Enhanced Comprehensive Session Booking System
