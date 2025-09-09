@@ -809,38 +809,26 @@ class RootCausePowerApp {
                 </div>
                 
                 <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                    ${packages.map(pkg => {
-                        const isMinimumPkg = pkg.credits === 50;
-                        const isDisabled = (isFirstPurchase || forceMinimum) && !isMinimumPkg;
-                        
-                        return `
-                        <div class="relative border-2 rounded-xl p-6 text-center transition-all hover:shadow-lg ${
-                            isDisabled ? 'border-gray-200 bg-gray-50 opacity-50' : 
-                            pkg.popular ? 'border-purple-500 bg-purple-50' : 'border-gray-200 hover:border-purple-300'
-                        }">
-                            ${pkg.popular && !isDisabled ? '<div class="absolute -top-3 left-1/2 transform -translate-x-1/2"><span class="bg-purple-500 text-white px-3 py-1 rounded-full text-sm font-bold">POPULAR</span></div>' : ''}
-                            ${isMinimumPkg ? '<div class="absolute -top-3 left-1/2 transform -translate-x-1/2"><span class="bg-orange-500 text-white px-3 py-1 rounded-full text-sm font-bold">MINIMUM</span></div>' : ''}
+                    ${packages.map(pkg => `
+                        <div class="relative border-2 rounded-xl p-6 text-center transition-all hover:shadow-lg ${pkg.popular ? 'border-purple-500 bg-purple-50' : 'border-gray-200 hover:border-purple-300'}">
+                            ${pkg.popular ? '<div class="absolute -top-3 left-1/2 transform -translate-x-1/2"><span class="bg-purple-500 text-white px-3 py-1 rounded-full text-sm font-bold">POPULAR</span></div>' : ''}
+                            ${pkg.credits === 50 ? '<div class="absolute -top-3 left-1/2 transform -translate-x-1/2"><span class="bg-orange-500 text-white px-3 py-1 rounded-full text-sm font-bold">MINIMUM</span></div>' : ''}
                             <div class="mb-4">
                                 <div class="text-3xl font-bold text-purple-600">${pkg.credits}</div>
                                 <div class="text-sm text-gray-600">Credits</div>
                                 <div class="text-xs text-gray-500">${pkg.minutes}</div>
-                                ${pkg.pricePerCredit ? `<div class="text-xs text-gray-400 mt-1">${pkg.pricePerCredit} per credit</div>` : ''}
+                                <div class="text-xs text-gray-400 mt-1">${pkg.pricePerCredit || ''}</div>
                             </div>
                             <div class="mb-4">
                                 <div class="text-2xl font-bold">${pkg.price}</div>
-                                ${pkg.save && !isDisabled ? `<div class="text-sm text-green-600 font-semibold">${pkg.save}</div>` : ''}
+                                ${pkg.save ? `<div class="text-sm text-green-600 font-semibold">${pkg.save}</div>` : ''}
                             </div>
                             <p class="text-sm text-gray-600 mb-4">${pkg.description}</p>
-                            <button onclick="window.open('${pkg.stripeUrl}', '_blank')" 
-                                class="w-full py-3 rounded-lg font-semibold transition-colors ${
-                                    isDisabled ? 'bg-gray-300 text-gray-500 cursor-not-allowed' :
-                                    'bg-purple-500 text-white hover:bg-purple-600'
-                                }" ${isDisabled ? 'disabled' : ''}>
-                                ${isDisabled ? 'Not Available for First Purchase' : 'Buy Credits'}
+                            <button onclick="window.open('${pkg.stripeUrl}', '_blank')" class="w-full bg-purple-500 text-white py-3 rounded-lg hover:bg-purple-600 transition-colors font-semibold">
+                                Buy Credits
                             </button>
                         </div>
-                        `;
-                    }).join('')}
+                    `).join('')}
                 </div>
                 
                 <div class="bg-gradient-to-r from-blue-50 to-purple-50 p-6 rounded-lg mb-6">
