@@ -2635,14 +2635,7 @@ ONLY return the follow-up question, nothing else.`;
                 if (!this.followUpQuestions) this.followUpQuestions = [];
                 this.followUpQuestions.push({ question, response });
                 console.log('🤖 Follow-up saved:', { question: question.substring(0, 30), response: response.substring(0, 30) });
-            }
-
-        };
-
-        // Initialize assessment when page loads
-        document.addEventListener('DOMContentLoaded', () => {
-            AIAssessment.init();
-        });
+            },
 
             // ===========================================
             // 🎯 AI RECOVERY PRESCRIPTION SYSTEM  
@@ -2908,6 +2901,11 @@ Remember: Healing is possible, and you deserve support on this journey.`;
                 };
             }
         };
+
+        // Initialize assessment when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            AIAssessment.init();
+        });
 
         // Ensure functions are available
         setTimeout(() => {

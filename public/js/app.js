@@ -2784,7 +2784,7 @@ class RootCausePowerApp {
                             <i class="fas fa-network-wired mr-1"></i>
                             Coordinated with ${this.getConnectedAISpecialists(coachType)}
                         </div>
-                        <button onclick="app.speakResponse(\`${response.replace(/'/g, "\\'"").replace(/`/g, "\\`")}\`, '${coachType}')" class="text-purple-500 hover:text-purple-700 ml-2" title="Speak response">
+                        <button class="speak-response-btn text-purple-500 hover:text-purple-700 ml-2" title="Speak response" data-response="${response.replace(/"/g, '&quot;')}" data-coach-type="${coachType}">
                             <i class="fas fa-volume-up"></i>
                         </button>
                     </div>
