@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Revolutionary PTSD Voice Coach - Root Cause Power</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .pulse-ring {
+            animation: pulse-ring 2s cubic-bezier(0.455, 0.03, 0.515, 0.955) infinite;
+        }
+        
+        @keyframes pulse-ring {
+            0% {
+                transform: scale(0.8);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(2.4);
+                opacity: 0;
+            }
+        }
+        
+        .emotional-state {
+            transition: all 0.3s ease;
+        }
+        
+        .recording {
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50 min-h-screen">
+    <!-- Official Interface Recommendation Banner -->
+    <div class="bg-green-500 text-white text-center py-3 px-4 z-50">
+        <div class="flex items-center justify-center space-x-4">
+            <i class="fas fa-star text-yellow-300"></i>
+            <span class="font-medium">🎙️ For TRUE Voice-to-Voice: Use the Official Hume Interface with your PTSD configuration!</span>
+            <a href="/hume-evi-direct.html" class="bg-green-600 hover:bg-green-700 px-3 py-1 rounded text-sm font-semibold">
+                Get Instructions
+            </a>
+        </div>
+    </div>
+
+    <!-- Crisis Banner (Hidden by default) -->
+    <div id="crisis-banner" class="hidden bg-red-500 text-white text-center py-2 px-4 z-50">
+        <div class="flex items-center justify-center space-x-4">
+            <i class="fas fa-exclamation-triangle text-yellow-300"></i>
+            <span class="font-medium">Crisis Support Detected - Professional Help Available</span>
+            <button onclick="showCrisisResources()" class="bg-red-600 hover:bg-red-700 px-3 py-1 rounded text-sm">
+                Get Help Now
+            </button>
+        </div>
+    </div>
+
+    <div class="container mx-auto px-4 py-8">
+        <div class="max-w-4xl mx-auto">
+            <!-- Header -->
+            <div class="text-center mb-8">
+                <h1 class="text-4xl font-bold text-gray-800 mb-2">
+                    🧠 Revolutionary PTSD Voice Coach
+                </h1>
+                <p class="text-xl text-gray-600">World's First Emotionally Intelligent Trauma Support</p>
+                <div class="mt-4 flex justify-center space-x-4">
+                    <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm">
+                        <i class="fas fa-check-circle mr-1"></i>Crisis Detection Active
+                    </span>
+                    <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
+                        <i class="fas fa-heart mr-1"></i>Trauma-Informed AI
+                    </span>
+                    <span class="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm">
+                        <i class="fas fa-microphone mr-1"></i>Real-Time Empathy
+                    </span>
+                </div>
+            </div>
+
+            <!-- Main Voice Interface -->
+            <div class="bg-white rounded-2xl shadow-xl p-8 mb-6">
+                <!-- Connection Status -->
+                <div class="flex items-center justify-between mb-6 pb-4 border-b">
+                    <div class="flex items-center space-x-3">
+                        <div id="connection-status" class="w-3 h-3 rounded-full bg-gray-400"></div>
+                        <span id="connection-text" class="text-gray-600 font-medium">Connecting to Voice Coach...</span>
+                    </div>
+                    <div class="text-sm text-gray-500">
+                        Config: <span class="font-mono">06f12c85-3975-4774-b078-8611e826dd85</span>
+                    </div>
+                </div>
+
+                <!-- Emotional State Display -->
+                <div class="text-center mb-8">
+                    <div id="emotional-display" class="emotional-state">
+                        <div class="w-32 h-32 mx-auto mb-4 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white text-4xl">
+                            <i class="fas fa-heart"></i>
+                        </div>
+                        <h3 id="emotion-text" class="text-xl font-bold text-gray-700">Ready to Listen</h3>
+                        <p id="emotion-description" class="text-gray-500 mt-2">Your emotionally intelligent companion is here for you</p>
+                    </div>
+                </div>
+
+                <!-- Voice Controls -->
+                <div class="flex justify-center space-x-6 mb-8">
+                    <button 
+                        id="start-coaching" 
+                        onclick="startVoiceCoaching()" 
+                        class="relative bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white px-8 py-4 rounded-full font-medium transition-all duration-200 shadow-lg"
+                    >
+                        <span class="pulse-ring absolute inset-0 bg-green-400 rounded-full opacity-30"></span>
+                        <i class="fas fa-microphone mr-2"></i>Start Voice Session
+                    </button>
+                    
+                    <button 
+                        id="stop-coaching" 
+                        onclick="stopVoiceCoaching()" 
+                        class="hidden bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white px-8 py-4 rounded-full font-medium transition-all duration-200"
+                    >
+                        <i class="fas fa-stop mr-2"></i>End Session
+                    </button>
+                    
+                    <button 
+                        onclick="requestGrounding()" 
+                        class="bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white px-6 py-4 rounded-full font-medium transition-all duration-200"
+                    >
+                        <i class="fas fa-anchor mr-2"></i>Grounding
+                    </button>
+                </div>
+
+                <!-- Session Info -->
+                <div class="grid md:grid-cols-3 gap-4 mb-6">
+                    <div class="bg-gray-50 rounded-lg p-4 text-center">
+                        <div class="text-2xl font-bold text-blue-600" id="session-duration">00:00</div>
+                        <div class="text-sm text-gray-600">Session Time</div>
+                    </div>
+                    <div class="bg-gray-50 rounded-lg p-4 text-center">
+                        <div class="text-2xl font-bold text-purple-600" id="emotion-confidence">--</div>
+                        <div class="text-sm text-gray-600">Emotion Confidence</div>
+                    </div>
+                    <div class="bg-gray-50 rounded-lg p-4 text-center">
+                        <div class="text-2xl font-bold text-green-600" id="support-level">Calm</div>
+                        <div class="text-sm text-gray-600">Support Level</div>
+                    </div>
+                </div>
+
+                <!-- Live Transcript -->
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <h4 class="font-bold text-gray-700 mb-3 flex items-center">
+                        <i class="fas fa-comments mr-2 text-blue-500"></i>Live Conversation
+                    </h4>
+                    <div id="conversation-transcript" class="h-32 overflow-y-auto space-y-2">
+                        <div class="text-gray-500 italic text-center py-8">
+                            Your conversation will appear here...
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="grid md:grid-cols-4 gap-4 mb-6">
+                <button onclick="requestBreathingExercise()" class="bg-green-100 hover:bg-green-200 text-green-800 p-4 rounded-lg transition-all duration-200 text-center">
+                    <i class="fas fa-wind text-2xl mb-2"></i>
+                    <div class="font-medium">Breathing</div>
+                </button>
+                <button onclick="requestMindfulness()" class="bg-blue-100 hover:bg-blue-200 text-blue-800 p-4 rounded-lg transition-all duration-200 text-center">
+                    <i class="fas fa-leaf text-2xl mb-2"></i>
+                    <div class="font-medium">Mindfulness</div>
+                </button>
+                <button onclick="requestValidation()" class="bg-purple-100 hover:bg-purple-200 text-purple-800 p-4 rounded-lg transition-all duration-200 text-center">
+                    <i class="fas fa-heart text-2xl mb-2"></i>
+                    <div class="font-medium">Validation</div>
+                </button>
+                <button onclick="requestResources()" class="bg-yellow-100 hover:bg-yellow-200 text-yellow-800 p-4 rounded-lg transition-all duration-200 text-center">
+                    <i class="fas fa-book text-2xl mb-2"></i>
+                    <div class="font-medium">Resources</div>
+                </button>
+            </div>
+
+            <!-- Safety Resources -->
+            <div class="bg-red-50 border border-red-200 rounded-lg p-6">
+                <h3 class="font-bold text-red-800 mb-3 flex items-center">
+                    <i class="fas fa-shield-alt mr-2"></i>
+                    Always Available Crisis Support
+                </h3>
+                <div class="grid md:grid-cols-3 gap-4 text-sm">
+                    <div>
+                        <strong class="text-red-700">US Crisis Hotline:</strong><br>
+                        <a href="tel:988" class="text-red-600 underline">988</a> (24/7)
+                    </div>
+                    <div>
+                        <strong class="text-red-700">Crisis Text Line:</strong><br>
+                        Text HOME to <a href="sms:741741" class="text-red-600 underline">741741</a>
+                    </div>
+                    <div>
+                        <strong class="text-red-700">Emergency:</strong><br>
+                        <a href="tel:911" class="text-red-600 underline">911</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Crisis Resources Modal -->
+    <div id="crisis-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl max-w-2xl w-full p-6">
+            <div class="flex items-center justify-between mb-4 pb-4 border-b">
+                <h2 class="text-xl font-bold text-red-800 flex items-center">
+                    <i class="fas fa-life-ring mr-2"></i>Crisis Support Resources
+                </h2>
+                <button onclick="hideCrisisResources()" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <div class="space-y-4">
+                <div class="bg-red-100 p-4 rounded-lg">
+                    <h3 class="font-bold text-red-800 mb-2">Immediate Help</h3>
+                    <div class="space-y-2">
+                        <div><strong>National Suicide Prevention Lifeline:</strong> <a href="tel:988" class="text-red-600 underline">988</a></div>
+                        <div><strong>Crisis Text Line:</strong> Text HOME to <a href="sms:741741" class="text-red-600 underline">741741</a></div>
+                        <div><strong>Emergency Services:</strong> <a href="tel:911" class="text-red-600 underline">911</a></div>
+                    </div>
+                </div>
+                <div class="bg-blue-100 p-4 rounded-lg">
+                    <h3 class="font-bold text-blue-800 mb-2">PTSD-Specific Resources</h3>
+                    <div class="space-y-1 text-sm">
+                        <div>• PTSD Foundation of America: <a href="tel:877-717-7873" class="text-blue-600 underline">877-717-7873</a></div>
+                        <div>• Veterans Crisis Line: <a href="tel:1-800-273-8255" class="text-blue-600 underline">1-800-273-8255</a></div>
+                        <div>• RAINN National Sexual Assault Hotline: <a href="tel:1-800-656-4673" class="text-blue-600 underline">1-800-656-4673</a></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Revolutionary PTSD Voice Coach Implementation
+        class RevolutionaryVoiceCoach {
+            constructor() {
+                this.ws = null;
+                this.isConnected = false;
+                this.isRecording = false;
+                this.sessionStartTime = null;
+                this.sessionTimer = null;
+                this.audioContext = null;
+                this.mediaRecorder = null;
+                this.audioChunks = [];
+                
+                // Emotional states
+                this.currentEmotion = 'neutral';
+                this.emotionHistory = [];
+                this.crisisThreshold = 0.8;
+                
+                this.init();
+            }
+            
+            async init() {
+                await this.requestMicrophonePermission();
+                this.connectToHume();
+                this.updateConnectionStatus('connecting', 'Connecting to Voice Coach...');
+            }
+            
+            async requestMicrophonePermission() {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ 
+                        audio: { 
+                            echoCancellation: true,
+                            noiseSuppression: true,
+                            sampleRate: 44100 
+                        } 
+                    });
+                    console.log('✅ Microphone access granted');
+                    stream.getTracks().forEach(track => track.stop()); // Stop preview
+                } catch (error) {
+                    console.error('❌ Microphone access denied:', error);
+                    alert('Microphone access is required for voice coaching. Please enable and refresh the page.');
+                }
+            }
+            
+            connectToHume() {
+                const apiKey = 'zYPlodq03zJLORX8IvOiFtzy5Es4fsaRtjo29UzTN8ckVibB';
+                const configId = '06f12c85-3975-4774-b078-8611e826dd85';
+                
+                // Use the proper Hume EVI WebSocket URL format
+                const wsUrl = `wss://api.hume.ai/v0/evi/chat`;
+                
+                console.log('🔌 Connecting to Hume EVI with PTSD configuration...');
+                this.ws = new WebSocket(wsUrl);
+                
+                this.ws.onopen = () => {
+                    console.log('✅ Connected to Hume EVI!');
+                    this.isConnected = true;
+                    this.updateConnectionStatus('connected', 'Revolutionary Voice Coach Connected');
+                    
+                    // Send authentication and configuration
+                    this.ws.send(JSON.stringify({
+                        type: 'session_settings',
+                        api_key: apiKey,
+                        config_id: configId,
+                        audio_encoding: 'linear16',
+                        sample_rate: 48000
+                    }));
+                };
+                
+                this.ws.onmessage = (event) => {
+                    const data = JSON.parse(event.data);
+                    console.log('📩 Hume EVI message:', data.type);
+                    this.handleHumeMessage(data);
+                };
+                
+                this.ws.onclose = () => {
+                    console.log('🔌 Disconnected from Hume EVI');
+                    this.isConnected = false;
+                    this.updateConnectionStatus('disconnected', 'Voice Coach Disconnected');
+                };
+                
+                this.ws.onerror = (error) => {
+                    console.error('❌ WebSocket error:', error);
+                    this.updateConnectionStatus('error', 'Connection Error - Try Official Interface');
+                };
+            }
+            
+            handleHumeMessage(data) {
+                console.log('📩 Hume message:', data);
+                
+                if (data.type === 'audio_output') {
+                    this.playAudioResponse(data.data);
+                }
+                
+                if (data.type === 'user_message') {
+                    this.addToTranscript('You', data.message.content);
+                }
+                
+                if (data.type === 'assistant_message') {
+                    this.addToTranscript('Coach', data.message.content);
+                }
+                
+                if (data.prosody && data.prosody.length > 0) {
+                    this.updateEmotionalState(data.prosody);
+                }
+                
+                // Crisis detection
+                if (data.message && this.detectCrisisSignals(data.message.content)) {
+                    this.handleCrisisDetection();
+                }
+            }
+            
+            updateConnectionStatus(status, text) {
+                const statusEl = document.getElementById('connection-status');
+                const textEl = document.getElementById('connection-text');
+                
+                const colors = {
+                    connecting: 'bg-yellow-400',
+                    connected: 'bg-green-400',
+                    disconnected: 'bg-gray-400',
+                    error: 'bg-red-400'
+                };
+                
+                statusEl.className = `w-3 h-3 rounded-full ${colors[status]}`;
+                textEl.textContent = text;
+            }
+            
+            updateEmotionalState(prosodyData) {
+                // Process emotional data from Hume
+                const dominantEmotion = this.findDominantEmotion(prosodyData);
+                this.currentEmotion = dominantEmotion.emotion;
+                
+                // Update UI
+                this.displayEmotionalState(dominantEmotion);
+                
+                // Check for crisis indicators
+                if (this.isCrisisEmotion(dominantEmotion)) {
+                    this.handleCrisisDetection();
+                }
+                
+                // Update confidence display
+                document.getElementById('emotion-confidence').textContent = 
+                    Math.round(dominantEmotion.confidence * 100) + '%';
+            }
+            
+            findDominantEmotion(prosodyData) {
+                // Find the emotion with highest score
+                let maxScore = 0;
+                let dominantEmotion = { emotion: 'neutral', confidence: 0 };
+                
+                prosodyData.forEach(item => {
+                    if (item.score > maxScore) {
+                        maxScore = item.score;
+                        dominantEmotion = {
+                            emotion: item.name.toLowerCase().replace('_', ' '),
+                            confidence: item.score
+                        };
+                    }
+                });
+                
+                return dominantEmotion;
+            }
+            
+            displayEmotionalState(emotionData) {
+                const displayEl = document.getElementById('emotional-display');
+                const emotionEl = document.getElementById('emotion-text');
+                const descEl = document.getElementById('emotion-description');
+                
+                const emotionMappings = {
+                    'calm': { icon: 'fas fa-leaf', color: 'from-green-400 to-emerald-500', desc: 'Feeling peaceful and centered' },
+                    'anxiety': { icon: 'fas fa-exclamation-triangle', color: 'from-orange-400 to-red-500', desc: 'Heightened stress detected - you\'re not alone' },
+                    'sadness': { icon: 'fas fa-heart-broken', color: 'from-blue-400 to-indigo-500', desc: 'Processing difficult emotions - this is part of healing' },
+                    'joy': { icon: 'fas fa-smile', color: 'from-yellow-400 to-orange-500', desc: 'Positive emotions emerging - celebrate this moment' },
+                    'fear': { icon: 'fas fa-shield-alt', color: 'from-purple-400 to-pink-500', desc: 'Fear acknowledged - you are safe right now' },
+                    'anger': { icon: 'fas fa-fire', color: 'from-red-400 to-pink-500', desc: 'Valid anger - let\'s process this together' }
+                };
+                
+                const mapping = emotionMappings[emotionData.emotion] || emotionMappings['calm'];
+                
+                const iconEl = displayEl.querySelector('i');
+                const bgEl = displayEl.querySelector('.w-32');
+                
+                iconEl.className = mapping.icon + ' text-4xl';
+                bgEl.className = `w-32 h-32 mx-auto mb-4 rounded-full bg-gradient-to-br ${mapping.color} flex items-center justify-center text-white text-4xl`;
+                
+                emotionEl.textContent = emotionData.emotion.charAt(0).toUpperCase() + emotionData.emotion.slice(1);
+                descEl.textContent = mapping.desc;
+                
+                // Update support level
+                const supportLevels = {
+                    'calm': 'Supportive',
+                    'anxiety': 'Active Support',
+                    'sadness': 'Gentle Care',
+                    'fear': 'Safety Focus',
+                    'anger': 'Validation',
+                    'joy': 'Celebration'
+                };
+                
+                document.getElementById('support-level').textContent = 
+                    supportLevels[emotionData.emotion] || 'Adaptive';
+            }
+            
+            async startVoiceSession() {
+                if (!this.isConnected) {
+                    alert('Please wait for the voice coach to connect first.');
+                    return;
+                }
+                
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ 
+                        audio: { 
+                            echoCancellation: true,
+                            noiseSuppression: true,
+                            sampleRate: 44100 
+                        } 
+                    });
+                    
+                    this.mediaRecorder = new MediaRecorder(stream, {
+                        mimeType: 'audio/webm;codecs=opus'
+                    });
+                    
+                    this.mediaRecorder.ondataavailable = (event) => {
+                        if (event.data.size > 0) {
+                            this.sendAudioToHume(event.data);
+                        }
+                    };
+                    
+                    this.mediaRecorder.start(100); // Send data every 100ms
+                    this.isRecording = true;
+                    this.sessionStartTime = Date.now();
+                    this.startSessionTimer();
+                    
+                    // Update UI
+                    document.getElementById('start-coaching').classList.add('hidden');
+                    document.getElementById('stop-coaching').classList.remove('hidden');
+                    
+                    // Send initial connection message
+                    this.sendMessageToHume({
+                        type: 'user_input',
+                        text: 'Hello, I\'d like to start a voice coaching session for PTSD support.'
+                    });
+                    
+                    console.log('🎙️ Voice session started');
+                    
+                } catch (error) {
+                    console.error('❌ Failed to start recording:', error);
+                    alert('Failed to start recording. Please check your microphone permissions.');
+                }
+            }
+            
+            stopVoiceSession() {
+                if (this.mediaRecorder && this.isRecording) {
+                    this.mediaRecorder.stop();
+                    this.mediaRecorder.stream.getTracks().forEach(track => track.stop());
+                    this.isRecording = false;
+                }
+                
+                if (this.sessionTimer) {
+                    clearInterval(this.sessionTimer);
+                }
+                
+                // Update UI
+                document.getElementById('start-coaching').classList.remove('hidden');
+                document.getElementById('stop-coaching').classList.add('hidden');
+                
+                console.log('🛑 Voice session stopped');
+            }
+            
+            sendAudioToHume(audioBlob) {
+                if (this.ws && this.isConnected) {
+                    // Convert audio blob to base64 and send
+                    const reader = new FileReader();
+                    reader.onload = () => {
+                        const audioData = reader.result.split(',')[1];
+                        this.ws.send(JSON.stringify({
+                            type: 'audio_input',
+                            data: audioData
+                        }));
+                    };
+                    reader.readAsDataURL(audioBlob);
+                }
+            }
+            
+            sendMessageToHume(message) {
+                if (this.ws && this.isConnected) {
+                    this.ws.send(JSON.stringify(message));
+                }
+            }
+            
+            addToTranscript(speaker, message) {
+                const transcript = document.getElementById('conversation-transcript');
+                const messageEl = document.createElement('div');
+                messageEl.className = `mb-2 ${speaker === 'You' ? 'text-right' : 'text-left'}`;
+                
+                const time = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                messageEl.innerHTML = `
+                    <div class="${speaker === 'You' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'} inline-block px-3 py-2 rounded-lg max-w-xs">
+                        <div class="font-medium text-xs mb-1">${speaker} - ${time}</div>
+                        <div>${message}</div>
+                    </div>
+                `;
+                
+                transcript.appendChild(messageEl);
+                transcript.scrollTop = transcript.scrollHeight;
+            }
+            
+            startSessionTimer() {
+                this.sessionTimer = setInterval(() => {
+                    const elapsed = Math.floor((Date.now() - this.sessionStartTime) / 1000);
+                    const minutes = Math.floor(elapsed / 60);
+                    const seconds = elapsed % 60;
+                    document.getElementById('session-duration').textContent = 
+                        `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                }, 1000);
+            }
+            
+            detectCrisisSignals(text) {
+                const crisisKeywords = [
+                    'want to die', 'kill myself', 'suicide', 'end it all', 'no point',
+                    'hopeless', 'can\'t go on', 'want to disappear', 'better off dead'
+                ];
+                
+                const lowerText = text.toLowerCase();
+                return crisisKeywords.some(keyword => lowerText.includes(keyword));
+            }
+            
+            isCrisisEmotion(emotionData) {
+                const crisisEmotions = ['despair', 'overwhelming_sadness', 'panic', 'hopelessness'];
+                return crisisEmotions.includes(emotionData.emotion) && emotionData.confidence > this.crisisThreshold;
+            }
+            
+            handleCrisisDetection() {
+                console.log('🚨 Crisis signals detected');
+                document.getElementById('crisis-banner').classList.remove('hidden');
+                
+                // Send supportive message
+                this.sendMessageToHume({
+                    type: 'user_input',
+                    text: 'I\'m having thoughts of self-harm. Please provide crisis support resources.'
+                });
+            }
+        }
+        
+        // Global instance
+        let voiceCoach = null;
+        
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            voiceCoach = new RevolutionaryVoiceCoach();
+        });
+        
+        // Global functions for UI
+        function startVoiceCoaching() {
+            voiceCoach?.startVoiceSession();
+        }
+        
+        function stopVoiceCoaching() {
+            voiceCoach?.stopVoiceSession();
+        }
+        
+        function requestGrounding() {
+            voiceCoach?.sendMessageToHume({
+                type: 'user_input',
+                text: 'I need grounding techniques to help me feel more centered and present.'
+            });
+        }
+        
+        function requestBreathingExercise() {
+            voiceCoach?.sendMessageToHume({
+                type: 'user_input',
+                text: 'Can you guide me through a breathing exercise for anxiety?'
+            });
+        }
+        
+        function requestMindfulness() {
+            voiceCoach?.sendMessageToHume({
+                type: 'user_input',
+                text: 'I\'d like to practice some mindfulness techniques.'
+            });
+        }
+        
+        function requestValidation() {
+            voiceCoach?.sendMessageToHume({
+                type: 'user_input',
+                text: 'I need validation and reassurance about my healing journey.'
+            });
+        }
+        
+        function requestResources() {
+            voiceCoach?.sendMessageToHume({
+                type: 'user_input',
+                text: 'Can you provide me with PTSD resources and coping strategies?'
+            });
+        }
+        
+        function showCrisisResources() {
+            document.getElementById('crisis-modal').classList.remove('hidden');
+        }
+        
+        function hideCrisisResources() {
+            document.getElementById('crisis-modal').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
