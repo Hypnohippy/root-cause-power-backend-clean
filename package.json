@@ -1,11 +1,41 @@
 {
-  "name": "root-cause-power-backend-clean",
+  "name": "root-cause-power-pwa",
   "version": "1.0.0",
-  "description": "Clean backend for Root Cause Power Platform",
+  "description": "Root Cause Power - Progressive Web App for PTSD Support Platform",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "build": "echo 'Static PWA - no build step required'",
+    "test": "echo 'Tests not configured yet'",
+    "pm2:start": "pm2 start ecosystem.config.js",
+    "pm2:stop": "pm2 stop root-cause-power-pwa",
+    "pm2:restart": "pm2 restart root-cause-power-pwa",
+    "pm2:delete": "pm2 delete root-cause-power-pwa"
+  },
   "dependencies": {
-    "groq-sdk": "^0.3.0"
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.2",
+    "express": "^4.18.2",
+    "groq-sdk": "^0.3.0",
+    "pm2": "^6.0.10"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
   },
   "engines": {
     "node": "18.x"
-  }
+  },
+  "keywords": [
+    "pwa",
+    "progressive-web-app",
+    "ptsd",
+    "mental-health",
+    "trauma-recovery",
+    "ai-coaching",
+    "lifestyle-medicine",
+    "hypnotherapy"
+  ],
+  "author": "David Prince, PhD Candidate in Lifestyle Medicine & Clinical Hypnotherapist",
+  "license": "MIT"
 }

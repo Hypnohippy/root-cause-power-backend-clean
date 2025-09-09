@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Icon Generator - Root Cause Power</title>
+</head>
+<body>
+    <h1>Root Cause Power - Icon Generator</h1>
+    <p>This page generates the required icons for the PWA. Right-click and save each icon.</p>
+    
+    <div id="icons"></div>
+
+    <script>
+        const sizes = [
+            { name: 'icon-16x16', size: 16 },
+            { name: 'icon-32x32', size: 32 },
+            { name: 'icon-72x72', size: 72 },
+            { name: 'icon-76x76', size: 76 },
+            { name: 'icon-96x96', size: 96 },
+            { name: 'icon-120x120', size: 120 },
+            { name: 'icon-128x128', size: 128 },
+            { name: 'icon-144x144', size: 144 },
+            { name: 'icon-152x152', size: 152 },
+            { name: 'icon-180x180', size: 180 },
+            { name: 'icon-192x192', size: 192 },
+            { name: 'icon-384x384', size: 384 },
+            { name: 'icon-512x512', size: 512 },
+            { name: 'favicon-16x16', size: 16 },
+            { name: 'favicon-32x32', size: 32 },
+            { name: 'apple-touch-icon-76x76', size: 76 },
+            { name: 'apple-touch-icon-120x120', size: 120 },
+            { name: 'apple-touch-icon-152x152', size: 152 },
+            { name: 'apple-touch-icon-180x180', size: 180 }
+        ];
+
+        function createIcon(size) {
+            const canvas = document.createElement('canvas');
+            canvas.width = size;
+            canvas.height = size;
+            const ctx = canvas.getContext('2d');
+
+            // Create gradient background
+            const gradient = ctx.createLinearGradient(0, 0, size, size);
+            gradient.addColorStop(0, '#10b981');
+            gradient.addColorStop(1, '#059669');
+
+            // Background circle
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(size/2, size/2, size/2 - 4, 0, 2 * Math.PI);
+            ctx.fill();
+
+            // Inner circle border
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+            ctx.lineWidth = Math.max(1, size / 256);
+            ctx.beginPath();
+            ctx.arc(size/2, size/2, size/2 - size/8, 0, 2 * Math.PI);
+            ctx.stroke();
+
+            // Heart shape
+            const heartSize = size / 6;
+            const heartX = size/2;
+            const heartY = size/2 - size/8;
+
+            ctx.fillStyle = 'white';
+            ctx.beginPath();
+            
+            // Left curve
+            ctx.arc(heartX - heartSize/2, heartY - heartSize/3, heartSize/3, 0, Math.PI, false);
+            // Right curve  
+            ctx.arc(heartX + heartSize/2, heartY - heartSize/3, heartSize/3, 0, Math.PI, false);
+            // Bottom point
+            ctx.lineTo(heartX, heartY + heartSize/2);
+            ctx.closePath();
+            ctx.fill();
+
+            // Brain/wellness symbol below heart
+            const brainY = size/2 + size/6;
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+            ctx.beginPath();
+            ctx.ellipse(heartX, brainY, size/12, size/20, 0, 0, 2 * Math.PI);
+            ctx.fill();
+
+            // Brain lines
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.7)';
+            ctx.lineWidth = Math.max(1, size / 200);
+            ctx.beginPath();
+            ctx.moveTo(heartX - size/20, brainY - size/40);
+            ctx.quadraticCurveTo(heartX, brainY - size/20, heartX + size/20, brainY - size/40);
+            ctx.stroke();
+
+            // Healing rays (for larger icons)
+            if (size >= 64) {
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
+                ctx.lineWidth = Math.max(1, size / 150);
+                ctx.lineCap = 'round';
+                
+                const rayLength = size / 20;
+                const rayDistance = size / 2 - size / 6;
+                
+                // Top ray
+                ctx.beginPath();
+                ctx.moveTo(heartX, size/2 - rayDistance);
+                ctx.lineTo(heartX, size/2 - rayDistance - rayLength);
+                ctx.stroke();
+                
+                // Right ray
+                ctx.beginPath();
+                ctx.moveTo(heartX + rayDistance, size/2);
+                ctx.lineTo(heartX + rayDistance + rayLength, size/2);
+                ctx.stroke();
+                
+                // Left ray
+                ctx.beginPath();
+                ctx.moveTo(heartX - rayDistance, size/2);
+                ctx.lineTo(heartX - rayDistance - rayLength, size/2);
+                ctx.stroke();
+            }
+
+            return canvas;
+        }
+
+        const iconsContainer = document.getElementById('icons');
+
+        sizes.forEach(iconSpec => {
+            const canvas = createIcon(iconSpec.size);
+            
+            const container = document.createElement('div');
+            container.style.margin = '20px';
+            container.style.textAlign = 'center';
+            
+            const label = document.createElement('h3');
+            label.textContent = `${iconSpec.name}.png (${iconSpec.size}x${iconSpec.size})`;
+            
+            const downloadBtn = document.createElement('button');
+            downloadBtn.textContent = 'Download';
+            downloadBtn.style.display = 'block';
+            downloadBtn.style.margin = '10px auto';
+            downloadBtn.style.padding = '10px 20px';
+            downloadBtn.style.backgroundColor = '#10b981';
+            downloadBtn.style.color = 'white';
+            downloadBtn.style.border = 'none';
+            downloadBtn.style.borderRadius = '5px';
+            downloadBtn.style.cursor = 'pointer';
+            
+            downloadBtn.onclick = () => {
+                const link = document.createElement('a');
+                link.download = `${iconSpec.name}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            };
+            
+            container.appendChild(label);
+            container.appendChild(canvas);
+            container.appendChild(downloadBtn);
+            iconsContainer.appendChild(container);
+        });
+    </script>
+</body>
+</html>

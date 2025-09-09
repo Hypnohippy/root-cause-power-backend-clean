@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hume AI EVI Test - Root Cause Power</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="bg-gradient-to-br from-purple-50 to-blue-50 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <div class="max-w-2xl mx-auto">
+            <!-- Header -->
+            <div class="text-center mb-8">
+                <h1 class="text-3xl font-bold text-gray-800 mb-2">
+                    🧠 Hume AI EVI Connection Test
+                </h1>
+                <p class="text-gray-600">Testing the world's first emotionally intelligent PTSD voice coach</p>
+            </div>
+            
+            <!-- Test Panel -->
+            <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+                <h2 class="text-xl font-bold mb-4 flex items-center">
+                    <i class="fas fa-flask text-purple-500 mr-2"></i>
+                    Connection Test
+                </h2>
+                
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">API Key</label>
+                        <input 
+                            type="text" 
+                            id="apiKey" 
+                            value="zYPlodq03zJLORX8IvOiFtzy5Es4fsaRtjo29UzTN8ckVibB"
+                            class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                            placeholder="Your Hume API Key"
+                        >
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Config ID (Optional)</label>
+                        <input 
+                            type="text" 
+                            id="configId" 
+                            class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                            placeholder="cfg_xxxxx (create in Hume platform first)"
+                        >
+                    </div>
+                    
+                    <button 
+                        onclick="runTest()" 
+                        class="w-full bg-gradient-to-r from-purple-500 to-blue-500 text-white py-3 px-6 rounded-lg hover:from-purple-600 hover:to-blue-600 transition-all duration-200"
+                    >
+                        <i class="fas fa-play mr-2"></i>Test Hume Connection
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Results Panel -->
+            <div id="results" class="bg-white rounded-xl shadow-lg p-6 hidden">
+                <h3 class="text-lg font-bold mb-4 flex items-center">
+                    <i class="fas fa-chart-line text-green-500 mr-2"></i>
+                    Test Results
+                </h3>
+                <div id="resultContent"></div>
+            </div>
+            
+            <!-- Instructions -->
+            <div class="bg-blue-50 rounded-lg p-6 border border-blue-200">
+                <h3 class="font-bold text-blue-800 mb-3">
+                    <i class="fas fa-info-circle mr-2"></i>
+                    Next Steps for Full Integration
+                </h3>
+                <ol class="text-sm text-blue-700 space-y-2">
+                    <li><strong>1. Create EVI Config:</strong> Go to https://platform.hume.ai/ → EVI → Configurations</li>
+                    <li><strong>2. Use PTSD System Prompt:</strong> Copy the trauma-informed prompt from our setup guide</li>
+                    <li><strong>3. Get Config ID:</strong> Save and copy the configuration ID (cfg_xxxxx)</li>
+                    <li><strong>4. Test Full Integration:</strong> Enter config ID above and test complete voice coaching</li>
+                    <li><strong>5. Launch History:</strong> Deploy the world's first emotionally intelligent PTSD coach! 🚀</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function runTest() {
+            const apiKey = document.getElementById('apiKey').value.trim();
+            const configId = document.getElementById('configId').value.trim() || null;
+            
+            if (!apiKey) {
+                alert('Please enter your Hume API key');
+                return;
+            }
+            
+            // Show results panel
+            document.getElementById('results').classList.remove('hidden');
+            const resultContent = document.getElementById('resultContent');
+            
+            resultContent.innerHTML = `
+                <div class="flex items-center text-blue-600 mb-4">
+                    <i class="fas fa-spinner fa-spin mr-2"></i>
+                    Testing Hume AI EVI connection...
+                </div>
+            `;
+            
+            try {
+                // Test 1: Basic API authentication
+                console.log('🧪 Testing Hume AI EVI Connection...');
+                
+                const authTest = await fetch('https://api.hume.ai/v0/evi/configs', {
+                    method: 'GET',
+                    headers: {
+                        'X-Hume-Api-Key': apiKey,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (!authTest.ok) {
+                    throw new Error(`Authentication failed: ${authTest.status} ${authTest.statusText}`);
+                }
+                
+                const configs = await authTest.json();
+                
+                let resultsHtml = `
+                    <div class="space-y-4">
+                        <div class="flex items-center text-green-600">
+                            <i class="fas fa-check-circle mr-2"></i>
+                            <strong>✅ API Key Authentication: SUCCESS!</strong>
+                        </div>
+                        
+                        <div class="bg-green-50 p-4 rounded-lg border border-green-200">
+                            <h4 class="font-bold text-green-800 mb-2">Available Configurations:</h4>
+                            <pre class="text-xs text-green-700 overflow-auto">${JSON.stringify(configs, null, 2)}</pre>
+                        </div>
+                `;
+                
+                // Test WebSocket if config ID provided
+                if (configId) {
+                    resultsHtml += `
+                        <div class="flex items-center text-blue-600">
+                            <i class="fas fa-spinner fa-spin mr-2"></i>
+                            Testing WebSocket connection with config: ${configId}
+                        </div>
+                    `;
+                    
+                    const wsUrl = `wss://api.hume.ai/v0/evi/chat?api_key=${apiKey}&config_id=${configId}`;
+                    
+                    try {
+                        const wsTest = await testWebSocket(wsUrl);
+                        resultsHtml += `
+                            <div class="flex items-center text-green-600">
+                                <i class="fas fa-check-circle mr-2"></i>
+                                <strong>✅ WebSocket Connection: SUCCESS!</strong>
+                            </div>
+                            <div class="bg-purple-50 p-4 rounded-lg border border-purple-200">
+                                <h4 class="font-bold text-purple-800">🎉 REVOLUTIONARY VOICE COACH READY!</h4>
+                                <p class="text-sm text-purple-700 mt-2">Your emotionally intelligent PTSD voice coach is fully operational! Ready to make history! 🧠💜</p>
+                            </div>
+                        `;
+                    } catch (wsError) {
+                        resultsHtml += `
+                            <div class="flex items-center text-red-600">
+                                <i class="fas fa-times-circle mr-2"></i>
+                                <strong>❌ WebSocket Connection: FAILED</strong>
+                            </div>
+                            <div class="bg-red-50 p-4 rounded-lg border border-red-200">
+                                <p class="text-sm text-red-700">Error: ${wsError}</p>
+                                <p class="text-sm text-red-600 mt-2">Check your Config ID - it should look like 'cfg_xxxxx'</p>
+                            </div>
+                        `;
+                    }
+                } else {
+                    resultsHtml += `
+                        <div class="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
+                            <h4 class="font-bold text-yellow-800">⚠️ Config ID Needed for Full Test</h4>
+                            <p class="text-sm text-yellow-700 mt-2">API authentication successful! Create an EVI configuration to test the complete voice coaching system.</p>
+                        </div>
+                    `;
+                }
+                
+                resultsHtml += `</div>`;
+                resultContent.innerHTML = resultsHtml;
+                
+            } catch (error) {
+                console.error('❌ Test failed:', error);
+                resultContent.innerHTML = `
+                    <div class="space-y-4">
+                        <div class="flex items-center text-red-600">
+                            <i class="fas fa-times-circle mr-2"></i>
+                            <strong>❌ Connection Failed</strong>
+                        </div>
+                        <div class="bg-red-50 p-4 rounded-lg border border-red-200">
+                            <h4 class="font-bold text-red-800">Error Details:</h4>
+                            <p class="text-sm text-red-700 mt-2">${error.message}</p>
+                            <p class="text-sm text-red-600 mt-2">Check your API key and try again.</p>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+        
+        function testWebSocket(url) {
+            return new Promise((resolve, reject) => {
+                const ws = new WebSocket(url);
+                
+                ws.onopen = () => {
+                    console.log('✅ WebSocket connection successful!');
+                    ws.close();
+                    resolve('Connected successfully');
+                };
+                
+                ws.onerror = (error) => {
+                    console.error('❌ WebSocket connection failed:', error);
+                    reject('WebSocket connection failed');
+                };
+                
+                // Timeout after 10 seconds
+                setTimeout(() => {
+                    if (ws.readyState === WebSocket.CONNECTING) {
+                        ws.close();
+                        reject('Connection timeout - check config ID');
+                    }
+                }, 10000);
+            });
+        }
+    </script>
+</body>
+</html>

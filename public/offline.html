@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Offline - Root Cause Power</title>
+    <meta name="theme-color" content="#10b981">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .breathing-circle {
+            animation: breathe 4s ease-in-out infinite;
+        }
+        
+        @keyframes breathe {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        .pulse-slow {
+            animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen flex items-center justify-center">
+    <div class="container mx-auto px-4 text-center">
+        <!-- Offline Status -->
+        <div class="mb-8">
+            <div class="breathing-circle w-24 h-24 bg-orange-500 rounded-full mx-auto mb-6 flex items-center justify-center">
+                <i class="fas fa-wifi-slash text-white text-2xl"></i>
+            </div>
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-800 mb-4">You're Currently Offline</h1>
+            <p class="text-lg text-gray-600 mb-8">Don't worry - essential features are still available to support you</p>
+        </div>
+
+        <!-- Crisis Resources - Always Available -->
+        <div class="bg-red-100 border-l-4 border-red-500 p-6 rounded-lg mb-8 max-w-2xl mx-auto">
+            <div class="flex items-center mb-4">
+                <i class="fas fa-exclamation-triangle text-red-500 text-2xl mr-3"></i>
+                <h2 class="text-xl font-bold text-red-800">🚨 Crisis Resources Available 24/7</h2>
+            </div>
+            <div class="grid md:grid-cols-3 gap-4 text-red-800">
+                <div class="text-center">
+                    <strong>UK: Samaritans</strong><br>
+                    <a href="tel:116123" class="text-blue-600 font-bold text-xl">116 123</a>
+                </div>
+                <div class="text-center">
+                    <strong>US: Crisis Lifeline</strong><br>
+                    <a href="tel:988" class="text-blue-600 font-bold text-xl">988</a>
+                </div>
+                <div class="text-center">
+                    <strong>Emergency Services</strong><br>
+                    <a href="tel:999" class="text-red-600 font-bold text-xl">999 (UK) / 911 (US)</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Offline Coping Techniques -->
+        <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 max-w-6xl mx-auto">
+            <div class="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow cursor-pointer" onclick="start54321Technique()">
+                <div class="text-blue-500 text-3xl mb-4">
+                    <i class="fas fa-eye"></i>
+                </div>
+                <h3 class="font-bold mb-2">5-4-3-2-1 Grounding</h3>
+                <p class="text-sm text-gray-600">Use your senses to stay present</p>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow cursor-pointer" onclick="startBreathingExercise()">
+                <div class="text-green-500 text-3xl mb-4">
+                    <i class="fas fa-wind"></i>
+                </div>
+                <h3 class="font-bold mb-2">Box Breathing</h3>
+                <p class="text-sm text-gray-600">Calm your nervous system</p>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow cursor-pointer" onclick="startProgressiveRelaxation()">
+                <div class="text-purple-500 text-3xl mb-4">
+                    <i class="fas fa-spa"></i>
+                </div>
+                <h3 class="font-bold mb-2">Progressive Relaxation</h3>
+                <p class="text-sm text-gray-600">Release physical tension</p>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow cursor-pointer" onclick="openOfflineJournal()">
+                <div class="text-orange-500 text-3xl mb-4">
+                    <i class="fas fa-journal-whills"></i>
+                </div>
+                <h3 class="font-bold mb-2">Offline Journal</h3>
+                <p class="text-sm text-gray-600">Write your thoughts safely</p>
+            </div>
+        </div>
+
+        <!-- Offline Journal -->
+        <div id="offline-journal" class="hidden bg-white rounded-lg shadow-lg p-6 max-w-2xl mx-auto mb-8">
+            <h3 class="text-2xl font-bold mb-4">📝 Offline Journal</h3>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-bold mb-2">How are you feeling? (1-10)</label>
+                    <input type="range" id="offline-mood" min="1" max="10" value="5" class="w-full">
+                    <div class="flex justify-between text-xs text-gray-500">
+                        <span>Very Low</span>
+                        <span id="offline-mood-display">5</span>
+                        <span>Very High</span>
+                    </div>
+                </div>
+                <textarea id="offline-journal-text" placeholder="Write about your feelings, thoughts, or experiences..." 
+                    class="w-full p-3 border rounded-lg h-32" rows="4"></textarea>
+                <button onclick="saveOfflineJournal()" 
+                    class="w-full bg-purple-500 text-white py-3 rounded-lg hover:bg-purple-600 transition-colors">
+                    Save Entry (Will sync when online)
+                </button>
+            </div>
+            <div id="offline-journal-entries" class="mt-6 space-y-2"></div>
+        </div>
+
+        <!-- Technique Modal -->
+        <div id="technique-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 items-center justify-center z-50">
+            <div class="bg-white p-8 rounded-lg max-w-2xl w-full mx-4">
+                <div id="technique-content"></div>
+                <button onclick="closeTechniqueModal()" class="mt-4 bg-gray-500 text-white px-6 py-2 rounded hover:bg-gray-600">Close</button>
+            </div>
+        </div>
+
+        <!-- Return to App -->
+        <div class="text-center">
+            <button onclick="returnToApp()" class="bg-green-500 text-white px-8 py-3 rounded-lg hover:bg-green-600 transition-colors font-semibold">
+                <i class="fas fa-arrow-left mr-2"></i>
+                Return to App
+            </button>
+            <p class="text-sm text-gray-500 mt-4">
+                <i class="fas fa-info-circle mr-1"></i>
+                Your data will sync automatically when you're back online
+            </p>
+        </div>
+
+        <!-- Connection Status -->
+        <div class="mt-8 p-4 bg-gray-100 rounded-lg max-w-md mx-auto">
+            <div class="flex items-center justify-center">
+                <div class="pulse-slow w-3 h-3 bg-orange-500 rounded-full mr-2"></div>
+                <span class="text-sm font-medium text-gray-700">Checking connection...</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Check mood display
+        document.getElementById('offline-mood').addEventListener('input', function() {
+            document.getElementById('offline-mood-display').textContent = this.value;
+        });
+
+        // Offline journal functionality
+        function openOfflineJournal() {
+            document.getElementById('offline-journal').classList.remove('hidden');
+            loadOfflineJournalEntries();
+        }
+
+        function saveOfflineJournal() {
+            const mood = document.getElementById('offline-mood').value;
+            const text = document.getElementById('offline-journal-text').value.trim();
+            
+            if (!text) {
+                alert('Please write something in your journal entry.');
+                return;
+            }
+
+            const entry = {
+                date: new Date().toISOString(),
+                mood: parseInt(mood),
+                text: text,
+                synced: false
+            };
+
+            // Save to localStorage
+            let entries = JSON.parse(localStorage.getItem('offlineJournalEntries') || '[]');
+            entries.unshift(entry);
+            localStorage.setItem('offlineJournalEntries', JSON.stringify(entries));
+
+            // Clear form
+            document.getElementById('offline-journal-text').value = '';
+            document.getElementById('offline-mood').value = 5;
+            document.getElementById('offline-mood-display').textContent = 5;
+
+            // Refresh display
+            loadOfflineJournalEntries();
+
+            alert('Journal entry saved! It will sync when you\'re back online.');
+        }
+
+        function loadOfflineJournalEntries() {
+            const entries = JSON.parse(localStorage.getItem('offlineJournalEntries') || '[]');
+            const container = document.getElementById('offline-journal-entries');
+            
+            if (entries.length === 0) {
+                container.innerHTML = '<p class="text-gray-500 text-sm">No offline entries yet.</p>';
+                return;
+            }
+
+            container.innerHTML = entries.slice(0, 3).map(entry => `
+                <div class="bg-gray-50 p-3 rounded border-l-4 border-purple-500">
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="text-xs text-gray-500">${new Date(entry.date).toLocaleDateString()}</span>
+                        <span class="text-xs ${entry.synced ? 'text-green-600' : 'text-orange-600'}">
+                            ${entry.synced ? '✓ Synced' : '⏳ Pending sync'}
+                        </span>
+                    </div>
+                    <div class="text-sm font-semibold">Mood: ${entry.mood}/10</div>
+                    <div class="text-sm text-gray-700">${entry.text.substring(0, 100)}${entry.text.length > 100 ? '...' : ''}</div>
+                </div>
+            `).join('');
+        }
+
+        // Coping techniques
+        function start54321Technique() {
+            document.getElementById('technique-content').innerHTML = `
+                <h2 class="text-2xl font-bold mb-4">5-4-3-2-1 Grounding Technique</h2>
+                <div class="space-y-4">
+                    <p class="text-lg">This technique helps you stay present by engaging your senses:</p>
+                    <div class="space-y-3">
+                        <div class="p-3 bg-blue-50 rounded">
+                            <strong>5 things you can SEE</strong><br>
+                            Look around and name 5 things you can see
+                        </div>
+                        <div class="p-3 bg-green-50 rounded">
+                            <strong>4 things you can TOUCH</strong><br>
+                            Notice the texture of 4 different objects
+                        </div>
+                        <div class="p-3 bg-yellow-50 rounded">
+                            <strong>3 things you can HEAR</strong><br>
+                            Listen carefully and identify 3 sounds
+                        </div>
+                        <div class="p-3 bg-orange-50 rounded">
+                            <strong>2 things you can SMELL</strong><br>
+                            Take deep breaths and notice 2 scents
+                        </div>
+                        <div class="p-3 bg-red-50 rounded">
+                            <strong>1 thing you can TASTE</strong><br>
+                            Focus on any taste in your mouth
+                        </div>
+                    </div>
+                    <p class="text-center text-gray-600 font-medium">Take your time with each step. You're safe.</p>
+                </div>
+            `;
+            showTechniqueModal();
+        }
+
+        function startBreathingExercise() {
+            document.getElementById('technique-content').innerHTML = `
+                <h2 class="text-2xl font-bold mb-4">Box Breathing Exercise</h2>
+                <div class="text-center">
+                    <div class="w-32 h-32 border-4 border-blue-500 rounded-full mx-auto mb-6 flex items-center justify-center breathing-circle">
+                        <span class="text-lg font-bold">Breathe</span>
+                    </div>
+                    <div class="space-y-4">
+                        <p><strong>Step 1:</strong> Breathe in for 4 counts</p>
+                        <p><strong>Step 2:</strong> Hold for 4 counts</p>
+                        <p><strong>Step 3:</strong> Breathe out for 4 counts</p>
+                        <p><strong>Step 4:</strong> Hold for 4 counts</p>
+                        <p class="text-gray-600">Repeat this cycle 4-5 times</p>
+                    </div>
+                </div>
+            `;
+            showTechniqueModal();
+        }
+
+        function startProgressiveRelaxation() {
+            document.getElementById('technique-content').innerHTML = `
+                <h2 class="text-2xl font-bold mb-4">Progressive Muscle Relaxation</h2>
+                <div class="space-y-4">
+                    <p>Tense each muscle group for 5 seconds, then release and notice the relaxation:</p>
+                    <div class="space-y-2 text-sm">
+                        <div class="p-2 bg-gray-50 rounded">1. <strong>Feet:</strong> Curl your toes, then release</div>
+                        <div class="p-2 bg-gray-50 rounded">2. <strong>Calves:</strong> Tense your calf muscles, then release</div>
+                        <div class="p-2 bg-gray-50 rounded">3. <strong>Thighs:</strong> Tighten your thigh muscles, then release</div>
+                        <div class="p-2 bg-gray-50 rounded">4. <strong>Glutes:</strong> Squeeze your buttocks, then release</div>
+                        <div class="p-2 bg-gray-50 rounded">5. <strong>Abdomen:</strong> Tighten your stomach, then release</div>
+                        <div class="p-2 bg-gray-50 rounded">6. <strong>Hands:</strong> Make fists, then release</div>
+                        <div class="p-2 bg-gray-50 rounded">7. <strong>Arms:</strong> Tense your arms, then release</div>
+                        <div class="p-2 bg-gray-50 rounded">8. <strong>Shoulders:</strong> Raise shoulders to ears, then release</div>
+                        <div class="p-2 bg-gray-50 rounded">9. <strong>Face:</strong> Scrunch facial muscles, then release</div>
+                    </div>
+                    <p class="text-center text-gray-600">Notice the difference between tension and relaxation.</p>
+                </div>
+            `;
+            showTechniqueModal();
+        }
+
+        function showTechniqueModal() {
+            document.getElementById('technique-modal').classList.remove('hidden');
+            document.getElementById('technique-modal').classList.add('flex');
+        }
+
+        function closeTechniqueModal() {
+            document.getElementById('technique-modal').classList.add('hidden');
+            document.getElementById('technique-modal').classList.remove('flex');
+        }
+
+        function returnToApp() {
+            window.location.href = './index.html';
+        }
+
+        // Check connection status
+        function updateConnectionStatus() {
+            const statusElement = document.querySelector('.pulse-slow').nextElementSibling;
+            if (navigator.onLine) {
+                statusElement.textContent = 'Connection restored! Redirecting...';
+                setTimeout(() => {
+                    window.location.href = './index.html';
+                }, 2000);
+            } else {
+                statusElement.textContent = 'Still offline - checking...';
+            }
+        }
+
+        // Listen for online/offline events
+        window.addEventListener('online', updateConnectionStatus);
+        window.addEventListener('offline', updateConnectionStatus);
+
+        // Check periodically
+        setInterval(updateConnectionStatus, 5000);
+
+        // Load offline journal on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadOfflineJournalEntries();
+        });
+    </script>
+</body>
+</html>

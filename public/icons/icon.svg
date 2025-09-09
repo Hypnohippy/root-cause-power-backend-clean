@@ -1,0 +1,53 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#10b981;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#059669;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="heart" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffffff;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#f0f9ff;stop-opacity:1" />
+    </linearGradient>
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="rgba(0,0,0,0.2)"/>
+    </filter>
+  </defs>
+  
+  <!-- Background Circle -->
+  <circle cx="256" cy="256" r="240" fill="url(#bg)" filter="url(#shadow)"/>
+  
+  <!-- Inner Circle -->
+  <circle cx="256" cy="256" r="200" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="2"/>
+  
+  <!-- Heart Symbol (PTSD Support) -->
+  <path d="M256 180c-20-40 -80-40 -80 0c0 40 80 120 80 120s80-80 80-120c0-40 -60-40 -80 0z" 
+        fill="url(#heart)" 
+        stroke="rgba(16,185,129,0.3)" 
+        stroke-width="2"
+        transform="scale(1.2) translate(-51.2, -51.2)"/>
+  
+  <!-- Brain/Mind Symbol -->
+  <g transform="translate(256, 320)">
+    <ellipse cx="0" cy="0" rx="40" ry="25" fill="rgba(255,255,255,0.9)" stroke="none"/>
+    <path d="M-30,-10 Q-20,-20 0,-10 Q20,-20 30,-10" stroke="rgba(16,185,129,0.8)" stroke-width="2" fill="none"/>
+    <path d="M-25,0 Q-15,-5 0,0 Q15,-5 25,0" stroke="rgba(16,185,129,0.6)" stroke-width="1.5" fill="none"/>
+    <path d="M-20,8 Q-10,3 0,8 Q10,3 20,8" stroke="rgba(16,185,129,0.4)" stroke-width="1" fill="none"/>
+  </g>
+  
+  <!-- Healing Rays -->
+  <g opacity="0.6">
+    <line x1="256" y1="80" x2="256" y2="120" stroke="white" stroke-width="3" stroke-linecap="round"/>
+    <line x1="380" y1="140" x2="350" y2="165" stroke="white" stroke-width="3" stroke-linecap="round"/>
+    <line x1="430" y1="256" x2="390" y2="256" stroke="white" stroke-width="3" stroke-linecap="round"/>
+    <line x1="380" y1="372" x2="350" y2="347" stroke="white" stroke-width="3" stroke-linecap="round"/>
+    <line x1="132" y1="372" x2="162" y2="347" stroke="white" stroke-width="3" stroke-linecap="round"/>
+    <line x1="82" y1="256" x2="122" y2="256" stroke="white" stroke-width="3" stroke-linecap="round"/>
+    <line x1="132" y1="140" x2="162" y2="165" stroke="white" stroke-width="3" stroke-linecap="round"/>
+  </g>
+  
+  <!-- Wellness Dots -->
+  <circle cx="180" cy="200" r="4" fill="rgba(255,255,255,0.8)"/>
+  <circle cx="332" cy="200" r="4" fill="rgba(255,255,255,0.8)"/>
+  <circle cx="200" cy="280" r="3" fill="rgba(255,255,255,0.6)"/>
+  <circle cx="312" cy="280" r="3" fill="rgba(255,255,255,0.6)"/>
+</svg>

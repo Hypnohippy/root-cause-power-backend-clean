@@ -1,0 +1,42 @@
+{
+  "bilateral-tones-left.wav": {
+    "duration": 1,
+    "type": "emdr"
+  },
+  "bilateral-tones-right.wav": {
+    "duration": 1,
+    "type": "emdr"
+  },
+  "alternating-chimes.wav": {
+    "duration": 30,
+    "type": "emdr"
+  },
+  "calming-rain.wav": {
+    "duration": 30,
+    "type": "ambient"
+  },
+  "ocean-waves.wav": {
+    "duration": 30,
+    "type": "ambient"
+  },
+  "forest-sounds.wav": {
+    "duration": 30,
+    "type": "ambient"
+  },
+  "box-breathing-guide.wav": {
+    "duration": 120,
+    "type": "breathing"
+  },
+  "panic-attack-help.wav": {
+    "duration": 60,
+    "type": "crisis"
+  },
+  "grounding-meditation.wav": {
+    "duration": 180,
+    "type": "meditation"
+  },
+  "progressive-relaxation.wav": {
+    "duration": 300,
+    "type": "relaxation"
+  }
+}
