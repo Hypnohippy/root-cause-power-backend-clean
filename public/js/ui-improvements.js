@@ -10,6 +10,7 @@ class UIImprovements {
 
     init() {
         console.log('🎨 Initializing UI improvements...');
+        this.forceHorizontalStatusLayout();
         this.enhanceAssessmentOptions();
         this.fixNavigationOverlap();
         this.improveButtonFeedback();
@@ -443,6 +444,63 @@ class UIImprovements {
         
         window.addEventListener('resize', checkLayout);
         checkLayout(); // Initial check
+    }
+
+    /**
+     * CRITICAL FIX: Force horizontal layout of status indicators
+     * Fixes the issue where status buttons stack vertically down the page
+     */
+    forceHorizontalStatusLayout() {
+        console.log('🔧 Forcing horizontal status layout...');
+        
+        // Wait for DOM to be ready
+        setTimeout(() => {
+            const statusElements = [
+                { id: 'api-status', right: '20rem' },
+                { id: 'stop-audio-btn', right: '15rem' },
+                { id: 'credit-counter', right: '10rem' },
+                { id: 'voice-credit-counter', right: '5rem' }
+            ];
+
+            statusElements.forEach(({ id, right }) => {
+                const element = document.getElementById(id);
+                if (element) {
+                    // Force horizontal positioning
+                    element.style.position = 'fixed';
+                    element.style.top = '1rem';
+                    element.style.right = right;
+                    element.style.zIndex = '9999';
+                    element.style.display = 'inline-block';
+                    
+                    console.log(`✅ Repositioned ${id} to horizontal layout`);
+                } else {
+                    console.log(`⚠️ Status element ${id} not found`);
+                }
+            });
+
+            // Add responsive adjustment for mobile
+            if (window.innerWidth <= 768) {
+                const mobilePositions = [
+                    { id: 'api-status', right: '16rem' },
+                    { id: 'stop-audio-btn', right: '12rem' },
+                    { id: 'credit-counter', right: '8rem' },
+                    { id: 'voice-credit-counter', right: '4rem' }
+                ];
+
+                mobilePositions.forEach(({ id, right }) => {
+                    const element = document.getElementById(id);
+                    if (element) {
+                        element.style.right = right;
+                        element.style.fontSize = '0.75rem';
+                    }
+                });
+            }
+        }, 100);
+        
+        // Reapply on window resize
+        window.addEventListener('resize', () => {
+            setTimeout(() => this.forceHorizontalStatusLayout(), 100);
+        });
     }
 }
 

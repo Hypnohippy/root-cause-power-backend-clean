@@ -115,6 +115,35 @@
     border-color: #8b5cf6 !important;
 }
 
+/* CRITICAL FIX: Force horizontal layout for top status indicators */
+#api-status {
+    position: fixed !important;
+    top: 1rem !important;
+    right: 20rem !important;
+    z-index: 40 !important;
+}
+
+#stop-audio-btn {
+    position: fixed !important;
+    top: 1rem !important;
+    right: 15rem !important;
+    z-index: 40 !important;
+}
+
+#credit-counter {
+    position: fixed !important;
+    top: 1rem !important;
+    right: 10rem !important;
+    z-index: 40 !important;
+}
+
+#voice-credit-counter {
+    position: fixed !important;
+    top: 1rem !important;
+    right: 4rem !important;
+    z-index: 40 !important;
+}
+
 /* Force horizontal navigation layout */
 header, .header, .nav-container {
     display: flex !important;
@@ -124,12 +153,52 @@ header, .header, .nav-container {
     width: 100% !important;
 }
 
+/* Create horizontal status bar */
+.status-bar-container {
+    position: fixed !important;
+    top: 1rem !important;
+    right: 1rem !important;
+    display: flex !important;
+    gap: 0.5rem !important;
+    align-items: center !important;
+    z-index: 40 !important;
+    flex-direction: row !important;
+}
+
 /* Specific fix for the navigation buttons container */
 .nav-buttons, div[style*="display: flex"], div[class*="nav"] {
     flex-direction: row !important;
     flex-wrap: nowrap !important;
     align-items: center !important;
     gap: 0.5rem !important;
+}
+
+/* AGGRESSIVE OVERRIDE: Force all status indicators to display horizontally */
+body #api-status,
+body #stop-audio-btn, 
+body #credit-counter,
+body #voice-credit-counter {
+    position: fixed !important;
+    top: 1rem !important;
+    z-index: 9999 !important;
+    display: inline-block !important;
+}
+
+body #api-status { right: 20rem !important; }
+body #stop-audio-btn { right: 15rem !important; }  
+body #credit-counter { right: 10rem !important; }
+body #voice-credit-counter { right: 5rem !important; }
+
+/* Alternative approach: Create wrapper and reposition */
+body::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 100%;
+    height: 4rem;
+    pointer-events: none;
+    z-index: 35;
 }
 
 /* Mobile responsive - smaller buttons on mobile */
@@ -144,6 +213,12 @@ header, .header, .nav-container {
         gap: 0.3rem !important;
         padding: 0.3rem !important;
     }
+    
+    /* Mobile: Stack status indicators more compactly */
+    body #api-status { right: 16rem !important; font-size: 0.75rem !important; }
+    body #stop-audio-btn { right: 12rem !important; font-size: 0.75rem !important; }
+    body #credit-counter { right: 8rem !important; font-size: 0.75rem !important; }
+    body #voice-credit-counter { right: 4rem !important; font-size: 0.75rem !important; }
 }
 
 /* Improved Spacing & Readability */
