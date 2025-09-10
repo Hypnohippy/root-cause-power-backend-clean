@@ -966,7 +966,7 @@ class RootCausePowerApp {
                                 ${pkg.save ? `<div class="text-sm text-green-600 font-semibold">${pkg.save}</div>` : ''}
                             </div>
                             <p class="text-sm text-gray-600 mb-4">${pkg.description}</p>
-                            <button onclick="app.purchaseVoiceCredits(${pkg.credits}, ${pkg.priceInCents})" class="w-full bg-purple-500 text-white py-3 rounded-lg hover:bg-purple-600 transition-colors font-semibold">
+                            <button class="voice-credit-buy-btn w-full bg-purple-500 text-white py-3 rounded-lg hover:bg-purple-600 transition-colors font-semibold" data-credits="${pkg.credits}" data-price="${pkg.priceInCents}">
                                 Buy Credits
                             </button>
                         </div>
@@ -1004,6 +1004,16 @@ class RootCausePowerApp {
         `;
         
         document.body.appendChild(modal);
+        
+        // Add event listeners for voice credit purchase buttons
+        modal.querySelectorAll('.voice-credit-buy-btn').forEach(button => {
+            button.addEventListener('click', () => {
+                const credits = parseInt(button.dataset.credits);
+                const priceInCents = parseInt(button.dataset.price);
+                console.log(`🎯 Voice credit button clicked: ${credits} credits, $${(priceInCents/100).toFixed(2)}`);
+                this.purchaseVoiceCredits(credits, priceInCents);
+            });
+        });
     }
 
     openVoiceAI() {
