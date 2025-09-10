@@ -158,6 +158,13 @@ class RootCausePowerApp {
             mobileNav.classList.toggle('hidden');
         });
 
+        // Hamburger menu toggle
+        document.getElementById('hamburger-menu-btn')?.addEventListener('click', (e) => {
+            e.preventDefault();
+            console.log('🍔 Hamburger menu button clicked');
+            this.toggleHamburgerMenu();
+        });
+
         // Modal close buttons
         document.addEventListener('click', (e) => {
             if (e.target.matches('.close-modal') || e.target.closest('.close-modal')) {
@@ -2197,6 +2204,11 @@ class RootCausePowerApp {
     toggleHamburgerMenu() {
         const dropdown = document.getElementById('hamburger-dropdown');
         const btn = document.getElementById('hamburger-menu-btn');
+        
+        if (!dropdown || !btn) {
+            console.error('❌ Hamburger menu elements not found:', { dropdown: !!dropdown, btn: !!btn });
+            return;
+        }
         
         if (dropdown.classList.contains('hidden')) {
             dropdown.classList.remove('hidden');
