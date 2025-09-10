@@ -1,56 +1,82 @@
 /* IMPROVED UI/UX FOR ROOT CAUSE POWER - Better Readability & Spacing */
 
-/* Enhanced Assessment Styles - Better Visual Feedback */
+/* ENHANCED ASSESSMENT - MAXIMUM VISUAL FEEDBACK FOR ACCESSIBILITY */
 .assessment-option {
-    padding: 1.5rem !important;
+    padding: 1.5rem 4rem 1.5rem 1.5rem !important;
     margin: 1rem 0 !important;
-    border: 3px solid #e5e7eb !important;
-    border-radius: 12px !important;
+    border: 4px solid #d1d5db !important;
+    border-radius: 16px !important;
     background: white !important;
     cursor: pointer !important;
     transition: all 0.3s ease !important;
-    font-size: 1.1rem !important;
+    font-size: 1.2rem !important;
     line-height: 1.6 !important;
     position: relative !important;
-    min-height: 80px !important;
+    min-height: 90px !important;
     display: flex !important;
     align-items: center !important;
+    font-weight: 500 !important;
 }
 
 .assessment-option:hover {
-    border-color: #8b5cf6 !important;
-    background: #f8fafc !important;
-    transform: translateY(-2px) !important;
-    box-shadow: 0 8px 25px rgba(139, 92, 246, 0.15) !important;
+    border-color: #3b82f6 !important;
+    background: linear-gradient(135deg, #dbeafe 0%, #e0e7ff 100%) !important;
+    transform: translateY(-3px) !important;
+    box-shadow: 0 12px 40px rgba(59, 130, 246, 0.3) !important;
+    color: #1d4ed8 !important;
 }
 
+/* BOLD SELECTED STATE - Maximum Contrast */
 .assessment-option.selected {
-    border-color: #10b981 !important;
-    background: linear-gradient(135deg, #ecfdf5 0%, #f0fdf4 100%) !important;
-    color: #047857 !important;
-    font-weight: 600 !important;
-    box-shadow: 0 8px 25px rgba(16, 185, 129, 0.25) !important;
+    border-color: #059669 !important;
+    background: linear-gradient(135deg, #065f46 0%, #047857 100%) !important;
+    color: white !important;
+    font-weight: 700 !important;
+    box-shadow: 0 16px 50px rgba(5, 150, 105, 0.5) !important;
+    transform: translateY(-4px) !important;
 }
 
-/* Better Radio Button / Checkbox Styles */
+/* LARGE, OBVIOUS SELECTION INDICATOR */
 .assessment-option::before {
     content: '';
     position: absolute;
     right: 1.5rem;
     top: 50%;
     transform: translateY(-50%);
-    width: 24px;
-    height: 24px;
-    border: 3px solid #d1d5db;
+    width: 32px;
+    height: 32px;
+    border: 4px solid #9ca3af;
     border-radius: 50%;
     background: white;
     transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
+.assessment-option:hover::before {
+    border-color: #3b82f6;
+    background: #dbeafe;
+    transform: translateY(-50%) scale(1.1);
+}
+
+/* FILLED CIRCLE WHEN SELECTED */
 .assessment-option.selected::before {
-    border-color: #10b981 !important;
-    background: #10b981 !important;
-    box-shadow: inset 0 0 0 4px white;
+    border-color: #ffffff !important;
+    background: #ffffff !important;
+    box-shadow: inset 0 0 0 8px #059669;
+    transform: translateY(-50%) scale(1.1);
+}
+
+/* ADD CHECKMARK ICON IN SELECTED CIRCLE */
+.assessment-option.selected::after {
+    content: '✓';
+    position: absolute;
+    right: 1.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #059669;
+    font-size: 18px;
+    font-weight: 900;
+    z-index: 10;
 }
 
 /* Better Button Spacing & Visibility */
@@ -230,7 +256,7 @@ body::after {
     z-index: 35;
 }
 
-/* Mobile responsive - smaller buttons on mobile */
+/* MOBILE ACCESSIBILITY - Extra Large Touch Targets */
 @media (max-width: 768px) {
     .nav-button, .header-button, .nav-btn {
         padding: 0.4rem 0.8rem !important;
@@ -248,6 +274,50 @@ body::after {
     body #stop-audio-btn { right: 12rem !important; font-size: 0.75rem !important; }
     body #credit-counter { right: 8rem !important; font-size: 0.75rem !important; }
     body #voice-credit-counter { right: 4rem !important; font-size: 0.75rem !important; }
+    
+    /* MOBILE ASSESSMENT - Even Bigger Touch Areas */
+    .assessment-option {
+        padding: 2rem 4.5rem 2rem 2rem !important;
+        min-height: 110px !important;
+        font-size: 1.3rem !important;
+        border-width: 5px !important;
+    }
+    
+    .assessment-option::before {
+        width: 36px !important;
+        height: 36px !important;
+        right: 1.25rem !important;
+    }
+    
+    .assessment-option.selected::after {
+        right: 1.45rem !important;
+        font-size: 20px !important;
+    }
+}
+
+/* HIGH CONTRAST MODE for Accessibility */
+@media (prefers-contrast: high) {
+    .assessment-option {
+        border-width: 5px !important;
+    }
+    
+    .assessment-option.selected {
+        background: #000000 !important;
+        color: #ffffff !important;
+        border-color: #ffffff !important;
+    }
+    
+    .assessment-option.selected::before {
+        background: #ffffff !important;
+        border-color: #ffffff !important;
+    }
+}
+
+/* FOCUS INDICATORS for Keyboard Navigation */
+.assessment-option:focus {
+    outline: 4px solid #f59e0b !important;
+    outline-offset: 2px !important;
+    box-shadow: 0 0 0 6px rgba(245, 158, 11, 0.3) !important;
 }
 
 /* Improved Spacing & Readability */

@@ -71,9 +71,31 @@ class UIImprovements {
     }
 
     /**
-     * Add selection animation
+     * Add selection animation with enhanced accessibility
      */
     addSelectionAnimation(element) {
+        // Enhanced visual feedback
+        element.style.transform = 'translateY(-8px) scale(1.05)';
+        element.style.borderWidth = '6px';
+        
+        // Add pulsing effect
+        element.style.animation = 'pulse 0.6s ease-in-out';
+        
+        // Audio feedback for screen readers and accessibility
+        this.playSelectionSound();
+        
+        // Visual notification for selection
+        this.showSelectionNotification(element);
+        
+        // Reset animation after completion
+        setTimeout(() => {
+            element.style.animation = '';
+            if (!element.classList.contains('selected')) {
+                element.style.transform = '';
+                element.style.borderWidth = '';
+            }
+        }, 600);
+        
         // Create success checkmark animation
         const checkmark = document.createElement('div');
         checkmark.innerHTML = '✓';
@@ -121,6 +143,88 @@ class UIImprovements {
                 
                 .assessment-option.selected {
                     animation: selectionGlow 0.6s ease-out;
+                }
+            `;
+            document.head.appendChild(style);
+        }
+    }
+
+    /**
+     * Play selection sound for accessibility
+     */
+    playSelectionSound() {
+        try {
+            // Create audio context for selection feedback
+            if (window.AudioContext || window.webkitAudioContext) {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                
+                // Create a pleasant selection tone
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                // Pleasant selection tone (C note)
+                oscillator.frequency.setValueAtTime(523.25, audioContext.currentTime);
+                oscillator.type = 'sine';
+                
+                // Quick, gentle sound
+                gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+                gainNode.gain.linearRampToValueAtTime(0.1, audioContext.currentTime + 0.01);
+                gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.2);
+                
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.2);
+            }
+        } catch (error) {
+            console.log('Audio feedback not available:', error);
+        }
+    }
+
+    /**
+     * Show visual selection notification
+     */
+    showSelectionNotification(element) {
+        // Create floating "Selected!" notification
+        const notification = document.createElement('div');
+        notification.textContent = 'Selected!';
+        notification.style.cssText = `
+            position: absolute;
+            top: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #059669;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            z-index: 1000;
+            opacity: 0;
+            animation: notificationPop 1.5s ease-out forwards;
+            pointer-events: none;
+        `;
+        
+        element.style.position = 'relative';
+        element.appendChild(notification);
+        
+        // Remove notification after animation
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.remove();
+            }
+        }, 1500);
+        
+        // Add notification animation CSS if not exists
+        if (!document.querySelector('#notification-animation-styles')) {
+            const style = document.createElement('style');
+            style.id = 'notification-animation-styles';
+            style.textContent = `
+                @keyframes notificationPop {
+                    0% { opacity: 0; transform: translateX(-50%) translateY(10px) scale(0.8); }
+                    20% { opacity: 1; transform: translateX(-50%) translateY(-5px) scale(1.1); }
+                    100% { opacity: 0; transform: translateX(-50%) translateY(-20px) scale(0.9); }
                 }
             `;
             document.head.appendChild(style);
