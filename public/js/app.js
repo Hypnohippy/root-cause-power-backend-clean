@@ -91,6 +91,16 @@ class RootCausePowerApp {
                 }
             });
         });
+
+        // Dropdown navigation items
+        document.querySelectorAll('.nav-dropdown-item').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const section = e.currentTarget.getAttribute('data-section');
+                if (section) {
+                    this.showSection(section);
+                }
+            });
+        });
     }
 
     showSection(sectionName) {
