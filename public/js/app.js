@@ -853,43 +853,43 @@ class RootCausePowerApp {
         return [
             { 
                 credits: 30, 
-                price: "£2.99", 
+                price: "$3.99", 
+                priceInCents: 399,
                 minutes: "~30 minutes",
                 description: "STARTER - Try voice coaching affordably",
                 popular: false,
                 minPurchase: true,
-                pricePerCredit: "£0.10",
-                stripeUrl: "https://buy.stripe.com/voice-credits-30"
+                pricePerCredit: "$0.13"
             },
             { 
                 credits: 60, 
-                price: "£4.99", 
+                price: "$6.99", 
+                priceInCents: 699,
                 minutes: "~60 minutes",
                 description: "POPULAR - Great for weekly sessions", 
                 popular: true,
-                save: "Save £1!",
-                pricePerCredit: "£0.08",
-                stripeUrl: "https://buy.stripe.com/voice-credits-60"
+                save: "Save $1!",
+                pricePerCredit: "$0.12"
             },
             { 
                 credits: 150, 
-                price: "£9.99", 
+                price: "$14.99", 
+                priceInCents: 1499,
                 minutes: "~150 minutes",
                 description: "VALUE - Perfect for regular users",
                 popular: false,
-                save: "Save £5!",
-                pricePerCredit: "£0.07",
-                stripeUrl: "https://buy.stripe.com/voice-credits-150"
+                save: "Save $5!",
+                pricePerCredit: "$0.10"
             },
             { 
                 credits: 300, 
-                price: "£17.99", 
+                price: "$24.99", 
+                priceInCents: 2499,
                 minutes: "~300 minutes", 
                 description: "POWER USER - Maximum savings",
                 popular: false,
-                save: "Save £12!",
-                pricePerCredit: "£0.06",
-                stripeUrl: "https://buy.stripe.com/voice-credits-300"
+                save: "Save $15!",
+                pricePerCredit: "$0.08"
             }
         ];
     }
@@ -966,7 +966,7 @@ class RootCausePowerApp {
                                 ${pkg.save ? `<div class="text-sm text-green-600 font-semibold">${pkg.save}</div>` : ''}
                             </div>
                             <p class="text-sm text-gray-600 mb-4">${pkg.description}</p>
-                            <button onclick="window.open('${pkg.stripeUrl}', '_blank')" class="w-full bg-purple-500 text-white py-3 rounded-lg hover:bg-purple-600 transition-colors font-semibold">
+                            <button onclick="app.purchaseVoiceCredits(${pkg.credits}, ${pkg.priceInCents})" class="w-full bg-purple-500 text-white py-3 rounded-lg hover:bg-purple-600 transition-colors font-semibold">
                                 Buy Credits
                             </button>
                         </div>
@@ -8468,6 +8468,51 @@ ${userContext}`;
         }
     }
     
+    // NEW: Purchase Voice Credits with Variable Pricing
+    async purchaseVoiceCredits(credits, priceInCents) {
+        try {
+            console.log(`💳 Purchasing ${credits} voice credits for $${(priceInCents/100).toFixed(2)}`);
+            
+            // Create Stripe checkout session for voice credits
+            const response = await fetch('/api/create-voice-credit-payment', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    userId: this.getCurrentUserId(),
+                    credits: credits,
+                    amount: priceInCents,
+                    planName: this.currentUser.plan
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                // Redirect to Stripe Checkout
+                const stripe = Stripe(data.stripePublishableKey);
+                const { error } = await stripe.redirectToCheckout({
+                    sessionId: data.sessionId
+                });
+                
+                if (error) {
+                    throw new Error(error.message);
+                }
+            } else {
+                if (data.needsConfiguration) {
+                    this.showStripeConfigurationHelp();
+                    return;
+                }
+                throw new Error(data.error || 'Failed to create payment session');
+            }
+            
+        } catch (error) {
+            console.error('❌ Voice credit purchase failed:', error);
+            this.showNotification('❌ Purchase failed: ' + error.message, 'error');
+        }
+    }
+    
     async startPaidHumeSession(coachType, sessionMinutes) {
         try {
             console.log(`🧠 Starting paid ${sessionMinutes}-minute Hume session`);
@@ -8769,6 +8814,26 @@ ${userContext}`;
                         this.openCoachModal(coachType);
                     }, 2000);
                 }
+            }, 1000);
+            
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
+        
+        // Handle voice credits purchase success
+        const voiceCredits = urlParams.get('voice_credits');
+        const purchasedCredits = urlParams.get('credits');
+        const purchaseAmount = urlParams.get('amount');
+        
+        if (paymentStatus === 'success' && voiceCredits === 'true') {
+            console.log('✅ Voice credits purchase successful');
+            
+            // Update local credit count immediately
+            this.currentUser.voiceCredits = (this.currentUser.voiceCredits || 0) + parseInt(purchasedCredits);
+            this.updateVoiceCreditDisplay();
+            
+            setTimeout(() => {
+                const amountText = (parseInt(purchaseAmount) / 100).toFixed(2);
+                this.showNotification(`🎉 Purchase successful! ${purchasedCredits} voice credits added for $${amountText}`, 'success');
             }, 1000);
             
             window.history.replaceState({}, document.title, window.location.pathname);

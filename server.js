@@ -422,13 +422,17 @@ app.post('/api/create-voice-session-payment', async (req, res) => {
                     currency: 'usd',
                     product_data: {
                         name: `🧠 Hume Voice Coaching Session${membershipInfo}`,
-                        description: `${sessionMinutes}-minute emotionally intelligent voice coaching with ${coachType} specialist`,
-                        images: ['https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=400']
+                        description: `${sessionMinutes}-minute emotionally intelligent voice coaching with ${coachType} specialist`
                     },
-                    unit_amount: amount,
+                    unit_amount: amount
                 },
-                quantity: 1,
+                quantity: 1
             }],
+            // Alternative: Use your variable price with amount override
+            // line_items: [{
+            //     price: 'price_1S5lj2C5Ez9YOIaylK1qkQ8m',
+            //     quantity: 1
+            // }],
             mode: 'payment',
             success_url: `${req.headers.origin || 'http://localhost:3000'}/voice-payment-success?session_id={CHECKOUT_SESSION_ID}&user_id=${userId}&minutes=${sessionMinutes}&coach_type=${coachType}&plan=${planName}`,
             cancel_url: `${req.headers.origin || 'http://localhost:3000'}?payment=cancelled`,
@@ -449,6 +453,71 @@ app.post('/api/create-voice-session-payment', async (req, res) => {
         
     } catch (error) {
         console.error('❌ Failed to create voice session payment:', error);
+        res.status(500).json({
+            success: false,
+            error: error.message
+        });
+    }
+});
+
+// NEW: Stripe payment integration for voice credit packages
+app.post('/api/create-voice-credit-payment', async (req, res) => {
+    try {
+        const { userId, credits, amount, planName } = req.body;
+        
+        if (!stripe) {
+            return res.status(400).json({
+                success: false,
+                error: 'Stripe not configured',
+                message: 'Please add both STRIPE_SECRET_KEY and STRIPE_PUBLISHABLE_KEY to environment variables',
+                needsConfiguration: true
+            });
+        }
+        
+        const priceText = (amount / 100).toFixed(2);
+        const membershipInfo = planName !== 'Free' ? ` (${planName} Member)` : '';
+        
+        // Create Stripe checkout session 
+        const session = await stripe.checkout.sessions.create({
+            payment_method_types: ['card'],
+            line_items: [{
+                price_data: {
+                    currency: 'usd',
+                    product_data: {
+                        name: `🎤 Voice Credits Package${membershipInfo}`,
+                        description: `${credits} minutes of Hume AI empathic voice coaching`,
+                        images: ['https://images.unsplash.com/photo-1589254065878-42c9da997008?w=400']
+                    },
+                    unit_amount: amount
+                },
+                quantity: 1
+            }],
+            mode: 'payment',
+            success_url: `${req.headers.origin || 'http://localhost:3000'}/voice-credits-success?session_id={CHECKOUT_SESSION_ID}&user_id=${userId}&credits=${credits}&amount=${amount}`,
+            cancel_url: `${req.headers.origin || 'http://localhost:3000'}?payment=cancelled`,
+            metadata: {
+                userId,
+                credits: credits.toString(),
+                amount: amount.toString(),
+                planName: planName || 'Free',
+                type: 'voice_credits'
+            },
+            // Custom description in checkout
+            custom_text: {
+                submit: {
+                    message: `Purchase ${credits} voice credits ($${priceText})${membershipInfo}`
+                }
+            }
+        });
+        
+        res.json({
+            success: true,
+            sessionId: session.id,
+            stripePublishableKey: process.env.STRIPE_PUBLISHABLE_KEY
+        });
+        
+    } catch (error) {
+        console.error('❌ Failed to create voice credit payment:', error);
         res.status(500).json({
             success: false,
             error: error.message
@@ -484,6 +553,38 @@ app.get('/voice-payment-success', async (req, res) => {
         
     } catch (error) {
         console.error('❌ Voice payment success handler error:', error);
+        res.redirect('/?payment=error&error=' + encodeURIComponent(error.message));
+    }
+});
+
+// Handle successful voice credit purchases
+app.get('/voice-credits-success', async (req, res) => {
+    try {
+        const { session_id, user_id, credits, amount } = req.query;
+        
+        if (!session_id || !user_id || !credits || !amount) {
+            throw new Error('Missing required parameters');
+        }
+        
+        // Verify payment with Stripe
+        if (stripe) {
+            const session = await stripe.checkout.sessions.retrieve(session_id);
+            
+            if (session.payment_status === 'paid') {
+                // Add voice credits to user account
+                const currentCredits = userVoiceCredits.get(user_id) || 0;
+                const purchasedCredits = parseInt(credits);
+                userVoiceCredits.set(user_id, currentCredits + purchasedCredits);
+                
+                console.log(`✅ Voice credits purchase successful: ${purchasedCredits} credits added to ${user_id}`);
+            }
+        }
+        
+        // Redirect back to platform with success message
+        res.redirect(`/?payment=success&voice_credits=true&credits=${credits}&amount=${amount}`);
+        
+    } catch (error) {
+        console.error('❌ Voice credit purchase success handler error:', error);
         res.redirect('/?payment=error&error=' + encodeURIComponent(error.message));
     }
 });
