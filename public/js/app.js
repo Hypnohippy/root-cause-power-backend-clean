@@ -7959,6 +7959,14 @@ ${userContext}`;
     showVoiceUpgradeModal(coachType) {
         const upgradeContent = `
             <div class="text-center">
+                <!-- Close button in header -->
+                <div class="flex justify-between items-start mb-4">
+                    <div></div>
+                    <button onclick="app.closeModal();" class="text-gray-400 hover:text-gray-600 text-2xl font-bold leading-none">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
                 <div class="mb-6">
                     <i class="fas fa-brain text-6xl text-purple-500 mb-4"></i>
                     <h2 class="text-2xl font-bold text-gray-800 mb-2">🧠 Voice Coaching Access Required</h2>
@@ -8193,7 +8201,13 @@ ${userContext}`;
                     throw new Error(error.message);
                 }
             } else {
-                throw new Error(data.error || 'Upgrade failed');
+                if (data.needsConfiguration) {
+                    // Show configuration help instead of generic error
+                    this.showStripeConfigurationHelp();
+                    return;
+                } else {
+                    throw new Error(data.error || 'Upgrade failed');
+                }
             }
             
         } catch (error) {
@@ -8318,6 +8332,14 @@ ${userContext}`;
         
         const modalContent = `
             <div class="text-center">
+                <!-- Close button in header -->
+                <div class="flex justify-between items-start mb-4">
+                    <div></div>
+                    <button onclick="app.closeModal();" class="text-gray-400 hover:text-gray-600 text-2xl font-bold leading-none">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
                 <div class="mb-6">
                     <i class="fas fa-brain text-6xl text-purple-500 mb-4"></i>
                     <h2 class="text-2xl font-bold text-gray-800 mb-2">🧠 Start Hume Voice Session</h2>
@@ -8363,8 +8385,13 @@ ${userContext}`;
                     </button>
                     
                     <button onclick="app.toggleTextMode('${coachType}'); app.closeModal();" 
-                            class="w-full bg-gray-200 text-gray-700 py-3 px-6 rounded-xl font-medium hover:bg-gray-300 transition-all">
+                            class="w-full bg-green-500 text-white py-3 px-6 rounded-xl font-medium hover:bg-green-600 transition-all">
                         <i class="fas fa-keyboard mr-2"></i>Use Free Text Chat Instead
+                    </button>
+                    
+                    <button onclick="app.closeModal();" 
+                            class="w-full bg-gray-200 text-gray-700 py-2 px-6 rounded-xl font-medium hover:bg-gray-300 transition-all">
+                        <i class="fas fa-times mr-2"></i>Cancel
                     </button>
                 </div>
                 
@@ -8420,7 +8447,13 @@ ${userContext}`;
                     throw new Error(error.message);
                 }
             } else {
-                throw new Error(data.error || 'Payment failed');
+                if (data.needsConfiguration) {
+                    // Show configuration help instead of generic error
+                    this.showStripeConfigurationHelp();
+                    return;
+                } else {
+                    throw new Error(data.error || 'Payment failed');
+                }
             }
             
         } catch (error) {
@@ -8570,6 +8603,14 @@ ${userContext}`;
         // Show renewal modal
         const renewalContent = `
             <div class="text-center">
+                <!-- Close button in header -->
+                <div class="flex justify-between items-start mb-4">
+                    <div></div>
+                    <button onclick="app.closeModal();" class="text-gray-400 hover:text-gray-600 text-2xl font-bold leading-none">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
                 <div class="mb-6">
                     <i class="fas fa-clock text-6xl text-orange-500 mb-4"></i>
                     <h2 class="text-2xl font-bold text-gray-800 mb-2">⏰ Session Complete</h2>
@@ -8638,6 +8679,73 @@ ${userContext}`;
             console.error('❌ Failed to renew session:', error);
             this.showNotification('❌ Failed to renew session', 'error');
         }
+    }
+    
+    showStripeConfigurationHelp() {
+        const helpContent = `
+            <div class="text-center">
+                <!-- Close button in header -->
+                <div class="flex justify-between items-start mb-4">
+                    <div></div>
+                    <button onclick="app.closeModal();" class="text-gray-400 hover:text-gray-600 text-2xl font-bold leading-none">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <div class="mb-6">
+                    <i class="fas fa-cog text-6xl text-blue-500 mb-4"></i>
+                    <h2 class="text-2xl font-bold text-gray-800 mb-2">⚙️ Stripe Configuration Required</h2>
+                    <p class="text-gray-600">Payment system needs to be configured with your Stripe keys</p>
+                </div>
+                
+                <div class="bg-blue-50 border border-blue-200 rounded-xl p-6 mb-6 text-left">
+                    <h3 class="font-bold text-blue-800 mb-4">🔧 Setup Instructions:</h3>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <h4 class="font-semibold text-blue-700 mb-2">1. Get Your Stripe Keys:</h4>
+                            <p class="text-sm text-blue-600 mb-2">Go to <a href="https://dashboard.stripe.com/apikeys" target="_blank" class="underline">Stripe Dashboard → API Keys</a></p>
+                            <ul class="text-xs text-blue-600 list-disc list-inside space-y-1">
+                                <li><strong>Publishable key:</strong> Starts with pk_test_ or pk_live_</li>
+                                <li><strong>Secret key:</strong> Starts with sk_test_ or sk_live_</li>
+                            </ul>
+                        </div>
+                        
+                        <div>
+                            <h4 class="font-semibold text-blue-700 mb-2">2. Add to Environment Variables:</h4>
+                            <div class="bg-gray-100 p-3 rounded text-xs font-mono">
+                                <div>STRIPE_SECRET_KEY=sk_test_your_key_here</div>
+                                <div>STRIPE_PUBLISHABLE_KEY=pk_test_your_key_here</div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <h4 class="font-semibold text-blue-700 mb-2">3. For Vercel Deployment:</h4>
+                            <p class="text-xs text-blue-600">Add keys in Vercel Dashboard → Project → Settings → Environment Variables</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="space-y-3">
+                    <button onclick="window.open('https://dashboard.stripe.com/apikeys', '_blank')" 
+                            class="w-full bg-blue-500 text-white py-3 px-6 rounded-xl font-bold hover:bg-blue-600 transition-all">
+                        <i class="fas fa-external-link-alt mr-2"></i>Open Stripe Dashboard
+                    </button>
+                    
+                    <button onclick="app.closeModal();" 
+                            class="w-full bg-gray-200 text-gray-700 py-3 px-6 rounded-xl font-medium hover:bg-gray-300 transition-all">
+                        <i class="fas fa-times mr-2"></i>Close
+                    </button>
+                </div>
+                
+                <div class="text-xs text-gray-500 mt-4">
+                    <strong>Note:</strong> Use test keys (sk_test_/pk_test_) for development and live keys for production
+                </div>
+            </div>
+        `;
+        
+        document.getElementById('modal-content').innerHTML = helpContent;
+        this.openModal('generic-modal');
     }
     
     handlePaymentSuccess() {

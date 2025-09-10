@@ -311,9 +311,10 @@ app.post('/api/create-subscription', async (req, res) => {
         const { userId, planName, amount } = req.body;
         
         if (!stripe) {
-            return res.status(500).json({
+            return res.status(400).json({
                 success: false,
-                error: 'Stripe not configured'
+                error: 'Stripe keys not configured. Please add STRIPE_SECRET_KEY to environment variables.',
+                needsConfiguration: true
             });
         }
         
@@ -403,9 +404,10 @@ app.post('/api/create-voice-session-payment', async (req, res) => {
         const { userId, sessionMinutes, coachType, amount, planName } = req.body;
         
         if (!stripe) {
-            return res.status(500).json({
+            return res.status(400).json({
                 success: false,
-                error: 'Stripe not configured'
+                error: 'Stripe keys not configured. Please add STRIPE_SECRET_KEY to environment variables.',
+                needsConfiguration: true
             });
         }
         
