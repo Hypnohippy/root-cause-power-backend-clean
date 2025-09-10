@@ -100,10 +100,22 @@ class RootCausePowerApp {
             if (e.target.matches('[data-section]') || e.target.closest('[data-section]')) {
                 const section = e.target.dataset.section || e.target.closest('[data-section]').dataset.section;
                 this.showSection(section);
+                
+                // Auto-close hamburger menu when navigation item selected
+                const dropdown = document.getElementById('hamburger-dropdown');
+                if (dropdown && !dropdown.classList.contains('hidden')) {
+                    this.toggleHamburgerMenu();
+                }
             }
             if (e.target.matches('.nav-item') || e.target.closest('.nav-item')) {
                 const navItem = e.target.matches('.nav-item') ? e.target : e.target.closest('.nav-item');
                 this.showSection(navItem.dataset.section);
+                
+                // Auto-close hamburger menu when navigation item selected
+                const dropdown = document.getElementById('hamburger-dropdown');
+                if (dropdown && !dropdown.classList.contains('hidden')) {
+                    this.toggleHamburgerMenu();
+                }
             }
         });
 
