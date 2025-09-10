@@ -1888,7 +1888,7 @@
     </div>
 
     <div id="ptsd-chat-modal" class="modal fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
-        <div class="bg-white p-6 rounded-lg max-w-4xl w-full mx-4 max-h-[85vh] flex flex-col">
+        <div class="bg-white p-4 rounded-lg max-w-lg w-full mx-4 max-h-[75vh] flex flex-col relative">
             <div id="ptsd-chat-content" class="flex flex-col h-full">
                 <div class="flex items-center justify-between mb-4 border-b pb-3">
                     <div class="flex items-center">
@@ -1936,11 +1936,11 @@
     <div id="emdr-modal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
         <div class="bg-white p-6 rounded-lg max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
             <div id="emdr-content">
-                <!-- Close button in header -->
-                <div class="flex justify-between items-start mb-4">
-                    <h2 class="text-2xl font-bold">EMDR Self-Help Techniques</h2>
-                    <button onclick="app.closeModal('emdr-modal')" class="text-gray-400 hover:text-gray-600 text-2xl font-bold leading-none">
-                        <i class="fas fa-times"></i>
+                <!-- LARGE PROMINENT CLOSE BUTTON -->
+                <div class="bg-red-50 p-3 rounded-lg border-2 border-red-200 flex justify-between items-center mb-4">
+                    <h2 class="text-lg font-bold text-gray-800">EMDR Techniques</h2>
+                    <button onclick="app.closeModal('emdr-modal')" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 font-bold">
+                        <i class="fas fa-times mr-1"></i> CLOSE
                     </button>
                 </div>
                 <div class="grid md:grid-cols-2 gap-6">

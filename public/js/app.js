@@ -186,6 +186,27 @@ class RootCausePowerApp {
             }
         });
 
+        // Universal modal escape and click-outside-to-close
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                // Find any visible modal and close it
+                const visibleModal = document.querySelector('.fixed.inset-0:not(.hidden)');
+                if (visibleModal) {
+                    visibleModal.remove();
+                    console.log('🔓 Modal closed with Escape key');
+                }
+            }
+        });
+
+        // Click outside modal to close
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('fixed') && e.target.classList.contains('inset-0')) {
+                // Clicked on modal backdrop
+                e.target.remove();
+                console.log('🔓 Modal closed by clicking outside');
+            }
+        });
+
         // Assessment navigation
         document.getElementById('prev-btn')?.addEventListener('click', () => this.previousStep());
         document.getElementById('next-btn')?.addEventListener('click', () => this.nextStep());
@@ -573,15 +594,15 @@ class RootCausePowerApp {
             const modal = document.createElement('div');
             modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
             modal.innerHTML = `
-                <div class="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-                    <div class="p-6 border-b border-gray-200">
+                <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full mx-4 max-h-[80vh] overflow-y-auto relative">
+                    <div class="bg-red-50 p-4 border-b-2 border-red-200">
                         <div class="flex items-center justify-between">
-                            <h2 class="text-2xl font-bold text-gray-800 flex items-center">
-                                <i class="fas fa-prescription text-green-500 mr-3"></i>
-                                Your Recovery Prescription
+                            <h2 class="text-lg font-bold text-gray-800 flex items-center">
+                                <i class="fas fa-prescription text-green-500 mr-2"></i>
+                                Your Results
                             </h2>
-                            <button onclick="this.closest('.fixed').remove()" class="text-gray-400 hover:text-gray-600">
-                                <i class="fas fa-times text-xl"></i>
+                            <button onclick="this.closest('.fixed').remove()" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 font-bold">
+                                <i class="fas fa-times mr-1"></i> CLOSE
                             </button>
                         </div>
                     </div>
@@ -1096,26 +1117,21 @@ class RootCausePowerApp {
         const modal = document.createElement('div');
         modal.className = 'fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4';
         modal.innerHTML = `
-            <div class="bg-white rounded-xl shadow-2xl max-w-4xl w-full h-[90vh] flex flex-col">
-                <!-- Header -->
-                <div class="flex items-center justify-between p-6 border-b border-gray-200">
+            <div class="bg-white rounded-xl shadow-2xl max-w-md w-full mx-4 max-h-[70vh] flex flex-col relative">
+                <!-- LARGE CLOSE BUTTON HEADER -->
+                <div class="bg-red-50 p-3 border-b-2 border-red-200 flex items-center justify-between">
                     <div class="flex items-center">
-                        <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center text-white mr-4">
-                            <i class="fas fa-brain text-xl"></i>
+                        <div class="w-8 h-8 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center text-white mr-3">
+                            <i class="fas fa-brain text-sm"></i>
                         </div>
                         <div>
-                            <h3 class="text-xl font-bold text-gray-800">🧠 Empathic Voice Coach</h3>
-                            <p class="text-sm text-gray-600">World's first emotionally intelligent PTSD support</p>
+                            <h3 class="text-lg font-bold text-gray-800">Voice Coach</h3>
+                            <p class="text-xs text-gray-600">Credits: ${this.currentUser.voiceCredits}</p>
                         </div>
                     </div>
-                    <div class="flex items-center space-x-3">
-                        <div class="bg-purple-50 px-3 py-1 rounded-full">
-                            <span class="text-sm font-medium text-purple-700">Credits: ${this.currentUser.voiceCredits}</span>
-                        </div>
-                        <button onclick="this.closest('.fixed').remove()" class="text-gray-400 hover:text-gray-600 text-xl">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    </div>
+                    <button onclick="this.closest('.fixed').remove()" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 font-bold text-lg">
+                        <i class="fas fa-times mr-1"></i> CLOSE
+                    </button>
                 </div>
                 
                 <!-- Voice Interface Container -->
