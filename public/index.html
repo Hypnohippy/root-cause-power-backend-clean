@@ -1933,7 +1933,7 @@
         </div>
     </div>
 
-    <div id="emdr-modal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div id="emdr-modal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden" style="display: none !important;">
         <div class="bg-white p-6 rounded-lg max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
             <div id="emdr-content">
                 <!-- LARGE PROMINENT CLOSE BUTTON -->
@@ -2158,8 +2158,8 @@
 
         // EMDR technique clicking
         document.addEventListener('click', function(e) {
-            // Handle EMDR technique clicks
-            if (e.target.matches('[data-technique="emdr"]') || e.target.closest('[data-technique="emdr"]')) {
+            // Handle EMDR technique clicks - TEMPORARILY DISABLED
+            if (false && (e.target.matches('[data-technique="emdr"]') || e.target.closest('[data-technique="emdr"]'))) {
                 console.log('🎯 EMDR technique clicked');
                 window.openModal('emdr-modal');
             }
