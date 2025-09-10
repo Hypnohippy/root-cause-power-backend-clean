@@ -120,6 +120,9 @@ class RootCausePowerApp {
         // Initialize voice credits display
         this.updateVoiceCreditDisplay();
         
+        // Check for auto-login
+        this.checkAutoLogin();
+        
         console.log('✅ App initialized successfully');
     }
 
@@ -2262,7 +2265,139 @@ class RootCausePowerApp {
             console.log('❌ Invalid admin code attempted');
         }
     }
+    
+    // Founder Login System
+    attemptLogin() {
+        const email = document.getElementById('login-email').value;
+        const password = document.getElementById('login-password').value;
+        
+        // Founder credentials
+        if (email === 'david@fuelgeist.co.uk' && password === 'Founder-1!') {
+            console.log('👑 Founder login successful!');
+            
+            // Grant full founder access
+            this.currentUser.email = email;
+            this.currentUser.name = 'David Prince';
+            this.currentUser.plan = 'Founder';
+            this.currentUser.isAdmin = true;
+            this.currentUser.subscriptionActive = true;
+            this.currentUser.voiceCredits = 999999;
+            this.currentUser.credits = -1;
+            this.currentUser.maxCreditsPerDay = -1;
+            this.currentUser.isLoggedIn = true;
+            
+            // Save to localStorage
+            localStorage.setItem('user_plan', 'Founder');
+            localStorage.setItem('user_email', email);
+            localStorage.setItem('user_name', 'David Prince');
+            localStorage.setItem('isAdmin', 'true');
+            localStorage.setItem('isLoggedIn', 'true');
+            localStorage.setItem('voiceCredits', '999999');
+            localStorage.setItem('subscriptionActive', 'true');
+            
+            // Update UI
+            this.updateUIForLoggedInUser();
+            
+            // Close modal and show success
+            this.closeModal('login-modal');
+            this.showNotification('👑 Welcome back, Founder! All premium features unlocked.', 'success');
+            
+            // Show founder indicator
+            this.showFounderIndicator();
+            
+            return true;
+        }
+        
+        // Demo/test account
+        else if (email === 'demo@test.com' && password === 'demo123') {
+            this.currentUser.email = email;
+            this.currentUser.name = 'Demo User';
+            this.currentUser.plan = 'Standard';
+            this.currentUser.subscriptionActive = true;
+            this.currentUser.voiceCredits = 40;
+            this.currentUser.isLoggedIn = true;
+            
+            localStorage.setItem('user_plan', 'Standard');
+            localStorage.setItem('user_email', email);
+            localStorage.setItem('isLoggedIn', 'true');
+            localStorage.setItem('voiceCredits', '40');
+            localStorage.setItem('subscriptionActive', 'true');
+            
+            this.updateUIForLoggedInUser();
+            this.closeModal('login-modal');
+            this.showNotification('✅ Demo login successful! Standard features available.', 'success');
+            
+            return true;
+        }
+        
+        // Invalid credentials
+        else {
+            this.showNotification('❌ Invalid email or password. Try founder login or demo account.', 'error');
+            console.log('❌ Login attempt failed');
+            return false;
+        }
+    }
+    
+    // Update UI for logged in user
+    updateUIForLoggedInUser() {
+        // Update navigation
+        const loginBtn = document.getElementById('login-btn');
+        if (loginBtn) {
+            loginBtn.textContent = `Welcome, ${this.currentUser.name || 'User'}`;
+            loginBtn.classList.remove('bg-green-500');
+            loginBtn.classList.add('bg-blue-500');
+        }
+        
+        // Update credit displays
+        this.updateVoiceCreditDisplay();
+        this.updateCreditDisplay();
+        
+        // Show plan indicator
+        const planIndicator = document.createElement('div');
+        planIndicator.className = 'fixed top-20 left-4 text-white px-3 py-1 rounded-full text-xs font-bold z-40';
+        planIndicator.innerHTML = `💼 ${this.currentUser.plan} Plan`;
+        
+        if (this.currentUser.plan === 'Founder') {
+            planIndicator.style.background = 'linear-gradient(45deg, #FFD700, #FFA500)';
+        } else if (this.currentUser.plan === 'Premium') {
+            planIndicator.style.background = 'linear-gradient(45deg, #8B5CF6, #A855F7)';
+        } else {
+            planIndicator.style.background = 'linear-gradient(45deg, #3B82F6, #1D4ED8)';
+        }
+        
+        document.body.appendChild(planIndicator);
+    }
 
+    // Check for auto-login on page load
+    checkAutoLogin() {
+        const savedEmail = localStorage.getItem('user_email');
+        const savedPlan = localStorage.getItem('user_plan');
+        const isLoggedIn = localStorage.getItem('isLoggedIn');
+        
+        if (isLoggedIn === 'true' && savedEmail && savedPlan) {
+            console.log('🔄 Auto-login detected:', savedEmail, savedPlan);
+            
+            this.currentUser.email = savedEmail;
+            this.currentUser.name = localStorage.getItem('user_name') || 'User';
+            this.currentUser.plan = savedPlan;
+            this.currentUser.isLoggedIn = true;
+            this.currentUser.subscriptionActive = localStorage.getItem('subscriptionActive') === 'true';
+            this.currentUser.voiceCredits = parseInt(localStorage.getItem('voiceCredits')) || 0;
+            this.currentUser.isAdmin = localStorage.getItem('isAdmin') === 'true';
+            
+            if (this.currentUser.isAdmin) {
+                this.currentUser.credits = -1;
+                this.currentUser.maxCreditsPerDay = -1;
+            }
+            
+            this.updateUIForLoggedInUser();
+            
+            if (savedPlan === 'Founder') {
+                this.showFounderIndicator();
+            }
+        }
+    }
+    
     // Initialize section-specific features
     initializeSection(sectionId) {
         switch(sectionId) {
