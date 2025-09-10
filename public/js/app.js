@@ -1165,11 +1165,11 @@ class RootCausePowerApp {
             console.log('📦 Loading Hume AI components...');
             
             // Load HumeEviClient
-            await this.loadScript('/src/services/hume/HumeEviClient.js');
+            await this.loadScript('/js/hume/HumeEviClient.js');
             console.log('✅ HumeEviClient loaded');
             
             // Load EmpathicVoiceInterface  
-            await this.loadScript('/src/components/voice-coach/EmpathicVoiceInterface.js');
+            await this.loadScript('/js/hume/EmpathicVoiceInterface.js');
             console.log('✅ EmpathicVoiceInterface loaded');
             
             // Wait for components to be available
