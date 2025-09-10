@@ -7141,6 +7141,184 @@ ${userContext}`;
             this.showNotification('Focus on your senses: what can you see, hear, and feel right now?', 'info');
         }
     }
+
+    /**
+     * Initialize Content Automation System
+     * Automatically discovers and curates latest PTSD/trauma research and resources
+     */
+    async initializeContentAutomation() {
+        console.log('🤖 Initializing Content Automation System...');
+        
+        try {
+            // Only initialize for admin users to avoid unnecessary API calls
+            if (this.currentUser.isAdmin) {
+                // Load content automation scripts
+                await this.loadContentAutomationScripts();
+                
+                // Initialize the scheduler
+                this.setupContentAutomationScheduler();
+                
+                console.log('✅ Content automation system initialized');
+                this.showNotification('🤖 Content automation system ready', 'success');
+            } else {
+                console.log('ℹ️ Content automation requires admin access - skipping initialization');
+            }
+        } catch (error) {
+            console.error('❌ Content automation initialization failed:', error);
+        }
+    }
+
+    /**
+     * Load content automation scripts dynamically
+     */
+    async loadContentAutomationScripts() {
+        try {
+            // Check if scripts already loaded
+            if (window.ContentAggregator && window.AutomationScheduler) {
+                return;
+            }
+
+            // Load ContentAggregator script
+            const aggregatorScript = document.createElement('script');
+            aggregatorScript.src = '/src/services/contentAutomation/ContentAggregator.js';
+            document.head.appendChild(aggregatorScript);
+
+            // Load AutomationScheduler script  
+            const schedulerScript = document.createElement('script');
+            schedulerScript.src = '/src/services/contentAutomation/AutomationScheduler.js';
+            document.head.appendChild(schedulerScript);
+
+            // Wait for scripts to load
+            await new Promise((resolve, reject) => {
+                let loadedScripts = 0;
+                const checkLoaded = () => {
+                    loadedScripts++;
+                    if (loadedScripts === 2) resolve();
+                };
+                
+                aggregatorScript.onload = checkLoaded;
+                schedulerScript.onload = checkLoaded;
+                aggregatorScript.onerror = reject;
+                schedulerScript.onerror = reject;
+                
+                // Timeout after 10 seconds
+                setTimeout(() => reject(new Error('Script loading timeout')), 10000);
+            });
+
+            console.log('✅ Content automation scripts loaded');
+        } catch (error) {
+            console.error('❌ Failed to load content automation scripts:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Setup content automation scheduler
+     */
+    setupContentAutomationScheduler() {
+        try {
+            if (!window.AutomationScheduler) {
+                throw new Error('AutomationScheduler not available');
+            }
+
+            // Initialize scheduler with 24-hour interval
+            this.automationScheduler = new AutomationScheduler({
+                interval: 24 * 60 * 60 * 1000, // 24 hours
+                autoApprovalThreshold: 0.9, // Auto-approve content with 90%+ relevance
+                maxContentPerRun: 10 // Limit content discovery per run
+            });
+
+            // Set up scheduler callbacks
+            this.automationScheduler.onContentDiscovered = (content) => {
+                console.log('🔍 New content discovered:', content.length, 'items');
+                this.showNotification(`🔍 Discovered ${content.length} new research articles`, 'info');
+            };
+
+            this.automationScheduler.onError = (error) => {
+                console.error('❌ Content automation error:', error);
+                this.showNotification('❌ Content automation encountered an error', 'error');
+            };
+
+            console.log('✅ Content automation scheduler ready');
+        } catch (error) {
+            console.error('❌ Failed to setup automation scheduler:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Open content admin dashboard
+     */
+    openContentAdmin() {
+        // Check admin access
+        if (!this.currentUser.isAdmin) {
+            this.showNotification('❌ Content admin requires admin access', 'error');
+            return;
+        }
+        
+        // Open content admin in new window
+        const adminWindow = window.open('/content-admin.html', '_blank', 'width=1200,height=800');
+        if (!adminWindow) {
+            alert('Please allow popups to access the content admin dashboard');
+        }
+    }
+
+    /**
+     * Manual content discovery trigger
+     */
+    async discoverNewContent() {
+        if (!this.currentUser.isAdmin) {
+            this.showNotification('❌ Content discovery requires admin access', 'error');
+            return;
+        }
+        
+        try {
+            this.showNotification('🔍 Starting content discovery...', 'info');
+            
+            // Initialize content aggregator if needed
+            if (!this.contentAggregator) {
+                await this.loadContentAutomationScripts();
+                this.contentAggregator = new ContentAggregator();
+            }
+            
+            // Discover new content
+            const newContent = await this.contentAggregator.discoverContent();
+            
+            if (newContent.length > 0) {
+                this.showNotification(`✅ Found ${newContent.length} new articles for review`, 'success');
+            } else {
+                this.showNotification('ℹ️ No new content found at this time', 'info');
+            }
+            
+            return newContent;
+        } catch (error) {
+            console.error('❌ Content discovery failed:', error);
+            this.showNotification('❌ Content discovery failed', 'error');
+        }
+    }
+
+    /**
+     * Toggle content automation on/off
+     */
+    toggleContentAutomation(enabled = true) {
+        if (!this.currentUser.isAdmin) {
+            this.showNotification('❌ Content automation control requires admin access', 'error');
+            return;
+        }
+
+        if (!this.automationScheduler) {
+            this.showNotification('❌ Content automation not initialized', 'error');
+            return;
+        }
+        
+        if (enabled) {
+            this.automationScheduler.start();
+            this.showNotification('✅ Content automation enabled', 'success');
+        } else {
+            this.automationScheduler.stop();
+            this.showNotification('⏸️ Content automation paused', 'info');
+        }
+    }
 }
 
 // Initialize the app with debugging
@@ -7187,144 +7365,6 @@ function initializeApp() {
             triggerCrisisSupport: function() { console.log('Crisis support requested - app not fully initialized'); }
         };
         console.log('🔧 Fallback app object created to prevent button errors');
-    }
-
-    /**
-     * Initialize Content Automation System
-     * Automatically discovers and curates latest PTSD/trauma research and resources
-     */
-    async initializeContentAutomation() {
-        console.log('🤖 Initializing Content Automation System...');
-        
-        try {
-            // Only initialize for admin users to avoid unnecessary API calls
-            if (this.currentUser.isAdmin) {
-                // Load content automation scripts
-                await this.loadContentAutomationScripts();
-                
-                // Initialize automation scheduler (runs in background)
-                if (typeof AutomationScheduler !== 'undefined') {
-                    this.automationScheduler = new AutomationScheduler();
-                    await this.automationScheduler.initialize();
-                    console.log('✅ Content automation scheduler started');
-                } else {
-                    console.log('⚠️ AutomationScheduler not available, manual content discovery only');
-                }
-            } else {
-                console.log('📝 Content automation available for admin users only');
-            }
-            
-        } catch (error) {
-            console.error('❌ Failed to initialize content automation:', error);
-        }
-    }
-
-    /**
-     * Load content automation scripts
-     */
-    async loadContentAutomationScripts() {
-        return new Promise((resolve, reject) => {
-            // Load ContentAggregator
-            const aggregatorScript = document.createElement('script');
-            aggregatorScript.src = '/src/services/contentAutomation/ContentAggregator.js';
-            aggregatorScript.onload = () => {
-                // Load AutomationScheduler
-                const schedulerScript = document.createElement('script');
-                schedulerScript.src = '/src/services/contentAutomation/AutomationScheduler.js';
-                schedulerScript.onload = resolve;
-                schedulerScript.onerror = reject;
-                document.head.appendChild(schedulerScript);
-            };
-            aggregatorScript.onerror = reject;
-            document.head.appendChild(aggregatorScript);
-        });
-    }
-
-    /**
-     * Access content admin dashboard
-     */
-    openContentAdminDashboard() {
-        if (!this.currentUser.isAdmin) {
-            this.showNotification('❌ Content administration requires admin access', 'error');
-            return;
-        }
-        
-        // Open content admin in new window
-        const adminWindow = window.open('/content-admin.html', '_blank', 'width=1200,height=800');
-        if (!adminWindow) {
-            alert('Please allow popups to access the content admin dashboard');
-        }
-    }
-
-    /**
-     * Manual content discovery trigger
-     */
-    async discoverNewContent() {
-        if (!this.currentUser.isAdmin) {
-            this.showNotification('❌ Content discovery requires admin access', 'error');
-            return;
-        }
-        
-        try {
-            this.showNotification('🔍 Starting content discovery...', 'info');
-            
-            // Initialize content aggregator if not available
-            if (typeof ContentAggregator === 'undefined') {
-                await this.loadContentAutomationScripts();
-            }
-            
-            const aggregator = new ContentAggregator();
-            const discoveredContent = await aggregator.aggregateContent();
-            
-            this.showNotification(
-                `✅ Discovered ${discoveredContent.length} new content items for review!`, 
-                'success'
-            );
-            
-            // Open content admin dashboard to review
-            this.openContentAdminDashboard();
-            
-        } catch (error) {
-            console.error('Content discovery error:', error);
-            this.showNotification('❌ Content discovery failed. Check console for details.', 'error');
-        }
-    }
-
-    /**
-     * Get content automation status
-     */
-    getContentAutomationStatus() {
-        if (!this.automationScheduler) {
-            return {
-                enabled: false,
-                message: 'Content automation not initialized'
-            };
-        }
-        
-        return this.automationScheduler.getStatus();
-    }
-
-    /**
-     * Toggle content automation on/off
-     */
-    toggleContentAutomation(enabled) {
-        if (!this.currentUser.isAdmin) {
-            this.showNotification('❌ Content automation control requires admin access', 'error');
-            return;
-        }
-        
-        if (!this.automationScheduler) {
-            this.showNotification('❌ Content automation not initialized', 'error');
-            return;
-        }
-        
-        if (enabled) {
-            this.automationScheduler.start();
-            this.showNotification('✅ Content automation enabled', 'success');
-        } else {
-            this.automationScheduler.stop();
-            this.showNotification('⏸️ Content automation paused', 'info');
-        }
     }
 }
 

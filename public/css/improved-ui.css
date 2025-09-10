@@ -76,27 +76,30 @@
     z-index: 1 !important;
 }
 
-/* Top Navigation Fixes - Prevent Overlapping */
-.top-nav, .header-nav {
+/* Top Navigation Fixes - Keep Horizontal */
+.top-nav, .header-nav, .nav-buttons {
     display: flex !important;
-    gap: 1rem !important;
+    gap: 0.5rem !important;
     align-items: center !important;
-    flex-wrap: wrap !important;
-    padding: 1rem !important;
+    flex-wrap: nowrap !important;
+    padding: 0.5rem !important;
     background: rgba(255, 255, 255, 0.95) !important;
     backdrop-filter: blur(10px) !important;
+    justify-content: flex-end !important;
+    overflow-x: auto !important;
 }
 
-.nav-button, .header-button {
-    padding: 0.75rem 1.5rem !important;
-    margin: 0.25rem !important;
-    font-size: 0.95rem !important;
+.nav-button, .header-button, .nav-btn {
+    padding: 0.5rem 1rem !important;
+    margin: 0.1rem !important;
+    font-size: 0.85rem !important;
     background: white !important;
-    border: 2px solid #e5e7eb !important;
-    border-radius: 6px !important;
+    border: 1px solid #e5e7eb !important;
+    border-radius: 4px !important;
     cursor: pointer !important;
     transition: all 0.3s ease !important;
     white-space: nowrap !important;
+    flex-shrink: 0 !important;
     min-width: fit-content !important;
 }
 
@@ -110,6 +113,37 @@
     background: #8b5cf6 !important;
     color: white !important;
     border-color: #8b5cf6 !important;
+}
+
+/* Force horizontal navigation layout */
+header, .header, .nav-container {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    flex-wrap: nowrap !important;
+    width: 100% !important;
+}
+
+/* Specific fix for the navigation buttons container */
+.nav-buttons, div[style*="display: flex"], div[class*="nav"] {
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    gap: 0.5rem !important;
+}
+
+/* Mobile responsive - smaller buttons on mobile */
+@media (max-width: 768px) {
+    .nav-button, .header-button, .nav-btn {
+        padding: 0.4rem 0.8rem !important;
+        font-size: 0.8rem !important;
+        margin: 0.05rem !important;
+    }
+    
+    .top-nav, .header-nav, .nav-buttons {
+        gap: 0.3rem !important;
+        padding: 0.3rem !important;
+    }
 }
 
 /* Improved Spacing & Readability */
