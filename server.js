@@ -6,6 +6,21 @@ const rateLimit = require('express-rate-limit');
 const { body, validationResult } = require('express-validator');
 require('dotenv').config();
 
+// Initialize Stripe
+let stripe = null;
+try {
+    const stripeKey = process.env.STRIPE_SECRET_KEY;
+    if (stripeKey) {
+        stripe = require('stripe')(stripeKey);
+        console.log('✅ Stripe initialized successfully');
+    } else {
+        console.log('⚠️ STRIPE_SECRET_KEY not found in environment variables');
+        console.log('Please add your Stripe keys to production environment');
+    }
+} catch (error) {
+    console.error('❌ Failed to initialize Stripe:', error.message);
+}
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -217,6 +232,258 @@ app.get('/api/hume/usage/summary', (req, res) => {
             projectedMonthlyUsage: Math.round((totalMinutes / now.getDate()) * 30 * 100) / 100
         }
     });
+});
+
+// ===================================
+// 💳 VOICE CREDIT MANAGEMENT SYSTEM
+// ===================================
+
+// In-memory storage for voice credits (use database in production)
+let userVoiceCredits = new Map();
+
+// Voice credit endpoints
+app.get('/api/voice-credits', (req, res) => {
+    const userId = req.headers['user-id'] || 'anonymous';
+    const credits = userVoiceCredits.get(userId) || 0;
+    
+    res.json({
+        success: true,
+        credits,
+        userId
+    });
+});
+
+app.post('/api/voice-credits/deduct', (req, res) => {
+    const userId = req.headers['user-id'] || 'anonymous';
+    const { minutes } = req.body;
+    
+    if (!minutes || minutes <= 0) {
+        return res.status(400).json({
+            success: false,
+            error: 'Invalid minutes specified'
+        });
+    }
+    
+    const currentCredits = userVoiceCredits.get(userId) || 0;
+    
+    if (currentCredits < minutes) {
+        return res.status(400).json({
+            success: false,
+            error: 'Insufficient credits'
+        });
+    }
+    
+    const newCredits = currentCredits - minutes;
+    userVoiceCredits.set(userId, newCredits);
+    
+    res.json({
+        success: true,
+        deductedMinutes: minutes,
+        remainingCredits: newCredits
+    });
+});
+
+app.post('/api/voice-credits/add', (req, res) => {
+    const userId = req.headers['user-id'] || 'anonymous';
+    const { minutes } = req.body;
+    
+    if (!minutes || minutes <= 0) {
+        return res.status(400).json({
+            success: false,
+            error: 'Invalid minutes specified'
+        });
+    }
+    
+    const currentCredits = userVoiceCredits.get(userId) || 0;
+    const newCredits = currentCredits + minutes;
+    userVoiceCredits.set(userId, newCredits);
+    
+    res.json({
+        success: true,
+        addedMinutes: minutes,
+        totalCredits: newCredits
+    });
+});
+
+// Subscription management
+app.post('/api/create-subscription', async (req, res) => {
+    try {
+        const { userId, planName, amount } = req.body;
+        
+        if (!stripe) {
+            return res.status(500).json({
+                success: false,
+                error: 'Stripe not configured'
+            });
+        }
+        
+        // Create Stripe checkout session for subscription
+        const session = await stripe.checkout.sessions.create({
+            payment_method_types: ['card'],
+            mode: 'subscription',
+            line_items: [{
+                price_data: {
+                    currency: 'usd',
+                    product_data: {
+                        name: `🧠 PTSD Platform - ${planName} Membership`,
+                        description: `Monthly ${planName} membership with voice coaching benefits`,
+                        images: ['https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=400']
+                    },
+                    unit_amount: amount,
+                    recurring: {
+                        interval: 'month',
+                    },
+                },
+                quantity: 1,
+            }],
+            success_url: `${req.headers.origin || 'http://localhost:3000'}/subscription-success?session_id={CHECKOUT_SESSION_ID}&plan=${planName}&user_id=${userId}`,
+            cancel_url: `${req.headers.origin || 'http://localhost:3000'}?subscription=cancelled`,
+            metadata: {
+                userId,
+                planName,
+                type: 'subscription'
+            }
+        });
+        
+        res.json({
+            success: true,
+            sessionId: session.id,
+            stripePublishableKey: process.env.STRIPE_PUBLISHABLE_KEY
+        });
+        
+    } catch (error) {
+        console.error('❌ Failed to create subscription:', error);
+        res.status(500).json({
+            success: false,
+            error: error.message
+        });
+    }
+});
+
+// Handle successful subscription payments
+app.get('/subscription-success', async (req, res) => {
+    try {
+        const { session_id, plan, user_id } = req.query;
+        
+        if (!session_id || !plan || !user_id) {
+            throw new Error('Missing required parameters');
+        }
+        
+        // Verify payment with Stripe
+        if (stripe) {
+            const session = await stripe.checkout.sessions.retrieve(session_id);
+            
+            if (session.payment_status === 'paid') {
+                // Update user's plan (in production, store in database)
+                console.log(`✅ Subscription successful: ${user_id} upgraded to ${plan}`);
+                
+                // Add monthly voice credits based on plan
+                const monthlyCredits = {
+                    'Standard': 60,
+                    'Premium': 120
+                };
+                
+                const currentCredits = userVoiceCredits.get(user_id) || 0;
+                userVoiceCredits.set(user_id, currentCredits + (monthlyCredits[plan] || 0));
+            }
+        }
+        
+        // Redirect back to platform with success message
+        res.redirect(`/?subscription=success&plan=${plan}`);
+        
+    } catch (error) {
+        console.error('❌ Subscription success handler error:', error);
+        res.redirect('/?subscription=error&error=' + encodeURIComponent(error.message));
+    }
+});
+
+// Stripe payment integration for voice sessions
+app.post('/api/create-voice-session-payment', async (req, res) => {
+    try {
+        const { userId, sessionMinutes, coachType, amount, planName } = req.body;
+        
+        if (!stripe) {
+            return res.status(500).json({
+                success: false,
+                error: 'Stripe not configured'
+            });
+        }
+        
+        const priceText = (amount / 100).toFixed(2);
+        const membershipInfo = planName !== 'Free' ? ` (${planName} Member Price)` : '';
+        
+        // Create Stripe checkout session
+        const session = await stripe.checkout.sessions.create({
+            payment_method_types: ['card'],
+            line_items: [{
+                price_data: {
+                    currency: 'usd',
+                    product_data: {
+                        name: `🧠 Hume Voice Coaching Session${membershipInfo}`,
+                        description: `${sessionMinutes}-minute emotionally intelligent voice coaching with ${coachType} specialist`,
+                        images: ['https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=400']
+                    },
+                    unit_amount: amount,
+                },
+                quantity: 1,
+            }],
+            mode: 'payment',
+            success_url: `${req.headers.origin || 'http://localhost:3000'}/voice-payment-success?session_id={CHECKOUT_SESSION_ID}&user_id=${userId}&minutes=${sessionMinutes}&coach_type=${coachType}&plan=${planName}`,
+            cancel_url: `${req.headers.origin || 'http://localhost:3000'}?payment=cancelled`,
+            metadata: {
+                userId,
+                sessionMinutes: sessionMinutes.toString(),
+                coachType,
+                planName: planName || 'Free',
+                type: 'voice_session'
+            }
+        });
+        
+        res.json({
+            success: true,
+            sessionId: session.id,
+            stripePublishableKey: process.env.STRIPE_PUBLISHABLE_KEY
+        });
+        
+    } catch (error) {
+        console.error('❌ Failed to create voice session payment:', error);
+        res.status(500).json({
+            success: false,
+            error: error.message
+        });
+    }
+});
+
+// Handle successful voice session payments
+app.get('/voice-payment-success', async (req, res) => {
+    try {
+        const { session_id, user_id, minutes, coach_type } = req.query;
+        
+        if (!session_id || !user_id || !minutes) {
+            throw new Error('Missing required parameters');
+        }
+        
+        // Verify payment with Stripe
+        if (stripe) {
+            const session = await stripe.checkout.sessions.retrieve(session_id);
+            
+            if (session.payment_status === 'paid') {
+                // Add voice credits to user account
+                const currentCredits = userVoiceCredits.get(user_id) || 0;
+                const sessionMinutes = parseInt(minutes);
+                userVoiceCredits.set(user_id, currentCredits + sessionMinutes);
+                
+                console.log(`✅ Voice payment successful: ${sessionMinutes} minutes added to ${user_id}`);
+            }
+        }
+        
+        // Redirect back to platform with success message
+        res.redirect(`/?payment=success&voice_session=true&minutes=${minutes}&coach=${coach_type}`);
+        
+    } catch (error) {
+        console.error('❌ Voice payment success handler error:', error);
+        res.redirect('/?payment=error&error=' + encodeURIComponent(error.message));
+    }
 });
 
 // Crisis detection and emergency support

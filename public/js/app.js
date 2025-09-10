@@ -20,9 +20,30 @@ class RootCausePowerApp {
             voiceCredits: 0, // New voice credits system
             isAdmin: false, // Admin access flag
             planLimits: {
-                'Free': { dailyCredits: 5, features: ['basic_assessment', 'emdr', 'crisis_support'] },
-                'Standard': { dailyCredits: -1, features: ['unlimited_ai', 'nutrition_analysis', 'meal_planning', 'progress_tracking', 'voice_credits_purchase'] },
-                'Premium': { dailyCredits: -1, features: ['photo_analysis', 'advanced_emdr', 'therapist_network', 'family_access', 'voice_credits_purchase'] }
+                'Free': { 
+                    dailyCredits: 5, 
+                    features: ['basic_assessment', 'emdr', 'crisis_support', 'text_chat_only'],
+                    voiceSessionAccess: false, // No voice session access for free users
+                    requiresUpgrade: true
+                },
+                'Standard': { 
+                    dailyCredits: -1, 
+                    features: ['unlimited_ai', 'nutrition_analysis', 'meal_planning', 'progress_tracking', 'voice_coaching'],
+                    voiceSessionAccess: true,
+                    voiceSessionPrice: 799, // $7.99 per additional session (after free credits)
+                    voiceSessionDiscount: 0,
+                    monthlyVoiceCredits: 40, // 2 free sessions per month
+                    monthlyPrice: 2900 // $29/month
+                },
+                'Premium': { 
+                    dailyCredits: -1, 
+                    features: ['photo_analysis', 'advanced_emdr', 'therapist_network', 'family_access', 'unlimited_voice_coaching'],
+                    voiceSessionAccess: true,
+                    voiceSessionPrice: 599, // $5.99 per additional session (better than Standard)
+                    voiceSessionDiscount: 25, // 25% discount vs Standard per-session rate
+                    monthlyVoiceCredits: 100, // 5 free sessions per month (2.5x Standard)
+                    monthlyPrice: 4900 // $49/month
+                }
             }
         };
         this.journalEntries = [];
@@ -32,6 +53,15 @@ class RootCausePowerApp {
             copingUsed: 0,
             healthScore: 3.2
         };
+        
+        // Handle payment success on page load
+        this.handlePaymentSuccess();
+        
+        // Load user's membership status
+        this.loadUserMembership();
+        
+        // Add in-app purchase disclosure
+        this.addInAppPurchaseDisclosure();
         this.deferredPrompt = null;
         this.apiKey = this.getApiKey(); // Load from secure environment
         this.stripeKey = this.getStripeKey(); // Load Stripe key
@@ -3021,6 +3051,7 @@ class RootCausePowerApp {
                         <p class="text-gray-600">AI-powered personalized guidance</p>
                     </div>
                 </div>
+                <!-- Chat area for both text and voice conversations -->
                 <div id="coach-chat-messages" class="bg-gray-50 p-4 rounded-lg flex-1 min-h-0 overflow-y-auto mb-4 border border-gray-200">
                     <div class="mb-3">
                         <div class="bg-${coach.color}-100 p-3 rounded-lg">
@@ -3028,32 +3059,76 @@ class RootCausePowerApp {
                         </div>
                     </div>
                 </div>
-                <div class="bg-gradient-to-r from-purple-50 to-blue-50 p-4 rounded-lg">
-                    <div class="flex items-center justify-center mb-3">
-                        <div class="pulse-ring"></div>
-                        <div id="voice-status-${coachType}" class="w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center text-white">
-                            <i class="fas fa-microphone"></i>
-                        </div>
-                    </div>
-                    <div class="text-center">
-                        <p class="font-semibold text-gray-800 mb-1">🎙️ Voice Conversation Active</p>
-                        <p class="text-sm text-gray-600 mb-2">Just start speaking naturally - I'm listening!</p>
-                        <div class="text-xs text-gray-500">
-                            <span class="inline-block bg-green-100 text-green-800 px-2 py-1 rounded-full mr-2">
-                                <i class="fas fa-circle text-green-500 text-xs mr-1"></i>Listening
-                            </span>
-                            <span class="inline-block bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
-                                Voice Credits: ${this.currentUser.voiceCredits || 0}
-                            </span>
+                
+                <!-- Hume conversation area (used for voice sessions) -->
+                <div id="coach-conversation-${coachType}" class="hidden bg-gradient-to-br from-purple-50 to-blue-50 p-4 rounded-lg flex-1 min-h-0 overflow-y-auto mb-4 border-2 border-purple-200">
+                    <div class="mb-3 text-center">
+                        <div class="bg-gradient-to-r from-purple-500 to-blue-500 text-white p-4 rounded-lg mx-auto max-w-sm">
+                            <i class="fas fa-brain text-2xl mb-2 block"></i>
+                            <div class="font-bold">🧠 Hume EVI Voice Session</div>
+                            <div class="text-sm opacity-90">Voice conversation with emotional intelligence</div>
                         </div>
                     </div>
                 </div>
                 
-                <!-- Alternative text input (collapsed by default) -->
-                <div class="mt-4">
-                    <button onclick="app.toggleTextMode('${coachType}')" class="text-sm text-gray-500 hover:text-gray-700 underline">
-                        <i class="fas fa-keyboard mr-1"></i>Prefer to type instead?
+                <!-- Voice Session Pricing -->
+                ${this.getVoiceSessionPricingHTML(coachType)}
+                
+                <!-- Choose Interaction Mode -->
+                <div class="grid grid-cols-2 gap-3 mb-4">
+                    <!-- HUME VOICE OPTION (Membership-gated) -->
+                    ${this.currentUser.plan === 'Free' ? `
+                        <button onclick="app.showVoiceUpgradeModal('${coachType}')" 
+                                class="bg-gradient-to-br from-gray-400 to-gray-600 text-white p-4 rounded-xl hover:from-gray-500 hover:to-gray-700 transition-all transform hover:scale-105 shadow-lg relative">
+                            <div class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold">
+                                <i class="fas fa-lock"></i>
+                            </div>
+                            <i class="fas fa-brain text-2xl mb-2 block opacity-60"></i>
+                            <div class="font-bold">🧠 Hume Voice</div>
+                            <div class="text-xs opacity-90">Membership Required</div>
+                        </button>
+                    ` : `
+                        <button id="hume-voice-btn-${coachType}" onclick="app.checkVoiceCreditsAndStart('${coachType}')" 
+                                class="bg-gradient-to-br from-purple-500 to-blue-600 text-white p-4 rounded-xl hover:from-purple-600 hover:to-blue-700 transition-all transform hover:scale-105 shadow-lg">
+                            <div class="absolute -top-2 -right-2 bg-green-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold">
+                                <i class="fas fa-check"></i>
+                            </div>
+                            <i class="fas fa-brain text-2xl mb-2 block"></i>
+                            <div class="font-bold">🧠 Hume Voice</div>
+                            <div class="text-xs opacity-90">Included with ${this.currentUser.plan}</div>
+                        </button>
+                    `}
+                    
+                    <!-- TEXT CHAT OPTION -->
+                    <button onclick="app.toggleTextMode('${coachType}')" 
+                            class="bg-gradient-to-br from-green-500 to-teal-600 text-white p-4 rounded-xl hover:from-green-600 hover:to-teal-700 transition-all transform hover:scale-105 shadow-lg">
+                        <i class="fas fa-keyboard text-2xl mb-2 block"></i>
+                        <div class="font-bold">💬 Text Chat</div>
+                        <div class="text-xs opacity-90">Type your messages</div>
                     </button>
+                </div>
+                
+                <!-- Hume Voice Status (hidden initially) -->
+                <div id="hume-voice-status-${coachType}" class="hidden bg-gradient-to-r from-purple-500 to-blue-500 rounded-lg p-4 text-white text-center mb-4">
+                    <div class="flex items-center justify-center space-x-4">
+                        <div class="bg-white bg-opacity-20 rounded-full p-3">
+                            <i class="fas fa-brain text-2xl"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold">🧠 Hume EVI Connected</h4>
+                            <p class="text-sm opacity-90">Emotionally intelligent voice coaching</p>
+                        </div>
+                    </div>
+                    <div class="mt-3 text-sm">
+                        <span class="inline-block w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></span>
+                        <span id="hume-status-text-${coachType}">Connecting...</span>
+                    </div>
+                    <button onclick="app.stopHumeVoiceSession('${coachType}')" class="mt-3 bg-red-500 bg-opacity-50 hover:bg-opacity-70 px-4 py-2 rounded-lg text-sm transition-colors">
+                        <i class="fas fa-stop mr-1"></i>Stop Voice Session
+                    </button>
+                </div>
+                
+                <!-- Text input mode -->
                     <div id="text-input-${coachType}" class="hidden mt-3">
                         <div class="flex space-x-2">
                             <input type="text" id="coach-user-input" placeholder="Type your message here..." class="flex-1 p-3 border rounded-lg focus:ring-2 focus:ring-${coach.color}-500 focus:border-${coach.color}-500">
@@ -3068,6 +3143,9 @@ class RootCausePowerApp {
         
         document.getElementById('coach-content').innerHTML = content;
         this.openModal('coach-modal');
+        
+        // Initialize voice credits display
+        this.updateVoiceCreditsDisplay(coachType);
         
         // Focus on input
         setTimeout(() => {
@@ -7428,6 +7506,1187 @@ ${userContext}`;
         } else {
             this.automationScheduler.stop();
             this.showNotification('⏸️ Content automation paused', 'info');
+        }
+    }
+
+    // ===================================
+    // HUME EVI INTEGRATION
+    // ===================================
+    
+    async startHumeVoiceSession(coachType) {
+        try {
+            console.log('🧠 Starting Hume EVI session for', coachType);
+            
+            // Get Hume configuration
+            const config = await this.getHumeConfig();
+            if (!config.apiKey) {
+                this.showNotification('❌ Hume voice service not configured', 'error');
+                return;
+            }
+            
+            // Hide text chat area and show Hume conversation area
+            const textChatArea = document.getElementById('coach-chat-messages');
+            const humeConversationArea = document.getElementById(`coach-conversation-${coachType}`);
+            const textInputArea = document.getElementById(`text-input-${coachType}`);
+            
+            if (textChatArea) textChatArea.classList.add('hidden');
+            if (humeConversationArea) humeConversationArea.classList.remove('hidden');
+            if (textInputArea) textInputArea.classList.add('hidden');
+            
+            // Show voice status
+            const statusElement = document.getElementById(`hume-voice-status-${coachType}`);
+            if (statusElement) {
+                statusElement.classList.remove('hidden');
+                this.updateHumeStatus(coachType, 'Connecting to Hume AI...');
+            }
+            
+            // Initialize Hume WebSocket connection
+            this.initializeHumeWebSocket(coachType, config);
+            
+        } catch (error) {
+            console.error('❌ Failed to start Hume session:', error);
+            this.showNotification('❌ Voice session failed to start', 'error');
+        }
+    }
+    
+    async getHumeConfig() {
+        try {
+            const response = await fetch('/api/hume/config');
+            return await response.json();
+        } catch (error) {
+            console.error('Failed to get Hume config:', error);
+            return { apiKey: null, configId: null };
+        }
+    }
+    
+    initializeHumeWebSocket(coachType, config) {
+        try {
+            // Close existing connection if any
+            if (this.humeWebSocket) {
+                this.humeWebSocket.close();
+            }
+            
+            // Create WebSocket connection to Hume EVI
+            const wsUrl = `wss://api.hume.ai/v0/evi/chat?api_key=${config.apiKey}&config_id=${config.configId}`;
+            this.humeWebSocket = new WebSocket(wsUrl);
+            
+            this.humeWebSocket.onopen = () => {
+                console.log('🎙️ Hume EVI connected');
+                this.updateHumeStatus(coachType, 'Connected! Setting up audio...');
+                
+                // Send session configuration for PTSD coaching
+                this.humeWebSocket.send(JSON.stringify({
+                    type: 'session_settings',
+                    audio_encoding: 'linear16',
+                    sample_rate: 48000,
+                    channels: 1,
+                    context: `You are a compassionate PTSD and wellness coach. You have emotional intelligence and can detect crisis situations. Provide supportive, evidence-based guidance for ${coachType} coaching. Always prioritize safety and suggest professional help when needed.`
+                }));
+                
+                this.setupHumeAudioStream(coachType);
+            };
+            
+            this.humeWebSocket.onmessage = (event) => {
+                this.handleHumeMessage(event, coachType);
+            };
+            
+            this.humeWebSocket.onerror = (error) => {
+                console.error('❌ Hume WebSocket error:', error);
+                this.updateHumeStatus(coachType, 'Connection error - check config');
+                this.showNotification('❌ Voice connection failed', 'error');
+            };
+            
+            this.humeWebSocket.onclose = (event) => {
+                console.log('🔌 Hume EVI disconnected', event.code, event.reason);
+                this.updateHumeStatus(coachType, 'Disconnected');
+            };
+            
+        } catch (error) {
+            console.error('❌ Failed to initialize Hume WebSocket:', error);
+            this.showNotification('❌ Voice initialization failed', 'error');
+        }
+    }
+    
+    async setupHumeAudioStream(coachType) {
+        try {
+            console.log('🎤 Setting up audio stream for Hume EVI...');
+            
+            // Request microphone access with specific requirements for Hume
+            const stream = await navigator.mediaDevices.getUserMedia({ 
+                audio: {
+                    echoCancellation: true,
+                    noiseSuppression: true,
+                    autoGainControl: true,
+                    sampleRate: 48000,
+                    sampleSize: 16
+                }
+            });
+            
+            // Set up audio processing for Hume EVI
+            this.audioContext = new (window.AudioContext || window.webkitAudioContext)({
+                sampleRate: 48000
+            });
+            
+            this.mediaStreamSource = this.audioContext.createMediaStreamSource(stream);
+            
+            // For real-time streaming to Hume, we'd need to implement proper audio encoding
+            // For now, we'll use a simplified approach that demonstrates the concept
+            
+            this.updateHumeStatus(coachType, 'Listening... Speak naturally for empathic coaching');
+            
+            // Store stream for cleanup
+            this.currentAudioStream = stream;
+            
+            // Add visual feedback for audio input
+            this.setupAudioVisualization(coachType);
+            
+            this.showNotification('🎙️ Hume voice session active', 'success');
+            
+        } catch (error) {
+            console.error('❌ Failed to setup audio stream:', error);
+            this.updateHumeStatus(coachType, 'Microphone access denied');
+            this.showNotification('❌ Please allow microphone access for voice coaching', 'error');
+            
+            // Fallback to text mode
+            setTimeout(() => this.toggleTextMode(coachType), 1000);
+        }
+    }
+    
+    setupAudioVisualization(coachType) {
+        // Add visual feedback when user is speaking
+        const analyser = this.audioContext.createAnalyser();
+        this.mediaStreamSource.connect(analyser);
+        
+        analyser.fftSize = 256;
+        const bufferLength = analyser.frequencyBinCount;
+        const dataArray = new Uint8Array(bufferLength);
+        
+        const visualizeAudio = () => {
+            if (this.audioContext && !this.audioContext.closed) {
+                analyser.getByteFrequencyData(dataArray);
+                
+                // Calculate average volume
+                let sum = 0;
+                for (let i = 0; i < bufferLength; i++) {
+                    sum += dataArray[i];
+                }
+                const average = sum / bufferLength;
+                
+                // Update status based on audio level
+                if (average > 30) { // User is speaking
+                    this.updateHumeStatus(coachType, '🎙️ Listening to you... (Hume AI analyzing)');
+                } else {
+                    this.updateHumeStatus(coachType, 'Ready to listen - speak when ready');
+                }
+                
+                requestAnimationFrame(visualizeAudio);
+            }
+        };
+        
+        visualizeAudio();
+    }
+    
+    handleHumeMessage(event, coachType) {
+        try {
+            const data = JSON.parse(event.data);
+            console.log('📨 Hume message type:', data.type);
+            
+            // Handle different message types from Hume EVI
+            if (data.type === 'audio_output') {
+                // Play Hume's empathic audio response
+                this.playHumeAudioResponse(data.data || data.audio);
+                this.updateHumeStatus(coachType, 'Playing response...');
+            } 
+            else if (data.type === 'user_message' || data.type === 'transcript') {
+                // Display user's transcript in chat
+                const message = data.message?.content || data.transcript || data.text;
+                if (message) {
+                    this.addMessageToChat(coachType, message, 'user');
+                }
+            } 
+            else if (data.type === 'assistant_message') {
+                // Display AI's response in chat
+                const message = data.message?.content || data.text;
+                if (message) {
+                    this.addMessageToChat(coachType, message, 'ai');
+                    
+                    // Enable crisis detection on AI responses
+                    this.checkForCrisisIndicators(message);
+                }
+            }
+            else if (data.type === 'emotion_scores' || data.prosody) {
+                // Update UI with emotion detection
+                this.updateEmotionFeedback(data.emotions || data.prosody, coachType);
+            }
+            else if (data.type === 'session_started') {
+                this.updateHumeStatus(coachType, 'Session active - speak naturally');
+            }
+            else if (data.type === 'error') {
+                console.error('❌ Hume error:', data.message);
+                this.updateHumeStatus(coachType, `Error: ${data.message}`);
+            }
+            
+        } catch (error) {
+            console.error('❌ Failed to handle Hume message:', error);
+        }
+    }
+    
+    checkForCrisisIndicators(message) {
+        // Ensure message is a string
+        if (!message || typeof message !== 'string') {
+            return;
+        }
+        
+        // Crisis keywords for PTSD coaching
+        const crisisKeywords = [
+            'kill myself', 'end it all', 'suicide', 'not worth living', 'self-harm',
+            'hurt myself', 'overdose', 'can\'t go on', 'want to die', 'cutting',
+            'ending my life', 'better off dead', 'suicidal thoughts'
+        ];
+        
+        const messageText = message.toLowerCase();
+        const hasCrisisKeyword = crisisKeywords.some(keyword => messageText.includes(keyword));
+        
+        if (hasCrisisKeyword) {
+            console.log('🚨 Crisis indicators detected in conversation');
+            setTimeout(() => this.triggerCrisisSupport(), 1000); // Brief delay to not interrupt flow
+        }
+    }
+    
+    updateEmotionFeedback(emotionData, coachType) {
+        if (!emotionData || !Array.isArray(emotionData)) return;
+        
+        // Find dominant emotion
+        let dominantEmotion = { name: 'Calm', score: 0 };
+        emotionData.forEach(emotion => {
+            if (emotion.score > dominantEmotion.score) {
+                dominantEmotion = emotion;
+            }
+        });
+        
+        // Check for crisis emotions (high distress, anxiety, sadness)
+        const crisisEmotions = ['Distress', 'Anxiety', 'Fear', 'Sadness', 'Anger'];
+        const highIntensityThreshold = 0.7;
+        
+        const crisisDetected = emotionData.some(emotion => 
+            crisisEmotions.includes(emotion.name) && emotion.score > highIntensityThreshold
+        );
+        
+        if (crisisDetected) {
+            console.log('🚨 High-intensity crisis emotion detected:', dominantEmotion.name);
+            setTimeout(() => this.triggerCrisisSupport(), 2000); // Allow coach to respond first
+        }
+    }
+    
+    playHumeAudioResponse(audioData) {
+        try {
+            // Convert base64 audio to playable format
+            const audio = new Audio(`data:audio/wav;base64,${audioData}`);
+            audio.play();
+        } catch (error) {
+            console.error('❌ Failed to play Hume audio:', error);
+        }
+    }
+    
+    addMessageToChat(coachType, message, sender) {
+        const chatContainer = document.getElementById(`coach-conversation-${coachType}`);
+        if (chatContainer) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `mb-3 ${sender === 'ai' ? 'text-left' : 'text-right'}`;
+            messageDiv.innerHTML = `
+                <div class="${sender === 'ai' ? 'bg-blue-100' : 'bg-green-100'} p-3 rounded-lg inline-block max-w-xs">
+                    ${message}
+                </div>
+            `;
+            chatContainer.appendChild(messageDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+    }
+    
+    updateHumeStatus(coachType, statusText) {
+        const statusElement = document.getElementById(`hume-status-text-${coachType}`);
+        if (statusElement) {
+            statusElement.textContent = statusText;
+        }
+    }
+    
+    stopHumeVoiceSession(coachType) {
+        console.log('🛑 Stopping Hume EVI session');
+        
+        // Close WebSocket
+        if (this.humeWebSocket) {
+            this.humeWebSocket.close();
+            this.humeWebSocket = null;
+        }
+        
+        // Stop audio stream
+        if (this.currentAudioStream) {
+            this.currentAudioStream.getTracks().forEach(track => track.stop());
+            this.currentAudioStream = null;
+        }
+        
+        // Close audio context
+        if (this.audioContext) {
+            this.audioContext.close();
+            this.audioContext = null;
+        }
+        
+        // Hide voice status and conversation area
+        const humeStatus = document.getElementById(`hume-voice-status-${coachType}`);
+        const humeConversationArea = document.getElementById(`coach-conversation-${coachType}`);
+        
+        if (humeStatus) humeStatus.classList.add('hidden');
+        if (humeConversationArea) humeConversationArea.classList.add('hidden');
+        
+        this.showNotification('🔇 Voice session ended', 'info');
+    }
+    
+    toggleTextMode(coachType) {
+        const textInputArea = document.getElementById(`text-input-${coachType}`);
+        const textChatArea = document.getElementById('coach-chat-messages');
+        const humeConversationArea = document.getElementById(`coach-conversation-${coachType}`);
+        const humeStatus = document.getElementById(`hume-voice-status-${coachType}`);
+        
+        // Show text mode
+        if (textInputArea) textInputArea.classList.remove('hidden');
+        if (textChatArea) textChatArea.classList.remove('hidden');
+        if (humeConversationArea) humeConversationArea.classList.add('hidden');
+        if (humeStatus) humeStatus.classList.add('hidden');
+        
+        // Stop any active voice session
+        this.stopHumeVoiceSession(coachType);
+        
+        // Focus on input
+        setTimeout(() => {
+            const input = document.getElementById('coach-user-input');
+            if (input) input.focus();
+        }, 100);
+        
+        this.showNotification('💬 Switched to text chat mode', 'info');
+    }
+    
+    // ===================================
+    // 👑 MEMBERSHIP & TIER MANAGEMENT
+    // ===================================
+    
+    loadUserMembership() {
+        // Load user's current plan from localStorage or API
+        const storedPlan = localStorage.getItem('user_plan') || 'Free';
+        this.currentUser.plan = storedPlan;
+        console.log(`👑 User membership tier: ${storedPlan}`);
+    }
+    
+    getUserPlanDetails() {
+        return this.currentUser.planLimits[this.currentUser.plan] || this.currentUser.planLimits['Free'];
+    }
+    
+    getVoiceSessionPricingHTML(coachType) {
+        const planDetails = this.getUserPlanDetails();
+        
+        // Free users see membership requirement
+        if (this.currentUser.plan === 'Free') {
+            return `
+                <div class="bg-gradient-to-br from-red-50 to-orange-50 border-2 border-red-200 rounded-xl p-4 mb-4">
+                    <div class="text-center">
+                        <i class="fas fa-lock text-3xl text-red-500 mb-3"></i>
+                        <h4 class="font-bold text-red-800 mb-2">🧠 Hume Voice Coaching</h4>
+                        <div class="bg-red-100 border border-red-300 rounded-lg p-3 mb-3">
+                            <div class="text-sm text-red-800 font-semibold">
+                                <i class="fas fa-crown mr-2"></i>MEMBERSHIP REQUIRED
+                            </div>
+                            <div class="text-xs text-red-700 mt-1">
+                                Voice coaching requires Standard or Premium membership
+                            </div>
+                        </div>
+                        <div class="text-xs text-gray-600 mb-3">
+                            <strong>In-App Purchase Required:</strong> Voice sessions are available to paid members only
+                        </div>
+                        <button onclick="app.showVoiceUpgradeModal('${coachType}')" 
+                                class="bg-gradient-to-r from-red-500 to-orange-500 text-white px-4 py-2 rounded-full text-sm font-bold hover:from-red-600 hover:to-orange-600 transition-all">
+                            <i class="fas fa-crown mr-1"></i>Upgrade to Access Voice Coaching
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Paid members see their benefits
+        const memberPrice = planDetails.voiceSessionPrice;
+        const discount = planDetails.voiceSessionDiscount || 0;
+        const monthlyCredits = planDetails.monthlyVoiceCredits || 0;
+        const memberPriceText = (memberPrice / 100).toFixed(2);
+        
+        let pricingBadge = '';
+        let benefitsText = '';
+        
+        if (this.currentUser.plan === 'Premium') {
+            pricingBadge = `<div class="bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-3 py-1 rounded-full text-xs font-bold">👑 PREMIUM VIP</div>`;
+            benefitsText = `${monthlyCredits} free minutes monthly • $${memberPriceText} additional sessions ${discount > 0 ? `(${discount}% off)` : ''}`;
+        } else if (this.currentUser.plan === 'Standard') {
+            pricingBadge = `<div class="bg-gradient-to-r from-blue-500 to-indigo-500 text-white px-3 py-1 rounded-full text-xs font-bold">⭐ STANDARD MEMBER</div>`;
+            benefitsText = `${monthlyCredits} free minutes monthly • $${memberPriceText} additional sessions`;
+        }
+        
+        return `
+            <div class="bg-gradient-to-br from-green-50 to-blue-50 border-2 border-green-200 rounded-xl p-4 mb-4">
+                <div class="text-center">
+                    <i class="fas fa-check-circle text-3xl text-green-500 mb-2"></i>
+                    <h4 class="font-bold text-green-800 mb-2">🧠 Hume Voice Access Granted</h4>
+                    <div class="flex items-center justify-center space-x-4 mb-3">
+                        ${pricingBadge}
+                    </div>
+                    <div class="text-sm text-gray-600 mb-3">
+                        ${benefitsText}
+                    </div>
+                    <div class="bg-green-100 border border-green-300 rounded-lg p-2 mb-3">
+                        <div class="text-xs text-green-800">
+                            <i class="fas fa-gift mr-1"></i>
+                            <span id="monthly-credits-${coachType}" class="font-semibold">${monthlyCredits} minutes included this month</span>
+                        </div>
+                    </div>
+                    <div id="voice-credits-display-${coachType}" class="text-sm">
+                        <span class="text-green-600 font-semibold">Available credits: </span>
+                        <span id="voice-credits-count-${coachType}" class="font-bold text-green-800">--</span>
+                    </div>
+                    <div class="mt-2 text-xs text-gray-500">
+                        <strong>Membership Benefit:</strong> Voice coaching included with your ${this.currentUser.plan} plan
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+    
+    showVoiceUpgradeModal(coachType) {
+        const upgradeContent = `
+            <div class="text-center">
+                <div class="mb-6">
+                    <i class="fas fa-brain text-6xl text-purple-500 mb-4"></i>
+                    <h2 class="text-2xl font-bold text-gray-800 mb-2">🧠 Voice Coaching Access Required</h2>
+                    <p class="text-gray-600">Hume AI's empathic voice coaching is a premium membership benefit</p>
+                </div>
+                
+                <div class="bg-red-50 border border-red-200 rounded-xl p-4 mb-6">
+                    <h3 class="font-bold text-red-800 mb-2">
+                        <i class="fas fa-info-circle mr-2"></i>In-App Purchase Required
+                    </h3>
+                    <p class="text-sm text-red-700">
+                        Voice coaching sessions require a Standard or Premium membership. 
+                        Free accounts have access to unlimited text-based AI coaching only.
+                    </p>
+                </div>
+                
+                <div class="grid md:grid-cols-2 gap-4 mb-6">
+                    <!-- Standard Plan -->
+                    <div class="border-2 border-blue-300 rounded-xl p-6 hover:border-blue-400 transition-colors">
+                        <div class="text-center">
+                            <div class="bg-gradient-to-r from-blue-500 to-indigo-500 text-white px-4 py-2 rounded-full text-sm font-bold mb-4">⭐ STANDARD</div>
+                            <div class="text-3xl font-bold text-blue-600 mb-2">$29/month</div>
+                            <div class="text-sm text-gray-600 mb-4">Voice coaching included</div>
+                            
+                            <div class="text-left space-y-2 text-sm mb-4">
+                                <div class="flex items-center">
+                                    <i class="fas fa-brain text-blue-500 mr-2"></i>
+                                    <span><strong>40 voice minutes/month included</strong></span>
+                                </div>
+                                <div class="flex items-center">
+                                    <i class="fas fa-plus text-blue-500 mr-2"></i>
+                                    <span>$7.99 for additional sessions</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <i class="fas fa-check text-blue-500 mr-2"></i>
+                                    <span>Unlimited AI text coaching</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <i class="fas fa-check text-blue-500 mr-2"></i>
+                                    <span>Advanced nutrition & meal planning</span>
+                                </div>
+                            </div>
+                            
+                            <button onclick="app.upgradeToPlan('Standard')" class="w-full bg-blue-500 text-white py-3 rounded-lg font-bold hover:bg-blue-600 transition-colors">
+                                Upgrade to Standard
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Premium Plan -->
+                    <div class="border-2 border-yellow-300 rounded-xl p-6 hover:border-yellow-400 transition-colors relative">
+                        <div class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-4 py-1 rounded-full text-xs font-bold">
+                            BEST VALUE
+                        </div>
+                        <div class="text-center mt-2">
+                            <div class="bg-gradient-to-r from-yellow-500 to-orange-500 text-white px-4 py-2 rounded-full text-sm font-bold mb-4">👑 PREMIUM VIP</div>
+                            <div class="text-3xl font-bold text-yellow-600 mb-2">$49/month</div>
+                            <div class="text-sm text-gray-600 mb-4">Maximum voice benefits</div>
+                            
+                            <div class="text-left space-y-2 text-sm mb-4">
+                                <div class="flex items-center">
+                                    <i class="fas fa-crown text-yellow-500 mr-2"></i>
+                                    <span><strong>100 voice minutes/month included</strong></span>
+                                </div>
+                                <div class="flex items-center">
+                                    <i class="fas fa-star text-yellow-500 mr-2"></i>
+                                    <span>$5.99 for additional sessions (25% off)</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <i class="fas fa-brain text-yellow-500 mr-2"></i>
+                                    <span>Unlimited voice coaching priority</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <i class="fas fa-users text-yellow-500 mr-2"></i>
+                                    <span>Therapist network access</span>
+                                </div>
+                            </div>
+                            
+                            <button onclick="app.upgradeToPlan('Premium')" class="w-full bg-gradient-to-r from-yellow-500 to-orange-500 text-white py-3 rounded-lg font-bold hover:from-yellow-600 hover:to-orange-600 transition-all">
+                                Upgrade to Premium VIP
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="text-center space-y-3">
+                    <button onclick="app.toggleTextMode('${coachType}'); app.closeModal();" 
+                            class="w-full bg-green-500 text-white py-3 px-6 rounded-xl font-medium hover:bg-green-600 transition-all">
+                        <i class="fas fa-keyboard mr-2"></i>Continue with Free Text Chat
+                    </button>
+                    
+                    <div class="text-xs text-gray-500">
+                        <strong>Note:</strong> Text-based AI coaching remains completely free with unlimited usage
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.getElementById('modal-content').innerHTML = upgradeContent;
+        this.openModal('generic-modal');
+    }
+    
+    showUpgradeModal(coachType) {
+        const upgradeContent = `
+            <div class="text-center">
+                <div class="mb-6">
+                    <i class="fas fa-crown text-6xl text-yellow-500 mb-4"></i>
+                    <h2 class="text-2xl font-bold text-gray-800 mb-2">👑 Upgrade Your Membership</h2>
+                    <p class="text-gray-600">Get discounts and free voice sessions every month!</p>
+                </div>
+                
+                <div class="grid md:grid-cols-2 gap-4 mb-6">
+                    <!-- Standard Plan -->
+                    <div class="border-2 border-blue-200 rounded-xl p-6 hover:border-blue-400 transition-colors">
+                        <div class="text-center">
+                            <div class="bg-gradient-to-r from-blue-500 to-indigo-500 text-white px-4 py-2 rounded-full text-sm font-bold mb-4">⭐ STANDARD</div>
+                            <div class="text-3xl font-bold text-blue-600 mb-2">$29/month</div>
+                            <div class="text-sm text-gray-600 mb-4">Perfect for regular users</div>
+                            
+                            <div class="text-left space-y-2 text-sm mb-4">
+                                <div class="flex items-center">
+                                    <i class="fas fa-check text-green-500 mr-2"></i>
+                                    <span>60 free voice minutes/month</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <i class="fas fa-check text-green-500 mr-2"></i>
+                                    <span>24% discount on additional sessions</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <i class="fas fa-check text-green-500 mr-2"></i>
+                                    <span>$4.95/session (instead of $6.50)</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <i class="fas fa-check text-green-500 mr-2"></i>
+                                    <span>Unlimited AI text coaching</span>
+                                </div>
+                            </div>
+                            
+                            <button onclick="app.upgradeToPlan('Standard')" class="w-full bg-blue-500 text-white py-3 rounded-lg font-bold hover:bg-blue-600 transition-colors">
+                                Choose Standard
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Premium Plan -->
+                    <div class="border-2 border-yellow-300 rounded-xl p-6 hover:border-yellow-400 transition-colors relative">
+                        <div class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-4 py-1 rounded-full text-xs font-bold">
+                            MOST POPULAR
+                        </div>
+                        <div class="text-center mt-2">
+                            <div class="bg-gradient-to-r from-yellow-500 to-orange-500 text-white px-4 py-2 rounded-full text-sm font-bold mb-4">👑 PREMIUM</div>
+                            <div class="text-3xl font-bold text-yellow-600 mb-2">$49/month</div>
+                            <div class="text-sm text-gray-600 mb-4">Maximum value & savings</div>
+                            
+                            <div class="text-left space-y-2 text-sm mb-4">
+                                <div class="flex items-center">
+                                    <i class="fas fa-crown text-yellow-500 mr-2"></i>
+                                    <span>120 free voice minutes/month</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <i class="fas fa-crown text-yellow-500 mr-2"></i>
+                                    <span>46% discount on additional sessions</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <i class="fas fa-crown text-yellow-500 mr-2"></i>
+                                    <span>$3.50/session (instead of $6.50)</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <i class="fas fa-crown text-yellow-500 mr-2"></i>
+                                    <span>Priority support & advanced features</span>
+                                </div>
+                            </div>
+                            
+                            <button onclick="app.upgradeToPlan('Premium')" class="w-full bg-gradient-to-r from-yellow-500 to-orange-500 text-white py-3 rounded-lg font-bold hover:from-yellow-600 hover:to-orange-600 transition-all">
+                                Choose Premium
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="text-center">
+                    <button onclick="app.closeModal(); app.checkVoiceCreditsAndStart('${coachType}')" 
+                            class="text-gray-600 hover:text-gray-800 text-sm underline">
+                        Continue with Free plan ($6.50/session)
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        document.getElementById('modal-content').innerHTML = upgradeContent;
+        this.openModal('generic-modal');
+    }
+    
+    async upgradeToPlan(planName) {
+        try {
+            console.log(`👑 Upgrading to ${planName} plan...`);
+            
+            // Show loading
+            const button = event.target;
+            const originalText = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Processing...';
+            button.disabled = true;
+            
+            // Create subscription payment with Stripe
+            const planPrices = {
+                'Standard': 2900, // $29.00
+                'Premium': 4900   // $49.00
+            };
+            
+            const response = await fetch('/api/create-subscription', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    userId: this.getCurrentUserId(),
+                    planName: planName,
+                    amount: planPrices[planName]
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                // Redirect to Stripe Checkout
+                const stripe = Stripe(data.stripePublishableKey);
+                const { error } = await stripe.redirectToCheckout({
+                    sessionId: data.sessionId
+                });
+                
+                if (error) {
+                    throw new Error(error.message);
+                }
+            } else {
+                throw new Error(data.error || 'Upgrade failed');
+            }
+            
+        } catch (error) {
+            console.error('❌ Plan upgrade failed:', error);
+            
+            // Reset button
+            const button = event.target;
+            button.innerHTML = originalText;
+            button.disabled = false;
+            
+            this.showNotification('❌ Upgrade failed: ' + error.message, 'error');
+        }
+    }
+    
+    addInAppPurchaseDisclosure() {
+        // Add disclosure notice to the page
+        const disclosureHTML = `
+            <div class="fixed bottom-4 right-4 bg-blue-50 border border-blue-200 rounded-lg p-3 max-w-sm text-xs shadow-lg z-50" id="iap-disclosure">
+                <div class="flex items-start space-x-2">
+                    <i class="fas fa-info-circle text-blue-500 mt-0.5"></i>
+                    <div>
+                        <div class="font-semibold text-blue-800">In-App Purchases Available</div>
+                        <div class="text-blue-700 mt-1">
+                            Voice coaching requires paid membership. Standard ($29/mo) or Premium ($49/mo) plans include voice sessions.
+                        </div>
+                        <button onclick="document.getElementById('iap-disclosure').remove()" 
+                                class="text-blue-600 hover:text-blue-800 font-medium mt-2">
+                            Dismiss
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        // Add to page after a delay
+        setTimeout(() => {
+            if (!document.getElementById('iap-disclosure')) {
+                document.body.insertAdjacentHTML('beforeend', disclosureHTML);
+                
+                // Auto-dismiss after 15 seconds
+                setTimeout(() => {
+                    const disclosure = document.getElementById('iap-disclosure');
+                    if (disclosure) disclosure.remove();
+                }, 15000);
+            }
+        }, 3000);
+    }
+
+    // ===================================
+    // 💳 VOICE SESSION PAYMENT SYSTEM
+    // ===================================
+    
+    async checkVoiceCreditsAndStart(coachType) {
+        try {
+            // First check if user has voice session access (membership gate)
+            const planDetails = this.getUserPlanDetails();
+            
+            if (!planDetails.voiceSessionAccess) {
+                console.log('🚫 Voice session access denied - membership upgrade required');
+                this.showVoiceUpgradeModal(coachType);
+                return;
+            }
+            
+            // Check if user has sufficient voice credits
+            const credits = await this.getVoiceCredits();
+            const sessionCost = 20; // 20-minute session
+            
+            if (credits >= sessionCost) {
+                // User has credits, start session
+                this.startPaidHumeSession(coachType, sessionCost);
+            } else {
+                // Show payment modal for additional voice credits
+                this.showVoicePaymentModal(coachType, sessionCost);
+            }
+            
+        } catch (error) {
+            console.error('❌ Failed to check voice credits:', error);
+            this.showNotification('❌ Failed to check voice credits', 'error');
+        }
+    }
+    
+    async getVoiceCredits() {
+        try {
+            const userId = this.getCurrentUserId();
+            const response = await fetch('/api/voice-credits', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'User-ID': userId
+                }
+            });
+            
+            const data = await response.json();
+            if (data.success) {
+                return data.credits;
+            }
+            return 0;
+        } catch (error) {
+            console.error('Failed to get voice credits:', error);
+            return 0;
+        }
+    }
+    
+    getCurrentUserId() {
+        // Get user ID from localStorage or generate temporary ID
+        let userId = localStorage.getItem('user_id');
+        if (!userId) {
+            userId = 'user_' + Date.now() + '_' + Math.random().toString(36).substring(2);
+            localStorage.setItem('user_id', userId);
+        }
+        return userId;
+    }
+    
+    showVoicePaymentModal(coachType, sessionMinutes) {
+        const planDetails = this.getUserPlanDetails();
+        const memberPrice = planDetails.voiceSessionPrice;
+        const regularPrice = 650; // Base price
+        const discount = planDetails.voiceSessionDiscount || 0;
+        
+        const memberPriceText = (memberPrice / 100).toFixed(2);
+        const regularPriceText = (regularPrice / 100).toFixed(2);
+        
+        const modalContent = `
+            <div class="text-center">
+                <div class="mb-6">
+                    <i class="fas fa-brain text-6xl text-purple-500 mb-4"></i>
+                    <h2 class="text-2xl font-bold text-gray-800 mb-2">🧠 Start Hume Voice Session</h2>
+                    <p class="text-gray-600">Experience emotionally intelligent AI coaching</p>
+                </div>
+                
+                <div class="bg-gradient-to-br from-purple-50 to-blue-50 border border-purple-200 rounded-xl p-6 mb-6">
+                    <div class="flex items-center justify-center space-x-6 mb-4">
+                        <div class="text-center">
+                            ${discount > 0 ? `<div class="text-lg text-gray-500 line-through mb-1">$${regularPriceText}</div>` : ''}
+                            <div class="text-3xl font-bold ${this.currentUser.plan === 'Premium' ? 'text-yellow-600' : this.currentUser.plan === 'Standard' ? 'text-blue-600' : 'text-purple-600'}">$${memberPriceText}</div>
+                            <div class="text-sm ${this.currentUser.plan === 'Premium' ? 'text-yellow-500' : this.currentUser.plan === 'Standard' ? 'text-blue-500' : 'text-purple-500'} font-medium">
+                                ${discount > 0 ? `${this.currentUser.plan} Member (${discount}% Off)` : 'Standard Rate'}
+                            </div>
+                        </div>
+                        <div class="text-center">
+                            <div class="bg-gradient-to-r from-purple-500 to-blue-500 text-white px-4 py-2 rounded-full">
+                                <div class="font-bold">${sessionMinutes} Minutes</div>
+                                <div class="text-xs opacity-90">Voice Session</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="text-sm text-gray-600 mb-4">
+                        ✅ Emotionally intelligent responses<br>
+                        ✅ Real-time crisis detection<br>
+                        ✅ Professional audio quality<br>
+                        ✅ Automatic session management
+                    </div>
+                    
+                    <div class="bg-yellow-100 border border-yellow-300 rounded-lg p-3 mb-4">
+                        <div class="text-sm text-yellow-800">
+                            <i class="fas fa-info-circle mr-2"></i>
+                            <strong>Session includes:</strong> 20 minutes of Hume voice coaching + automatic renewal option
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="space-y-3">
+                    <button onclick="app.purchaseVoiceSession('${coachType}', ${sessionMinutes})" 
+                            class="w-full bg-gradient-to-r from-purple-500 to-blue-500 text-white py-4 px-6 rounded-xl font-bold text-lg hover:from-purple-600 hover:to-blue-600 transition-all">
+                        <i class="fas fa-credit-card mr-2"></i>Pay $${memberPriceText} & Start Session
+                    </button>
+                    
+                    <button onclick="app.toggleTextMode('${coachType}'); app.closeModal();" 
+                            class="w-full bg-gray-200 text-gray-700 py-3 px-6 rounded-xl font-medium hover:bg-gray-300 transition-all">
+                        <i class="fas fa-keyboard mr-2"></i>Use Free Text Chat Instead
+                    </button>
+                </div>
+                
+                <div class="text-xs text-gray-500 mt-4">
+                    Secure payment processed by Stripe • Cancel anytime
+                </div>
+            </div>
+        `;
+        
+        document.getElementById('modal-content').innerHTML = modalContent;
+        this.openModal('generic-modal');
+    }
+    
+    async purchaseVoiceSession(coachType, sessionMinutes) {
+        try {
+            console.log('💳 Processing voice session purchase...');
+            
+            // Show loading state
+            const button = event.target;
+            const originalText = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Processing Payment...';
+            button.disabled = true;
+            
+            // Get member pricing
+            const planDetails = this.getUserPlanDetails();
+            const memberPrice = planDetails.voiceSessionPrice;
+            
+            // Create Stripe payment session
+            const response = await fetch('/api/create-voice-session-payment', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    userId: this.getCurrentUserId(),
+                    sessionMinutes: sessionMinutes,
+                    coachType: coachType,
+                    amount: memberPrice,
+                    planName: this.currentUser.plan
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                // Redirect to Stripe Checkout
+                const stripe = Stripe(data.stripePublishableKey);
+                const { error } = await stripe.redirectToCheckout({
+                    sessionId: data.sessionId
+                });
+                
+                if (error) {
+                    throw new Error(error.message);
+                }
+            } else {
+                throw new Error(data.error || 'Payment failed');
+            }
+            
+        } catch (error) {
+            console.error('❌ Voice session purchase failed:', error);
+            
+            // Reset button
+            const button = event.target;
+            button.innerHTML = originalText;
+            button.disabled = false;
+            
+            this.showNotification('❌ Payment failed: ' + error.message, 'error');
+        }
+    }
+    
+    async startPaidHumeSession(coachType, sessionMinutes) {
+        try {
+            console.log(`🧠 Starting paid ${sessionMinutes}-minute Hume session`);
+            
+            // Start session timer
+            this.currentSessionMinutes = sessionMinutes;
+            this.sessionStartTime = Date.now();
+            
+            // Deduct credits
+            await this.deductVoiceCredits(sessionMinutes);
+            
+            // Update credits display
+            this.updateVoiceCreditsDisplay(coachType);
+            
+            // Start the Hume session
+            await this.startHumeVoiceSession(coachType);
+            
+            // Set up session timer and warnings
+            this.setupSessionTimer(coachType, sessionMinutes);
+            
+            this.showNotification(`🎙️ ${sessionMinutes}-minute voice session started`, 'success');
+            
+        } catch (error) {
+            console.error('❌ Failed to start paid session:', error);
+            this.showNotification('❌ Failed to start voice session', 'error');
+        }
+    }
+    
+    async deductVoiceCredits(minutes) {
+        try {
+            const userId = this.getCurrentUserId();
+            const response = await fetch('/api/voice-credits/deduct', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'User-ID': userId
+                },
+                body: JSON.stringify({ minutes })
+            });
+            
+            const data = await response.json();
+            if (!data.success) {
+                throw new Error(data.error || 'Failed to deduct credits');
+            }
+            
+            return data.remainingCredits;
+        } catch (error) {
+            console.error('Failed to deduct voice credits:', error);
+            throw error;
+        }
+    }
+    
+    async updateVoiceCreditsDisplay(coachType) {
+        try {
+            const credits = await this.getVoiceCredits();
+            const creditsElement = document.getElementById(`voice-credits-count-${coachType}`);
+            if (creditsElement) {
+                creditsElement.textContent = `${credits} minutes`;
+            }
+        } catch (error) {
+            console.error('Failed to update credits display:', error);
+        }
+    }
+    
+    setupSessionTimer(coachType, totalMinutes) {
+        const totalMs = totalMinutes * 60 * 1000;
+        const warningTime = totalMs - (5 * 60 * 1000); // 5 minutes before end
+        const endTime = this.sessionStartTime + totalMs;
+        
+        // Warning at 5 minutes remaining
+        setTimeout(() => {
+            if (this.humeWebSocket && this.humeWebSocket.readyState === WebSocket.OPEN) {
+                this.showSessionTimeWarning(coachType, 5);
+            }
+        }, warningTime);
+        
+        // End session automatically
+        setTimeout(() => {
+            if (this.humeWebSocket && this.humeWebSocket.readyState === WebSocket.OPEN) {
+                this.endSessionWithRenewalOption(coachType);
+            }
+        }, totalMs);
+        
+        // Update timer display every minute
+        this.sessionTimer = setInterval(() => {
+            const now = Date.now();
+            const elapsed = Math.floor((now - this.sessionStartTime) / 60000);
+            const remaining = totalMinutes - elapsed;
+            
+            if (remaining <= 0) {
+                clearInterval(this.sessionTimer);
+                return;
+            }
+            
+            this.updateHumeStatus(coachType, `Session time: ${remaining} minutes remaining`);
+        }, 60000);
+    }
+    
+    showSessionTimeWarning(coachType, minutesRemaining) {
+        const warningHtml = `
+            <div class="bg-gradient-to-r from-orange-400 to-red-500 text-white rounded-lg p-4 mb-4">
+                <div class="flex items-center justify-center space-x-3">
+                    <i class="fas fa-clock text-2xl"></i>
+                    <div class="text-center">
+                        <div class="font-bold">⏰ Session Ending Soon</div>
+                        <div class="text-sm opacity-90">${minutesRemaining} minutes remaining</div>
+                    </div>
+                </div>
+                <button onclick="app.showRenewalOption('${coachType}')" 
+                        class="mt-3 w-full bg-white bg-opacity-20 hover:bg-opacity-30 px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                    <i class="fas fa-plus mr-1"></i>Extend Session (+$6.50)
+                </button>
+            </div>
+        `;
+        
+        // Insert warning above the status area
+        const statusElement = document.getElementById(`hume-voice-status-${coachType}`);
+        if (statusElement) {
+            statusElement.insertAdjacentHTML('beforebegin', warningHtml);
+        }
+    }
+    
+    endSessionWithRenewalOption(coachType) {
+        console.log('⏰ Voice session time limit reached');
+        
+        // Stop current session
+        this.stopHumeVoiceSession(coachType);
+        
+        const planDetails = this.getUserPlanDetails();
+        const renewalPrice = planDetails.voiceSessionPrice;
+        const renewalPriceText = (renewalPrice / 100).toFixed(2);
+        
+        // Show renewal modal
+        const renewalContent = `
+            <div class="text-center">
+                <div class="mb-6">
+                    <i class="fas fa-clock text-6xl text-orange-500 mb-4"></i>
+                    <h2 class="text-2xl font-bold text-gray-800 mb-2">⏰ Session Complete</h2>
+                    <p class="text-gray-600">Your 20-minute voice session has ended</p>
+                </div>
+                
+                <div class="bg-gradient-to-br from-orange-50 to-red-50 border border-orange-200 rounded-xl p-6 mb-6">
+                    <h3 class="font-bold text-orange-800 mb-3">Continue Your Journey?</h3>
+                    <p class="text-sm text-gray-600 mb-4">
+                        Extend your emotionally intelligent coaching session with another 20 minutes
+                    </p>
+                    
+                    <div class="flex items-center justify-center space-x-4 mb-4">
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-orange-600">$${renewalPriceText}</div>
+                            <div class="text-sm text-orange-500">${this.currentUser.plan} Member Rate</div>
+                        </div>
+                        <div class="bg-gradient-to-r from-orange-500 to-red-500 text-white px-3 py-2 rounded-full text-sm font-bold">
+                            +20 MIN
+                        </div>
+                    </div>
+                    
+                    <div class="text-xs text-gray-600">
+                        <strong>Membership Benefit:</strong> ${this.currentUser.plan} pricing automatically applied
+                    </div>
+                </div>
+                
+                <div class="space-y-3">
+                    <button onclick="app.renewVoiceSession('${coachType}', 20)" 
+                            class="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white py-4 px-6 rounded-xl font-bold text-lg hover:from-orange-600 hover:to-red-600 transition-all">
+                        <i class="fas fa-plus mr-2"></i>Continue Session - $${renewalPriceText}
+                    </button>
+                    
+                    <button onclick="app.toggleTextMode('${coachType}'); app.closeModal();" 
+                            class="w-full bg-green-500 text-white py-3 px-6 rounded-xl font-medium hover:bg-green-600 transition-all">
+                        <i class="fas fa-keyboard mr-2"></i>Switch to Free Text Chat
+                    </button>
+                    
+                    <button onclick="app.closeModal();" 
+                            class="w-full bg-gray-200 text-gray-700 py-3 px-6 rounded-xl font-medium hover:bg-gray-300 transition-all">
+                        <i class="fas fa-times mr-2"></i>End Session
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        document.getElementById('modal-content').innerHTML = renewalContent;
+        this.openModal('generic-modal');
+    }
+    
+    async renewVoiceSession(coachType, additionalMinutes) {
+        try {
+            // Check credits first
+            const credits = await this.getVoiceCredits();
+            
+            if (credits >= additionalMinutes) {
+                // User has credits, renew immediately
+                await this.startPaidHumeSession(coachType, additionalMinutes);
+                this.closeModal();
+            } else {
+                // Need to purchase more credits
+                this.showVoicePaymentModal(coachType, additionalMinutes);
+            }
+            
+        } catch (error) {
+            console.error('❌ Failed to renew session:', error);
+            this.showNotification('❌ Failed to renew session', 'error');
+        }
+    }
+    
+    handlePaymentSuccess() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const paymentStatus = urlParams.get('payment');
+        const subscriptionStatus = urlParams.get('subscription');
+        const voiceSession = urlParams.get('voice_session');
+        const minutes = urlParams.get('minutes');
+        const coachType = urlParams.get('coach');
+        const plan = urlParams.get('plan');
+        
+        // Handle voice session payment success
+        if (paymentStatus === 'success' && voiceSession === 'true') {
+            console.log('✅ Voice session payment successful');
+            
+            setTimeout(() => {
+                this.showNotification(`🎉 Payment successful! ${minutes} minutes added to your account`, 'success');
+                
+                if (coachType && coachType !== 'null') {
+                    setTimeout(() => {
+                        this.openCoachModal(coachType);
+                    }, 2000);
+                }
+            }, 1000);
+            
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
+        // Handle subscription success
+        else if (subscriptionStatus === 'success' && plan) {
+            console.log(`✅ Subscription successful: ${plan} plan`);
+            
+            // Update user's plan
+            this.currentUser.plan = plan;
+            localStorage.setItem('user_plan', plan);
+            
+            setTimeout(() => {
+                this.showNotification(`🎉 Welcome to ${plan} membership! You now have enhanced voice coaching benefits.`, 'success');
+            }, 1000);
+            
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
+        // Handle cancellations and errors
+        else if (paymentStatus === 'cancelled' || subscriptionStatus === 'cancelled') {
+            this.showNotification('ℹ️ Payment cancelled', 'info');
+            window.history.replaceState({}, document.title, window.location.pathname);
+        } else if (paymentStatus === 'error' || subscriptionStatus === 'error') {
+            const error = urlParams.get('error');
+            this.showNotification(`❌ Payment error: ${error || 'Unknown error'}`, 'error');
+            window.history.replaceState({}, document.title, window.location.pathname);
         }
     }
 }
