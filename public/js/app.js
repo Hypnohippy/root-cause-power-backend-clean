@@ -2078,7 +2078,7 @@ class RootCausePowerApp {
         });
         
         // Remove active class from nav items
-        document.querySelectorAll('.nav-item').forEach(item => {
+        document.querySelectorAll('.nav-item, .nav-btn, .nav-dropdown-item').forEach(item => {
             item.classList.remove('active');
         });
         
@@ -2109,6 +2109,22 @@ class RootCausePowerApp {
             
             // Update URL
             history.pushState(null, null, `?section=${sectionId}`);
+        }
+    }
+
+    // Hamburger Menu Toggle
+    toggleHamburgerMenu() {
+        const dropdown = document.getElementById('hamburger-dropdown');
+        const btn = document.getElementById('hamburger-menu-btn');
+        
+        if (dropdown.classList.contains('hidden')) {
+            dropdown.classList.remove('hidden');
+            btn.innerHTML = '<i class="fas fa-times text-xl"></i>';
+            console.log('📱 Hamburger menu opened');
+        } else {
+            dropdown.classList.add('hidden');
+            btn.innerHTML = '<i class="fas fa-bars text-xl"></i>';
+            console.log('📱 Hamburger menu closed');
         }
     }
 

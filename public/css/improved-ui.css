@@ -173,21 +173,34 @@ header, .header, .nav-container {
     gap: 0.5rem !important;
 }
 
-/* AGGRESSIVE OVERRIDE: Force all status indicators to display horizontally */
+/* NEW NAVIGATION STYLES - Clean Professional Banner */
+#main-nav {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+}
+
+.nav-btn.active,
+.nav-dropdown-item.active {
+    background: #10b981 !important;
+    color: white !important;
+}
+
+.nav-btn:hover {
+    background: #f3f4f6 !important;
+    color: #10b981 !important;
+}
+
+/* Ensure content starts below new navigation */
+body {
+    padding-top: 120px !important; /* Adjust for new nav height */
+}
+
+/* Hide old status indicators since they're now in nav */
 body #api-status,
 body #stop-audio-btn, 
 body #credit-counter,
 body #voice-credit-counter {
-    position: fixed !important;
-    top: 1rem !important;
-    z-index: 9999 !important;
-    display: inline-block !important;
+    display: none !important;
 }
-
-body #api-status { right: 20rem !important; }
-body #stop-audio-btn { right: 15rem !important; }  
-body #credit-counter { right: 10rem !important; }
-body #voice-credit-counter { right: 5rem !important; }
 
 /* Alternative approach: Create wrapper and reposition */
 body::after {

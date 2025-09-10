@@ -33,7 +33,7 @@
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="./css/styles.css">
-    <link rel="stylesheet" href="./css/improved-ui.css?v=1.1.0">
+    <link rel="stylesheet" href="./css/improved-ui.css?v=1.2.0">
     
     <!-- Voice UI Animations -->
     <style>
@@ -221,37 +221,112 @@
         <i class="fas fa-microphone mr-1"></i><span id="voice-credit-count">0</span> Voice
     </div>
 
-    <!-- Navigation -->
-    <nav class="bg-gray-800 text-white p-4 fixed w-full top-0 z-30" id="main-nav">
-        <div class="container mx-auto flex justify-between items-center">
-            <div class="text-2xl font-bold text-green-400 flex items-center">
-                <i class="fas fa-heart mr-2"></i>
-                Root Cause Power
+    <!-- Clean Professional Navigation -->
+    <nav class="bg-white shadow-lg border-b-2 border-gray-200 fixed w-full top-0 z-30" id="main-nav">
+        <div class="container mx-auto px-4">
+            <!-- Top Status Bar (Moved from fixed positions) -->
+            <div class="flex justify-between items-center py-2 text-sm border-b border-gray-100">
+                <div class="flex items-center space-x-4 text-gray-600">
+                    <div class="flex items-center">
+                        <div class="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+                        <span>AI Connected</span>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <button onclick="app.stopAllAudio()" class="bg-red-500 text-white px-3 py-1 rounded-full text-xs hover:bg-red-600 transition-colors">
+                        <i class="fas fa-volume-mute mr-1"></i>Stop Audio
+                    </button>
+                    <div class="bg-green-500 text-white px-3 py-1 rounded-full text-xs font-bold">
+                        5/5 Daily
+                    </div>
+                    <div class="bg-purple-500 text-white px-3 py-1 rounded-full text-xs font-bold cursor-pointer hover:bg-purple-600 transition-colors" onclick="app.showVoiceCreditStore()">
+                        <i class="fas fa-microphone mr-1"></i>0 Voice
+                    </div>
+                </div>
             </div>
-            
-            <!-- Mobile Menu Button -->
-            <button id="mobile-menu-btn" class="md:hidden text-white focus:outline-none">
-                <i class="fas fa-bars text-xl"></i>
-            </button>
-            
-            <!-- Desktop Navigation -->
-            <div class="hidden md:flex space-x-6" id="desktop-nav">
-                <div class="nav-item px-3 py-2 rounded cursor-pointer hover:bg-gray-700 transition-colors" data-section="home">Home</div>
-                <div class="nav-item px-3 py-2 rounded cursor-pointer hover:bg-gray-700 transition-colors" data-section="assessment">Life Analysis</div>
-                <div class="nav-item px-3 py-2 rounded cursor-pointer hover:bg-gray-700 transition-colors" data-section="coaches">AI Coaches</div>
-                <div class="nav-item px-3 py-2 rounded cursor-pointer hover:bg-gray-700 transition-colors" data-section="nutrition">Nutrition</div>
-                <div class="nav-item px-3 py-2 rounded cursor-pointer hover:bg-gray-700 transition-colors" data-section="media-library">Media Library</div>
-                <div class="nav-item px-3 py-2 rounded cursor-pointer hover:bg-gray-700 transition-colors" data-section="dashboard">Dashboard</div>
-                <div class="nav-item px-3 py-2 rounded cursor-pointer hover:bg-gray-700 transition-colors" data-section="community">Community</div>
-                <div class="nav-item px-3 py-2 rounded cursor-pointer hover:bg-gray-700 transition-colors" data-section="ptsd-corner">PTSD Corner</div>
-                <div class="nav-item px-3 py-2 rounded cursor-pointer hover:bg-gray-700 transition-colors" data-section="pricing">Pricing</div>
-                <div class="nav-item px-3 py-2 rounded cursor-pointer hover:bg-gray-700 transition-colors" data-section="help">Help</div>
+
+            <!-- Main Navigation Banner -->
+            <div class="flex justify-between items-center py-3">
+                <!-- Logo -->
+                <div class="text-xl font-bold text-green-600 flex items-center">
+                    <i class="fas fa-heart mr-2"></i>
+                    Root Cause Power
+                </div>
+                
+                <!-- Main 5 Navigation Buttons -->
+                <div class="hidden md:flex items-center space-x-6">
+                    <button class="nav-btn px-4 py-2 rounded-lg font-medium text-gray-700 hover:bg-gray-100 hover:text-green-600 transition-all" data-section="assessment">
+                        <i class="fas fa-chart-line mr-2"></i>Analysis
+                    </button>
+                    <button class="nav-btn px-4 py-2 rounded-lg font-medium text-gray-700 hover:bg-gray-100 hover:text-green-600 transition-all" data-section="dashboard">
+                        <i class="fas fa-tachometer-alt mr-2"></i>Dashboard
+                    </button>
+                    <button class="nav-btn px-4 py-2 rounded-lg font-medium text-gray-700 hover:bg-gray-100 hover:text-green-600 transition-all" data-section="ptsd-corner">
+                        <i class="fas fa-shield-heart mr-2"></i>PTSD Corner
+                    </button>
+                    <button class="nav-btn px-4 py-2 rounded-lg font-medium text-gray-700 hover:bg-gray-100 hover:text-green-600 transition-all" data-section="coaches">
+                        <i class="fas fa-robot mr-2"></i>Coaches
+                    </button>
+                    <button onclick="app.triggerCrisisSupport()" class="bg-red-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-red-600 transition-all shadow-md">
+                        <i class="fas fa-phone mr-2"></i>🚨 Crisis Help
+                    </button>
+                </div>
+
+                <!-- Hamburger Menu & Mobile Crisis -->
+                <div class="flex items-center space-x-3">
+                    <!-- Mobile Crisis Button -->
+                    <button onclick="app.triggerCrisisSupport()" class="md:hidden bg-red-500 text-white px-3 py-2 rounded-lg text-sm font-semibold hover:bg-red-600 transition-all">
+                        🚨
+                    </button>
+                    
+                    <!-- Hamburger Menu -->
+                    <button id="hamburger-menu-btn" class="text-gray-700 hover:text-green-600 p-2 rounded-lg hover:bg-gray-100 transition-all" onclick="app.toggleHamburgerMenu()">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                </div>
             </div>
-            
-            <!-- Crisis Support Button - Always Visible -->
-            <button onclick="app.triggerCrisisSupport()" class="bg-red-500 px-3 py-2 rounded text-sm hover:bg-red-600 transition-colors mr-2 font-semibold" title="24/7 Crisis Support Available">
-                🚨 Crisis Help
-            </button>
+        </div>
+
+        <!-- Dropdown Menu (Hidden by default) -->
+        <div id="hamburger-dropdown" class="hidden bg-white border-t border-gray-200 shadow-lg">
+            <div class="container mx-auto px-4 py-4">
+                <div class="grid md:grid-cols-3 gap-4">
+                    <div>
+                        <h3 class="font-semibold text-gray-800 mb-2">Health & Wellness</h3>
+                        <div class="space-y-2">
+                            <button class="nav-dropdown-item w-full text-left px-3 py-2 text-gray-600 hover:bg-gray-100 hover:text-green-600 rounded transition-all" data-section="nutrition">
+                                <i class="fas fa-apple-alt mr-2"></i>Nutrition
+                            </button>
+                            <button class="nav-dropdown-item w-full text-left px-3 py-2 text-gray-600 hover:bg-gray-100 hover:text-green-600 rounded transition-all" data-section="media-library">
+                                <i class="fas fa-play-circle mr-2"></i>Media Library
+                            </button>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-gray-800 mb-2">Community</h3>
+                        <div class="space-y-2">
+                            <button class="nav-dropdown-item w-full text-left px-3 py-2 text-gray-600 hover:bg-gray-100 hover:text-green-600 rounded transition-all" data-section="community">
+                                <i class="fas fa-users mr-2"></i>Community
+                            </button>
+                            <button class="nav-dropdown-item w-full text-left px-3 py-2 text-gray-600 hover:bg-gray-100 hover:text-green-600 rounded transition-all" data-section="pricing">
+                                <i class="fas fa-credit-card mr-2"></i>Pricing
+                            </button>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-gray-800 mb-2">Account</h3>
+                        <div class="space-y-2">
+                            <button class="nav-dropdown-item w-full text-left px-3 py-2 text-gray-600 hover:bg-gray-100 hover:text-green-600 rounded transition-all" onclick="app.showVoiceCreditStore()">
+                                <i class="fas fa-microphone mr-2"></i>Voice Credits
+                            </button>
+                            <button class="nav-dropdown-item w-full text-left px-3 py-2 text-gray-600 hover:bg-gray-100 hover:text-green-600 rounded transition-all" data-section="help">
+                                <i class="fas fa-question-circle mr-2"></i>Help
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
             
             <button id="login-btn" class="bg-green-500 px-4 py-2 rounded hover:bg-green-600 transition-colors">Login</button>
         </div>
@@ -1885,8 +1960,8 @@
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="./js/app.js?v=1.3.0"></script>
-    <script src="./js/ui-improvements.js?v=1.1.0"></script>
+    <script src="./js/app.js?v=1.4.0"></script>
+    <script src="./js/ui-improvements.js?v=1.2.0"></script>
     
     <!-- PWA Registration -->
     <script>
