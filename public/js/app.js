@@ -2140,6 +2140,89 @@ class RootCausePowerApp {
         }
     }
 
+    // Mobile-Friendly Admin Access Functions
+    logoTapHandler() {
+        if (!this.logoTapCount) this.logoTapCount = 0;
+        this.logoTapCount++;
+        
+        console.log(`🔍 Logo tap ${this.logoTapCount}/3`);
+        
+        if (this.logoTapCount === 3) {
+            this.enableAdminAccess(true);
+            this.showNotification('🔑 Admin Access Granted! All features unlocked.', 'success');
+            console.log('👑 Triple-tap admin access activated');
+            this.logoTapCount = 0;
+        }
+        
+        // Reset counter after 2 seconds
+        setTimeout(() => {
+            this.logoTapCount = 0;
+        }, 2000);
+    }
+
+    showAdminLogin() {
+        const modal = document.createElement('div');
+        modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
+        modal.innerHTML = `
+            <div class="bg-white rounded-lg p-6 max-w-sm w-full shadow-2xl">
+                <div class="text-center mb-6">
+                    <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-key text-purple-500 text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">Admin Access</h3>
+                    <p class="text-gray-600">Enter admin code or use alternative methods</p>
+                </div>
+                
+                <div class="space-y-4 mb-6">
+                    <input type="password" id="admin-code" placeholder="Enter admin code..." 
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+                    
+                    <div class="text-sm text-gray-600 bg-gray-50 p-3 rounded-lg">
+                        <strong>Alternative Methods:</strong><br>
+                        • Triple-tap the ❤️ Root Cause Power logo<br>
+                        • Add <code>?admin_access=root_cause_power_admin_2024</code> to URL<br>
+                        • Console: <code>founderMode()</code>
+                    </div>
+                </div>
+                
+                <div class="flex space-x-4">
+                    <button onclick="this.parentElement.parentElement.parentElement.remove()" 
+                            class="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+                        Cancel
+                    </button>
+                    <button onclick="app.tryAdminCode()" 
+                            class="flex-1 px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600">
+                        Access
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        document.getElementById('admin-code').focus();
+        
+        // Auto-close hamburger menu
+        const dropdown = document.getElementById('hamburger-dropdown');
+        if (dropdown && !dropdown.classList.contains('hidden')) {
+            this.toggleHamburgerMenu();
+        }
+    }
+
+    tryAdminCode() {
+        const code = document.getElementById('admin-code').value;
+        const validCodes = ['admin2024', 'rootcause', 'founder', 'davidprince'];
+        
+        if (validCodes.includes(code.toLowerCase())) {
+            this.enableAdminAccess(true);
+            this.showNotification('🔑 Admin Access Granted! All features unlocked.', 'success');
+            document.querySelector('.fixed.inset-0').remove();
+            console.log('🔐 Admin code accepted');
+        } else {
+            this.showNotification('❌ Invalid admin code. Try alternative methods.', 'error');
+            console.log('❌ Invalid admin code attempted');
+        }
+    }
+
     // Initialize section-specific features
     initializeSection(sectionId) {
         switch(sectionId) {
