@@ -2210,8 +2210,8 @@ class RootCausePowerApp {
                     <div class="text-sm text-gray-600 bg-gray-50 p-3 rounded-lg">
                         <strong>Alternative Methods:</strong><br>
                         • Triple-tap the ❤️ Root Cause Power logo<br>
-                        • Add <code>?admin_access=root_cause_power_admin_2024</code> to URL<br>
-                        • Console: <code>founderMode()</code>
+                        • Use special URL parameter<br>
+                        • Console command available
                     </div>
                 </div>
                 
@@ -7962,7 +7962,7 @@ ${userContext}`;
                 <!-- Close button in header -->
                 <div class="flex justify-between items-start mb-4">
                     <div></div>
-                    <button onclick="app.closeModal();" class="text-gray-400 hover:text-gray-600 text-2xl font-bold leading-none">
+                    <button onclick="app.closeModal('generic-modal');" class="text-gray-400 hover:text-gray-600 text-2xl font-bold leading-none">
                         <i class="fas fa-times"></i>
                     </button>
                 </div>
@@ -8053,7 +8053,7 @@ ${userContext}`;
                 </div>
                 
                 <div class="text-center space-y-3">
-                    <button onclick="app.toggleTextMode('${coachType}'); app.closeModal();" 
+                    <button onclick="app.toggleTextMode('${coachType}'); app.closeModal('generic-modal');" 
                             class="w-full bg-green-500 text-white py-3 px-6 rounded-xl font-medium hover:bg-green-600 transition-all">
                         <i class="fas fa-keyboard mr-2"></i>Continue with Free Text Chat
                     </button>
@@ -8148,7 +8148,7 @@ ${userContext}`;
                 </div>
                 
                 <div class="text-center">
-                    <button onclick="app.closeModal(); app.checkVoiceCreditsAndStart('${coachType}')" 
+                    <button onclick="app.closeModal('generic-modal'); app.checkVoiceCreditsAndStart('${coachType}')" 
                             class="text-gray-600 hover:text-gray-800 text-sm underline">
                         Continue with Free plan ($6.50/session)
                     </button>
@@ -8335,7 +8335,7 @@ ${userContext}`;
                 <!-- Close button in header -->
                 <div class="flex justify-between items-start mb-4">
                     <div></div>
-                    <button onclick="app.closeModal();" class="text-gray-400 hover:text-gray-600 text-2xl font-bold leading-none">
+                    <button onclick="app.closeModal('generic-modal');" class="text-gray-400 hover:text-gray-600 text-2xl font-bold leading-none">
                         <i class="fas fa-times"></i>
                     </button>
                 </div>
@@ -8384,12 +8384,12 @@ ${userContext}`;
                         <i class="fas fa-credit-card mr-2"></i>Pay $${memberPriceText} & Start Session
                     </button>
                     
-                    <button onclick="app.toggleTextMode('${coachType}'); app.closeModal();" 
+                    <button onclick="app.toggleTextMode('${coachType}'); app.closeModal('generic-modal');" 
                             class="w-full bg-green-500 text-white py-3 px-6 rounded-xl font-medium hover:bg-green-600 transition-all">
                         <i class="fas fa-keyboard mr-2"></i>Use Free Text Chat Instead
                     </button>
                     
-                    <button onclick="app.closeModal();" 
+                    <button onclick="app.closeModal('generic-modal');" 
                             class="w-full bg-gray-200 text-gray-700 py-2 px-6 rounded-xl font-medium hover:bg-gray-300 transition-all">
                         <i class="fas fa-times mr-2"></i>Cancel
                     </button>
@@ -8606,7 +8606,7 @@ ${userContext}`;
                 <!-- Close button in header -->
                 <div class="flex justify-between items-start mb-4">
                     <div></div>
-                    <button onclick="app.closeModal();" class="text-gray-400 hover:text-gray-600 text-2xl font-bold leading-none">
+                    <button onclick="app.closeModal('generic-modal');" class="text-gray-400 hover:text-gray-600 text-2xl font-bold leading-none">
                         <i class="fas fa-times"></i>
                     </button>
                 </div>
@@ -8644,12 +8644,12 @@ ${userContext}`;
                         <i class="fas fa-plus mr-2"></i>Continue Session - $${renewalPriceText}
                     </button>
                     
-                    <button onclick="app.toggleTextMode('${coachType}'); app.closeModal();" 
+                    <button onclick="app.toggleTextMode('${coachType}'); app.closeModal('generic-modal');" 
                             class="w-full bg-green-500 text-white py-3 px-6 rounded-xl font-medium hover:bg-green-600 transition-all">
                         <i class="fas fa-keyboard mr-2"></i>Switch to Free Text Chat
                     </button>
                     
-                    <button onclick="app.closeModal();" 
+                    <button onclick="app.closeModal('generic-modal');" 
                             class="w-full bg-gray-200 text-gray-700 py-3 px-6 rounded-xl font-medium hover:bg-gray-300 transition-all">
                         <i class="fas fa-times mr-2"></i>End Session
                     </button>
@@ -8687,7 +8687,7 @@ ${userContext}`;
                 <!-- Close button in header -->
                 <div class="flex justify-between items-start mb-4">
                     <div></div>
-                    <button onclick="app.closeModal();" class="text-gray-400 hover:text-gray-600 text-2xl font-bold leading-none">
+                    <button onclick="app.closeModal('generic-modal');" class="text-gray-400 hover:text-gray-600 text-2xl font-bold leading-none">
                         <i class="fas fa-times"></i>
                     </button>
                 </div>
@@ -8732,7 +8732,7 @@ ${userContext}`;
                         <i class="fas fa-external-link-alt mr-2"></i>Open Stripe Dashboard
                     </button>
                     
-                    <button onclick="app.closeModal();" 
+                    <button onclick="app.closeModal('generic-modal');" 
                             class="w-full bg-gray-200 text-gray-700 py-3 px-6 rounded-xl font-medium hover:bg-gray-300 transition-all">
                         <i class="fas fa-times mr-2"></i>Close
                     </button>
