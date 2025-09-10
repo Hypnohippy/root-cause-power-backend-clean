@@ -3121,21 +3121,18 @@ Make it hopeful, specific, and actionable. Focus on their strengths and provide 
                 console.log('💾 Assessment data saved to dashboard');
             },
 
-            // Fallback prescription if AI fails
+            // DISABLED - Use personalized prescription instead
             showFallbackPrescription: function() {
-                const fallback = `Thank you for completing your assessment. Based on your responses, I can see you're on a journey of healing and growth.
-
-**Your Next Steps:**
-1. **Daily Self-Care**: Focus on small, consistent actions that nurture your wellbeing
-2. **Professional Support**: Consider connecting with a mental health professional who understands trauma
-3. **Community**: You're not alone - support is available when you need it
-
-**EMDR Techniques**: Use the EMDR tools in this platform for self-soothing and processing
-**Crisis Support**: Available 24/7 - Samaritans: 116 123 (UK), Crisis Lifeline: 988 (US)
-
-Remember: Healing is possible, and you deserve support on this journey.`;
-
-                this.showPrescriptionResults(fallback);
+                console.log('🚫 Fallback prescription disabled - redirecting to personalized system');
+                // Force use of personalized prescription from app.js
+                if (window.app && window.app.completeAssessment) {
+                    window.app.completeAssessment();
+                } else {
+                    console.error('❌ App personalization system not available');
+                    // Only show fallback if absolutely no other option
+                    const fallback = `⚠️ Assessment system temporarily unavailable. Please refresh and try again, or contact support.`;
+                    this.showPrescriptionResults(fallback);
+                }
             },
 
             // Action handlers

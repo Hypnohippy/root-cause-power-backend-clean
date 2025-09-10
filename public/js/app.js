@@ -952,12 +952,12 @@ class RootCausePowerApp {
         const modal = document.createElement('div');
         modal.className = 'fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4';
         modal.innerHTML = `
-            <div class="bg-white rounded-xl shadow-2xl max-w-4xl w-full p-6 max-h-[90vh] overflow-y-auto">
-                <!-- Close button in header -->
-                <div class="flex justify-between items-start mb-4">
-                    <div></div>
-                    <button onclick="this.closest('.fixed').remove()" class="text-gray-400 hover:text-gray-600 text-2xl font-bold leading-none">
-                        <i class="fas fa-times"></i>
+            <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full mx-4 p-4 max-h-[80vh] overflow-y-auto relative">
+                <!-- LARGE PROMINENT CLOSE BUTTON -->
+                <div class="flex justify-between items-center mb-4 bg-red-50 p-3 rounded-lg border-2 border-red-200">
+                    <div class="text-red-700 font-bold">Voice Credits Store</div>
+                    <button onclick="this.closest('.fixed').remove()" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 font-bold text-lg">
+                        <i class="fas fa-times mr-1"></i> CLOSE
                     </button>
                 </div>
                 
