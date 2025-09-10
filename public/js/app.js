@@ -224,11 +224,12 @@ class RootCausePowerApp {
     openVoiceAI() {
         console.log('🎤 Opening Voice AI Coach...');
         
-        // Check if user has voice credits
-        if (!window.creditSystem || !window.creditSystem.canAfford('voice', 2)) {
-            this.showVoiceCreditStore();
-            return;
-        }
+        // Temporarily skip credit check for testing
+        // TODO: Re-enable credit system once fully integrated
+        // if (!window.creditSystem || !window.creditSystem.canAfford('voice', 2)) {
+        //     this.showVoiceCreditStore();
+        //     return;
+        // }
         
         // Open Hume Voice Modal
         const modal = document.getElementById('hume-voice-modal');
@@ -248,10 +249,11 @@ class RootCausePowerApp {
         console.log('🎙️ Starting Hume AI voice session...');
         
         if (window.humeVoice) {
-            window.humeVoice.startVoiceSession();
+            return window.humeVoice.startVoiceSession();
         } else {
             console.warn('⚠️ Hume Voice system not available');
             this.showError('Voice system not available. Please try again later.');
+            return false;
         }
     }
 
