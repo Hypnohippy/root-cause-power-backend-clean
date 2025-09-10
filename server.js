@@ -802,6 +802,132 @@ app.get('/api/voice/credit-balance/:userId', (req, res) => {
     });
 });
 
+// ===========================================
+// 💳 STRIPE CHECKOUT SESSION ENDPOINTS
+// ===========================================
+
+app.post('/api/create-checkout-session', async (req, res) => {
+    try {
+        const { type, credits, planType, amount, currency = 'gbp' } = req.body;
+        
+        if (!stripe) {
+            return res.status(400).json({
+                error: 'Stripe not configured. Please add STRIPE_SECRET_KEY to environment variables.',
+                needsConfiguration: true
+            });
+        }
+
+        let sessionConfig = {
+            payment_method_types: ['card'],
+            mode: 'payment',
+            success_url: `${req.headers.origin || 'http://localhost:3000'}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
+            cancel_url: `${req.headers.origin || 'http://localhost:3000'}/?payment=cancelled`
+        };
+
+        if (type === 'voice_credits') {
+            sessionConfig.line_items = [{
+                price_data: {
+                    currency: currency,
+                    product_data: {
+                        name: `🎤 Voice AI Credits - ${credits} Sessions`,
+                        description: `${credits} voice coaching sessions with empathic AI`,
+                        images: ['https://images.unsplash.com/photo-1589254065878-42c9da997008?w=400']
+                    },
+                    unit_amount: amount
+                },
+                quantity: 1
+            }];
+            
+            sessionConfig.metadata = {
+                type: 'voice_credits',
+                credits: credits.toString(),
+                userId: req.body.userId || 'anonymous'
+            };
+
+        } else if (type === 'subscription') {
+            sessionConfig.mode = 'subscription';
+            sessionConfig.line_items = [{
+                price_data: {
+                    currency: currency,
+                    product_data: {
+                        name: `Root Cause Power - ${planType.charAt(0).toUpperCase() + planType.slice(1)} Plan`,
+                        description: `Monthly ${planType} membership with full platform access`
+                    },
+                    unit_amount: amount,
+                    recurring: {
+                        interval: 'month'
+                    }
+                },
+                quantity: 1
+            }];
+            
+            sessionConfig.metadata = {
+                type: 'subscription',
+                planType: planType,
+                userId: req.body.userId || 'anonymous'
+            };
+        }
+
+        const session = await stripe.checkout.sessions.create(sessionConfig);
+        
+        res.json({
+            sessionId: session.id,
+            url: session.url
+        });
+
+    } catch (error) {
+        console.error('❌ Checkout session creation failed:', error);
+        res.status(500).json({
+            error: error.message
+        });
+    }
+});
+
+// Handle successful payments
+app.get('/payment-success', async (req, res) => {
+    try {
+        const { session_id } = req.query;
+        
+        if (!session_id) {
+            throw new Error('No session ID provided');
+        }
+
+        if (stripe) {
+            const session = await stripe.checkout.sessions.retrieve(session_id);
+            
+            if (session.payment_status === 'paid') {
+                const metadata = session.metadata;
+                
+                if (metadata.type === 'voice_credits') {
+                    // Add voice credits to user account
+                    const userId = metadata.userId || 'anonymous';
+                    const credits = parseInt(metadata.credits) || 0;
+                    const currentCredits = userVoiceCredits.get(userId) || 0;
+                    userVoiceCredits.set(userId, currentCredits + credits);
+                    
+                    console.log(`✅ Voice credits purchased: ${credits} added to ${userId}`);
+                    
+                    res.redirect(`/?payment=success&type=voice_credits&credits=${credits}`);
+                    
+                } else if (metadata.type === 'subscription') {
+                    // Update user subscription
+                    console.log(`✅ Subscription activated: ${metadata.planType} for ${metadata.userId}`);
+                    
+                    res.redirect(`/?payment=success&type=subscription&plan=${metadata.planType}`);
+                }
+            } else {
+                res.redirect('/?payment=failed&reason=payment_not_completed');
+            }
+        } else {
+            res.redirect('/?payment=failed&reason=stripe_not_configured');
+        }
+
+    } catch (error) {
+        console.error('❌ Payment success handler error:', error);
+        res.redirect(`/?payment=failed&error=${encodeURIComponent(error.message)}`);
+    }
+});
+
 // Session booking endpoints
 app.post('/api/sessions/book', (req, res) => {
     const { sessionType, sessionDate, sessionTime, goals, price, userId, userEmail } = req.body;
