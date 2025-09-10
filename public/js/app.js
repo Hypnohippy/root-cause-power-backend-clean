@@ -1137,7 +1137,7 @@ class RootCausePowerApp {
      * Initialize the Revolutionary Hume EVI Interface
      */
     async initializeEmpathicVoiceInterface() {
-        console.log('🚀 Initializing Voice Coach Interface...');
+        console.log('🚀 Restoring Original Hume AI Empathic Voice System...');
         
         const container = document.getElementById('empathic-voice-container');
         if (!container) {
@@ -1145,263 +1145,139 @@ class RootCausePowerApp {
             return;
         }
 
-        // Create working voice interface immediately
+        // Show loading state
         container.innerHTML = `
-            <div class="h-full flex flex-col">
-                <!-- Voice Status -->
-                <div class="bg-gradient-to-r from-purple-100 to-blue-100 p-4 text-center border-b">
-                    <div class="text-lg font-bold text-purple-800 mb-2">🎤 Voice Coach Ready</div>
-                    <div id="voice-status" class="text-sm text-purple-600">Click the microphone to start talking</div>
-                </div>
-
-                <!-- Voice Controls -->
-                <div class="flex-1 flex items-center justify-center bg-gradient-to-br from-purple-50 to-blue-50">
-                    <div class="text-center">
-                        <button id="voice-start-btn" class="w-24 h-24 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full text-white text-3xl hover:from-purple-600 hover:to-blue-600 transition-all shadow-lg mb-4">
-                            <i class="fas fa-microphone"></i>
-                        </button>
-                        <div class="text-lg font-medium text-gray-700 mb-2">Voice Coaching</div>
-                        <div class="text-sm text-gray-600 max-w-xs">Tap the microphone and speak naturally. Your AI coach will respond with voice.</div>
-                    </div>
-                </div>
-
-                <!-- Conversation Area -->
-                <div class="h-48 bg-gray-50 border-t overflow-y-auto p-4">
-                    <div id="voice-conversation" class="space-y-3">
-                        <div class="bg-blue-100 p-3 rounded-lg">
-                            <div class="text-sm font-medium text-blue-800">🤖 Coach Sarah</div>
-                            <div class="text-blue-700">Hello! I'm your voice coach. Click the microphone and tell me how you're feeling today. I'm here to support your healing journey.</div>
+            <div class="h-full flex items-center justify-center bg-gradient-to-br from-purple-50 to-blue-50">
+                <div class="text-center">
+                    <div class="animate-pulse mb-4">
+                        <div class="w-20 h-20 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full mx-auto flex items-center justify-center">
+                            <i class="fas fa-brain text-white text-2xl"></i>
                         </div>
                     </div>
+                    <div class="text-lg font-bold text-purple-800 mb-2">Connecting to Hume AI...</div>
+                    <div class="text-sm text-purple-600">Loading empathic voice intelligence system</div>
                 </div>
             </div>
         `;
 
-        // Add voice functionality
-        this.setupVoiceControls();
-        
-        console.log('✅ Voice Coach Interface Ready!');
-        this.showNotification('🎤 Voice Coach is ready! Click the microphone to start.', 'success');
-    }
-    
-    setupVoiceControls() {
-        const startBtn = document.getElementById('voice-start-btn');
-        const statusDiv = document.getElementById('voice-status');
-        const conversationDiv = document.getElementById('voice-conversation');
-        
-        if (!startBtn || !statusDiv || !conversationDiv) {
-            console.error('❌ Voice controls not found');
-            return;
-        }
-
-        let isListening = false;
-        let recognition = null;
-
-        // Check for speech recognition support
-        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            recognition = new SpeechRecognition();
+        try {
+            // Load the actual Hume EVI components
+            console.log('📦 Loading Hume AI components...');
             
-            recognition.continuous = false;
-            recognition.interimResults = false;
-            recognition.lang = 'en-US';
-
-            recognition.onstart = () => {
-                console.log('🎤 Voice recognition started');
-                isListening = true;
-                startBtn.innerHTML = '<i class="fas fa-stop"></i>';
-                startBtn.className = startBtn.className.replace('from-purple-500 to-blue-500', 'from-red-500 to-red-600');
-                statusDiv.textContent = 'Listening... speak now';
+            // Load HumeEviClient
+            await this.loadScript('/src/services/hume/HumeEviClient.js');
+            console.log('✅ HumeEviClient loaded');
+            
+            // Load EmpathicVoiceInterface  
+            await this.loadScript('/src/components/voice-coach/EmpathicVoiceInterface.js');
+            console.log('✅ EmpathicVoiceInterface loaded');
+            
+            // Wait for components to be available
+            await this.waitForComponents();
+            
+            // Initialize with proper API key from HumeEviClient
+            const humeConfig = {
+                apiKey: 'zYPlodq03zJLORX8IvOiFtzy5Es4fsaRtjo29UzTN8ckVibB',
+                configId: '06f12c85-3975-4774-b078-8611e826dd85',
+                voiceId: 'empathic-therapist-voice',
+                crisisDetection: true,
+                theme: 'trauma-informed'
             };
-
-            recognition.onresult = (event) => {
-                const transcript = event.results[0][0].transcript;
-                console.log('🗣️ User said:', transcript);
-                
-                // Add user message to conversation
-                this.addVoiceMessage('user', transcript);
-                
-                // Generate AI response
-                this.generateVoiceResponse(transcript);
-            };
-
-            recognition.onend = () => {
-                console.log('🎤 Voice recognition ended');
-                isListening = false;
-                startBtn.innerHTML = '<i class="fas fa-microphone"></i>';
-                startBtn.className = startBtn.className.replace('from-red-500 to-red-600', 'from-purple-500 to-blue-500');
-                statusDiv.textContent = 'Click the microphone to start talking';
-            };
-
-            recognition.onerror = (event) => {
-                console.error('❌ Voice recognition error:', event.error);
-                statusDiv.textContent = 'Voice error - please try again';
-                isListening = false;
-                startBtn.innerHTML = '<i class="fas fa-microphone"></i>';
-                startBtn.className = startBtn.className.replace('from-red-500 to-red-600', 'from-purple-500 to-blue-500');
-            };
+            
+            console.log('🧠 Initializing Hume EVI with config:', humeConfig);
+            
+            // Create the empathic voice interface
+            this.voiceInterface = new EmpathicVoiceInterface('empathic-voice-container', humeConfig);
+            
+            await this.voiceInterface.init();
+            
+            console.log('✅ Hume AI Empathic Voice Coach is ready!');
+            this.showNotification('🧠 Hume AI Voice Coach Sarah is ready for natural conversation!', 'success');
+            
+        } catch (error) {
+            console.error('❌ Failed to load Hume AI system:', error);
+            this.showHumeFallback(error);
         }
+    }
 
-        startBtn.addEventListener('click', () => {
-            if (!recognition) {
-                statusDiv.textContent = 'Voice not supported in this browser';
-                // Show text fallback
-                this.showTextChatFallback();
+    async waitForComponents() {
+        let attempts = 0;
+        const maxAttempts = 10;
+        
+        while (attempts < maxAttempts) {
+            if (window.HumeEviClient && window.EmpathicVoiceInterface) {
+                console.log('✅ Hume components ready');
+                return;
+            }
+            console.log(`⏳ Waiting for Hume components... (${attempts + 1}/${maxAttempts})`);
+            await new Promise(resolve => setTimeout(resolve, 500));
+            attempts++;
+        }
+        
+        throw new Error('Hume components failed to load after ' + maxAttempts + ' attempts');
+    }
+
+    showHumeFallback(error) {
+        console.error('🔴 Hume AI unavailable, showing explanation:', error);
+        
+        const container = document.getElementById('empathic-voice-container');
+        if (!container) return;
+        
+        container.innerHTML = `
+            <div class="h-full flex items-center justify-center bg-red-50 p-6">
+                <div class="text-center max-w-md">
+                    <div class="text-6xl mb-4">⚠️</div>
+                    <h3 class="text-xl font-bold text-red-800 mb-4">Hume AI Voice System Unavailable</h3>
+                    <div class="text-red-700 space-y-3 text-sm">
+                        <p><strong>The natural conversational voice system is temporarily unavailable.</strong></p>
+                        <p>This may be due to:</p>
+                        <ul class="text-left list-disc ml-4 space-y-1">
+                            <li>Hume AI API connectivity issues</li>
+                            <li>Component loading problems</li>
+                            <li>Network restrictions</li>
+                        </ul>
+                        <p class="mt-4 font-medium">You can still use text-based coaching by clicking "AI Coaches" in the navigation menu.</p>
+                    </div>
+                    <button onclick="this.closest('.fixed').remove()" class="mt-6 bg-red-500 text-white px-6 py-3 rounded-lg hover:bg-red-600">
+                        Close & Use Text Coaching
+                    </button>
+                </div>
+            </div>
+        `;
+    }
+
+    /**
+     * Load JavaScript file dynamically
+     */
+    loadScript(src) {
+        return new Promise((resolve, reject) => {
+            // Check if already loaded
+            const existingScript = document.querySelector(`script[src="${src}"]`);
+            if (existingScript) {
+                resolve();
                 return;
             }
 
-            if (isListening) {
-                recognition.stop();
-            } else {
-                try {
-                    recognition.start();
-                } catch (error) {
-                    console.error('❌ Failed to start recognition:', error);
-                    statusDiv.textContent = 'Click to try again';
-                }
-            }
+            const script = document.createElement('script');
+            script.src = src;
+            script.type = 'text/javascript';
+            script.async = true;
+            
+            script.onload = () => {
+                console.log(`✅ Script loaded: ${src}`);
+                resolve();
+            };
+            
+            script.onerror = (error) => {
+                console.error(`❌ Failed to load script: ${src}`, error);
+                reject(new Error(`Failed to load script: ${src}`));
+            };
+            
+            document.head.appendChild(script);
         });
-
-        console.log('🎤 Voice controls setup complete');
     }
-
-    addVoiceMessage(sender, message) {
-        const conversationDiv = document.getElementById('voice-conversation');
-        if (!conversationDiv) return;
-
-        const messageDiv = document.createElement('div');
-        const isUser = sender === 'user';
-        
-        messageDiv.className = `${isUser ? 'bg-green-100' : 'bg-blue-100'} p-3 rounded-lg`;
-        messageDiv.innerHTML = `
-            <div class="text-sm font-medium ${isUser ? 'text-green-800' : 'text-blue-800'}">
-                ${isUser ? '👤 You' : '🤖 Coach Sarah'}
-            </div>
-            <div class="${isUser ? 'text-green-700' : 'text-blue-700'}">${message}</div>
-        `;
-        
-        conversationDiv.appendChild(messageDiv);
-        conversationDiv.scrollTop = conversationDiv.scrollHeight;
-    }
-
-    generateVoiceResponse(userMessage) {
-        // Simulate AI processing
-        const statusDiv = document.getElementById('voice-status');
-        if (statusDiv) {
-            statusDiv.textContent = 'Coach is thinking...';
-        }
-
-        // Simple response system - can be enhanced with actual AI
-        setTimeout(() => {
-            const responses = [
-                "I hear you, and I want you to know that what you're feeling is completely valid. Can you tell me more about what's been on your mind lately?",
-                "Thank you for sharing that with me. It sounds like you're going through something challenging. How are you taking care of yourself right now?",
-                "I appreciate your openness. What you're experiencing is part of the healing process. What would feel most supportive for you in this moment?",
-                "Your feelings matter, and I'm here to support you. Have you noticed any patterns in what triggers these feelings?",
-                "That's a lot to carry. You're being very brave by talking about this. What has helped you feel even a little bit better before?"
-            ];
-            
-            const response = responses[Math.floor(Math.random() * responses.length)];
-            this.addVoiceMessage('coach', response);
-            
-            // Use text-to-speech if available
-            if ('speechSynthesis' in window) {
-                const utterance = new SpeechSynthesisUtterance(response);
-                utterance.rate = 0.9;
-                utterance.pitch = 1.0;
-                utterance.volume = 0.8;
-                speechSynthesis.speak(utterance);
-            }
-            
-            if (statusDiv) {
-                statusDiv.textContent = 'Click the microphone to respond';
-            }
-        }, 1500);
-    }
-
-    showTextChatFallback() {
-        const container = document.getElementById('empathic-voice-container');
-        if (!container) return;
-
-        container.innerHTML = `
-            <div class="h-full flex flex-col">
-                <div class="bg-yellow-100 p-4 text-center border-b">
-                    <div class="text-lg font-bold text-yellow-800 mb-2">💬 Text Chat Mode</div>
-                    <div class="text-sm text-yellow-700">Voice not available - using text chat instead</div>
-                </div>
-                <div class="flex-1 bg-gray-50 overflow-y-auto p-4">
-                    <div id="text-conversation" class="space-y-3">
-                        <div class="bg-blue-100 p-3 rounded-lg">
-                            <div class="text-sm font-medium text-blue-800">🤖 Coach Sarah</div>
-                            <div class="text-blue-700">Hello! Voice isn't working right now, but I'm still here to help. Type your message below and I'll respond.</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="border-t p-4">
-                    <div class="flex gap-2">
-                        <input type="text" id="text-input" placeholder="Type your message..." class="flex-1 p-2 border rounded">
-                        <button id="send-btn" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Send</button>
-                    </div>
-                </div>
-            </div>
-        `;
-
-        // Add text chat functionality
-        const input = document.getElementById('text-input');
-        const sendBtn = document.getElementById('send-btn');
-        
-        const sendMessage = () => {
-            const message = input.value.trim();
-            if (message) {
-                this.addTextMessage('user', message);
-                input.value = '';
-                this.generateTextResponse(message);
-            }
-        };
-
-        sendBtn.addEventListener('click', sendMessage);
-        input.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                sendMessage();
-            }
-        });
-        
-        input.focus();
-    }
-
-    addTextMessage(sender, message) {
-        const conversationDiv = document.getElementById('text-conversation');
-        if (!conversationDiv) return;
-
-        const messageDiv = document.createElement('div');
-        const isUser = sender === 'user';
-        
-        messageDiv.className = `${isUser ? 'bg-green-100' : 'bg-blue-100'} p-3 rounded-lg`;
-        messageDiv.innerHTML = `
-            <div class="text-sm font-medium ${isUser ? 'text-green-800' : 'text-blue-800'}">
-                ${isUser ? '👤 You' : '🤖 Coach Sarah'}
-            </div>
-            <div class="${isUser ? 'text-green-700' : 'text-blue-700'}">${message}</div>
-        `;
-        
-        conversationDiv.appendChild(messageDiv);
-        conversationDiv.scrollTop = conversationDiv.scrollHeight;
-    }
-
-    generateTextResponse(userMessage) {
-        setTimeout(() => {
-            const responses = [
-                "I hear you, and I want you to know that what you're feeling is completely valid. Can you tell me more about what's been on your mind lately?",
-                "Thank you for sharing that with me. It sounds like you're going through something challenging. How are you taking care of yourself right now?",
-                "I appreciate your openness. What you're experiencing is part of the healing process. What would feel most supportive for you in this moment?",
-                "Your feelings matter, and I'm here to support you. Have you noticed any patterns in what triggers these feelings?",
-                "That's a lot to carry. You're being very brave by talking about this. What has helped you feel even a little bit better before?"
-            ];
-            
-            const response = responses[Math.floor(Math.random() * responses.length)];
-            this.addTextMessage('coach', response);
-        }, 1000);
-    }
+    
+    // Removed terrible browser-based voice functions - restoring proper Hume AI system
     
     /**
      * Dynamic script loader
