@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Content Admin - Root Cause Power</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        .admin-header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+        }
+        
+        .admin-title {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+        
+        .crown-badge {
+            background: linear-gradient(45deg, #FFD700, #FFA500);
+            padding: 0.5rem;
+            border-radius: 50%;
+            box-shadow: 0 2px 10px rgba(255, 215, 0, 0.3);
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #4f46e5;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-label {
+            color: #6b7280;
+            font-weight: 500;
+        }
+        
+        .actions-bar {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(45deg, #4f46e5, #7c3aed);
+            color: white;
+        }
+        
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.9);
+            color: #374151;
+            border: 1px solid #d1d5db;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        
+        .content-grid {
+            display: grid;
+            gap: 1.5rem;
+        }
+        
+        .content-item {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .content-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+        }
+        
+        .content-header {
+            display: flex;
+            justify-content: between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+            gap: 1rem;
+        }
+        
+        .content-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            line-height: 1.4;
+            flex: 1;
+        }
+        
+        .content-score {
+            background: linear-gradient(45deg, #10b981, #059669);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        
+        .content-meta {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+        
+        .content-type {
+            background: #dbeafe;
+            color: #1e40af;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+        
+        .content-description {
+            margin-bottom: 1rem;
+            line-height: 1.6;
+            color: #4b5563;
+        }
+        
+        .content-actions {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+        
+        .btn-small {
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+        }
+        
+        .btn-approve {
+            background: linear-gradient(45deg, #10b981, #059669);
+            color: white;
+        }
+        
+        .btn-reject {
+            background: linear-gradient(45deg, #ef4444, #dc2626);
+            color: white;
+        }
+        
+        .btn-edit {
+            background: linear-gradient(45deg, #f59e0b, #d97706);
+            color: white;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: #6b7280;
+        }
+        
+        .spinner {
+            display: inline-block;
+            width: 2rem;
+            height: 2rem;
+            border: 3px solid #e5e7eb;
+            border-top: 3px solid #4f46e5;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .filters {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .filter-select {
+            padding: 0.5rem 1rem;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            background: white;
+            font-size: 0.875rem;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 1rem;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .actions-bar {
+                flex-direction: column;
+            }
+            
+            .content-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-header">
+        <div class="admin-title">
+            <div class="crown-badge">👑</div>
+            Content Administration Dashboard
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Stats Grid -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number" id="pendingCount">-</div>
+                <div class="stat-label">Pending Review</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="approvedToday">-</div>
+                <div class="stat-label">Approved Today</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="totalContent">-</div>
+                <div class="stat-label">Total Content</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="avgScore">-</div>
+                <div class="stat-label">Avg. Quality Score</div>
+            </div>
+        </div>
+
+        <!-- Actions Bar -->
+        <div class="actions-bar">
+            <button class="btn btn-primary" onclick="runContentDiscovery()">
+                🔍 Discover New Content
+            </button>
+            <button class="btn btn-secondary" onclick="exportApproved()">
+                📥 Export Approved
+            </button>
+            <button class="btn btn-secondary" onclick="bulkApprove()">
+                ✅ Bulk Approve High Scores
+            </button>
+            <button class="btn btn-secondary" onclick="refreshContent()">
+                🔄 Refresh
+            </button>
+        </div>
+
+        <!-- Filters -->
+        <div class="filters">
+            <select class="filter-select" id="typeFilter" onchange="filterContent()">
+                <option value="all">All Types</option>
+                <option value="research_paper">Research Papers</option>
+                <option value="video">Videos</option>
+                <option value="article">Articles</option>
+                <option value="resource">Resources</option>
+            </select>
+            
+            <select class="filter-select" id="scoreFilter" onchange="filterContent()">
+                <option value="all">All Scores</option>
+                <option value="high">High Quality (0.8+)</option>
+                <option value="medium">Medium Quality (0.6-0.8)</option>
+                <option value="low">Needs Review (< 0.6)</option>
+            </select>
+            
+            <select class="filter-select" id="sourceFilter" onchange="filterContent()">
+                <option value="all">All Sources</option>
+                <option value="PubMed">PubMed</option>
+                <option value="YouTube">YouTube</option>
+                <option value="RSS">RSS Feeds</option>
+            </select>
+        </div>
+
+        <!-- Content Grid -->
+        <div id="contentContainer">
+            <div class="loading">
+                <div class="spinner"></div>
+                <p>Loading content for review...</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="../src/services/contentAutomation/ContentAggregator.js"></script>
+    <script>
+        class ContentAdminDashboard {
+            constructor() {
+                this.contentAggregator = new ContentAggregator();
+                this.pendingContent = [];
+                this.filteredContent = [];
+                this.currentFilters = {
+                    type: 'all',
+                    score: 'all',
+                    source: 'all'
+                };
+                
+                this.init();
+            }
+            
+            async init() {
+                await this.loadContent();
+                this.updateStats();
+                this.renderContent();
+            }
+            
+            async loadContent() {
+                try {
+                    // Load pending content from storage
+                    const stored = localStorage.getItem('pendingContent');
+                    this.pendingContent = stored ? JSON.parse(stored) : [];
+                    
+                    // Filter pending items only
+                    this.pendingContent = this.pendingContent.filter(item => item.status === 'pending');
+                    
+                } catch (error) {
+                    console.error('Error loading content:', error);
+                    this.pendingContent = [];
+                }
+                
+                this.filterContent();
+            }
+            
+            updateStats() {
+                const pending = this.pendingContent.length;
+                const today = new Date().toDateString();
+                const approvedToday = JSON.parse(localStorage.getItem('approvedContent') || '[]')
+                    .filter(item => new Date(item.approvedDate).toDateString() === today).length;
+                const total = pending + JSON.parse(localStorage.getItem('approvedContent') || '[]').length;
+                const avgScore = pending > 0 ? 
+                    (this.pendingContent.reduce((sum, item) => sum + (item.relevanceScore || 0), 0) / pending).toFixed(2) : 
+                    '0.00';
+                
+                document.getElementById('pendingCount').textContent = pending;
+                document.getElementById('approvedToday').textContent = approvedToday;
+                document.getElementById('totalContent').textContent = total;
+                document.getElementById('avgScore').textContent = avgScore;
+            }
+            
+            filterContent() {
+                let filtered = [...this.pendingContent];
+                
+                // Apply filters
+                if (this.currentFilters.type !== 'all') {
+                    filtered = filtered.filter(item => item.type === this.currentFilters.type);
+                }
+                
+                if (this.currentFilters.score !== 'all') {
+                    switch (this.currentFilters.score) {
+                        case 'high':
+                            filtered = filtered.filter(item => (item.relevanceScore || 0) >= 0.8);
+                            break;
+                        case 'medium':
+                            filtered = filtered.filter(item => (item.relevanceScore || 0) >= 0.6 && (item.relevanceScore || 0) < 0.8);
+                            break;
+                        case 'low':
+                            filtered = filtered.filter(item => (item.relevanceScore || 0) < 0.6);
+                            break;
+                    }
+                }
+                
+                if (this.currentFilters.source !== 'all') {
+                    filtered = filtered.filter(item => item.source.includes(this.currentFilters.source));
+                }
+                
+                // Sort by relevance score (highest first)
+                filtered.sort((a, b) => (b.relevanceScore || 0) - (a.relevanceScore || 0));
+                
+                this.filteredContent = filtered;
+            }
+            
+            renderContent() {
+                const container = document.getElementById('contentContainer');
+                
+                if (this.filteredContent.length === 0) {
+                    container.innerHTML = `
+                        <div class="loading">
+                            <p>📭 No content matching current filters</p>
+                            <button class="btn btn-primary" onclick="dashboard.runContentDiscovery()">
+                                🔍 Discover New Content
+                            </button>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                const html = this.filteredContent.map(item => this.renderContentItem(item)).join('');
+                container.innerHTML = `<div class="content-grid">${html}</div>`;
+            }
+            
+            renderContentItem(item) {
+                const score = (item.relevanceScore || 0).toFixed(2);
+                const scoreColor = score >= 0.8 ? '#10b981' : score >= 0.6 ? '#f59e0b' : '#ef4444';
+                
+                return `
+                    <div class="content-item" id="item-${item.id}">
+                        <div class="content-header">
+                            <h3 class="content-title">${this.escapeHtml(item.title)}</h3>
+                            <div class="content-score" style="background: ${scoreColor}">
+                                ${(score * 100).toFixed(0)}%
+                            </div>
+                        </div>
+                        
+                        <div class="content-meta">
+                            <span class="content-type">${this.formatType(item.type)}</span>
+                            <span>📅 ${this.formatDate(item.publishDate || item.discovered)}</span>
+                            <span>📍 ${item.source}</span>
+                            ${item.aiAnalysis?.targetAudience ? `<span>👥 ${item.aiAnalysis.targetAudience}</span>` : ''}
+                        </div>
+                        
+                        <div class="content-description">
+                            ${this.escapeHtml(this.truncateText(item.description || item.abstract || '', 200))}
+                        </div>
+                        
+                        ${item.url ? `<p><strong>🔗 URL:</strong> <a href="${item.url}" target="_blank">${item.url}</a></p>` : ''}
+                        
+                        <div class="content-actions">
+                            <button class="btn btn-small btn-approve" onclick="dashboard.approveContent('${item.id}')">
+                                ✅ Approve
+                            </button>
+                            <button class="btn btn-small btn-reject" onclick="dashboard.rejectContent('${item.id}')">
+                                ❌ Reject
+                            </button>
+                            <button class="btn btn-small btn-edit" onclick="dashboard.editContent('${item.id}')">
+                                ✏️ Edit
+                            </button>
+                            <button class="btn btn-small btn-secondary" onclick="dashboard.viewDetails('${item.id}')">
+                                👁️ Details
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            async approveContent(itemId) {
+                const item = this.pendingContent.find(i => i.id === itemId);
+                if (!item) return;
+                
+                // Move to approved content
+                const approved = JSON.parse(localStorage.getItem('approvedContent') || '[]');
+                approved.push({
+                    ...item,
+                    status: 'approved',
+                    approvedDate: new Date().toISOString(),
+                    approvedBy: 'admin'
+                });
+                localStorage.setItem('approvedContent', JSON.stringify(approved));
+                
+                // Remove from pending
+                this.pendingContent = this.pendingContent.filter(i => i.id !== itemId);
+                const pendingData = JSON.parse(localStorage.getItem('pendingContent') || '[]');
+                const updatedPending = pendingData.filter(i => i.id !== itemId);
+                localStorage.setItem('pendingContent', JSON.stringify(updatedPending));
+                
+                // Update UI
+                document.getElementById(`item-${itemId}`).style.animation = 'fadeOut 0.5s ease';
+                setTimeout(() => {
+                    this.filterContent();
+                    this.renderContent();
+                    this.updateStats();
+                }, 500);
+                
+                console.log('✅ Content approved:', item.title);
+            }
+            
+            async rejectContent(itemId) {
+                const item = this.pendingContent.find(i => i.id === itemId);
+                if (!item) return;
+                
+                if (!confirm(`Are you sure you want to reject "${item.title}"?`)) return;
+                
+                // Move to rejected content
+                const rejected = JSON.parse(localStorage.getItem('rejectedContent') || '[]');
+                rejected.push({
+                    ...item,
+                    status: 'rejected',
+                    rejectedDate: new Date().toISOString(),
+                    rejectedBy: 'admin'
+                });
+                localStorage.setItem('rejectedContent', JSON.stringify(rejected));
+                
+                // Remove from pending
+                this.pendingContent = this.pendingContent.filter(i => i.id !== itemId);
+                const pendingData = JSON.parse(localStorage.getItem('pendingContent') || '[]');
+                const updatedPending = pendingData.filter(i => i.id !== itemId);
+                localStorage.setItem('pendingContent', JSON.stringify(updatedPending));
+                
+                // Update UI
+                document.getElementById(`item-${itemId}`).style.animation = 'fadeOut 0.5s ease';
+                setTimeout(() => {
+                    this.filterContent();
+                    this.renderContent();
+                    this.updateStats();
+                }, 500);
+                
+                console.log('❌ Content rejected:', item.title);
+            }
+            
+            async runContentDiscovery() {
+                const button = event.target;
+                const originalText = button.innerHTML;
+                button.innerHTML = '<div class="spinner" style="width:1rem;height:1rem;margin-right:0.5rem;"></div> Discovering...';
+                button.disabled = true;
+                
+                try {
+                    await this.contentAggregator.aggregateContent();
+                    await this.loadContent();
+                    this.updateStats();
+                    this.renderContent();
+                    
+                    alert('✅ Content discovery completed! Check the new items above.');
+                    
+                } catch (error) {
+                    console.error('Content discovery error:', error);
+                    alert('❌ Content discovery failed. Check console for details.');
+                } finally {
+                    button.innerHTML = originalText;
+                    button.disabled = false;
+                }
+            }
+            
+            // Utility functions
+            escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+            
+            truncateText(text, maxLength) {
+                return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
+            }
+            
+            formatType(type) {
+                return type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+            }
+            
+            formatDate(dateString) {
+                return new Date(dateString).toLocaleDateString();
+            }
+        }
+        
+        // Global functions for onclick handlers
+        let dashboard;
+        
+        window.addEventListener('DOMContentLoaded', () => {
+            dashboard = new ContentAdminDashboard();
+        });
+        
+        function filterContent() {
+            dashboard.currentFilters = {
+                type: document.getElementById('typeFilter').value,
+                score: document.getElementById('scoreFilter').value,
+                source: document.getElementById('sourceFilter').value
+            };
+            dashboard.filterContent();
+            dashboard.renderContent();
+        }
+        
+        function runContentDiscovery() {
+            dashboard.runContentDiscovery();
+        }
+        
+        function refreshContent() {
+            location.reload();
+        }
+        
+        function exportApproved() {
+            const approved = JSON.parse(localStorage.getItem('approvedContent') || '[]');
+            const dataStr = JSON.stringify(approved, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(dataBlob);
+            link.download = `approved-content-${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+        }
+        
+        function bulkApprove() {
+            const highQuality = dashboard.filteredContent.filter(item => (item.relevanceScore || 0) >= 0.8);
+            
+            if (highQuality.length === 0) {
+                alert('No high-quality content (80%+) to bulk approve.');
+                return;
+            }
+            
+            if (!confirm(`Approve ${highQuality.length} high-quality items?`)) return;
+            
+            highQuality.forEach(item => {
+                dashboard.approveContent(item.id);
+            });
+        }
+        
+        // Add CSS animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fadeOut {
+                from { opacity: 1; transform: scale(1); }
+                to { opacity: 0; transform: scale(0.9); }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>

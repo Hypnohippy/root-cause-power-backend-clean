@@ -733,6 +733,89 @@ const communityPosts = [
     }
 ]; // In production, use a database
 
+// Content Automation API endpoints
+app.post('/api/content/discover', async (req, res) => {
+    try {
+        // In a full implementation, you'd load and use ContentAggregator here
+        // For now, return a mock response to demonstrate the system
+        const mockContent = [
+            {
+                id: `content_${Date.now()}_1`,
+                type: 'research_paper',
+                title: 'New EMDR Research: Enhanced Bilateral Stimulation Techniques',
+                description: 'Recent clinical trial shows 23% improvement in PTSD recovery rates with new bilateral stimulation protocols.',
+                source: 'PubMed',
+                url: 'https://pubmed.ncbi.nlm.nih.gov/example1',
+                relevanceScore: 0.92,
+                publishDate: new Date().toISOString(),
+                discovered: new Date().toISOString()
+            },
+            {
+                id: `content_${Date.now()}_2`,
+                type: 'video',
+                title: 'Trauma-Informed Yoga: Integration with Traditional Therapy',
+                description: 'Professional webinar on combining somatic approaches with cognitive behavioral therapy for trauma survivors.',
+                source: 'YouTube',
+                url: 'https://youtube.com/watch?v=example',
+                relevanceScore: 0.87,
+                publishDate: new Date().toISOString(),
+                discovered: new Date().toISOString()
+            },
+            {
+                id: `content_${Date.now()}_3`,
+                type: 'article',
+                title: 'Digital Therapeutics in Mental Health: Latest FDA Approvals',
+                description: 'Overview of newly approved digital mental health interventions and their clinical effectiveness data.',
+                source: 'Mental Health Today',
+                relevanceScore: 0.81,
+                publishDate: new Date().toISOString(),
+                discovered: new Date().toISOString()
+            }
+        ];
+        
+        res.json({
+            success: true,
+            contentFound: mockContent.length,
+            content: mockContent,
+            message: `Discovered ${mockContent.length} new content items for review`,
+            timestamp: new Date().toISOString()
+        });
+        
+    } catch (error) {
+        console.error('Content discovery error:', error);
+        res.status(500).json({
+            success: false,
+            error: error.message,
+            message: 'Content discovery failed'
+        });
+    }
+});
+
+app.get('/api/content/status', (req, res) => {
+    try {
+        // Mock content status - in production, query your database
+        res.json({
+            success: true,
+            status: {
+                pending: 12,
+                approved: 45,
+                rejected: 8,
+                total: 65,
+                lastDiscovery: new Date().toISOString(),
+                avgQualityScore: 0.78,
+                automationEnabled: true
+            }
+        });
+        
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            error: error.message
+        });
+    }
+});
+
+// Community API endpoints
 app.get('/api/community/posts', (req, res) => {
     res.json({
         success: true,
