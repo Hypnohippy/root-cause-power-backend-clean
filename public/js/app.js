@@ -933,6 +933,14 @@ class RootCausePowerApp {
         modal.className = 'fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4';
         modal.innerHTML = `
             <div class="bg-white rounded-xl shadow-2xl max-w-4xl w-full p-6 max-h-[90vh] overflow-y-auto">
+                <!-- Close button in header -->
+                <div class="flex justify-between items-start mb-4">
+                    <div></div>
+                    <button onclick="this.closest('.fixed').remove()" class="text-gray-400 hover:text-gray-600 text-2xl font-bold leading-none">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
                 <div class="text-center mb-8">
                     <div class="w-20 h-20 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center text-white mx-auto mb-4">
                         <i class="fas fa-microphone text-3xl"></i>
@@ -999,8 +1007,8 @@ class RootCausePowerApp {
                 </div>
                 
                 <div class="text-center">
-                    <button onclick="this.closest('.fixed').remove()" class="bg-gray-500 text-white px-6 py-2 rounded-lg hover:bg-gray-600 transition-colors">
-                        Close
+                    <button onclick="this.closest('.fixed').remove()" class="bg-gray-500 text-white px-8 py-3 rounded-lg hover:bg-gray-600 transition-colors font-semibold">
+                        <i class="fas fa-times mr-2"></i>Close Store
                     </button>
                 </div>
             </div>
@@ -1017,6 +1025,24 @@ class RootCausePowerApp {
                 this.purchaseVoiceCredits(credits, priceInCents);
             });
         });
+        
+        // Add escape key handler and click-outside-to-close
+        const closeModal = () => modal.remove();
+        const escapeHandler = (e) => {
+            if (e.key === 'Escape') {
+                closeModal();
+                document.removeEventListener('keydown', escapeHandler);
+            }
+        };
+        
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                closeModal();
+                document.removeEventListener('keydown', escapeHandler);
+            }
+        });
+        
+        document.addEventListener('keydown', escapeHandler);
     }
 
     openVoiceAI() {
