@@ -253,6 +253,73 @@ app.get('/api/voice-credits', (req, res) => {
     });
 });
 
+// Stripe configuration endpoint for frontend
+app.get('/api/stripe-config', (req, res) => {
+    res.json({
+        publishableKey: process.env.STRIPE_PUBLISHABLE_KEY || null,
+        configured: !!(process.env.STRIPE_SECRET_KEY && process.env.STRIPE_PUBLISHABLE_KEY)
+    });
+});
+
+// Hume AI configuration endpoint for frontend
+app.get('/api/hume-config', (req, res) => {
+    res.json({
+        accessToken: process.env.HUME_ACCESS_TOKEN || null,
+        configId: process.env.HUME_CONFIG_ID || null,
+        configured: !!(process.env.HUME_ACCESS_TOKEN && process.env.HUME_CONFIG_ID)
+    });
+});
+
+// Create payment session for voice credit packages
+app.post('/api/create-payment-session', async (req, res) => {
+    try {
+        const { packageType, amount, minutes, productName, description } = req.body;
+        
+        if (!stripe) {
+            return res.status(400).json({
+                error: 'Payment system not configured',
+                needsConfiguration: true
+            });
+        }
+
+        const session = await stripe.checkout.sessions.create({
+            payment_method_types: ['card'],
+            line_items: [{
+                price_data: {
+                    currency: 'gbp',
+                    product_data: {
+                        name: productName,
+                        description: description,
+                        images: ['https://images.unsplash.com/photo-1589254065878-42c9da997008?w=400']
+                    },
+                    unit_amount: amount // amount is already in pence
+                },
+                quantity: 1
+            }],
+            mode: 'payment',
+            success_url: `${req.headers.origin || 'http://localhost:3000'}/payment-success?session_id={CHECKOUT_SESSION_ID}&type=voice_credits&minutes=${minutes}`,
+            cancel_url: `${req.headers.origin || 'http://localhost:3000'}?payment=cancelled`,
+            metadata: {
+                type: 'voice_credits',
+                packageType,
+                minutes: minutes.toString(),
+                userId: req.headers['user-id'] || 'anonymous'
+            }
+        });
+        
+        res.json({
+            sessionId: session.id,
+            url: session.url
+        });
+        
+    } catch (error) {
+        console.error('❌ Failed to create payment session:', error);
+        res.status(500).json({
+            error: error.message
+        });
+    }
+});
+
 app.post('/api/voice-credits/deduct', (req, res) => {
     const userId = req.headers['user-id'] || 'anonymous';
     const { minutes } = req.body;
