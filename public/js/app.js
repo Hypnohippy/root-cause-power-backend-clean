@@ -6073,7 +6073,6 @@ Root Cause Power - AI-Powered Trauma Recovery Platform
     // Quick admin activation (for your convenience)
     activateFounderMode() {
         this.enableAdminAccess(true);
-    }
         
         // Update displays
         this.updateCreditDisplay();
