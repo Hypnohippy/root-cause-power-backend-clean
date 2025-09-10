@@ -16,6 +16,7 @@ class HumeVoiceCoach {
         this.stream = null;
         this.sessionStartTime = null;
         this.sessionDuration = 0;
+        this.manualStop = false; // Track if user manually stopped session
         
         // Voice session settings
         this.settings = {
@@ -79,6 +80,9 @@ class HumeVoiceCoach {
         try {
             console.log('🎯 Starting Hume AI voice session...');
             
+            // Reset manual stop flag
+            this.manualStop = false;
+            
             // Temporarily skip credit check for testing
             // TODO: Re-enable once credit system is fully integrated
             // if (!window.creditSystem || !window.creditSystem.canAfford('voice', this.settings.minCreditsRequired)) {
@@ -122,6 +126,9 @@ class HumeVoiceCoach {
     async stopVoiceSession() {
         try {
             console.log('⏹️ Stopping Hume AI voice session...');
+            
+            // Set manual stop flag to prevent auto-restart
+            this.manualStop = true;
             
             // Skip credit charging for now - TODO: Re-enable once credit system is integrated
             // if (this.sessionStartTime) {
@@ -338,39 +345,89 @@ class HumeVoiceCoach {
     startSpeechRecognition() {
         try {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            
+            if (!SpeechRecognition) {
+                this.updateVoiceStatus('Speech recognition not supported in this browser');
+                return;
+            }
+            
             this.recognition = new SpeechRecognition();
             
-            this.recognition.continuous = true;
-            this.recognition.interimResults = true;
+            // Better speech recognition settings
+            this.recognition.continuous = false; // Process one phrase at a time for better conversation
+            this.recognition.interimResults = false; // Only use final results
             this.recognition.lang = 'en-US';
+            this.recognition.maxAlternatives = 1;
             
             this.recognition.onstart = () => {
-                this.updateVoiceStatus('Listening... speak naturally');
+                console.log('🎤 Speech recognition started');
+                this.updateVoiceStatus('I\'m listening... speak now');
                 this.isRecording = true;
+                this.animateVoiceWaves(true);
             };
             
             this.recognition.onresult = (event) => {
-                let finalTranscript = '';
-                for (let i = event.resultIndex; i < event.results.length; i++) {
-                    if (event.results[i].isFinal) {
-                        finalTranscript += event.results[i][0].transcript;
+                const result = event.results[0];
+                if (result.isFinal) {
+                    const transcript = result[0].transcript.trim();
+                    console.log('🗣️ User said:', transcript);
+                    
+                    if (transcript.length > 0) {
+                        this.processUserSpeech(transcript);
+                    } else {
+                        this.updateVoiceStatus('I didn\'t catch that. Please try again.');
+                        this.restartListening();
                     }
                 }
+            };
+            
+            this.recognition.onend = () => {
+                console.log('🎤 Speech recognition ended');
+                this.isRecording = false;
+                this.animateVoiceWaves(false);
                 
-                if (finalTranscript) {
-                    this.processUserSpeech(finalTranscript);
+                // Auto-restart listening after AI responds (unless manually stopped)
+                if (!this.manualStop) {
+                    setTimeout(() => {
+                        if (this.socket || this.recognition) {
+                            this.restartListening();
+                        }
+                    }, 2000);
                 }
             };
             
             this.recognition.onerror = (error) => {
-                console.error('❌ Speech recognition error:', error);
-                this.updateVoiceStatus('Speech recognition error - please try again');
+                console.error('❌ Speech recognition error:', error.error);
+                this.isRecording = false;
+                this.animateVoiceWaves(false);
+                
+                if (error.error === 'no-speech') {
+                    this.updateVoiceStatus('No speech detected. Click microphone to try again.');
+                } else if (error.error === 'not-allowed') {
+                    this.updateVoiceStatus('Microphone access denied. Please allow microphone access.');
+                } else {
+                    this.updateVoiceStatus('Speech error - click microphone to try again');
+                }
             };
             
             this.recognition.start();
             
         } catch (error) {
             console.error('❌ Failed to start speech recognition:', error);
+            this.updateVoiceStatus('Speech recognition failed - please try again');
+        }
+    }
+    
+    // Restart listening for continuous conversation
+    restartListening() {
+        if (this.recognition && !this.manualStop && !this.isRecording) {
+            setTimeout(() => {
+                try {
+                    this.recognition.start();
+                } catch (error) {
+                    console.log('Recognition restart failed (normal if already running)');
+                }
+            }, 500);
         }
     }
 
@@ -422,35 +479,69 @@ class HumeVoiceCoach {
             // Use the main app's AI system if available
             if (window.app && window.app.callAI) {
                 const emotionContext = emotions.map(e => `${e.name} (${e.score.toFixed(2)})`).join(', ');
-                const prompt = `You are an empathetic voice coach. The user said: "${userText}". 
-                Detected emotions: ${emotionContext}. 
-                Respond with warmth, understanding, and helpful guidance in 2-3 sentences maximum. 
-                Be conversational and supportive.`;
+                const prompt = `You are a warm, empathetic voice coach speaking directly to someone. The user just said: "${userText}". 
+
+Detected emotions: ${emotionContext}.
+
+Respond naturally as if you're having a real conversation. Guidelines:
+- Keep it to 1-2 sentences maximum for natural conversation flow
+- Be warm and supportive, not clinical
+- Ask a gentle follow-up question to keep the conversation going
+- Use "I" statements and direct address ("you")
+- Match their emotional tone appropriately
+- If they seem distressed, offer gentle comfort and coping suggestions
+- If they seem positive, celebrate with them
+- Make it feel like talking to a caring friend who happens to be a mental health expert
+
+Response:`;
                 
                 const response = await window.app.callAI(prompt, 'voice-coach');
                 return response;
             }
             
-            // Fallback responses based on emotions
-            return this.generateFallbackResponse(emotions[0]?.name || 'neutral');
+            // Enhanced fallback responses
+            return this.generateFallbackResponse(emotions[0]?.name || 'neutral', userText);
             
         } catch (error) {
             console.error('❌ Error generating AI response:', error);
-            return "I'm here to support you. Please tell me more about how you're feeling.";
+            return "I'm really glad you're sharing with me. What's been on your mind today?";
         }
     }
 
     // Generate fallback empathetic responses
-    generateFallbackResponse(emotion) {
+    generateFallbackResponse(emotion, userText = '') {
         const responses = {
-            sadness: "I can hear that you're going through a difficult time. It's okay to feel sad - these feelings are valid. What's one small thing that usually brings you comfort?",
-            anger: "I notice you're feeling frustrated right now. Those feelings are completely understandable. Let's take a deep breath together and explore what's behind these feelings.",
-            anxiety: "I can sense you're feeling anxious. That must be really challenging. Remember, you're safe right now. Would it help to try a grounding technique together?",
-            joy: "I love hearing the positivity in your voice! It's wonderful when we can recognize and celebrate these good moments. What's contributing to this good feeling?",
-            neutral: "I'm here and listening to you. Sometimes it's helpful just to have someone present with us. What's on your mind today?"
+            sadness: [
+                "I hear you, and I want you to know that what you're feeling is completely valid. What's been weighing on you most?",
+                "It sounds like you're carrying something heavy right now. I'm here with you. Can you tell me more about what's going on?",
+                "Your feelings matter, and it's okay to not be okay sometimes. What would feel most helpful right now?"
+            ],
+            anger: [
+                "I can feel the intensity in what you're sharing. Those feelings make total sense. What triggered this for you?",
+                "It sounds like something really got to you. I'm listening. What happened?",
+                "That frustration is so real. Sometimes we need to feel it before we can work through it. What's going on?"
+            ],
+            anxiety: [
+                "I can sense that anxious energy. You're not alone in this. What's making you feel most worried right now?",
+                "Anxiety can feel so overwhelming. You're brave for talking about it. What's been on your mind?",
+                "I hear that worry in your voice. Let's take this one step at a time. What's concerning you most?"
+            ],
+            joy: [
+                "I love hearing that brightness in your voice! It's beautiful when good things happen. What's brought this happiness?",
+                "You sound so positive right now - that's wonderful! Tell me what's going well for you.",
+                "That joy is contagious! I'm so glad you're experiencing this. What's been lifting your spirits?"
+            ],
+            neutral: [
+                "I'm really glad you're here talking with me. Whatever's on your mind, I'm listening. How are you doing today?",
+                "Thanks for sharing your thoughts with me. I'm here to support you. What would be most helpful to talk about?",
+                "I appreciate you opening up. Sometimes just talking helps. What's been going through your mind lately?"
+            ]
         };
         
-        return responses[emotion] || responses.neutral;
+        const responseList = responses[emotion] || responses.neutral;
+        const randomResponse = responseList[Math.floor(Math.random() * responseList.length)];
+        
+        return randomResponse;
     }
 
     // Speak response using text-to-speech
@@ -460,35 +551,16 @@ class HumeVoiceCoach {
                 // Cancel any ongoing speech
                 speechSynthesis.cancel();
                 
-                const utterance = new SpeechSynthesisUtterance(text);
-                
-                // Try to find a good voice
-                const voices = speechSynthesis.getVoices();
-                const preferredVoice = voices.find(voice => 
-                    voice.lang.startsWith('en') && voice.name.includes('Female')
-                ) || voices.find(voice => voice.lang.startsWith('en'));
-                
-                if (preferredVoice) {
-                    utterance.voice = preferredVoice;
+                // Wait for voices to load if they haven't yet
+                let voices = speechSynthesis.getVoices();
+                if (voices.length === 0) {
+                    speechSynthesis.onvoiceschanged = () => {
+                        voices = speechSynthesis.getVoices();
+                        this.createAndSpeakUtterance(text, voices);
+                    };
+                } else {
+                    this.createAndSpeakUtterance(text, voices);
                 }
-                
-                utterance.rate = 0.9;
-                utterance.pitch = 1.0;
-                utterance.volume = 0.8;
-                
-                utterance.onstart = () => {
-                    this.isPlaying = true;
-                    this.updateVoiceStatus('AI Coach is speaking...');
-                    this.animateVoiceWaves(true);
-                };
-                
-                utterance.onend = () => {
-                    this.isPlaying = false;
-                    this.updateVoiceStatus('Listening... speak naturally');
-                    this.animateVoiceWaves(false);
-                };
-                
-                speechSynthesis.speak(utterance);
                 
             } else {
                 console.warn('⚠️ Text-to-speech not supported');
@@ -497,6 +569,78 @@ class HumeVoiceCoach {
         } catch (error) {
             console.error('❌ Error speaking response:', error);
         }
+    }
+    
+    // Create and speak utterance with consistent voice
+    createAndSpeakUtterance(text, voices) {
+        const utterance = new SpeechSynthesisUtterance(text);
+        
+        // Find the best voice and stick with it
+        let selectedVoice = null;
+        
+        // Prefer specific good voices
+        const preferredVoices = [
+            'Microsoft Zira - English (United States)',
+            'Google US English',
+            'Alex',
+            'Samantha'
+        ];
+        
+        for (const voiceName of preferredVoices) {
+            selectedVoice = voices.find(voice => voice.name === voiceName);
+            if (selectedVoice) break;
+        }
+        
+        // Fallback to any English female voice
+        if (!selectedVoice) {
+            selectedVoice = voices.find(voice => 
+                voice.lang.startsWith('en') && voice.name.toLowerCase().includes('female')
+            );
+        }
+        
+        // Fallback to any English voice
+        if (!selectedVoice) {
+            selectedVoice = voices.find(voice => voice.lang.startsWith('en'));
+        }
+        
+        // Use the selected voice consistently
+        if (selectedVoice) {
+            utterance.voice = selectedVoice;
+            console.log('🗣️ Using voice:', selectedVoice.name);
+        }
+        
+        // Consistent speech settings
+        utterance.rate = 0.85; // Slightly slower for clarity
+        utterance.pitch = 1.0;
+        utterance.volume = 0.9;
+        
+        utterance.onstart = () => {
+            this.isPlaying = true;
+            this.updateVoiceStatus('AI Coach is speaking...');
+            this.animateVoiceWaves(true);
+        };
+        
+        utterance.onend = () => {
+            this.isPlaying = false;
+            this.updateVoiceStatus('Your turn - speak naturally');
+            this.animateVoiceWaves(false);
+            
+            // Resume listening for continued conversation
+            if (!this.manualStop) {
+                setTimeout(() => {
+                    this.restartListening();
+                }, 1000);
+            }
+        };
+        
+        utterance.onerror = (error) => {
+            console.error('❌ Speech synthesis error:', error);
+            this.isPlaying = false;
+            this.animateVoiceWaves(false);
+            this.updateVoiceStatus('Speech error - please continue talking');
+        };
+        
+        speechSynthesis.speak(utterance);
     }
 
     // Start recording audio

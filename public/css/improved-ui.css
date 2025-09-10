@@ -622,12 +622,17 @@ p {
     overflow-y: auto !important;
 }
 
-/* Ensure all modals have escape capability */
-.fixed.inset-0 {
+/* Ensure visible modals have proper layout */
+.fixed.inset-0:not(.hidden) {
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
     padding: 1rem !important;
+}
+
+/* Ensure hidden modals stay hidden */
+.hidden {
+    display: none !important;
 }
 
 /* Print Styles */
