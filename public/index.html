@@ -1876,7 +1876,7 @@
     </div>
 
     <div id="coach-modal" class="modal fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
-        <div class="bg-white p-6 rounded-lg max-w-4xl w-full mx-4 max-h-[85vh] flex flex-col">
+        <div class="bg-white p-4 rounded-lg max-w-2xl w-full mx-4 max-h-[90vh] flex flex-col">
             <div class="flex justify-between items-center mb-4 border-b pb-3">
                 <h2 class="text-xl font-bold">AI Coach Chat</h2>
                 <button class="close-modal text-gray-500 hover:text-gray-700 text-xl" onclick="app.closeModal('coach-modal')">
@@ -1934,9 +1934,15 @@
     </div>
 
     <div id="emdr-modal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-        <div class="bg-white p-8 rounded-lg max-w-4xl w-full mx-4">
+        <div class="bg-white p-6 rounded-lg max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
             <div id="emdr-content">
-                <h2 class="text-2xl font-bold mb-4">EMDR Self-Help Techniques</h2>
+                <!-- Close button in header -->
+                <div class="flex justify-between items-start mb-4">
+                    <h2 class="text-2xl font-bold">EMDR Self-Help Techniques</h2>
+                    <button onclick="app.closeModal('emdr-modal')" class="text-gray-400 hover:text-gray-600 text-2xl font-bold leading-none">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
                 <div class="grid md:grid-cols-2 gap-6">
                     <div class="emdr-technique p-4 rounded-lg cursor-pointer hover:shadow-lg transition-all" data-emdr="butterfly">
                         <h4 class="font-bold mb-2">🦋 Butterfly Hug</h4>
@@ -3164,12 +3170,10 @@ Remember: Healing is possible, and you deserve support on this journey.`;
                         </div>
                         
                         <div class="space-y-4 mb-6">
-                            <button onclick="app.showSection('coaches'); this.parentElement.parentElement.parentElement.remove();" 
-                                    class="w-full px-4 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all">
+                            <button id="share-ai-coaches-btn" class="w-full px-4 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all">
                                 <i class="fas fa-robot mr-2"></i>Meet Your AI Coaches
                             </button>
-                            <button onclick="app.openVoiceCoach(); this.parentElement.parentElement.parentElement.remove();" 
-                                    class="w-full px-4 py-3 bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-lg hover:from-blue-600 hover:to-indigo-600 transition-all">
+                            <button id="share-ai-voice-btn" class="w-full px-4 py-3 bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-lg hover:from-blue-600 hover:to-indigo-600 transition-all">
                                 <i class="fas fa-microphone mr-2"></i>Start Voice Session
                             </button>
                             <div class="text-sm text-gray-600 bg-gray-50 p-3 rounded-lg">

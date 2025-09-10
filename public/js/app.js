@@ -165,6 +165,19 @@ class RootCausePowerApp {
             this.toggleHamburgerMenu();
         });
 
+        // Share with AI popup buttons
+        document.getElementById('share-ai-coaches-btn')?.addEventListener('click', (e) => {
+            console.log('🤖 Share AI - Meet Coaches clicked');
+            this.showSection('coaches');
+            e.target.closest('.fixed')?.remove();
+        });
+
+        document.getElementById('share-ai-voice-btn')?.addEventListener('click', (e) => {
+            console.log('🎤 Share AI - Voice Session clicked');
+            this.openVoiceCoach();
+            e.target.closest('.fixed')?.remove();
+        });
+
         // Modal close buttons
         document.addEventListener('click', (e) => {
             if (e.target.matches('.close-modal') || e.target.closest('.close-modal')) {
@@ -2951,13 +2964,13 @@ class RootCausePowerApp {
                     </div>
                     
                     <div class="flex flex-wrap justify-center gap-4">
-                        <button onclick="app.startTreatmentPlan()" class="cta-button bg-purple-500 text-white px-6 py-3 rounded-lg hover:bg-purple-600 transition-colors">
-                            <i class="fas fa-play mr-2"></i>Begin Treatment Plan
+                        <button id="start-treatment-btn" class="cta-button bg-purple-500 text-white px-6 py-3 rounded-lg hover:bg-purple-600 transition-colors">
+                            <i class="fas fa-play mr-2"></i>Continue to Dashboard
                         </button>
-                        <button onclick="app.showSection('coaches')" class="cta-button bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600 transition-colors">
+                        <button id="meet-coaches-btn" class="cta-button bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600 transition-colors">
                             <i class="fas fa-robot mr-2"></i>Meet Your AI Team
                         </button>
-                        <button onclick="app.downloadPrescription()" class="cta-button bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition-colors">
+                        <button id="download-prescription-btn" class="cta-button bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition-colors">
                             <i class="fas fa-download mr-2"></i>Download Plan
                         </button>
                     </div>
@@ -2966,6 +2979,24 @@ class RootCausePowerApp {
             
             // Populate priority actions
             this.populatePriorityActions();
+            
+            // Add event listeners for assessment result buttons
+            setTimeout(() => {
+                document.getElementById('start-treatment-btn')?.addEventListener('click', () => {
+                    console.log('🎯 Continue to Dashboard clicked');
+                    this.startTreatmentPlan();
+                });
+                
+                document.getElementById('meet-coaches-btn')?.addEventListener('click', () => {
+                    console.log('🤖 Meet Your AI Team clicked');
+                    this.showSection('coaches');
+                });
+                
+                document.getElementById('download-prescription-btn')?.addEventListener('click', () => {
+                    console.log('📥 Download Plan clicked');
+                    this.downloadPrescription();
+                });
+            }, 100);
             
             this.storeData('assessmentData', this.assessmentData);
             this.storeData('personalizedPrescription', prescription);
@@ -3058,50 +3089,103 @@ class RootCausePowerApp {
     generatePersonalizedPrescription() {
         const prescription = [];
         
-        // Get assessment data
+        // Get assessment data with better analysis
         const energyLevel = this.assessmentData.step_1 ? this.assessmentData.step_1[0] : 2;
         const sleepQuality = this.assessmentData.step_2 ? this.assessmentData.step_2[0] : 2;
         const mentalHealth = this.assessmentData.step_3 ? this.assessmentData.step_3[0] : 2;
         const crisisLevel = this.assessmentData.step_14 ? this.assessmentData.step_14[0] : 0;
+        const stressLevel = this.assessmentData.step_4 ? this.assessmentData.step_4[0] : 2;
+        const anxietyLevel = this.assessmentData.step_5 ? this.assessmentData.step_5[0] : 2;
+        const traumaHistory = this.assessmentData.step_6 ? this.assessmentData.step_6[0] : 0;
+        
+        // Generate unique user ID for personalization
+        const userId = this.currentUser.id || Date.now();
+        const userName = this.currentUser.name || 'there';
+        
+        prescription.push(`
+            <div class="bg-gradient-to-r from-blue-100 to-purple-100 border-l-4 border-purple-500 p-4 mb-4">
+                <h4 class="font-bold text-purple-800 mb-2">👋 Hello ${userName}! Your Personal Recovery Plan</h4>
+                <p class="text-sm text-purple-700">Based on your unique assessment results, here's your customized healing journey designed specifically for you.</p>
+            </div>
+        `);
 
-        // Crisis Protocol
+        // Crisis Protocol (if needed)
         if (crisisLevel >= 2) {
             prescription.push(`
                 <div class="bg-red-100 border-l-4 border-red-500 p-4 mb-4">
-                    <h4 class="font-bold text-red-800 mb-2">🚨 CRISIS INTERVENTION PROTOCOL</h4>
+                    <h4 class="font-bold text-red-800 mb-2">🚨 IMMEDIATE PRIORITY - Crisis Support</h4>
                     <ul class="text-sm text-red-700 space-y-1">
-                        <li>• Immediate safety assessment and planning</li>
-                        <li>• 24/7 crisis hotline access: UK Samaritans 116 123</li>
-                        <li>• Daily check-ins with AI crisis support</li>
-                        <li>• Professional mental health referral (within 48 hours)</li>
+                        <li>• <strong>Your Crisis Coach is ready:</strong> <button onclick="app.openCoachModal('ptsd')" class="text-red-800 underline font-bold">Start Crisis Support Chat →</button></li>
+                        <li>• 24/7 Emergency: UK Samaritans 116 123 | US 988</li>
+                        <li>• Daily safety check-ins through your dashboard</li>
                     </ul>
                 </div>
             `);
         }
 
-        // Sleep Protocol
-        if (sleepQuality <= 2) {
-            prescription.push(`
-                <div class="bg-blue-100 border-l-4 border-blue-500 p-4 mb-4">
-                    <h4 class="font-bold text-blue-800 mb-2">😴 SLEEP RESTORATION PROTOCOL</h4>
-                    <ul class="text-sm text-blue-700 space-y-1">
-                        <li>• Sleep Hygiene: No screens 1hr before bed, cool dark room</li>
-                        <li>• Consistent sleep/wake times ±30 minutes</li>
-                        <li>• AI Sleep Coach: Daily tracking and optimization</li>
-                    </ul>
-                </div>
-            `);
-        }
+        // Primary Recovery Protocol based on top issues
+        const primaryIssues = [];
+        if (sleepQuality <= 2) primaryIssues.push('sleep');
+        if (anxietyLevel >= 3) primaryIssues.push('anxiety');
+        if (stressLevel >= 3) primaryIssues.push('stress');
+        if (energyLevel <= 2) primaryIssues.push('energy');
+        if (traumaHistory >= 2) primaryIssues.push('trauma');
 
-        // Nutrition Protocol
         prescription.push(`
             <div class="bg-green-100 border-l-4 border-green-500 p-4 mb-4">
-                <h4 class="font-bold text-green-800 mb-2">🥗 TRAUMA RECOVERY NUTRITION</h4>
-                <ul class="text-sm text-green-700 space-y-1">
-                    <li>• Anti-inflammatory foods: Omega-3 fish, leafy greens, berries</li>
-                    <li>• Protein at every meal (20-30g) for neurotransmitter support</li>
-                    <li>• AI Nutrition Coach: Meal planning and photo analysis</li>
-                </ul>
+                <h4 class="font-bold text-green-800 mb-2">🎯 Your Priority Focus Areas</h4>
+                <div class="grid md:grid-cols-2 gap-3 text-sm">
+        `);
+
+        if (primaryIssues.includes('trauma')) {
+            prescription.push(`
+                    <div class="bg-white p-3 rounded border-l-2 border-purple-400">
+                        <div class="font-bold text-purple-700">🧠 Trauma Recovery</div>
+                        <div class="text-gray-600">Meet your <button onclick="app.openCoachModal('ptsd')" class="text-purple-600 underline font-medium">PTSD Specialist →</button></div>
+                    </div>
+            `);
+        }
+
+        if (primaryIssues.includes('sleep')) {
+            prescription.push(`
+                    <div class="bg-white p-3 rounded border-l-2 border-blue-400">
+                        <div class="font-bold text-blue-700">😴 Sleep Restoration</div>
+                        <div class="text-gray-600">Work with your <button onclick="app.openCoachModal('sleep')" class="text-blue-600 underline font-medium">Sleep Coach →</button></div>
+                    </div>
+            `);
+        }
+
+        if (primaryIssues.includes('anxiety') || primaryIssues.includes('stress')) {
+            prescription.push(`
+                    <div class="bg-white p-3 rounded border-l-2 border-indigo-400">
+                        <div class="font-bold text-indigo-700">🧘 Stress & Anxiety</div>
+                        <div class="text-gray-600">Connect with <button onclick="app.openCoachModal('stress')" class="text-indigo-600 underline font-medium">Mindfulness Coach →</button></div>
+                    </div>
+            `);
+        }
+
+        if (primaryIssues.includes('energy')) {
+            prescription.push(`
+                    <div class="bg-white p-3 rounded border-l-2 border-green-400">
+                        <div class="font-bold text-green-700">🥗 Energy & Nutrition</div>
+                        <div class="text-gray-600">Consult your <button onclick="app.openCoachModal('nutrition')" class="text-green-600 underline font-medium">Nutrition Coach →</button></div>
+                    </div>
+            `);
+        }
+
+        prescription.push(`
+                </div>
+            </div>
+        `);
+
+        // Dashboard Integration
+        prescription.push(`
+            <div class="bg-yellow-50 border-l-4 border-yellow-500 p-4 mb-4">
+                <h4 class="font-bold text-yellow-800 mb-2">📊 Your Dashboard is Ready</h4>
+                <p class="text-sm text-yellow-700 mb-3">Track your progress and access all your tools in one place:</p>
+                <button onclick="app.showSection('dashboard')" class="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600 transition-colors font-medium">
+                    <i class="fas fa-chart-line mr-2"></i>Open Your Personal Dashboard →
+                </button>
             </div>
         `);
 
@@ -6082,14 +6166,14 @@ Root Cause Power - AI-Powered Trauma Recovery Platform
             <div class="space-y-4">
                 <p class="text-sm">This technique uses alternating sounds to create bilateral stimulation:</p>
                 <div class="grid grid-cols-2 gap-4">
-                    <button onclick="app.playBinauralTone('left')" class="bg-blue-500 text-white p-4 rounded hover:bg-blue-600 transition-colors">
+                    <button id="emdr-left-ear-btn" class="bg-blue-500 text-white p-4 rounded hover:bg-blue-600 transition-colors">
                         🎧 Left Ear<br><span class="text-xs">Play tone</span>
                     </button>
-                    <button onclick="app.playBinauralTone('right')" class="bg-green-500 text-white p-4 rounded hover:bg-green-600 transition-colors">
+                    <button id="emdr-right-ear-btn" class="bg-green-500 text-white p-4 rounded hover:bg-green-600 transition-colors">
                         🎧 Right Ear<br><span class="text-xs">Play tone</span>
                     </button>
                 </div>
-                <button onclick="app.startAlternatingTones()" class="w-full bg-purple-500 text-white p-3 rounded hover:bg-purple-600 transition-colors">
+                <button id="emdr-alternating-btn" class="w-full bg-purple-500 text-white p-3 rounded hover:bg-purple-600 transition-colors">
                     🔄 Start Professional EMDR Audio (10 min)
                 </button>
                 <div class="space-y-1 text-xs text-gray-600">
@@ -6101,6 +6185,24 @@ Root Cause Power - AI-Powered Trauma Recovery Platform
                 </div>
             </div>
         `;
+        
+        // Add event listeners for audio buttons
+        setTimeout(() => {
+            document.getElementById('emdr-left-ear-btn')?.addEventListener('click', () => {
+                console.log('🎵 EMDR Left ear clicked');
+                this.playBinauralTone('left');
+            });
+            
+            document.getElementById('emdr-right-ear-btn')?.addEventListener('click', () => {
+                console.log('🎵 EMDR Right ear clicked');
+                this.playBinauralTone('right');
+            });
+            
+            document.getElementById('emdr-alternating-btn')?.addEventListener('click', () => {
+                console.log('🔄 EMDR Alternating tones clicked');
+                this.startAlternatingTones();
+            });
+        }, 100);
     }
 
     startTactileBLS(container) {
