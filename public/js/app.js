@@ -1168,3 +1168,101 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 });
 
+// === RCP Single-Paste Stabilizer (clicks, readable text, safe AI fallbacks) ===
+window.app = window.app || {};
+
+// Always return a gentle follow-up, even if the API has trouble
+app.aiFollowUp = async function (currentQuestion, userResponse) {
+  try {
+    const r = await fetch('/api/followup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        currentQuestion,
+        userResponse: String(userResponse ?? '')
+      })
+    });
+    let data = {};
+    try { data = await r.json(); } catch {}
+    return data.followUp || 'Would you like to tell me a little more?';
+  } catch {
+    return 'Would you like to tell me a little more?';
+  }
+};
+
+// Always return a helpful prescription, even if the API has trouble
+app.aiPrescription = async function (assessmentContext) {
+  try {
+    const r = await fetch('/api/prescription', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ assessmentContext })
+    });
+    let data = {};
+    try { data = await r.json(); } catch {}
+    return data.prescription || `Short, kind prescription:
+- 2-minute box breathing before bed
+- Morning sunlight 5–10 minutes
+- Keep a gentle sleep log for 3 days
+- If distress rises, pause and practice grounding (5-4-3-2-1)
+- Celebrate one small win each day`;
+  } catch {
+    return `Short, kind prescription:
+- 2-minute box breathing before bed
+- Morning sunlight 5–10 minutes
+- Keep a gentle sleep log for 3 days
+- If distress rises, pause and practice grounding (5-4-3-2-1)
+- Celebrate one small win each day`;
+  }
+};
+
+// Make sure nothing invisible blocks clicks and the assessment is readable
+document.addEventListener('DOMContentLoaded', function () {
+  // Hide common overlays that can block clicks
+  ['mobile-menu', 'nav-overlay'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.classList.add('hidden');
+      el.style.display = 'none';
+      el.style.pointerEvents = 'none';
+    }
+  });
+
+  // Show desktop nav if something left it hidden
+  if (window.innerWidth >= 768) {
+    document.querySelectorAll('nav.hidden').forEach(n => n.classList.remove('hidden'));
+  }
+
+  // Raise the assessment and ensure readable text
+  const ac = document.getElementById('assessment-questions') || document.getElementById('assessment-content');
+  if (ac) {
+    ac.style.position = 'relative';
+    ac.style.zIndex = '1000';
+    ac.style.color = '#111827'; // readable dark text
+    // Optional: ensure the panel is readable on any theme
+    if (!ac.style.background || ac.style.background === 'transparent') {
+      ac.style.background = '#ffffff';
+    }
+  }
+
+  // Follow-up bubble readable styling (in case Tailwind isn’t applied)
+  const styleId = 'rcp-hotfix-inline';
+  if (!document.getElementById(styleId)) {
+    const style = document.createElement('style');
+    style.id = styleId;
+    style.textContent = `
+      #rcp-followup{
+        background:#eff6ff;
+        border-left:4px solid #60a5fa;
+        color:#1e40af;
+        padding:1rem;
+        border-radius:0.5rem;
+        margin-top:1rem;
+      }
+      .rcp-scale-btn { cursor:pointer; }
+    `;
+    document.head.appendChild(style);
+  }
+});
+
+
