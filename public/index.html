@@ -289,11 +289,11 @@
                             <!-- Progress Indicator -->
                             <div class="mb-8">
                                 <div class="flex justify-between items-center mb-2">
-                                    <span class="text-sm font-semibold text-purple-600">Step 1 of 5</span>
-                                    <span class="text-sm text-gray-500">Personalized Assessment</span>
+                                    <span class="text-sm font-semibold text-purple-600">Ready to Begin</span>
+                                    <span class="text-sm text-gray-500">10-Question Comprehensive Assessment</span>
                                 </div>
                                 <div class="w-full bg-purple-100 rounded-full h-3">
-                                    <div class="bg-gradient-to-r from-purple-500 to-blue-500 h-3 rounded-full transition-all duration-700" style="width: 20%"></div>
+                                    <div class="bg-gradient-to-r from-purple-500 to-blue-500 h-3 rounded-full transition-all duration-700" style="width: 0%"></div>
                                 </div>
                             </div>
                             
@@ -306,38 +306,19 @@
                                     <div class="flex-1">
                                         <div class="font-bold text-purple-800 mb-2">AI Healthcare Assistant</div>
                                         <div class="text-gray-700 text-lg leading-relaxed">
-                                            Let's start with something fundamental to your wellbeing - your sleep. 
-                                            How would you rate your sleep quality over the past week?
+                                            I'm ready to conduct a comprehensive 10-question health assessment covering sleep, mental health, PTSD/trauma, chronic illness, stress, physical health, nutrition, social support, resilience, and life satisfaction.
                                         </div>
                                     </div>
                                 </div>
                                 
-                                <!-- Sleep Quality Scale -->
-                                <div class="grid grid-cols-5 gap-3 mb-6" id="sleep-scale">
-                                    <button onclick="selectSleepRating(1)" class="sleep-option p-4 bg-white rounded-xl border-2 border-gray-200 hover:border-purple-400 hover:shadow-md transition-all text-center">
-                                        <div class="text-3xl font-bold text-purple-500 mb-2">1</div>
-                                        <div class="text-sm text-gray-600 font-medium">Terrible</div>
+                                <!-- Start Assessment Button -->
+                                <div class="text-center py-8">
+                                    <button onclick="startPersonalizedAssessment()" class="bg-gradient-to-r from-purple-500 to-blue-500 text-white px-8 py-4 rounded-xl text-xl font-bold hover:from-purple-600 hover:to-blue-600 transition-all ai-glow shadow-lg">
+                                        <i class="fas fa-heart mr-3"></i>Start My Comprehensive Health Assessment
                                     </button>
-                                    <button onclick="selectSleepRating(2)" class="sleep-option p-4 bg-white rounded-xl border-2 border-gray-200 hover:border-purple-400 hover:shadow-md transition-all text-center">
-                                        <div class="text-3xl font-bold text-purple-500 mb-2">2</div>
-                                        <div class="text-sm text-gray-600 font-medium">Poor</div>
-                                    </button>
-                                    <button onclick="selectSleepRating(3)" class="sleep-option p-4 bg-white rounded-xl border-2 border-gray-200 hover:border-purple-400 hover:shadow-md transition-all text-center">
-                                        <div class="text-3xl font-bold text-purple-500 mb-2">3</div>
-                                        <div class="text-sm text-gray-600 font-medium">Fair</div>
-                                    </button>
-                                    <button onclick="selectSleepRating(4)" class="sleep-option p-4 bg-white rounded-xl border-2 border-gray-200 hover:border-purple-400 hover:shadow-md transition-all text-center">
-                                        <div class="text-3xl font-bold text-purple-500 mb-2">4</div>
-                                        <div class="text-sm text-gray-600 font-medium">Good</div>
-                                    </button>
-                                    <button onclick="selectSleepRating(5)" class="sleep-option p-4 bg-white rounded-xl border-2 border-gray-200 hover:border-purple-400 hover:shadow-md transition-all text-center">
-                                        <div class="text-3xl font-bold text-purple-500 mb-2">5</div>
-                                        <div class="text-sm text-gray-600 font-medium">Excellent</div>
-                                    </button>
-                                </div>
-                                
-                                <div class="text-center text-sm text-gray-500">
-                                    Click a number to rate your sleep quality
+                                    <div class="text-sm text-gray-500 mt-3">
+                                        ✨ 10 questions with AI follow-ups • Covers all major health areas • Personalized recommendations
+                                    </div>
                                 </div>
                             </div>
                             
@@ -362,14 +343,217 @@
             </div>
         </section>
 
-        <!-- Other sections would go here (coaches, pricing, etc.) -->
-        <!-- I've shortened this for readability - the rest remains the same -->
+        <!-- PLACEHOLDER: Other sections would go here -->
+        <section id="coaches" class="section hidden py-16 bg-gray-50">
+            <div class="max-w-7xl mx-auto px-4 text-center">
+                <h1 class="text-4xl font-bold mb-6">Your Personal AI Healthcare Team</h1>
+                <p class="text-xl text-gray-600">Coming soon - your personalized AI specialists</p>
+            </div>
+        </section>
+
+        <section id="voice-ai" class="section hidden py-16 bg-gradient-to-br from-indigo-50 to-purple-50">
+            <div class="max-w-7xl mx-auto px-4 text-center">
+                <h1 class="text-4xl font-bold mb-6">🎙️ Revolutionary Voice AI Therapy</h1>
+                <p class="text-xl text-gray-600">Coming soon - voice emotion analysis and therapeutic responses</p>
+            </div>
+        </section>
+
+        <section id="ptsd-corner" class="section hidden py-16 bg-gradient-to-br from-green-50 to-emerald-50">
+            <div class="max-w-7xl mx-auto px-4 text-center">
+                <h1 class="text-4xl font-bold mb-6">🛡️ Your Safe Haven</h1>
+                <p class="text-xl text-gray-600">Coming soon - trauma-informed AI support and coping tools</p>
+            </div>
+        </section>
+
+        <section id="pricing" class="section hidden py-16 bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 text-white">
+            <div class="max-w-7xl mx-auto px-4 text-center">
+                <h1 class="text-4xl font-bold mb-6">🚀 JOIN THE HEALTHCARE REVOLUTION</h1>
+                <p class="text-xl text-blue-100">Coming soon - revolutionary pricing plans</p>
+            </div>
+        </section>
 
     </main>
 
-    <!-- JavaScript for functionality -->
+    <!-- JavaScript for comprehensive assessment -->
     <script>
         console.log('🚀 REVOLUTIONARY AI HEALTHCARE SYSTEM INITIALIZING...');
+
+        // Comprehensive 10-Question Assessment System
+        const ASSESSMENT_QUESTIONS = [
+            {
+                id: 1,
+                category: 'sleep',
+                question: "How would you rate your sleep quality over the past week?",
+                type: 'scale',
+                icon: 'fa-moon',
+                color: 'purple',
+                followups: {
+                    1: "What time do you usually try to fall asleep, and how long does it typically take?",
+                    2: "Do you wake up frequently during the night? What thoughts keep you awake?", 
+                    3: "What's your biggest sleep challenge right now?",
+                    4: "What helps you get good sleep? Any particular routines?",
+                    5: "That's excellent! What's your secret to great sleep?"
+                }
+            },
+            {
+                id: 2, 
+                category: 'mental_health',
+                question: "Over the past 2 weeks, how often have you felt down, depressed, or hopeless?",
+                type: 'frequency',
+                icon: 'fa-heart',
+                color: 'rose',
+                options: ['Not at all', 'Several days', 'More than half the days', 'Nearly every day'],
+                followups: {
+                    0: "I'm glad to hear that. What helps you maintain good mental health?",
+                    1: "That's understandable - we all have difficult days. What typically triggers these feelings?",
+                    2: "I hear you, and I want you to know you're not alone. What support do you have right now?",
+                    3: "Thank you for sharing something so personal. Have you been able to talk to anyone about how you're feeling?"
+                }
+            },
+            {
+                id: 3,
+                category: 'ptsd_trauma',
+                question: "Do you experience flashbacks, nightmares, or intrusive thoughts related to past traumatic events?",
+                type: 'frequency', 
+                icon: 'fa-shield-heart',
+                color: 'green',
+                options: ['Never', 'Rarely', 'Sometimes', 'Often', 'Daily'],
+                followups: {
+                    0: "I'm glad you don't experience these symptoms. Having good mental health is a strength.",
+                    1: "It's good that these are rare. When they do happen, what helps you cope?",
+                    2: "These experiences can be really challenging. Do you have coping strategies that help?",
+                    3: "I understand how difficult this must be. Are you currently receiving any trauma-informed support?",
+                    4: "Thank you for your trust in sharing this. Daily symptoms can be exhausting - what gets you through each day?"
+                }
+            },
+            {
+                id: 4,
+                category: 'chronic_illness',
+                question: "Do you live with any chronic health conditions (diabetes, arthritis, autoimmune, chronic pain, etc.)?",
+                type: 'multiple_choice',
+                icon: 'fa-heartbeat',
+                color: 'red',
+                options: ['No chronic conditions', 'One chronic condition', 'Multiple chronic conditions', 'Chronic pain condition', 'Autoimmune condition'],
+                followups: {
+                    0: "That's wonderful that you don't have chronic conditions. Prevention is so important - what do you do to stay healthy?",
+                    1: "Managing a chronic condition takes strength. How well do you feel it's controlled right now?",
+                    2: "Living with multiple conditions is incredibly challenging. What's your biggest daily struggle?",
+                    3: "Chronic pain affects everything. On a scale of 1-10, what's your average daily pain level?",
+                    4: "Autoimmune conditions can be so unpredictable. How do you handle the uncertainty and flare-ups?"
+                }
+            },
+            {
+                id: 5,
+                category: 'anxiety_stress',
+                question: "How would you rate your current stress and anxiety levels?",
+                type: 'scale',
+                icon: 'fa-brain',
+                color: 'yellow', 
+                followups: {
+                    1: "Low stress is wonderful! What helps you stay so calm and centered?",
+                    2: "Mild stress is normal. What are your main sources of stress right now?",
+                    3: "Moderate stress can be tough. What situations or thoughts trigger your anxiety most?",
+                    4: "High stress is really hard to carry. What's weighing most heavily on your mind?",
+                    5: "I can hear how overwhelming things feel. What would help you feel even slightly more supported right now?"
+                }
+            },
+            {
+                id: 6,
+                category: 'physical_health',
+                question: "How would you rate your overall physical health and energy levels?",
+                type: 'scale',
+                icon: 'fa-running',
+                color: 'blue',
+                followups: {
+                    1: "Low energy can make everything harder. What do you think might be contributing to this?",
+                    2: "Poor physical health affects so much. What's your biggest physical challenge right now?", 
+                    3: "Average health is a good starting point. What would you most like to improve?",
+                    4: "Good health is such a blessing. How do you maintain your physical wellbeing?",
+                    5: "Excellent health! What's your secret? Exercise, nutrition, genetics, lifestyle?"
+                }
+            },
+            {
+                id: 7,
+                category: 'nutrition_eating',
+                question: "How would you describe your relationship with food and eating habits?",
+                type: 'multiple_choice',
+                icon: 'fa-apple-alt',
+                color: 'green',
+                options: ['Very poor - struggling with eating', 'Poor - inconsistent, unhealthy choices', 'Fair - some good, some bad habits', 'Good - generally healthy choices', 'Excellent - confident and balanced'],
+                followups: {
+                    0: "Eating struggles are so difficult. Is this related to access, appetite, emotional eating, or something else?",
+                    1: "Inconsistent eating is common when life is overwhelming. What makes healthy eating challenging for you?",
+                    2: "A mix of good and bad habits is very human! What healthy changes would feel most achievable right now?", 
+                    3: "Good eating habits are a great foundation. What motivates you to make healthy choices?",
+                    4: "A balanced relationship with food is amazing! How did you develop this confidence?"
+                }
+            },
+            {
+                id: 8,
+                category: 'social_support',
+                question: "How supported do you feel by family, friends, or your community?",
+                type: 'scale',
+                icon: 'fa-users',
+                color: 'indigo',
+                followups: {
+                    1: "Feeling isolated is so painful. What makes it hard to connect with others right now?",
+                    2: "Limited support can make everything harder. Who in your life do you feel closest to?",
+                    3: "Some support is good. What kind of additional support would be most helpful?",
+                    4: "Strong support makes such a difference! Who are your key support people?",
+                    5: "Amazing support system! How did you build such strong relationships?"
+                }
+            },
+            {
+                id: 9,
+                category: 'coping_resilience',
+                question: "When faced with major life challenges, how well do you feel you cope and bounce back?",
+                type: 'scale',
+                icon: 'fa-mountain',
+                color: 'purple',
+                followups: {
+                    1: "Struggling to cope is completely understandable given what you're facing. What feels most overwhelming?",
+                    2: "Difficulty coping doesn't mean you're weak - it means you're human. What has helped you get through tough times before?",
+                    3: "Average coping skills can definitely be strengthened. What would help you feel more resilient?",
+                    4: "Good resilience is a real strength! What strategies work best for you?",
+                    5: "Incredible resilience! What wisdom would you share with others facing difficulties?"
+                }
+            },
+            {
+                id: 10,
+                category: 'life_satisfaction',
+                question: "Overall, how satisfied do you feel with your life right now?",
+                type: 'scale',
+                icon: 'fa-star',
+                color: 'gold',
+                followups: {
+                    1: "I hear that life feels really difficult right now. What's the hardest part about your current situation?",
+                    2: "Dissatisfaction is painful. If you could change one thing about your life, what would it be?",
+                    3: "Neutral satisfaction suggests room for growth. What would make your life feel more fulfilling?", 
+                    4: "Good satisfaction is wonderful! What aspects of your life bring you the most joy?",
+                    5: "High life satisfaction is beautiful! What makes your life feel so fulfilling?"
+                }
+            }
+        ];
+
+        // Assessment State Management
+        let assessmentState = {
+            currentQuestion: 0,
+            responses: {},
+            followupResponses: {},
+            startTime: null,
+            userProfile: {
+                riskFactors: [],
+                strengths: [],
+                priorities: []
+            }
+        };
+
+        // Global user profile for basic functionality
+        let userProfile = {
+            id: generateUserId(),
+            interactions: 0,
+            memories: []
+        };
 
         // Navigation System
         function showSection(sectionName) {
@@ -384,35 +568,175 @@
             const target = document.getElementById(sectionName);
             if (target) {
                 target.classList.remove('hidden');
+                
+                // Section-specific initialization
+                if (sectionName === 'assessment') {
+                    console.log('🧠 AI Assessment System loaded - ready for user to start');
+                    // Assessment starts when user clicks "Start My Comprehensive Health Assessment" button
+                }
+                
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             }
         }
 
-        // Mobile Menu Toggle
         function toggleMobileMenu() {
             const menu = document.getElementById('mobile-menu');
             menu.classList.toggle('hidden');
         }
 
-        // Intelligent Assessment Function
-        async function selectSleepRating(rating) {
-            console.log(`😴 Sleep rating selected: ${rating}/5`);
+        function generateUserId() {
+            return 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        }
+
+        function addMemory(type, data) {
+            userProfile.memories.push({
+                id: Date.now(),
+                timestamp: new Date().toISOString(),
+                type: type,
+                data: data
+            });
+        }
+
+        // Comprehensive Assessment Functions
+        async function startPersonalizedAssessment() {
+            console.log('🎯 Starting comprehensive 10-question assessment...');
+            
+            // Reset assessment state
+            assessmentState = {
+                currentQuestion: 0,
+                responses: {},
+                followupResponses: {},
+                startTime: new Date().toISOString(),
+                userProfile: {
+                    riskFactors: [],
+                    strengths: [],
+                    priorities: []
+                }
+            };
+            
+            // Start with first question
+            showAssessmentQuestion(0);
+        }
+
+        function showAssessmentQuestion(questionIndex) {
+            const container = document.getElementById('assessment-content');
+            const question = ASSESSMENT_QUESTIONS[questionIndex];
+            const progress = ((questionIndex + 1) / ASSESSMENT_QUESTIONS.length) * 100;
+            
+            container.innerHTML = `
+                <div class="p-8">
+                    <!-- Progress Indicator -->
+                    <div class="mb-8">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm font-semibold text-${question.color}-600">Question ${questionIndex + 1} of ${ASSESSMENT_QUESTIONS.length}</span>
+                            <span class="text-sm text-gray-500">Comprehensive Health Assessment</span>
+                        </div>
+                        <div class="w-full bg-${question.color}-100 rounded-full h-3">
+                            <div class="bg-gradient-to-r from-${question.color}-500 to-blue-500 h-3 rounded-full transition-all duration-700" style="width: ${progress}%"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- AI Question Interface -->
+                    <div class="bg-gradient-to-br from-${question.color}-50 to-blue-50 rounded-2xl p-8 border border-${question.color}-200 mb-8">
+                        <div class="flex items-start space-x-4 mb-6">
+                            <div class="w-12 h-12 bg-gradient-to-br from-${question.color}-500 to-blue-500 rounded-full flex items-center justify-center text-white text-xl">
+                                <i class="fas ${question.icon}"></i>
+                            </div>
+                            <div class="flex-1">
+                                <div class="font-bold text-${question.color}-800 mb-2">AI Healthcare Assistant</div>
+                                <div class="text-gray-700 text-lg leading-relaxed">
+                                    ${question.question}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Answer Options -->
+                        <div id="answer-options" class="mb-6">
+                            ${generateAnswerOptions(question)}
+                        </div>
+                        
+                        <div class="text-center text-sm text-gray-500">
+                            Your response helps me understand how to best support you
+                        </div>
+                    </div>
+                    
+                    <!-- AI Follow-up Area -->
+                    <div id="ai-followup" class="hidden">
+                        <!-- AI follow-up will appear here -->
+                    </div>
+                    
+                    <!-- Navigation -->
+                    <div class="flex justify-between items-center">
+                        <button onclick="showSection('home')" class="px-6 py-3 border border-gray-300 rounded-xl text-gray-700 font-semibold hover:bg-gray-50 transition-all">
+                            <i class="fas fa-arrow-left mr-2"></i>Back to Home
+                        </button>
+                        <button id="continue-btn" disabled class="px-8 py-3 bg-gray-300 text-gray-500 rounded-xl font-semibold cursor-not-allowed">
+                            Continue to Next Question
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function generateAnswerOptions(question) {
+            if (question.type === 'scale') {
+                return `
+                    <div class="grid grid-cols-5 gap-3">
+                        ${[1,2,3,4,5].map(i => `
+                            <button onclick="selectAnswer(${i})" class="answer-option p-4 bg-white rounded-xl border-2 border-gray-200 hover:border-${question.color}-400 hover:shadow-md transition-all text-center">
+                                <div class="text-3xl font-bold text-${question.color}-500 mb-2">${i}</div>
+                                <div class="text-sm text-gray-600 font-medium">${['Terrible','Poor','Fair','Good','Excellent'][i-1]}</div>
+                            </button>
+                        `).join('')}
+                    </div>
+                `;
+            } else if (question.type === 'frequency' || question.type === 'multiple_choice') {
+                return `
+                    <div class="space-y-3">
+                        ${question.options.map((option, index) => `
+                            <button onclick="selectAnswer(${index})" class="answer-option w-full p-4 bg-white rounded-xl border-2 border-gray-200 hover:border-${question.color}-400 hover:shadow-md transition-all text-left">
+                                <div class="font-medium text-gray-800">${option}</div>
+                            </button>
+                        `).join('')}
+                    </div>
+                `;
+            }
+        }
+
+        async function selectAnswer(answerValue) {
+            const currentQ = ASSESSMENT_QUESTIONS[assessmentState.currentQuestion];
+            console.log(`📝 Question ${assessmentState.currentQuestion + 1} answered: ${answerValue}`);
+            
+            // Store response
+            assessmentState.responses[currentQ.category] = answerValue;
             
             // Visual feedback
-            document.querySelectorAll('.sleep-option').forEach(option => {
-                option.classList.remove('bg-purple-100', 'border-purple-500');
+            document.querySelectorAll('.answer-option').forEach(option => {
+                option.classList.remove('bg-blue-100', 'border-blue-500');
             });
-            event.target.closest('.sleep-option').classList.add('bg-purple-100', 'border-purple-500');
+            event.target.classList.add('bg-blue-100', 'border-blue-500');
+            
+            // Show AI follow-up
+            await showAIFollowup(currentQ, answerValue);
             
             // Enable continue button
             const continueBtn = document.getElementById('continue-btn');
             continueBtn.disabled = false;
-            continueBtn.className = 'px-8 py-3 bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-xl font-semibold hover:from-purple-600 hover:to-blue-600 transition-all';
-            continueBtn.innerHTML = '<i class="fas fa-arrow-right mr-2"></i>Continue to AI Analysis';
-            continueBtn.onclick = () => generateAIPrescription(rating);
+            continueBtn.className = 'px-8 py-3 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-xl font-semibold hover:from-blue-600 hover:to-purple-600 transition-all';
             
-            // Show AI follow-up
+            if (assessmentState.currentQuestion < ASSESSMENT_QUESTIONS.length - 1) {
+                continueBtn.innerHTML = '<i class="fas fa-arrow-right mr-2"></i>Next Question';
+                continueBtn.onclick = () => proceedToNextQuestion();
+            } else {
+                continueBtn.innerHTML = '<i class="fas fa-magic mr-2"></i>Generate AI Health Plan';
+                continueBtn.onclick = () => generateComprehensiveAssessment();
+            }
+        }
+
+        async function showAIFollowup(question, answerValue) {
             const followupDiv = document.getElementById('ai-followup');
+            const followupText = question.followups[answerValue] || "Thank you for sharing that with me.";
+            
             followupDiv.classList.remove('hidden');
             followupDiv.innerHTML = `
                 <div class="bg-white rounded-2xl p-6 shadow-lg border border-blue-200 mb-6">
@@ -423,57 +747,247 @@
                         <div class="flex-1">
                             <div class="font-semibold text-blue-800 mb-2">🤖 AI Follow-up Question</div>
                             <div class="text-gray-700 mb-4" id="followup-question">
-                                ${rating <= 2 ? 
-                                    "What time of day do you find it hardest to fall asleep?" :
-                                    rating <= 3 ? 
-                                    "Do you wake up feeling rested, or still tired?" :
-                                    "What helps you maintain such good sleep quality?"
-                                }
+                                ${followupText}
                             </div>
-                            <textarea id="followup-response" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" rows="3" placeholder="Your response (optional)..."></textarea>
+                            <textarea id="followup-response" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" rows="3" placeholder="Your response helps me understand you better (optional)..."></textarea>
                         </div>
                     </div>
                 </div>
             `;
         }
 
-        function generateAIPrescription(sleepRating) {
+        function proceedToNextQuestion() {
+            // Store follow-up response if provided
+            const followupResponse = document.getElementById('followup-response')?.value;
+            if (followupResponse) {
+                const currentQ = ASSESSMENT_QUESTIONS[assessmentState.currentQuestion];
+                assessmentState.followupResponses[currentQ.category] = followupResponse;
+            }
+            
+            // Move to next question
+            assessmentState.currentQuestion++;
+            showAssessmentQuestion(assessmentState.currentQuestion);
+        }
+
+        async function generateComprehensiveAssessment() {
+            console.log('🎯 Generating comprehensive AI health plan...');
+            
+            // Store final follow-up response
+            const followupResponse = document.getElementById('followup-response')?.value;
+            if (followupResponse) {
+                const currentQ = ASSESSMENT_QUESTIONS[assessmentState.currentQuestion];
+                assessmentState.followupResponses[currentQ.category] = followupResponse;
+            }
+            
+            // Analyze responses for risk factors and strengths
+            analyzeUserProfile();
+            
             const container = document.getElementById('assessment-content');
+            
+            // Show loading state
+            container.innerHTML = `
+                <div class="p-8 text-center">
+                    <div class="mb-8">
+                        <div class="w-24 h-24 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-6 ai-glow">
+                            <i class="fas fa-brain text-white text-3xl animate-pulse"></i>
+                        </div>
+                        <h2 class="text-3xl font-bold text-gray-800 mb-4">🧠 AI Analyzing Your Complete Health Profile...</h2>
+                        <p class="text-lg text-gray-600 mb-6">
+                            Processing your 10 responses to create a comprehensive, personalized health and wellness plan
+                        </p>
+                        
+                        <div class="bg-purple-50 rounded-xl p-6 border border-purple-200 max-w-md mx-auto">
+                            <div class="space-y-3 text-sm text-purple-700">
+                                <div class="flex items-center justify-between">
+                                    <span>Analyzing sleep patterns...</span>
+                                    <i class="fas fa-check text-green-500"></i>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <span>Assessing mental health indicators...</span>
+                                    <i class="fas fa-check text-green-500"></i>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <span>Evaluating trauma responses...</span>
+                                    <i class="fas fa-check text-green-500"></i>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <span>Processing chronic health factors...</span>
+                                    <i class="fas fa-check text-green-500"></i>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <span>Creating personalized recommendations...</span>
+                                    <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-purple-500"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Generate comprehensive prescription
+            setTimeout(() => {
+                displayComprehensiveResults();
+            }, 3000);
+        }
+
+        function analyzeUserProfile() {
+            const responses = assessmentState.responses;
+            const profile = assessmentState.userProfile;
+            
+            // Identify risk factors
+            if (responses.sleep <= 2) profile.riskFactors.push('Poor sleep quality');
+            if (responses.mental_health >= 2) profile.riskFactors.push('Depression/hopelessness symptoms');
+            if (responses.ptsd_trauma >= 2) profile.riskFactors.push('Trauma symptoms');
+            if (responses.chronic_illness >= 1) profile.riskFactors.push('Chronic health conditions');
+            if (responses.anxiety_stress >= 4) profile.riskFactors.push('High stress/anxiety');
+            if (responses.physical_health <= 2) profile.riskFactors.push('Poor physical health');
+            if (responses.nutrition_eating <= 1) profile.riskFactors.push('Eating/nutrition struggles');
+            if (responses.social_support <= 2) profile.riskFactors.push('Limited social support');
+            if (responses.coping_resilience <= 2) profile.riskFactors.push('Difficulty coping with challenges');
+            if (responses.life_satisfaction <= 2) profile.riskFactors.push('Low life satisfaction');
+            
+            // Identify strengths
+            if (responses.sleep >= 4) profile.strengths.push('Good sleep habits');
+            if (responses.mental_health === 0) profile.strengths.push('Strong mental health');
+            if (responses.ptsd_trauma === 0) profile.strengths.push('No trauma symptoms');
+            if (responses.anxiety_stress <= 2) profile.strengths.push('Good stress management');
+            if (responses.physical_health >= 4) profile.strengths.push('Strong physical health');
+            if (responses.nutrition_eating >= 3) profile.strengths.push('Healthy eating habits');
+            if (responses.social_support >= 4) profile.strengths.push('Strong support network');
+            if (responses.coping_resilience >= 4) profile.strengths.push('Good resilience skills');
+            if (responses.life_satisfaction >= 4) profile.strengths.push('High life satisfaction');
+            
+            // Set priorities based on risk factors
+            if (profile.riskFactors.includes('Depression/hopelessness symptoms') || 
+                profile.riskFactors.includes('Trauma symptoms')) {
+                profile.priorities.push('Mental health and trauma support');
+            }
+            if (profile.riskFactors.includes('Poor sleep quality')) {
+                profile.priorities.push('Sleep optimization');
+            }
+            if (profile.riskFactors.includes('Chronic health conditions')) {
+                profile.priorities.push('Chronic illness management');
+            }
+            if (profile.riskFactors.includes('High stress/anxiety')) {
+                profile.priorities.push('Stress reduction and anxiety management');
+            }
+        }
+
+        function displayComprehensiveResults() {
+            const container = document.getElementById('assessment-content');
+            const profile = assessmentState.userProfile;
+            const responses = assessmentState.responses;
+            
+            // Add comprehensive assessment to user memory
+            addMemory('comprehensive_assessment', { 
+                responses, 
+                followupResponses: assessmentState.followupResponses,
+                riskFactors: profile.riskFactors,
+                strengths: profile.strengths,
+                priorities: profile.priorities,
+                timestamp: new Date().toISOString() 
+            });
             
             container.innerHTML = `
                 <div class="p-8">
+                    <!-- Success Header -->
                     <div class="text-center mb-8">
-                        <div class="w-20 h-20 bg-gradient-to-br from-green-500 to-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6 ai-glow">
+                        <div class="w-24 h-24 bg-gradient-to-br from-green-500 to-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-2xl">
                             <i class="fas fa-heart text-white text-3xl"></i>
                         </div>
-                        <h1 class="text-4xl font-bold text-gray-800 mb-4">🎉 Your Personal AI Healthcare Plan is Ready!</h1>
+                        <h1 class="text-4xl font-bold text-gray-800 mb-4">🎉 Your Comprehensive AI Health Plan is Ready!</h1>
                         <p class="text-lg text-gray-600 max-w-2xl mx-auto">
-                            Created specifically for you based on your unique responses and health patterns
+                            Based on your complete health assessment covering ${ASSESSMENT_QUESTIONS.length} key areas of wellness
                         </p>
                     </div>
                     
-                    <div class="bg-gradient-to-br from-white to-green-50 rounded-2xl shadow-2xl border-2 border-green-200 p-8 mb-8">
+                    <!-- Health Overview -->
+                    <div class="grid md:grid-cols-2 gap-8 mb-8">
+                        <!-- Strengths -->
+                        <div class="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl shadow-xl border-2 border-green-200 p-6">
+                            <div class="flex items-center mb-4">
+                                <i class="fas fa-star text-2xl text-green-600 mr-3"></i>
+                                <h3 class="text-xl font-bold text-green-800">Your Strengths</h3>
+                            </div>
+                            <div class="space-y-2">
+                                ${profile.strengths.length > 0 ? 
+                                    profile.strengths.map(strength => `
+                                        <div class="flex items-center text-green-700">
+                                            <i class="fas fa-check-circle mr-2 text-green-500"></i>
+                                            ${strength}
+                                        </div>
+                                    `).join('') :
+                                    '<div class="text-green-700">Building on your foundation of sharing openly with our assessment</div>'
+                                }
+                            </div>
+                        </div>
+                        
+                        <!-- Priority Areas -->
+                        <div class="bg-gradient-to-br from-blue-50 to-purple-50 rounded-2xl shadow-xl border-2 border-blue-200 p-6">
+                            <div class="flex items-center mb-4">
+                                <i class="fas fa-target text-2xl text-blue-600 mr-3"></i>
+                                <h3 class="text-xl font-bold text-blue-800">Priority Focus Areas</h3>
+                            </div>
+                            <div class="space-y-2">
+                                ${profile.priorities.length > 0 ?
+                                    profile.priorities.map(priority => `
+                                        <div class="flex items-center text-blue-700">
+                                            <i class="fas fa-arrow-right mr-2 text-blue-500"></i>
+                                            ${priority}
+                                        </div>
+                                    `).join('') :
+                                    '<div class="text-blue-700">Continue building on your existing healthy habits</div>'
+                                }
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Personalized Recommendations -->
+                    <div class="bg-gradient-to-br from-white to-purple-50 rounded-2xl shadow-2xl border-2 border-purple-200 p-8 mb-8">
                         <div class="flex items-center justify-between mb-6">
                             <div class="flex items-center space-x-3">
-                                <i class="fas fa-user-md text-2xl text-green-600"></i>
+                                <i class="fas fa-user-md text-2xl text-purple-600"></i>
                                 <div>
-                                    <div class="font-bold text-green-800">Your AI Healthcare Assistant</div>
-                                    <div class="text-sm text-green-600">Personalized Prescription Generated</div>
+                                    <div class="font-bold text-purple-800">Your AI Healthcare Team</div>
+                                    <div class="text-sm text-purple-600">Comprehensive Health Plan Generated</div>
                                 </div>
                             </div>
                         </div>
                         
                         <div class="prose max-w-none text-gray-800 leading-relaxed">
-                            <p><strong>Based on your sleep rating of ${sleepRating}/5:</strong></p>
-                            ${sleepRating <= 2 ? 
-                                '<p>I can see sleep is a significant challenge. Here\'s your personalized sleep optimization protocol: Start with a consistent bedtime routine, limit screens 1 hour before bed, and try 4-7-8 breathing technique.</p>' :
-                                sleepRating <= 3 ? 
-                                '<p>Your sleep has room for improvement. I recommend: Optimize your sleep environment (cool, dark, quiet), establish a wind-down routine, and consider magnesium supplementation.</p>' :
-                                '<p>Excellent sleep foundation! To maintain this: Keep your consistent schedule, continue what\'s working, and consider sleep tracking to optimize further.</p>'
-                            }
+                            ${generatePersonalizedRecommendations()}
                         </div>
                     </div>
                     
+                    <!-- Crisis Support Notice -->
+                    ${profile.riskFactors.some(rf => rf.includes('Depression') || rf.includes('Trauma')) ? `
+                        <div class="bg-gradient-to-r from-red-50 to-pink-50 rounded-2xl border-2 border-red-200 p-6 mb-8">
+                            <div class="flex items-center mb-4">
+                                <i class="fas fa-heart text-2xl text-red-600 mr-3"></i>
+                                <h3 class="text-xl font-bold text-red-800">Important: You're Not Alone</h3>
+                            </div>
+                            <p class="text-red-700 mb-4">
+                                Based on your responses, I want you to know that professional support is available 24/7. 
+                                Your mental health matters, and there are people trained to help.
+                            </p>
+                            <div class="grid md:grid-cols-3 gap-4">
+                                <a href="tel:116123" class="bg-red-500 text-white p-3 rounded-lg text-center hover:bg-red-600 transition-all">
+                                    <div class="font-bold">🇬🇧 UK: Samaritans</div>
+                                    <div>116 123 (Free)</div>
+                                </a>
+                                <a href="tel:988" class="bg-red-500 text-white p-3 rounded-lg text-center hover:bg-red-600 transition-all">
+                                    <div class="font-bold">🇺🇸 US: Crisis Lifeline</div>
+                                    <div>988 (Free)</div>
+                                </a>
+                                <a href="tel:999" class="bg-red-600 text-white p-3 rounded-lg text-center hover:bg-red-700 transition-all">
+                                    <div class="font-bold">Emergency</div>
+                                    <div>999 / 911</div>
+                                </a>
+                            </div>
+                        </div>
+                    ` : ''}
+                    
+                    <!-- Next Steps -->
                     <div class="grid md:grid-cols-3 gap-6">
                         <button onclick="showSection('coaches')" class="bg-gradient-to-br from-purple-500 to-blue-500 text-white p-6 rounded-xl hover:from-purple-600 hover:to-blue-600 transition-all text-center">
                             <i class="fas fa-robot text-3xl mb-3 block"></i>
@@ -484,17 +998,125 @@
                         <button onclick="showSection('ptsd-corner')" class="bg-gradient-to-br from-green-500 to-emerald-500 text-white p-6 rounded-xl hover:from-green-600 hover:to-emerald-600 transition-all text-center">
                             <i class="fas fa-shield-heart text-3xl mb-3 block"></i>
                             <div class="font-bold mb-2">Visit Safe Space</div>
-                            <div class="text-sm opacity-90">Access PTSD support tools</div>
+                            <div class="text-sm opacity-90">Access trauma-informed tools</div>
                         </button>
                         
-                        <button onclick="showSection('pricing')" class="bg-gradient-to-br from-gray-600 to-gray-700 text-white p-6 rounded-xl hover:from-gray-700 hover:to-gray-800 transition-all text-center">
-                            <i class="fas fa-rocket text-3xl mb-3 block"></i>
-                            <div class="font-bold mb-2">Get Full Access</div>
-                            <div class="text-sm opacity-90">Unlock all AI features</div>
+                        <button onclick="downloadComprehensiveAssessment()" class="bg-gradient-to-br from-gray-600 to-gray-700 text-white p-6 rounded-xl hover:from-gray-700 hover:to-gray-800 transition-all text-center">
+                            <i class="fas fa-download text-3xl mb-3 block"></i>
+                            <div class="font-bold mb-2">Save Complete Assessment</div>
+                            <div class="text-sm opacity-90">Download your health plan</div>
                         </button>
                     </div>
                 </div>
             `;
+        }
+
+        function generatePersonalizedRecommendations() {
+            const responses = assessmentState.responses;
+            let recommendations = [];
+            
+            // Sleep recommendations
+            if (responses.sleep <= 2) {
+                recommendations.push("🌙 **Sleep Recovery Protocol**: Your sleep quality needs immediate attention. I recommend establishing a consistent bedtime routine, limiting screens 1 hour before bed, and creating a cool, dark sleep environment. Consider the 4-7-8 breathing technique before bed.");
+            } else if (responses.sleep >= 4) {
+                recommendations.push("🌙 **Sleep Excellence Maintenance**: Your sleep habits are a real strength! Continue your current routine and consider tracking sleep patterns to optimize further.");
+            }
+            
+            // Mental health recommendations
+            if (responses.mental_health >= 2) {
+                recommendations.push("💖 **Mental Health Support**: Thank you for sharing about your struggles with depression. Please consider connecting with a mental health professional. In the meantime, daily mindfulness, gentle movement, and reaching out to supportive people can help.");
+            }
+            
+            // PTSD/Trauma recommendations
+            if (responses.ptsd_trauma >= 2) {
+                recommendations.push("🛡️ **Trauma-Informed Care**: Trauma symptoms require specialized support. I recommend trauma-focused therapy like EMDR or CBT. Daily grounding techniques (5-4-3-2-1 method) and self-compassion practices can provide immediate relief.");
+            }
+            
+            // Chronic illness recommendations  
+            if (responses.chronic_illness >= 1) {
+                recommendations.push("🏥 **Chronic Condition Management**: Living with chronic illness requires a holistic approach. Focus on stress reduction, gentle movement as tolerated, anti-inflammatory nutrition, and building a strong support team including specialists.");
+            }
+            
+            // Stress/Anxiety recommendations
+            if (responses.anxiety_stress >= 4) {
+                recommendations.push("🧠 **Stress & Anxiety Relief**: High stress levels need immediate attention. Try box breathing (4-4-4-4 count), progressive muscle relaxation, and identifying specific stress triggers. Consider professional anxiety treatment.");
+            }
+            
+            // Physical health recommendations
+            if (responses.physical_health <= 2) {
+                recommendations.push("💪 **Physical Health Building**: Start with gentle, sustainable changes. Even 5 minutes of daily movement, staying hydrated, and eating one nourishing meal per day can begin to rebuild your energy and vitality.");
+            }
+            
+            // Nutrition recommendations
+            if (responses.nutrition_eating <= 1) {
+                recommendations.push("🍎 **Nutrition Recovery**: Eating struggles are complex. Focus on eating regularly (even small amounts), choosing nutrient-dense foods when possible, and addressing any emotional or practical barriers to healthy eating. Consider nutritional counseling.");
+            }
+            
+            // Social support recommendations
+            if (responses.social_support <= 2) {
+                recommendations.push("👥 **Connection Building**: Isolation makes everything harder. Start small - reach out to one person today, consider joining a support group (online or in-person), or engage with community activities that align with your interests.");
+            }
+            
+            // Resilience recommendations
+            if (responses.coping_resilience <= 2) {
+                recommendations.push("🏔️ **Resilience Development**: Building coping skills takes time. Practice self-compassion, develop a 'coping toolkit' of strategies that work for you, and remember that asking for help is a sign of strength, not weakness.");
+            }
+            
+            // Life satisfaction recommendations
+            if (responses.life_satisfaction <= 2) {
+                recommendations.push("⭐ **Life Fulfillment**: Low life satisfaction often reflects unmet needs or values. Consider what truly matters to you, set small achievable goals, and remember that change is possible - even small steps can lead to significant improvements.");
+            }
+            
+            if (recommendations.length === 0) {
+                recommendations.push("🌟 **Wellness Optimization**: Your assessment shows many areas of strength! Focus on maintaining these healthy patterns while gradually enhancing areas where you'd like to grow. Consider setting new wellness goals that excite and motivate you.");
+            }
+            
+            return recommendations.join('<br><br>');
+        }
+
+        function downloadComprehensiveAssessment() {
+            const assessment = assessmentState;
+            const profile = assessment.userProfile;
+            
+            const content = `Root Cause Power - Comprehensive Health Assessment Results
+Generated: ${new Date().toLocaleDateString()}
+Assessment ID: ${Date.now()}
+
+=== ASSESSMENT RESPONSES ===
+${ASSESSMENT_QUESTIONS.map((q, i) => {
+    const response = assessment.responses[q.category];
+    const followup = assessment.followupResponses[q.category] || 'No additional response';
+    return `${i + 1}. ${q.question}
+Response: ${response}
+Follow-up: ${followup}`;
+}).join('\n\n')}
+
+=== AI ANALYSIS ===
+Strengths Identified:
+${profile.strengths.map(s => `• ${s}`).join('\n')}
+
+Priority Areas:
+${profile.priorities.map(p => `• ${p}`).join('\n')}
+
+Risk Factors:
+${profile.riskFactors.map(rf => `• ${rf}`).join('\n')}
+
+=== PERSONALIZED RECOMMENDATIONS ===
+${generatePersonalizedRecommendations().replace(/<br><br>/g, '\n\n').replace(/\*\*(.*?)\*\*/g, '$1')}
+
+---
+This comprehensive assessment was generated by AI based on your personal responses.
+For medical concerns, please consult with qualified healthcare professionals.
+Crisis support: UK 116 123 | US 988 | Emergency 999/911
+`;
+            
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `RootCausePower-Assessment-${new Date().toISOString().split('T')[0]}.txt`;
+            a.click();
+            URL.revokeObjectURL(url);
         }
 
         function triggerCrisisSupport() {
@@ -504,6 +1126,7 @@
         // Initialize
         showSection('home');
         console.log('🚀 REVOLUTIONARY AI HEALTHCARE SYSTEM READY!');
+        console.log('💫 Welcome to the future of personalized medicine!');
     </script>
 </body>
 </html>
