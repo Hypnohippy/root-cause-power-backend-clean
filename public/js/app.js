@@ -947,4 +947,59 @@ window.addEventListener('DOMContentLoaded', () => {
     window.app.stopAllAudio = window.app.stopAllAudio.bind(window.app);
 });
 
+// === AI HELPERS: follow-up questions + prescription (Groq via serverless) ===
+window.app = window.app || {};
+
+// Call the follow-up endpoint
+app.aiFollowUp = async function (currentQuestion, userResponse) {
+  const r = await fetch('/api/followup', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      currentQuestion: currentQuestion,
+      userResponse: String(userResponse ?? '')
+    })
+  });
+  const data = await r.json();
+  if (!r.ok) throw new Error(data?.error || 'Follow-up API error');
+  return data.followUp || 'Would you like to tell me a little more?';
+};
+
+// Call the prescription endpoint
+app.aiPrescription = async function (assessmentContext) {
+  const r = await fetch('/api/prescription', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ assessmentContext })
+  });
+  const data = await r.json();
+  if (!r.ok) throw new Error(data?.error || 'Prescription API error');
+  return data.prescription || '';
+};
+
+// If an AIAssessment object exists, plug these helpers into it
+if (window.AIAssessment) {
+  // Replace follow-up generator
+  AIAssessment.callAIForFollowUp = function (context) {
+    // context.currentQuestion.question, context.userResponse
+    return app.aiFollowUp(context.currentQuestion.question, context.userResponse);
+  };
+
+  // Replace prescription generator
+  AIAssessment.generateAIPrescription = function () {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const analysisContext = this.prepareAssessmentForAI
+          ? this.prepareAssessmentForAI()
+          : 'No assessment context available.';
+        const result = await app.aiPrescription(analysisContext);
+        resolve(result);
+      } catch (e) {
+        reject(e);
+      }
+    });
+  };
+}
+
+
 console.log('🚀 Root Cause Power App script loaded successfully!');
