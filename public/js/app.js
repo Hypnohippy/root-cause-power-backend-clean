@@ -1003,3 +1003,168 @@ if (window.AIAssessment) {
 
 
 console.log('🚀 Root Cause Power App script loaded successfully!');
+
+// === AI hookup + Minimal fallback assessment renderer ===
+// Define AI helper calls if not already present
+window.app = window.app || {};
+
+if (!app.aiFollowUp) {
+  app.aiFollowUp = async function (currentQuestion, userResponse) {
+    const r = await fetch('/api/followup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        currentQuestion,
+        userResponse: String(userResponse ?? '')
+      })
+    });
+    const data = await r.json();
+    if (!r.ok) throw new Error(data?.error || 'Follow-up API error');
+    return data.followUp || 'Would you like to tell me a little more?';
+  };
+}
+
+if (!app.aiPrescription) {
+  app.aiPrescription = async function (assessmentContext) {
+    const r = await fetch('/api/prescription', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ assessmentContext })
+    });
+    const data = await r.json();
+    if (!r.ok) throw new Error(data?.error || 'Prescription API error');
+    return data.prescription || '';
+  };
+}
+
+// Minimal fallback assessment if nothing else renders it
+document.addEventListener('DOMContentLoaded', function () {
+  // Your page sometimes uses #assessment-questions, sometimes #assessment-content
+  const container =
+    document.getElementById('assessment-questions') ||
+    document.getElementById('assessment-content');
+
+  // Only run if an assessment container exists and is still showing the loader
+  if (!container) return;
+  if (container.dataset.rcpFallbackLoaded) return;
+  container.dataset.rcpFallbackLoaded = '1';
+
+  renderStep1();
+
+  function renderStep1() {
+    container.innerHTML = `
+      <div class="bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden">
+        <div class="bg-gradient-to-r from-purple-50 to-blue-50 p-6 border-b border-gray-100">
+          <div class="flex items-center">
+            <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center text-white font-bold text-lg mr-4">1</div>
+            <div>
+              <h3 class="text-xl font-semibold text-gray-800">Sleep Quality</h3>
+              <p class="text-sm text-gray-600">How well are you sleeping these days?</p>
+            </div>
+          </div>
+        </div>
+        <div class="p-6">
+          <div class="grid grid-cols-5 gap-2 mb-2" id="rcp-scale">
+            ${[1,2,3,4,5].map(i => `
+              <button data-value="${i}" class="rcp-scale-btn w-full p-3 rounded-lg border-2 border-gray-200 hover:border-purple-400 hover:bg-purple-50 transition-all">
+                <div class="text-2xl font-bold text-purple-600 mb-1">${i}</div>
+                <div class="text-xs text-gray-600">${['Terrible','Poor','Fair','Good','Excellent'][i-1]}</div>
+              </button>
+            `).join('')}
+          </div>
+          <p class="text-xs text-gray-500 text-center mb-4">Click a number to rate your experience</p>
+
+          <div id="rcp-followup" class="hidden mt-4 p-4 bg-blue-50 border-l-4 border-blue-400 rounded-lg text-blue-800 text-sm"></div>
+
+          <div class="mt-6 flex justify-between items-center">
+            <button id="rcp-prev" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors" disabled>← Previous</button>
+            <button id="rcp-next" class="px-6 py-2 bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-lg hover:from-purple-600 hover:to-blue-600 transition-all disabled:opacity-50" disabled>
+              Continue →
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+
+    const scaleBtns = container.querySelectorAll('.rcp-scale-btn');
+    const followupDiv = container.querySelector('#rcp-followup');
+    const nextBtn = container.querySelector('#rcp-next');
+
+    let selected = null;
+
+    scaleBtns.forEach(btn => {
+      btn.addEventListener('click', async () => {
+        // highlight selection
+        scaleBtns.forEach(b => b.classList.remove('bg-purple-100','border-purple-500'));
+        btn.classList.add('bg-purple-100','border-purple-500');
+        selected = parseInt(btn.dataset.value, 10);
+        nextBtn.disabled = false;
+
+        // Ask AI a follow-up
+        try {
+          followupDiv.classList.remove('hidden');
+          followupDiv.textContent = 'Thinking...';
+          const q = 'How well are you sleeping these days?';
+          const f = await app.aiFollowUp(q, `${selected}/5`);
+          followupDiv.innerHTML = `<strong>AI Coach Sarah asks:</strong> ${f}`;
+        } catch (e) {
+          followupDiv.classList.remove('hidden');
+          followupDiv.textContent = 'Follow-up unavailable right now.';
+          console.warn(e);
+        }
+      });
+    });
+
+    nextBtn.addEventListener('click', async () => {
+      // Show prescription based on the one answer (demo)
+      renderPrescriptionLoading();
+      try {
+        const context = `ASSESSMENT RESULTS:\nSleep Quality: ${selected}/5 (${['Terrible','Poor','Fair','Good','Excellent'][selected-1]})\n`;
+        const rx = await app.aiPrescription(context);
+        renderPrescription(rx);
+      } catch (e) {
+        renderPrescription('Sorry—could not generate your prescription right now.');
+        console.warn(e);
+      }
+    });
+  }
+
+  function renderPrescriptionLoading() {
+    container.innerHTML = `
+      <div class="text-center py-12">
+        <div class="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full mb-6 animate-pulse">
+          <i class="fas fa-brain text-white text-3xl"></i>
+        </div>
+        <h3 class="text-2xl font-bold text-gray-800 mb-2">Creating your personalized prescription…</h3>
+        <p class="text-gray-600">This usually takes a few seconds.</p>
+        <div class="flex justify-center items-center space-x-2 mt-4">
+          <div class="w-3 h-3 bg-purple-500 rounded-full animate-bounce"></div>
+          <div class="w-3 h-3 bg-blue-500 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
+          <div class="w-3 h-3 bg-purple-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderPrescription(text) {
+    container.innerHTML = `
+      <div class="text-center mb-8">
+        <div class="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-green-500 to-blue-500 rounded-full mb-4">
+          <i class="fas fa-heart text-white text-3xl"></i>
+        </div>
+        <h2 class="text-3xl font-bold text-gray-800 mb-2">Your Personal Recovery Prescription</h2>
+        <p class="text-gray-600">Created by AI Coach Sarah for you</p>
+      </div>
+      <div class="bg-white border-2 border-green-200 rounded-lg p-8 shadow-lg text-left whitespace-pre-wrap leading-relaxed text-gray-800">
+        ${escapeHtml(text || 'No content')}
+      </div>
+    `;
+  }
+
+  function escapeHtml(str) {
+    return String(str).replace(/[&<>"']/g, s => ({
+      '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'
+    }[s]));
+  }
+});
+
