@@ -35,13 +35,11 @@ export default async function handler(req, res) {
         messages: [
           {
             role: 'system',
-            content:
-              'You are a gentle, trauma-informed coach named Sarah. Create a concise, actionable recovery prescription in 4–6 short bullet lines. Avoid medical advice and diagnosis.'
+            content: 'You are a gentle, trauma-informed coach named Sarah. Create a concise, actionable recovery prescription in 4–6 short bullet lines. Avoid medical advice and diagnosis.'
           },
           {
             role: 'user',
-            content:
-              `Use this assessment context to produce the prescription:\n${assessmentContext}\nReturn only the prescription, no extra commentary.`
+            content: `Use this assessment context to produce the prescription:\n${assessmentContext}\nReturn only the prescription, no extra commentary.`
           }
         ]
       })
