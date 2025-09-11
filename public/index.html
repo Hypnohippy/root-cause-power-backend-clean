@@ -1,362 +1,1002 @@
-Copy<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Root Cause Power — PTSD Support</title>
-
-  <!-- Tailwind CSS (baseline styles) -->
-  <script src="https://cdn.tailwindcss.com"></script>
-
-  <!-- Icons used by the fallback assessment (fa-brain, fa-heart) -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
-
-  <!-- RCP Hotfix: readable text, baseline button styles, hide overlays -->
-  <style id="rcp-hotfix">
-    html, body { background:#f8fafc; color:#111827; }
-    /* Force readable text in the assessment area even if a parent sets white */
-    #assessment-content, #assessment-questions { color:#111827; }
-
-    /* Minimal styles for the 1–5 buttons if Tailwind classes aren't loaded */
-    .rcp-scale-btn { border:2px solid #e5e7eb; border-radius:0.5rem; padding:0.75rem; background:#ffffff; }
-    .rcp-scale-btn .text-2xl { font-weight:700; color:#7c3aed; }
-    .rcp-scale-btn .text-xs { color:#4b5563; }
-    .rcp-scale-btn:hover { background:#f5f3ff; border-color:#a78bfa; cursor:pointer; }
-
-    /* Blue follow-up bubble (if Tailwind classes not present) */
-    #rcp-followup { background:#eff6ff; border-left:4px solid #60a5fa; color:#1e40af; }
-
-    /* Keep any stray mobile overlays from covering the page by default */
-    #mobile-menu, #nav-overlay, .mobile-menu-panel { display:none !important; }
-  </style>
-</head>
-<body class="min-h-screen flex flex-col">
-  <!-- Simple Header -->
-  <header class="bg-white/80 backdrop-blur border-b border-gray-200 sticky top-0 z-40">
-    <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
-      <div class="flex items-center space-x-3">
-        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-blue-500"></div>
-        <h1 class="text-lg md:text-xl font-semibold text-gray-800">Root Cause Power</h1>
-      </div>
-      <nav class="hidden md:flex items-center space-x-6 text-sm">
-        <a href="#assessment" class="text-gray-600 hover:text-gray-900">Assessment</a>
-        <a href="#about" class="text-gray-600 hover:text-gray-900">About</a>
-      </nav>
-    </div>
-  </header>
-
-  <!-- Main -->
-  <main class="flex-1">
-    <!-- Hero / Intro -->
-    <section class="py-10">
-      <div class="max-w-5xl mx-auto px-4">
-        <div class="bg-gradient-to-r from-purple-50 to-blue-50 border border-gray-200 rounded-xl p-6">
-          <h2 class="text-2xl font-bold text-gray-800 mb-2">Personalized PTSD Support</h2>
-          <p class="text-gray-600">
-            Start a gentle, trauma‑informed check‑in. Choose a number, get an AI follow‑up, and receive a short personal recovery plan.
-          </p>
-        </div>
-      </div>
-    </section>
-
-    <!-- Assessment Section -->
-    <section id="assessment" class="pb-16">
-      <div class="max-w-3xl mx-auto px-4">
-        <!-- This is where your fallback assessment renderer writes Step 1 -->
-        <div id="assessment-content" class="relative"></div>
-      </div>
-    </section>
-
-    <!-- About Section -->
-    <section id="about" class="pb-16">
-      <div class="max-w-3xl mx-auto px-4">
-        <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
-          <h3 class="text-xl font-semibold text-gray-800 mb-2">About</h3>
-          <p class="text-gray-600">
-            This app runs on secure serverless endpoints and never exposes your API keys. It asks short, compassionate follow‑ups and creates a concise, actionable prescription tailored to your responses.
-          </p>
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <!-- Footer -->
-  <footer class="border-t border-gray-200 bg-white">
-    <div class="max-w-5xl mx-auto px-4 py-6 text-sm text-gray-500">
-      © <span id="year"></span> Root Cause Power. All rights reserved.
-    </div>
-  </footer>
-
-  <!-- Year helper -->
-  <script>
-    document.getElementById('year').textContent = new Date().getFullYear();
-  </script>
-
-  <!-- Your app logic (already in your repo) -->
-  <script src="/js/app.js"></script>
-
-  <!-- Optional: tiny click-unblock in case any overlay remains -->
-  <script>
-    document.addEventListener('DOMContentLoaded', function () {
-      // Hide any common overlays that might block clicks
-      ['mobile-menu', 'nav-overlay'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) { el.style.display = 'none'; el.style.pointerEvents = 'none'; }
-      });
-      // Raise assessment above any stray elements
-      const ac = document.getElementById('assessment-content') || document.getElementById('assessment-questions');
-      if (ac) { ac.style.position = 'relative'; ac.style.zIndex = '1000'; }
-    });
-
-    <!-- RCP Inline Fallback: render Step 1 + unblock clicks + safe AI fallbacks -->
-<script id="rcp-inline-fallback">
-(function () {
-  console.log('🚀 RCP inline fallback booting');
-
-  // Minimal styles to ensure readability and clickable buttons
-  try {
-    const s = document.createElement('style');
-    s.id = 'rcp-inline-style';
-    s.textContent = `
-      #assessment-questions, #assessment-content {
-        position: relative !important;
-        z-index: 999999 !important;
-        pointer-events: auto !important;
-        color: #111827 !important;      /* readable */
-        background: #ffffff !important;  /* readable */
-      }
-      #assessment-questions button, #assessment-content button { pointer-events: auto !important; }
-      #rcp-followup {
-        background: #eff6ff !important;
-        border-left: 4px solid #60a5fa !important;
-        color: #1e40af !important;
-        padding: 1rem !important;
-        border-radius: 0.5rem !important;
-        margin-top: 1rem !important;
-      }
-      .rcp-scale-btn { border: 2px solid #e5e7eb; border-radius: 0.5rem; padding: 0.75rem; background: #ffffff; }
-      .rcp-scale-btn .rcp-num { font-weight: 700; color: #7c3aed; font-size: 1.5rem; display:block; margin-bottom: 0.25rem; }
-      .rcp-scale-btn .rcp-label { color:#4b5563; font-size: 0.75rem; display:block; }
-      .rcp-scale-btn:hover { background:#f5f3ff; border-color:#a78bfa; cursor:pointer; }
-      .rcp-scale-btn.selected { background:#ede9fe; border-color:#7c3aed; }
-    `;
-    document.head.appendChild(s);
-  } catch (e) { console.warn('style inject failed', e); }
-
-  // Safe AI helpers — always return something gentle
-  async function aiFollowUp(currentQuestion, userResponse) {
-    try {
-      const r = await fetch('/api/followup', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ currentQuestion, userResponse: String(userResponse ?? '') })
-      });
-      let data = {};
-      try { data = await r.json(); } catch {}
-      return data.followUp || 'Would you like to tell me a little more?';
-    } catch {
-      return 'Would you like to tell me a little more?';
-    }
-  }
-  async function aiPrescription(assessmentContext) {
-    try {
-      const r = await fetch('/api/prescription', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ assessmentContext })
-      });
-      let data = {};
-      try { data = await r.json(); } catch {}
-      return data.prescription || `Short, kind prescription:
-- 2-minute box breathing before bed
-- Morning sunlight 5–10 minutes
-- Keep a gentle sleep log for 3 days
-- If distress rises, pause and practice grounding (5-4-3-2-1)
-- Celebrate one small win each day`;
-    } catch {
-      return `Short, kind prescription:
-- 2-minute box breathing before bed
-- Morning sunlight 5–10 minutes
-- Keep a gentle sleep log for 3 days
-- If distress rises, pause and practice grounding (5-4-3-2-1)
-- Celebrate one small win each day`;
-    }
-  }
-
-  function isFullscreenOverlay(el) {
-    try {
-      const st = getComputedStyle(el);
-      const fixedOrAbs = st.position === 'fixed' || st.position === 'absolute';
-      const widthCovers = st.width.endsWith('vw') || parseInt(st.width) >= (window.innerWidth - 2);
-      const heightCovers = st.height.endsWith('vh') || parseInt(st.height) >= (window.innerHeight - 2);
-      const coversScreen = parseInt(st.left) <= 0 && parseInt(st.top) <= 0 && widthCovers && heightCovers;
-      const looksLikeOverlay =
-        (el.id && /overlay|backdrop|modal|drawer|sheet|inset-0/i.test(el.id)) ||
-        (el.className && /overlay|backdrop|modal|drawer|sheet|inset-0|fixed/i.test(String(el.className)));
-      return fixedOrAbs && (coversScreen || looksLikeOverlay);
-    } catch { return false; }
-  }
-
-  function uncoverOverlaysAbove(container) {
-    const rect = container.getBoundingClientRect();
-    const pts = [
-      [rect.left + rect.width / 2, rect.top + rect.height / 2],
-      [rect.left + 10, rect.top + 10],
-      [rect.right - 10, rect.top + 10],
-      [rect.left + 10, rect.bottom - 10],
-      [rect.right - 10, rect.bottom - 10]
-    ];
-    const changed = new Set();
-    pts.forEach(([x, y]) => {
-      const stack = document.elementsFromPoint(x, y);
-      for (const el of stack) {
-        if (!el || el === document.documentElement || el === document.body) continue;
-        if (container.contains(el)) break;
-        if (!changed.has(el)) {
-          changed.add(el);
-          try {
-            el.style.pointerEvents = 'none';
-            if (isFullscreenOverlay(el)) {
-              el.style.display = 'none';
-              el.style.visibility = 'hidden';
-            }
-          } catch {}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Root Cause Power - Complete PTSD Support Platform</title>
+    
+    <!-- PWA Meta Tags -->
+    <!-- Deployment Sync Test: 2025-09-10 20:33 -->
+    <meta name="application-name" content="Root Cause Power">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Root Cause Power">
+    <meta name="description" content="AI-powered PTSD support platform combining Lifestyle Medicine and Clinical Hypnotherapy">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#10b981">
+    
+    <!-- Apple Touch Icons -->
+    <link rel="apple-touch-icon" sizes="180x180" href="./icons/apple-touch-icon-180x180.svg">
+    <link rel="apple-touch-icon" sizes="152x152" href="./icons/apple-touch-icon-152x152.svg">
+    <link rel="apple-touch-icon" sizes="120x120" href="./icons/apple-touch-icon-120x120.svg">
+    <link rel="apple-touch-icon" sizes="76x76" href="./icons/apple-touch-icon-76x76.svg">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="./manifest.json">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" sizes="32x32" href="./icons/favicon-32x32.svg">
+    <link rel="icon" type="image/svg+xml" sizes="16x16" href="./icons/favicon-16x16.svg">
+    <link rel="shortcut icon" href="./icons/favicon.ico">
+    
+    <!-- Stylesheets -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="./css/styles.css">
+    <link rel="stylesheet" href="./css/improved-ui.css?v=1.4.0">
+    
+    <!-- Stripe Payment Integration -->
+    <script src="https://js.stripe.com/v3/"></script>
+    
+    <!-- Voice UI Animations -->
+    <style>
+        .pulse-ring {
+            position: absolute;
+            border: 3px solid rgba(147, 51, 234, 0.3);
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: pulse-ring 1.5s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
         }
-      }
-    });
-  }
+        
+        @keyframes pulse-ring {
+            0% { transform: scale(0.8); opacity: 1; }
+            100% { transform: scale(1.4); opacity: 0; }
+        }
+        
+        .voice-active {
+            animation: voice-pulse 2s ease-in-out infinite alternate;
+        }
+        
+        @keyframes voice-pulse {
+            from { box-shadow: 0 0 0 0 rgba(147, 51, 234, 0.7); }
+            to { box-shadow: 0 0 0 10px rgba(147, 51, 234, 0); }
+        }
 
-  function renderStep1(container) {
-    container.innerHTML = `
-      <div class="rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-        <div style="background:linear-gradient(90deg,#faf5ff,#eff6ff); padding:1rem; border-bottom:1px solid #e5e7eb;">
-          <div style="display:flex; align-items:center;">
-            <div style="width:48px; height:48px; background:linear-gradient(135deg,#7c3aed,#3b82f6); border-radius:9999px; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:700; font-size:18px; margin-right:1rem;">1</div>
-            <div>
-              <h3 style="font-size:1.125rem; font-weight:600; color:#1f2937; margin:0;">Sleep Quality</h3>
-              <p style="font-size:0.875rem; color:#4b5563; margin:0;">How well are you sleeping these days?</p>
+        /* Credit System Styles */
+        .credit-badge {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .credit-badge::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .credit-badge:hover::after {
+            left: 100%;
+        }
+
+        .credit-low {
+            animation: pulse-warning 2s infinite;
+        }
+        
+        @keyframes pulse-warning {
+            0%, 100% { background-color: rgb(239 68 68); }
+            50% { background-color: rgb(220 38 38); }
+        }
+
+        /* Voice Credit Modal Styles */
+        .voice-credit-modal {
+            backdrop-filter: blur(10px);
+        }
+        
+        .credit-package {
+            transition: all 0.3s ease;
+        }
+        
+        .credit-package:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        
+        /* Hume AI Voice Interface */
+        .voice-interface {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .voice-wave {
+            width: 4px;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.7);
+            margin: 0 2px;
+            border-radius: 2px;
+            animation: voice-wave 1.5s ease-in-out infinite;
+        }
+        
+        .voice-wave:nth-child(2) { animation-delay: 0.1s; }
+        .voice-wave:nth-child(3) { animation-delay: 0.2s; }
+        .voice-wave:nth-child(4) { animation-delay: 0.3s; }
+        .voice-wave:nth-child(5) { animation-delay: 0.4s; }
+        
+        @keyframes voice-wave {
+            0%, 100% { height: 20px; }
+            50% { height: 40px; }
+        }
+
+        /* Accessibility Features */
+        .high-contrast { 
+            filter: contrast(150%) brightness(110%); 
+        }
+        
+        .large-text { 
+            font-size: 1.25rem !important; 
+            line-height: 1.6 !important; 
+        }
+        
+        .extra-large-text { 
+            font-size: 1.5rem !important; 
+            line-height: 1.7 !important; 
+        }
+        
+        .reduced-motion * { 
+            animation-duration: 0.01ms !important; 
+            animation-iteration-count: 1 !important; 
+            transition-duration: 0.01ms !important; 
+        }
+        
+        .focus-ring:focus {
+            outline: 3px solid #fbbf24 !important;
+            outline-offset: 2px !important;
+        }
+        
+        .skip-link {
+            position: absolute;
+            top: -40px;
+            left: 6px;
+            background: #000;
+            color: white;
+            padding: 8px;
+            text-decoration: none;
+            z-index: 1000;
+        }
+        
+        .skip-link:focus {
+            top: 6px;
+        }
+
+        /* Screen reader only content */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Skip to main content link -->
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    
+    <!-- Accessibility Toolbar -->
+    <div id="accessibility-toolbar" class="fixed top-0 right-0 z-50 bg-white shadow-lg rounded-bl-lg p-2" role="toolbar" aria-label="Accessibility Options">
+        <button id="accessibility-toggle" class="w-10 h-10 bg-blue-500 text-white rounded-full hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500" aria-label="Open accessibility options" title="Accessibility Options">
+            <i class="fas fa-universal-access"></i>
+        </button>
+        
+        <div id="accessibility-panel" class="hidden mt-2 bg-white border rounded-lg shadow-lg p-4 w-64">
+            <h3 class="font-bold mb-3 text-gray-800">Accessibility Options</h3>
+            
+            <div class="space-y-3">
+                <!-- Font Size -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Text Size</label>
+                    <div class="flex space-x-2">
+                        <button onclick="app.setFontSize('normal')" class="px-3 py-1 text-xs border rounded hover:bg-gray-50" aria-label="Normal text size">A</button>
+                        <button onclick="app.setFontSize('large')" class="px-3 py-1 text-sm border rounded hover:bg-gray-50" aria-label="Large text size">A</button>
+                        <button onclick="app.setFontSize('extra-large')" class="px-3 py-1 text-base border rounded hover:bg-gray-50" aria-label="Extra large text size">A</button>
+                    </div>
+                </div>
+                
+                <!-- High Contrast -->
+                <div class="flex items-center justify-between">
+                    <label for="high-contrast-toggle" class="text-sm font-medium text-gray-700">High Contrast</label>
+                    <input type="checkbox" id="high-contrast-toggle" class="rounded" onchange="app.toggleHighContrast()" aria-describedby="high-contrast-desc">
+                </div>
+                <p id="high-contrast-desc" class="text-xs text-gray-500">Increases color contrast for better visibility</p>
+                
+                <!-- Reduced Motion -->
+                <div class="flex items-center justify-between">
+                    <label for="reduced-motion-toggle" class="text-sm font-medium text-gray-700">Reduce Motion</label>
+                    <input type="checkbox" id="reduced-motion-toggle" class="rounded" onchange="app.toggleReducedMotion()" aria-describedby="reduced-motion-desc">
+                </div>
+                <p id="reduced-motion-desc" class="text-xs text-gray-500">Reduces animations and transitions</p>
+                
+                <!-- Voice Settings -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Voice Speed</label>
+                    <input type="range" id="voice-speed" min="0.5" max="2" step="0.1" value="1" class="w-full" onchange="app.setVoiceSpeed(this.value)" aria-label="Adjust voice reading speed">
+                    <div class="flex justify-between text-xs text-gray-500">
+                        <span>Slow</span>
+                        <span>Fast</span>
+                    </div>
+                </div>
+                
+                <!-- Screen Reader Announcements -->
+                <div class="flex items-center justify-between">
+                    <label for="screen-reader-toggle" class="text-sm font-medium text-gray-700">Enhanced Audio Cues</label>
+                    <input type="checkbox" id="screen-reader-toggle" class="rounded" onchange="app.toggleScreenReaderMode()" aria-describedby="screen-reader-desc">
+                </div>
+                <p id="screen-reader-desc" class="text-xs text-gray-500">Provides additional audio feedback for navigation</p>
+                
+                <!-- Focus Indicators -->
+                <div class="flex items-center justify-between">
+                    <label for="focus-indicators-toggle" class="text-sm font-medium text-gray-700">Enhanced Focus</label>
+                    <input type="checkbox" id="focus-indicators-toggle" class="rounded" checked onchange="app.toggleFocusIndicators()" aria-describedby="focus-indicators-desc">
+                </div>
+                <p id="focus-indicators-desc" class="text-xs text-gray-500">Shows clear focus indicators for keyboard navigation</p>
             </div>
-          </div>
+            
+            <button onclick="app.resetAccessibilitySettings()" class="w-full mt-4 bg-gray-500 text-white py-2 rounded hover:bg-gray-600 text-sm">
+                Reset to Defaults
+            </button>
         </div>
-        <div style="padding:1rem;">
-          <div id="rcp-scale" style="display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:0.5rem; margin-bottom:0.5rem;">
-            ${[1,2,3,4,5].map(i => `
-              <button data-value="${i}" class="rcp-scale-btn">
-                <span class="rcp-num">${i}</span>
-                <span class="rcp-label">${['Terrible','Poor','Fair','Good','Excellent'][i-1]}</span>
-              </button>
-            `).join('')}
-          </div>
-          <p style="font-size:0.75rem; color:#6b7280; text-align:center; margin-bottom:1rem;">Click a number to rate your experience</p>
+    </div>
 
-          <div id="rcp-followup" class="hidden" style="display:none;"></div>
+    <!-- Screen reader live region for announcements -->
+    <div id="sr-announcements" aria-live="polite" aria-atomic="true" class="sr-only"></div>
 
-          <div style="margin-top:1.25rem; display:flex; justify-content:space-between; align-items:center;">
-            <button id="rcp-prev" style="padding:0.5rem 1rem; border:1px solid #d1d5db; border-radius:0.5rem; color:#374151; background:#fff;" disabled>← Previous</button>
-            <button id="rcp-next" style="padding:0.5rem 1rem; border-radius:0.5rem; color:#fff; background:linear-gradient(90deg,#7c3aed,#3b82f6); opacity:0.6;" disabled>Continue →</button>
-          </div>
+    <!-- PWA Installation Banner -->
+    <div id="install-banner" class="hidden fixed top-0 left-0 right-0 bg-green-500 text-white p-3 z-50">
+        <div class="container mx-auto flex items-center justify-between">
+            <div class="flex items-center">
+                <i class="fas fa-download mr-2"></i>
+                <span>Install Root Cause Power app for better experience!</span>
+            </div>
+            <div class="flex space-x-2">
+                <button id="install-button" class="bg-white text-green-500 px-3 py-1 rounded text-sm font-semibold">Install</button>
+                <button id="dismiss-install" class="text-white hover:text-gray-200">✕</button>
+            </div>
         </div>
-      </div>
-    `;
+    </div>
 
-    const scale = container.querySelector('#rcp-scale');
-    const followupDiv = container.querySelector('#rcp-followup');
-    const nextBtn = container.querySelector('#rcp-next');
-    let selected = null;
+    <!-- Clean Professional Navigation -->
+    <nav class="bg-white shadow-lg border-b-2 border-gray-200 fixed w-full top-0 z-30" id="main-nav">
+        <div class="container mx-auto px-4">
+            <!-- Top Status Bar with Credits -->
+            <div class="flex justify-between items-center py-2 text-sm border-b border-gray-100">
+                <div class="flex items-center space-x-4 text-gray-600">
+                    <div class="flex items-center">
+                        <div id="api-status-indicator" class="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+                        <span id="api-status-text">AI Connected</span>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <button onclick="app.stopAllAudio()" class="bg-red-500 text-white px-3 py-1 rounded-full text-xs hover:bg-red-600 transition-colors">
+                        <i class="fas fa-volume-mute mr-1"></i>Stop Audio
+                    </button>
+                    
+                    <!-- Daily Credits Counter -->
+                    <div id="daily-credit-counter" class="credit-badge bg-green-500 text-white px-3 py-1 rounded-full text-xs font-bold cursor-pointer hover:bg-green-600 transition-colors" onclick="app.showCreditInfo()">
+                        <span id="daily-credit-count">5/5</span> Daily
+                    </div>
+                    
+                    <!-- Voice Credits Counter -->
+                    <div id="voice-credit-counter" class="credit-badge bg-purple-500 text-white px-3 py-1 rounded-full text-xs font-bold cursor-pointer hover:bg-purple-600 transition-colors" onclick="app.showVoiceCreditStore()" title="Buy Voice Credits">
+                        <i class="fas fa-microphone mr-1"></i><span id="voice-credit-count">0</span> Voice
+                    </div>
+                </div>
+            </div>
 
-    scale.addEventListener('click', async (ev) => {
-      const btn = ev.target.closest('.rcp-scale-btn');
-      if (!btn) return;
+            <!-- Main Navigation Banner -->
+            <div class="flex justify-between items-center py-3">
+                <!-- Logo (Triple-tap for admin access) -->
+                <div id="logo" class="text-xl font-bold text-green-600 flex items-center cursor-pointer" onclick="app.logoTapHandler()">
+                    <i class="fas fa-heart mr-2"></i>
+                    Root Cause Power
+                </div>
+                
+                <!-- Main 5 Navigation Buttons -->
+                <div class="flex items-center space-x-6">
+                    <button class="nav-btn px-4 py-2 rounded-lg font-medium text-gray-700 hover:bg-gray-100 hover:text-green-600 transition-all" data-section="assessment">
+                        <i class="fas fa-chart-line mr-2"></i>Analysis
+                    </button>
+                    <button class="nav-btn px-4 py-2 rounded-lg font-medium text-gray-700 hover:bg-gray-100 hover:text-green-600 transition-all" data-section="dashboard">
+                        <i class="fas fa-tachometer-alt mr-2"></i>Dashboard
+                    </button>
+                    <button class="nav-btn px-4 py-2 rounded-lg font-medium text-gray-700 hover:bg-gray-100 hover:text-green-600 transition-all" data-section="ptsd-corner">
+                        <i class="fas fa-shield-heart mr-2"></i>PTSD Corner
+                    </button>
+                    <button class="nav-btn px-4 py-2 rounded-lg font-medium text-gray-700 hover:bg-gray-100 hover:text-green-600 transition-all" data-section="coaches">
+                        <i class="fas fa-robot mr-2"></i>Coaches
+                    </button>
+                    <button onclick="app.triggerCrisisSupport()" class="bg-red-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-red-600 transition-all shadow-md">
+                        <i class="fas fa-phone mr-2"></i>🚨 Crisis Help
+                    </button>
+                </div>
 
-      try { uncoverOverlaysAbove(container); } catch {}
+                <!-- Hamburger Menu & Mobile Crisis -->
+                <div class="flex items-center space-x-3">
+                    <!-- Mobile Crisis Button -->
+                    <button onclick="app.triggerCrisisSupport()" class="md:hidden bg-red-500 text-white px-3 py-2 rounded-lg text-sm font-semibold hover:bg-red-600 transition-all">
+                        🚨
+                    </button>
+                    
+                    <!-- Hamburger Menu -->
+                    <button id="hamburger-menu-btn" class="text-gray-700 hover:text-green-600 p-2 rounded-lg hover:bg-gray-100 transition-all" onclick="app.toggleHamburgerMenu()">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
 
-      scale.querySelectorAll('.rcp-scale-btn').forEach(b => b.classList.remove('selected'));
-      btn.classList.add('selected');
-      selected = parseInt(btn.dataset.value, 10);
-      nextBtn.disabled = false;
-      nextBtn.style.opacity = '1';
+        <!-- Dropdown Menu (Hidden by default) -->
+        <div id="hamburger-dropdown" class="hidden bg-white border-t border-gray-200 shadow-lg">
+            <div class="container mx-auto px-4 py-4">
+                <div class="grid md:grid-cols-3 gap-4">
+                    <div>
+                        <h3 class="font-semibold text-gray-800 mb-2">Health & Wellness</h3>
+                        <div class="space-y-2">
+                            <button class="nav-dropdown-item w-full text-left px-3 py-2 text-gray-600 hover:bg-gray-100 hover:text-green-600 rounded transition-all" data-section="nutrition">
+                                <i class="fas fa-apple-alt mr-2"></i>Nutrition
+                            </button>
+                            <button class="nav-dropdown-item w-full text-left px-3 py-2 text-gray-600 hover:bg-gray-100 hover:text-green-600 rounded transition-all" data-section="media-library">
+                                <i class="fas fa-play-circle mr-2"></i>Media Library
+                            </button>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-gray-800 mb-2">Community</h3>
+                        <div class="space-y-2">
+                            <button class="nav-dropdown-item w-full text-left px-3 py-2 text-gray-600 hover:bg-gray-100 hover:text-green-600 rounded transition-all" data-section="community">
+                                <i class="fas fa-users mr-2"></i>Community
+                            </button>
+                            <button class="nav-dropdown-item w-full text-left px-3 py-2 text-gray-600 hover:bg-gray-100 hover:text-green-600 rounded transition-all" data-section="pricing">
+                                <i class="fas fa-credit-card mr-2"></i>Pricing
+                            </button>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-gray-800 mb-2">Account</h3>
+                        <div class="space-y-2">
+                            <button class="nav-dropdown-item w-full text-left px-3 py-2 text-gray-600 hover:bg-gray-100 hover:text-green-600 rounded transition-all" onclick="app.showVoiceCreditStore()">
+                                <i class="fas fa-microphone mr-2"></i>Voice Credits
+                            </button>
+                            <button class="nav-dropdown-item w-full text-left px-3 py-2 text-gray-600 hover:bg-gray-100 hover:text-green-600 rounded transition-all" data-section="help">
+                                <i class="fas fa-question-circle mr-2"></i>Help
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
 
-      try {
-        followupDiv.style.display = 'block';
-        followupDiv.textContent = 'Thinking...';
-        const q = 'How well are you sleeping these days?';
-        const f = await aiFollowUp(q, `${selected}/5`);
-        followupDiv.innerHTML = '<strong>AI Coach Sarah asks:</strong> ' + escapeHtml(f);
-      } catch {
-        followupDiv.style.display = 'block';
-        followupDiv.textContent = 'Follow-up unavailable right now.';
-      }
+    <!-- Main App Container -->
+    <div id="app-container" class="pt-24 md:pt-28">
+        <main id="main-content" tabindex="-1">
+        <!-- Home Section -->
+        <section id="home" class="section active">
+            <div class="gradient-bg text-white py-20">
+                <div class="container mx-auto text-center px-4">
+                    <div class="mb-6">
+                        <i class="fas fa-heart text-6xl mb-4 animate-pulse"></i>
+                    </div>
+                    <h1 class="text-4xl md:text-5xl font-bold mb-4">Root Cause Power</h1>
+                    <p class="text-lg md:text-xl mb-8">Discover the root causes of your health challenges with AI-powered lifestyle medicine</p>
+                    <p class="text-base md:text-lg mb-8 opacity-90">Created by David Prince, PhD Candidate in Lifestyle Medicine & Clinical Hypnotherapist (CNHC Registered)</p>
+                    <button data-section="assessment" class="cta-button bg-white text-blue-600 px-6 md:px-8 py-3 rounded-lg text-lg font-semibold hover:bg-gray-100 transition-colors shadow-lg">Start Your Life Analysis</button>
+                </div>
+            </div>
+
+            <div class="container mx-auto py-16 px-4">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold mb-4">Combining Science & Wisdom</h2>
+                    <p class="text-lg md:text-xl text-gray-600">Our platform integrates Lifestyle Medicine and Clinical Hypnotherapy for comprehensive wellness</p>
+                </div>
+
+                <div class="grid md:grid-cols-3 gap-8 mb-16">
+                    <div class="feature-card text-center p-6 bg-white rounded-lg shadow-lg hover:shadow-xl transition-shadow">
+                        <i class="fas fa-brain text-4xl text-blue-500 mb-4"></i>
+                        <h3 class="text-xl font-bold mb-2">Lifestyle Medicine</h3>
+                        <p class="text-gray-600">Evidence-based approach to preventing and treating chronic diseases through lifestyle interventions</p>
+                    </div>
+                    <div class="feature-card text-center p-6 bg-white rounded-lg shadow-lg hover:shadow-xl transition-shadow">
+                        <i class="fas fa-leaf text-4xl text-green-500 mb-4"></i>
+                        <h3 class="text-xl font-bold mb-2">Clinical Hypnotherapy</h3>
+                        <p class="text-gray-600">Professional therapeutic techniques to address subconscious patterns affecting health</p>
+                    </div>
+                    <div class="feature-card text-center p-6 bg-white rounded-lg shadow-lg hover:shadow-xl transition-shadow">
+                        <i class="fas fa-robot text-4xl text-purple-500 mb-4"></i>
+                        <h3 class="text-xl font-bold mb-2">AI Integration</h3>
+                        <p class="text-gray-600">Personalized coaching and recommendations powered by advanced artificial intelligence</p>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="bg-white rounded-lg shadow-lg p-8">
+                    <h3 class="text-2xl font-bold text-center mb-6">Get Started Now</h3>
+                    <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <button data-section="assessment" class="quick-action bg-green-100 hover:bg-green-200 text-green-800 p-4 rounded-lg text-center transition-colors">
+                            <i class="fas fa-clipboard-list text-2xl mb-2 block"></i>
+                            <span class="font-semibold">Take Assessment</span>
+                        </button>
+                        <button data-section="ptsd-corner" class="quick-action bg-purple-100 hover:bg-purple-200 text-purple-800 p-4 rounded-lg text-center transition-colors">
+                            <i class="fas fa-shield-alt text-2xl mb-2 block"></i>
+                            <span class="font-semibold">PTSD Support</span>
+                        </button>
+                        <button data-section="coaches" class="quick-action bg-blue-100 hover:bg-blue-200 text-blue-800 p-4 rounded-lg text-center transition-colors">
+                            <i class="fas fa-user-md text-2xl mb-2 block"></i>
+                            <span class="font-semibold">AI Coaches</span>
+                        </button>
+                        <button onclick="app.openVoiceAI()" class="quick-action bg-gradient-to-br from-purple-100 to-pink-100 hover:from-purple-200 hover:to-pink-200 text-purple-800 p-4 rounded-lg text-center transition-colors relative">
+                            <div class="absolute top-1 right-1 bg-yellow-400 text-black px-1 py-0.5 rounded-full text-xs font-bold">NEW!</div>
+                            <i class="fas fa-microphone text-2xl mb-2 block"></i>
+                            <span class="font-semibold">Voice Coach</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Rest of sections... (continuing with the same pattern) -->
+        <!-- I'll continue with the key sections that need credit integration -->
+        
+        <!-- AI Coaches Section -->
+        <section id="coaches" class="section hidden">
+            <div class="container mx-auto py-8 px-4">
+                <h2 class="text-3xl md:text-4xl font-bold text-center mb-8">Your AI Health Specialists</h2>
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="coach-card text-white p-6 rounded-lg shadow-lg cursor-pointer hover:shadow-xl transition-all transform hover:scale-105" data-coach="nutrition">
+                        <i class="fas fa-apple-alt text-4xl mb-4"></i>
+                        <h3 class="text-xl font-bold mb-2">Nutrition Coach</h3>
+                        <p>Personalized meal plans and nutritional guidance based on your assessment results</p>
+                        <div class="mt-3 text-sm bg-white bg-opacity-20 p-2 rounded">
+                            <i class="fas fa-coins mr-1"></i>Uses daily credits
+                        </div>
+                    </div>
+                    
+                    <div class="bg-gradient-to-br from-purple-600 to-blue-600 text-white p-6 rounded-lg shadow-lg cursor-pointer hover:shadow-xl transition-all transform hover:scale-105 relative" onclick="app.openVoiceAI()">
+                        <div class="absolute top-2 right-2 bg-yellow-400 text-black px-2 py-1 rounded-full text-xs font-bold">NEW!</div>
+                        <i class="fas fa-microphone text-4xl mb-4"></i>
+                        <h3 class="text-xl font-bold mb-2">🎤 Voice AI Coach</h3>
+                        <p>Emotionally intelligent voice coaching powered by advanced Hume AI - talk naturally and get empathetic responses</p>
+                        <div class="mt-3 text-sm bg-white bg-opacity-20 p-2 rounded">
+                            <i class="fas fa-microphone mr-1"></i>Uses voice credits • Natural conversation
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Assessment Section -->
+        <section id="assessment" class="section hidden">
+            <div class="container mx-auto py-8 px-4">
+                <!-- Safety & Care Message -->
+                <div class="bg-gradient-to-r from-blue-50 to-purple-50 border-l-4 border-purple-500 p-6 mb-8 rounded-lg">
+                    <div class="flex items-start">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-shield-heart text-purple-500 text-2xl"></i>
+                        </div>
+                        <div class="ml-4">
+                            <h4 class="text-lg font-semibold text-purple-800 mb-2">You're in Safe Hands</h4>
+                            <p class="text-purple-600 text-sm">This assessment is designed with care by mental health professionals. Take your time, and remember - seeking help is a sign of strength.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <h2 class="text-3xl md:text-4xl font-bold text-center mb-8">Life Analysis Assessment</h2>
+                <p class="text-xl text-center text-gray-600 mb-12">Comprehensive wellness evaluation to understand your unique needs</p>
+                
+                <div id="assessment-content" class="max-w-4xl mx-auto">
+                    <!-- Assessment will be loaded here -->
+                    <div class="text-center">
+                        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500 mx-auto mb-4"></div>
+                        <p>Loading your personalized assessment...</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Dashboard Section -->
+        <section id="dashboard" class="section hidden">
+            <div class="container mx-auto py-8 px-4">
+                <h2 class="text-3xl md:text-4xl font-bold text-center mb-8">Your Wellness Dashboard</h2>
+                <p class="text-xl text-center text-gray-600 mb-12">Track your progress and access personalized insights</p>
+                
+                <div class="grid md:grid-cols-3 gap-6 mb-8">
+                    <div class="bg-white p-6 rounded-lg shadow-lg">
+                        <h3 class="text-xl font-semibold mb-4">Progress Overview</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <div class="flex justify-between mb-1">
+                                    <span class="text-sm">Wellness Score</span>
+                                    <span class="text-sm font-medium">75%</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-2">
+                                    <div class="bg-green-600 h-2 rounded-full" style="width: 75%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PTSD Corner Section -->
+        <section id="ptsd-corner" class="section hidden">
+            <div class="container mx-auto py-8 px-4">
+                <h2 class="text-3xl md:text-4xl font-bold text-center mb-8">PTSD Support Corner</h2>
+                <p class="text-xl text-center text-gray-600 mb-12">Specialized support and techniques for trauma recovery</p>
+                
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div class="bg-white p-6 rounded-lg shadow-lg">
+                        <i class="fas fa-brain text-4xl text-purple-600 mb-4"></i>
+                        <h3 class="text-xl font-semibold mb-4">EMDR Techniques</h3>
+                        <p class="text-gray-600 mb-4">Evidence-based trauma processing techniques</p>
+                        <button class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 transition-colors">
+                            Start EMDR Session
+                        </button>
+                    </div>
+                    
+                    <div class="bg-white p-6 rounded-lg shadow-lg">
+                        <i class="fas fa-shield-alt text-4xl text-green-600 mb-4"></i>
+                        <h3 class="text-xl font-semibold mb-4">Crisis Support</h3>
+                        <p class="text-gray-600 mb-4">24/7 immediate support when you need it most</p>
+                        <button onclick="app.triggerCrisisSupport()" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition-colors">
+                            Get Help Now
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Nutrition Section -->
+        <section id="nutrition" class="section hidden">
+            <div class="container mx-auto py-8 px-4">
+                <h2 class="text-3xl md:text-4xl font-bold text-center mb-8">Nutrition & Wellness</h2>
+                <p class="text-xl text-center text-gray-600 mb-12">Fuel your recovery with personalized nutrition guidance</p>
+                
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div class="bg-white p-6 rounded-lg shadow-lg text-center">
+                        <i class="fas fa-apple-alt text-4xl text-green-600 mb-4"></i>
+                        <h3 class="text-xl font-semibold mb-4">Meal Planning</h3>
+                        <p class="text-gray-600">Personalized nutrition plans for optimal mental health</p>
+                    </div>
+                    
+                    <div class="bg-white p-6 rounded-lg shadow-lg text-center">
+                        <i class="fas fa-chart-line text-4xl text-blue-600 mb-4"></i>
+                        <h3 class="text-xl font-semibold mb-4">Progress Tracking</h3>
+                        <p class="text-gray-600">Monitor how nutrition impacts your mood and energy</p>
+                    </div>
+                    
+                    <div class="bg-white p-6 rounded-lg shadow-lg text-center">
+                        <i class="fas fa-utensils text-4xl text-orange-600 mb-4"></i>
+                        <h3 class="text-xl font-semibold mb-4">Recipe Library</h3>
+                        <p class="text-gray-600">Healing recipes designed for mental wellness</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Media Library Section -->
+        <section id="media-library" class="section hidden">
+            <div class="container mx-auto py-8 px-4">
+                <h2 class="text-3xl md:text-4xl font-bold text-center mb-8">Media Library</h2>
+                <p class="text-xl text-center text-gray-600 mb-12">Guided meditations, exercises, and healing content</p>
+                
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="bg-white p-6 rounded-lg shadow-lg">
+                        <i class="fas fa-play-circle text-4xl text-purple-600 mb-4"></i>
+                        <h3 class="text-xl font-semibold mb-4">Guided Meditations</h3>
+                        <p class="text-gray-600">Calming meditation sessions for different needs</p>
+                    </div>
+                    
+                    <div class="bg-white p-6 rounded-lg shadow-lg">
+                        <i class="fas fa-music text-4xl text-blue-600 mb-4"></i>
+                        <h3 class="text-xl font-semibold mb-4">Healing Sounds</h3>
+                        <p class="text-gray-600">Therapeutic audio for relaxation and focus</p>
+                    </div>
+                    
+                    <div class="bg-white p-6 rounded-lg shadow-lg">
+                        <i class="fas fa-book-open text-4xl text-green-600 mb-4"></i>
+                        <h3 class="text-xl font-semibold mb-4">Educational Content</h3>
+                        <p class="text-gray-600">Learn about trauma, recovery, and wellness</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Community Section -->
+        <section id="community" class="section hidden">
+            <div class="container mx-auto py-8 px-4">
+                <h2 class="text-3xl md:text-4xl font-bold text-center mb-8">Supportive Community</h2>
+                <p class="text-xl text-center text-gray-600 mb-12">Connect with others on similar healing journeys</p>
+                
+                <div class="max-w-4xl mx-auto">
+                    <div class="bg-white p-6 rounded-lg shadow-lg mb-6">
+                        <h3 class="text-xl font-semibold mb-4">Community Guidelines</h3>
+                        <ul class="space-y-2 text-gray-600">
+                            <li>• Treat everyone with respect and kindness</li>
+                            <li>• Share experiences, not medical advice</li>
+                            <li>• Maintain confidentiality and privacy</li>
+                            <li>• Support each other's healing journeys</li>
+                        </ul>
+                    </div>
+                    
+                    <div id="community-posts" class="space-y-4">
+                        <!-- Community posts will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Pricing Section -->
+        <section id="pricing" class="section hidden">
+            <div class="container mx-auto py-8 px-4">
+                <h2 class="text-3xl md:text-4xl font-bold text-center mb-8">Choose Your Plan</h2>
+                <p class="text-xl text-center text-gray-600 mb-12">Affordable access to comprehensive mental health support</p>
+                
+                <div class="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+                    <div class="bg-white p-8 rounded-lg shadow-lg border-2 border-gray-200">
+                        <h3 class="text-2xl font-bold text-center mb-4">Basic</h3>
+                        <div class="text-center mb-6">
+                            <span class="text-4xl font-bold">$9</span>
+                            <span class="text-gray-600">/month</span>
+                        </div>
+                        <ul class="space-y-3 mb-8">
+                            <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i>Life Analysis Assessment</li>
+                            <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i>Basic AI Coaching</li>
+                            <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i>Community Access</li>
+                        </ul>
+                        <button onclick="app.selectPlan('basic')" class="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors">
+                            Get Started
+                        </button>
+                    </div>
+                    
+                    <div class="bg-white p-8 rounded-lg shadow-lg border-2 border-green-500 relative">
+                        <div class="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-4 py-1 rounded-full text-sm">
+                            Most Popular
+                        </div>
+                        <h3 class="text-2xl font-bold text-center mb-4">Premium</h3>
+                        <div class="text-center mb-6">
+                            <span class="text-4xl font-bold">$29</span>
+                            <span class="text-gray-600">/month</span>
+                        </div>
+                        <ul class="space-y-3 mb-8">
+                            <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i>Everything in Basic</li>
+                            <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i>Voice AI Coaching</li>
+                            <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i>PTSD Corner Access</li>
+                            <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i>Nutrition Guidance</li>
+                        </ul>
+                        <button onclick="app.selectPlan('premium')" class="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition-colors">
+                            Get Started
+                        </button>
+                    </div>
+                    
+                    <div class="bg-white p-8 rounded-lg shadow-lg border-2 border-gray-200">
+                        <h3 class="text-2xl font-bold text-center mb-4">Enterprise</h3>
+                        <div class="text-center mb-6">
+                            <span class="text-4xl font-bold">$99</span>
+                            <span class="text-gray-600">/month</span>
+                        </div>
+                        <ul class="space-y-3 mb-8">
+                            <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i>Everything in Premium</li>
+                            <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i>Priority Support</li>
+                            <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i>Custom Features</li>
+                            <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i>Team Management</li>
+                        </ul>
+                        <button onclick="app.selectPlan('enterprise')" class="w-full bg-purple-600 text-white py-3 rounded-lg hover:bg-purple-700 transition-colors">
+                            Contact Sales
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Help Section -->
+        <section id="help" class="section hidden">
+            <div class="container mx-auto py-8 px-4">
+                <h2 class="text-3xl md:text-4xl font-bold text-center mb-8">Help & Support</h2>
+                <p class="text-xl text-center text-gray-600 mb-12">We're here to support you every step of the way</p>
+                
+                <div class="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                    <div class="bg-white p-6 rounded-lg shadow-lg">
+                        <h3 class="text-xl font-semibold mb-4">Frequently Asked Questions</h3>
+                        <div class="space-y-4">
+                            <div class="border-b pb-2">
+                                <h4 class="font-medium">How does the assessment work?</h4>
+                                <p class="text-gray-600 text-sm mt-1">Our comprehensive assessment evaluates multiple aspects of your wellness...</p>
+                            </div>
+                            <div class="border-b pb-2">
+                                <h4 class="font-medium">Is my data secure?</h4>
+                                <p class="text-gray-600 text-sm mt-1">Yes, we use enterprise-grade encryption and follow HIPAA guidelines...</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white p-6 rounded-lg shadow-lg">
+                        <h3 class="text-xl font-semibold mb-4">Contact Support</h3>
+                        <div class="space-y-4">
+                            <div class="flex items-center">
+                                <i class="fas fa-envelope text-blue-600 mr-3"></i>
+                                <span>support@rootcausepower.com</span>
+                            </div>
+                            <div class="flex items-center">
+                                <i class="fas fa-phone text-green-600 mr-3"></i>
+                                <span>1-800-SUPPORT</span>
+                            </div>
+                            <div class="flex items-center">
+                                <i class="fas fa-clock text-purple-600 mr-3"></i>
+                                <span>Available 24/7 for crisis support</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+    </main>
+    </div>
+
+    <!-- Voice Credit Store Modal -->
+    <div id="voice-credit-modal" class="modal voice-credit-modal fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-xl shadow-2xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <!-- Header -->
+            <div class="bg-gradient-to-r from-purple-600 to-blue-600 text-white p-6 rounded-t-xl">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h2 class="text-2xl font-bold mb-2">🎙️ Voice Credit Store</h2>
+                        <p class="text-purple-100">Purchase credits for conversational AI voice coaching</p>
+                    </div>
+                    <button onclick="app.closeModal('voice-credit-modal')" class="text-white hover:text-gray-200 text-2xl">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Current Balance -->
+            <div class="p-6 border-b border-gray-200">
+                <div class="flex items-center justify-between bg-gradient-to-r from-purple-50 to-blue-50 p-4 rounded-lg">
+                    <div class="flex items-center">
+                        <div class="w-12 h-12 bg-purple-500 rounded-full flex items-center justify-center text-white mr-4">
+                            <i class="fas fa-microphone text-xl"></i>
+                        </div>
+                        <div>
+                            <div class="text-lg font-semibold text-gray-800">Current Balance</div>
+                            <div class="text-sm text-gray-600">Voice minutes available</div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div id="current-voice-balance" class="text-3xl font-bold text-purple-600">0</div>
+                        <div class="text-sm text-gray-600">minutes</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Credit Packages -->
+            <div class="p-6">
+                <h3 class="text-xl font-bold mb-4 text-gray-800">Choose Your Voice Credit Package</h3>
+                <div class="grid md:grid-cols-3 gap-6">
+                    <!-- Starter Package -->
+                    <div class="credit-package bg-white border-2 border-gray-200 rounded-lg p-6 text-center hover:border-purple-400">
+                        <div class="text-4xl mb-3">🚀</div>
+                        <h4 class="text-lg font-bold mb-2">Starter</h4>
+                        <div class="text-3xl font-bold text-purple-600 mb-1">£9.99</div>
+                        <div class="text-sm text-gray-600 mb-4">60 minutes</div>
+                        <div class="text-xs text-gray-500 mb-4">Perfect for trying voice AI</div>
+                        <button onclick="app.purchaseVoiceCredits('starter', 9.99, 60)" class="w-full bg-purple-500 text-white py-2 rounded hover:bg-purple-600 transition-colors">
+                            Purchase
+                        </button>
+                    </div>
+                    
+                    <!-- Popular Package -->
+                    <div class="credit-package bg-white border-2 border-purple-500 rounded-lg p-6 text-center relative">
+                        <div class="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                            <span class="bg-purple-500 text-white px-3 py-1 rounded-full text-sm font-bold">POPULAR</span>
+                        </div>
+                        <div class="text-4xl mb-3">⭐</div>
+                        <h4 class="text-lg font-bold mb-2">Popular</h4>
+                        <div class="text-3xl font-bold text-purple-600 mb-1">£24.99</div>
+                        <div class="text-sm text-gray-600 mb-2">180 minutes</div>
+                        <div class="text-xs text-green-600 font-semibold mb-2">Save 30%!</div>
+                        <div class="text-xs text-gray-500 mb-4">Great for regular users</div>
+                        <button onclick="app.purchaseVoiceCredits('popular', 24.99, 180)" class="w-full bg-purple-500 text-white py-2 rounded hover:bg-purple-600 transition-colors">
+                            Purchase
+                        </button>
+                    </div>
+                    
+                    <!-- Premium Package -->
+                    <div class="credit-package bg-white border-2 border-gray-200 rounded-lg p-6 text-center hover:border-purple-400">
+                        <div class="text-4xl mb-3">💎</div>
+                        <h4 class="text-lg font-bold mb-2">Premium</h4>
+                        <div class="text-3xl font-bold text-purple-600 mb-1">£49.99</div>
+                        <div class="text-sm text-gray-600 mb-2">420 minutes</div>
+                        <div class="text-xs text-green-600 font-semibold mb-2">Save 40%!</div>
+                        <div class="text-xs text-gray-500 mb-4">Best value for power users</div>
+                        <button onclick="app.purchaseVoiceCredits('premium', 49.99, 420)" class="w-full bg-purple-500 text-white py-2 rounded hover:bg-purple-600 transition-colors">
+                            Purchase
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Payment Info -->
+                <div class="mt-6 bg-gray-50 p-4 rounded-lg">
+                    <div class="flex items-center text-sm text-gray-600">
+                        <i class="fas fa-shield-alt text-green-500 mr-2"></i>
+                        <span>Secure payment powered by Stripe • Voice credits never expire • Instant activation</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hume AI Voice Interface Modal -->
+    <div id="hume-voice-modal" class="modal fixed inset-0 bg-black bg-opacity-75 hidden items-center justify-center z-50">
+        <div class="voice-interface rounded-2xl shadow-2xl max-w-2xl w-full mx-4 text-white">
+            <!-- Header -->
+            <div class="p-6 border-b border-white border-opacity-20">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h2 class="text-2xl font-bold mb-1">🧠 Empathic Voice Coach</h2>
+                        <p class="text-purple-100">Powered by Hume AI - emotionally intelligent conversation</p>
+                    </div>
+                    <button onclick="app.closeVoiceSession()" class="text-white hover:text-gray-200 text-2xl">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Voice Interface -->
+            <div class="p-8 text-center">
+                <!-- Voice Animation -->
+                <div id="voice-animation" class="flex justify-center items-center mb-6 h-16">
+                    <div class="voice-wave"></div>
+                    <div class="voice-wave"></div>
+                    <div class="voice-wave"></div>
+                    <div class="voice-wave"></div>
+                    <div class="voice-wave"></div>
+                </div>
+                
+                <!-- Status Display -->
+                <div id="voice-status" class="mb-6">
+                    <div class="text-xl font-semibold mb-2">Ready to Listen</div>
+                    <div class="text-purple-200">Click the microphone to start talking</div>
+                </div>
+                
+                <!-- Controls -->
+                <div class="flex justify-center space-x-4 mb-6">
+                    <button id="voice-start-btn" onclick="app.startVoiceSession()" class="bg-white bg-opacity-20 hover:bg-opacity-30 px-6 py-3 rounded-full transition-all">
+                        <i class="fas fa-microphone text-2xl"></i>
+                    </button>
+                    <button id="voice-stop-btn" onclick="app.stopVoiceSession()" class="bg-red-500 hover:bg-red-600 px-6 py-3 rounded-full transition-all hidden">
+                        <i class="fas fa-stop text-2xl"></i>
+                    </button>
+                </div>
+                
+                <!-- Credits Display -->
+                <div class="bg-white bg-opacity-10 p-3 rounded-lg">
+                    <div class="text-sm">
+                        <span class="text-purple-200">Voice Credits:</span>
+                        <span id="voice-session-credits" class="font-bold ml-2">0 minutes</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="./js/app.js?v=1.8.0"></script>
+    <script src="./js/ui-improvements.js?v=1.6.0"></script>
+    <script src="./js/hume-voice.js?v=1.0.0"></script>
+    
+    <!-- PWA Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(registration => {
+                        console.log('SW registered: ', registration);
+                    })
+                    .catch(registrationError => {
+                        console.log('SW registration failed: ', registrationError);
+                    });
+            });
+        }
+    </script>
+
+    <!-- Accessibility Script -->
+    <script>
+        // Initialize accessibility features
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load saved accessibility preferences
+            const savedPrefs = localStorage.getItem('accessibilityPrefs');
+            if (savedPrefs) {
+                const prefs = JSON.parse(savedPrefs);
+                if (prefs.fontSize) app.setFontSize(prefs.fontSize);
+                if (prefs.highContrast) document.body.classList.add('high-contrast');
+                if (prefs.reducedMotion) document.body.classList.add('reduced-motion');
+                if (prefs.voiceSpeed) app.setVoiceSpeed(prefs.voiceSpeed);
+            }
+            
+            // Accessibility toolbar toggle
+            document.getElementById('accessibility-toggle').addEventListener('click', function() {
+                const panel = document.getElementById('accessibility-panel');
+                panel.classList.toggle('hidden');
+                
+                // Announce to screen readers
+                if (window.app && app.announceToScreenReader) {
+                    app.announceToScreenReader(
+                        panel.classList.contains('hidden') 
+                        ? 'Accessibility panel closed' 
+                        : 'Accessibility panel opened'
+                    );
+                }
+            });
+
+            // Keyboard navigation enhancements
+            document.addEventListener('keydown', function(e) {
+                // Quick accessibility panel toggle with Alt+A
+                if (e.altKey && e.key === 'a') {
+                    e.preventDefault();
+                    document.getElementById('accessibility-toggle').click();
+                }
+                
+                // Quick high contrast toggle with Alt+C
+                if (e.altKey && e.key === 'c') {
+                    e.preventDefault();
+                    if (window.app && app.toggleHighContrast) app.toggleHighContrast();
+                }
+                
+                // Emergency crisis help with Alt+H
+                if (e.altKey && e.key === 'h') {
+                    e.preventDefault();
+                    if (window.app && app.triggerCrisisSupport) app.triggerCrisisSupport();
+                }
+            });
+        });
+
+                    // Quick high contrast toggle with Alt+C
+            if (e.altKey && e.key === 'c') {
+                e.preventDefault();
+                if (window.app && app.toggleHighContrast) app.toggleHighContrast();
+            }
+            
+            // Emergency crisis help with Alt+H
+            if (e.altKey && e.key === 'h') {
+                e.preventDefault();
+                if (window.app && app.triggerCrisisSupport) app.triggerCrisisSupport();
+            }
+        });
     });
+        // Fallback: make the hamburger button open/close the dropdown
+window.app = window.app || {};
+app.toggleHamburgerMenu = function () {
+  const menu = document.getElementById('hamburger-dropdown');
+  if (!menu) return;
+  menu.classList.toggle('hidden');
+};
 
-    nextBtn.addEventListener('click', async () => {
-      renderPrescriptionLoading(container);
-      try {
-        const context = 'ASSESSMENT RESULTS:\\nSleep Quality: ' + selected + '/5 (' + ['Terrible','Poor','Fair','Good','Excellent'][selected-1] + ')\\n';
-        const rx = await aiPrescription(context);
-        renderPrescription(container, rx);
-      } catch {
-        renderPrescription(container, 'Sorry—could not generate your prescription right now.');
-      }
-    });
-  }
+// Also attach a click listener in case the inline onclick doesn’t fire
+document.addEventListener('DOMContentLoaded', function () {
+  const btn = document.getElementById('hamburger-menu-btn');
+  if (btn) btn.addEventListener('click', app.toggleHamburgerMenu);
+});
 
-  function renderPrescriptionLoading(container) {
-    container.innerHTML = `
-      <div style="text-align:center; padding:3rem 0;">
-        <div style="display:inline-flex; align-items:center; justify-content:center; width:80px; height:80px; background:linear-gradient(135deg,#7c3aed,#3b82f6); border-radius:9999px; margin-bottom:1.5rem; animation:pulse 1.2s ease-in-out infinite;"></div>
-        <h3 style="font-size:1.5rem; font-weight:700; color:#1f2937; margin:0 0 0.5rem;">Creating your personalized prescription…</h3>
-        <p style="color:#4b5563; margin:0;">This usually takes a few seconds.</p>
-      </div>
-    `;
-  }
-
-  function renderPrescription(container, text) {
-    container.innerHTML = `
-      <div style="text-align:center; margin-bottom:2rem;">
-        <div style="display:inline-flex; align-items:center; justify-content:center; width:80px; height:80px; background:linear-gradient(135deg,#22c55e,#3b82f6); border-radius:9999px; margin-bottom:1rem;"></div>
-        <h2 style="font-size:1.75rem; font-weight:800; color:#1f2937; margin:0 0 0.5rem;">Your Personal Recovery Prescription</h2>
-        <p style="color:#4b5563; margin:0;">Created by AI Coach Sarah for you</p>
-      </div>
-      <div style="background:#fff; border:2px solid #bbf7d0; border-radius:0.75rem; padding:2rem; box-shadow: 0 10px 20px rgba(0,0,0,0.05); text-align:left; white-space:pre-wrap; line-height:1.7; color:#111827;">
-        ${escapeHtml(text || 'No content')}
-      </div>
-    `;
-  }
-
-  function escapeHtml(str) {
-    return String(str).replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
-  }
-
-  function start() {
-    // Find or create an assessment container
-    let container = document.getElementById('assessment-questions') || document.getElementById('assessment-content');
-    if (!container) {
-      // Try to create one inside the #assessment section if present
-      const section = document.getElementById('assessment') || document.body;
-      container = document.createElement('div');
-      container.id = 'assessment-content';
-      section.appendChild(container);
-    }
-
-    // Only render once
-    if (!container.dataset.rcpInlineRendered) {
-      container.dataset.rcpInlineRendered = '1';
-      try { uncoverOverlaysAbove(container); } catch {}
-      renderStep1(container);
-    }
-  }
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', start, { once: true });
-  } else {
-    // DOM already ready; run now and also shortly after to be safe
-    start();
-    setTimeout(start, 0);
-    setTimeout(start, 300);
-  }
-})();
-</script>
-
-  </script>
+    </script>
 </body>
 </html>
