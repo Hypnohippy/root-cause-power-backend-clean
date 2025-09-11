@@ -969,6 +969,34 @@
                 }
             });
         });
+
+                    // Quick high contrast toggle with Alt+C
+            if (e.altKey && e.key === 'c') {
+                e.preventDefault();
+                if (window.app && app.toggleHighContrast) app.toggleHighContrast();
+            }
+            
+            // Emergency crisis help with Alt+H
+            if (e.altKey && e.key === 'h') {
+                e.preventDefault();
+                if (window.app && app.triggerCrisisSupport) app.triggerCrisisSupport();
+            }
+        });
+    });
+        // Fallback: make the hamburger button open/close the dropdown
+window.app = window.app || {};
+app.toggleHamburgerMenu = function () {
+  const menu = document.getElementById('hamburger-dropdown');
+  if (!menu) return;
+  menu.classList.toggle('hidden');
+};
+
+// Also attach a click listener in case the inline onclick doesn’t fire
+document.addEventListener('DOMContentLoaded', function () {
+  const btn = document.getElementById('hamburger-menu-btn');
+  if (btn) btn.addEventListener('click', app.toggleHamburgerMenu);
+});
+
     </script>
 </body>
 </html>
