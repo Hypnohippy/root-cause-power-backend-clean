@@ -1,32 +1,49 @@
-// /api/prescription.js
-export default async function handler(req, res) {
+// /api/prescription.js (Vercel Node Serverless, CommonJS + safe JSON body parsing)
+module.exports = async (req, res) => {
   if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
+    res.statusCode = 405;
+    res.setHeader('Content-Type', 'application/json');
+    return res.end(JSON.stringify({ error: 'Method not allowed' }));
   }
 
+  // Robust JSON body parsing (works even when req.body is undefined)
+  let body = {};
   try {
-    const { assessmentContext } = req.body || {};
-    const fallback =
-`Short, kind prescription:
+    if (req.body && typeof req.body === 'object') {
+      body = req.body;
+    } else {
+      const chunks = [];
+      for await (const chunk of req) chunks.push(chunk);
+      const raw = Buffer.concat(chunks).toString('utf8');
+      body = raw ? JSON.parse(raw) : {};
+    }
+  } catch {
+    body = {};
+  }
+
+  const { assessmentContext } = body;
+  const fallback = `Short, kind prescription:
 - 2-minute box breathing before bed
 - Morning sunlight 5–10 minutes
 - Keep a gentle sleep log for 3 days
 - If distress rises, pause and practice grounding (5-4-3-2-1)
 - Celebrate one small win each day`;
 
-    // Use whichever key you have set in Vercel
-    const apiKey = process.env.GROQ_API_KEY || process.env.OPENAI_API_KEY;
+  const apiKey = process.env.GROQ_API_KEY || process.env.OPENAI_API_KEY;
 
-    // No key? Always return a helpful prescription so UI never breaks.
-    if (!apiKey) {
-      return res.status(200).json({ prescription: fallback });
-    }
+  // No key? Always return a helpful prescription so the UI never breaks.
+  if (!apiKey) {
+    res.statusCode = 200;
+    res.setHeader('Content-Type', 'application/json');
+    return res.end(JSON.stringify({ prescription: fallback }));
+  }
 
+  try {
     const r = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`
+        Authorization: `Bearer ${apiKey}`
       },
       body: JSON.stringify({
         model: 'llama-3.3-70b-versatile',
@@ -35,7 +52,8 @@ export default async function handler(req, res) {
         messages: [
           {
             role: 'system',
-            content: 'You are a gentle, trauma-informed coach named Sarah. Create a concise, actionable recovery prescription in 4–6 short bullet lines. Avoid medical advice and diagnosis.'
+            content:
+              'You are a gentle, trauma-informed coach named Sarah. Create a concise, actionable recovery prescription in 4–6 short bullet lines. Avoid medical advice and diagnosis.'
           },
           {
             role: 'user',
@@ -47,16 +65,19 @@ export default async function handler(req, res) {
 
     const data = await r.json().catch(() => ({}));
 
-    // If API errors, still return a helpful prescription
-    if (!r.ok) {
-      console.error('Groq error', r.status, data);
-      return res.status(200).json({ prescription: fallback });
-    }
+    const text =
+      (data && data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content
+        ? String(data.choices[0].message.content).trim()
+        : '') || fallback;
 
-    const text = (data?.choices?.[0]?.message?.content || '').trim() || fallback;
-    return res.status(200).json({ prescription: text });
+    // Always return 200 with a usable prescription (graceful)
+    res.statusCode = 200;
+    res.setHeader('Content-Type', 'application/json');
+    return res.end(JSON.stringify({ prescription: text }));
   } catch (err) {
     console.error('Prescription handler error', err);
-    return res.status(200).json({ prescription: fallback });
+    res.statusCode = 200;
+    res.setHeader('Content-Type', 'application/json');
+    return res.end(JSON.stringify({ prescription: fallback }));
   }
-}
+};
