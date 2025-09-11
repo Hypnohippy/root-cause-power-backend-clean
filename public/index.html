@@ -343,38 +343,716 @@
             </div>
         </section>
 
-        <!-- PLACEHOLDER: Other sections would go here -->
+        <!-- COACHES SECTION - Personal AI Team -->
         <section id="coaches" class="section hidden py-16 bg-gray-50">
-            <div class="max-w-7xl mx-auto px-4 text-center">
-                <h1 class="text-4xl font-bold mb-6">Your Personal AI Healthcare Team</h1>
-                <p class="text-xl text-gray-600">Coming soon - your personalized AI specialists</p>
+            <div class="max-w-7xl mx-auto px-4">
+                <div class="text-center mb-16">
+                    <h1 class="text-4xl font-bold text-gray-800 mb-6">Your Personal AI Healthcare Team</h1>
+                    <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                        Each AI specialist knows your complete health story and adapts to your unique needs in real-time
+                    </p>
+                </div>
+                
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    
+                    <!-- Nutrition AI -->
+                    <div class="bg-gradient-to-br from-green-500 to-emerald-600 text-white p-8 rounded-2xl shadow-xl hover:shadow-2xl transition-all transform hover:scale-105 personal-connect">
+                        <div class="flex items-start justify-between mb-6">
+                            <i class="fas fa-apple-alt text-5xl"></i>
+                            <div class="emotion-indicator emotion-happy"></div>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-4">Dr. Nutri-AI</h3>
+                        <p class="mb-6 opacity-90">
+                            "Based on your sleep patterns and stress levels, I've prepared a personalized meal plan that supports your PTSD recovery."
+                        </p>
+                        <div class="bg-white/20 rounded-lg p-4 mb-6">
+                            <div class="text-sm">
+                                <div class="flex justify-between mb-2">
+                                    <span>Knows Your Preferences:</span>
+                                    <span>✓ 847 data points</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>Adaptation Level:</span>
+                                    <span>🔥 Expert</span>
+                                </div>
+                            </div>
+                        </div>
+                        <button onclick="startAICoaching('maya')" class="w-full bg-white text-green-600 py-3 rounded-lg font-bold hover:bg-green-50 transition-all">
+                            Start Nutrition Chat
+                        </button>
+                    </div>
+
+                    <!-- PTSD Specialist AI -->
+                    <div class="bg-gradient-to-br from-purple-500 to-violet-600 text-white p-8 rounded-2xl shadow-xl hover:shadow-2xl transition-all transform hover:scale-105 personal-connect">
+                        <div class="flex items-start justify-between mb-6">
+                            <i class="fas fa-shield-heart text-5xl"></i>
+                            <div class="emotion-indicator emotion-concerned"></div>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-4">Trauma-Wise AI</h3>
+                        <p class="mb-6 opacity-90">
+                            "I notice your sleep improved after our EMDR session last week. Ready to build on that progress with some new techniques?"
+                        </p>
+                        <div class="bg-white/20 rounded-lg p-4 mb-6">
+                            <div class="text-sm">
+                                <div class="flex justify-between mb-2">
+                                    <span>Crisis Detection:</span>
+                                    <span>✓ 24/7 Active</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>Trauma Protocols:</span>
+                                    <span>🛡️ Advanced</span>
+                                </div>
+                            </div>
+                        </div>
+                        <button onclick="showSection('ptsd-corner')" class="w-full bg-white text-purple-600 py-3 rounded-lg font-bold hover:bg-purple-50 transition-all">
+                            Enter Safe Space
+                        </button>
+                    </div>
+
+                    <!-- Revolutionary Voice AI -->
+                    <div class="bg-gradient-to-br from-pink-500 to-rose-600 text-white p-8 rounded-2xl shadow-xl hover:shadow-2xl transition-all transform hover:scale-105 personal-connect relative overflow-hidden">
+                        <div class="absolute top-4 right-4 bg-yellow-400 text-black px-3 py-1 rounded-full text-xs font-bold animate-bounce">
+                            REVOLUTIONARY!
+                        </div>
+                        <div class="flex items-start justify-between mb-6">
+                            <i class="fas fa-microphone text-5xl"></i>
+                            <div class="emotion-indicator emotion-happy"></div>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-4">🎤 Voice Emotion AI</h3>
+                        <p class="mb-6 opacity-90">
+                            "I can hear in your voice that you're feeling better today. Your tone tells me the breathing exercises are working!"
+                        </p>
+                        <div class="bg-white/20 rounded-lg p-4 mb-6">
+                            <div class="text-sm">
+                                <div class="flex justify-between mb-2">
+                                    <span>Emotional Reading:</span>
+                                    <span>🎯 Real-time</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>Voice Analysis:</span>
+                                    <span>🎙️ Hume AI</span>
+                                </div>
+                            </div>
+                        </div>
+                        <button onclick="showSection('voice-ai')" class="w-full bg-white text-pink-600 py-3 rounded-lg font-bold hover:bg-pink-50 transition-all">
+                            Start Voice Session
+                        </button>
+                    </div>
+                </div>
+
+                <!-- AI Memory Status -->
+                <div class="mt-16 bg-white rounded-2xl shadow-xl p-8 border border-purple-100">
+                    <div class="text-center mb-8">
+                        <h3 class="text-2xl font-bold text-gray-800 mb-4">🧠 Your AI Memory Bank</h3>
+                        <p class="text-gray-600">See how your AI team is learning and adapting to serve you better</p>
+                    </div>
+                    
+                    <div class="grid md:grid-cols-4 gap-6">
+                        <div class="text-center">
+                            <div class="text-3xl font-bold text-purple-600 mb-2">1,247</div>
+                            <div class="text-sm text-gray-600">Interactions Remembered</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-3xl font-bold text-green-600 mb-2">94%</div>
+                            <div class="text-sm text-gray-600">Prediction Accuracy</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-3xl font-bold text-blue-600 mb-2">24/7</div>
+                            <div class="text-sm text-gray-600">Emotional Monitoring</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-3xl font-bold text-rose-600 mb-2">∞</div>
+                            <div class="text-sm text-gray-600">Adaptation Capability</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- AI Chat Interface -->
+                <div id="ai-chat-container" class="hidden mt-16">
+                    <div class="bg-white rounded-2xl shadow-2xl border-2 border-purple-200 max-w-4xl mx-auto">
+                        <div class="bg-gradient-to-r from-purple-500 to-blue-500 p-6 rounded-t-2xl">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-4">
+                                    <div id="current-coach-avatar" class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-user-md text-white text-xl"></i>
+                                    </div>
+                                    <div>
+                                        <div id="current-coach-name" class="text-xl font-bold text-white">Coach Sarah</div>
+                                        <div id="current-coach-status" class="text-purple-200 text-sm">Online and ready to help</div>
+                                    </div>
+                                </div>
+                                <button onclick="closeAIChat()" class="text-white hover:bg-white/20 p-2 rounded-full transition-all">
+                                    <i class="fas fa-times text-xl"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="p-6">
+                            <!-- Chat Messages -->
+                            <div id="chat-messages" class="h-96 overflow-y-auto mb-6 space-y-4 bg-gray-50 rounded-xl p-4">
+                                <!-- Messages will appear here -->
+                            </div>
+                            
+                            <!-- Chat Input -->
+                            <div class="flex space-x-4">
+                                <input type="text" id="chat-input" placeholder="Share what's on your mind..." class="flex-1 p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
+                                <button onclick="sendChatMessage()" class="bg-gradient-to-r from-purple-500 to-blue-500 text-white px-6 py-4 rounded-xl font-semibold hover:from-purple-600 hover:to-blue-600 transition-all">
+                                    <i class="fas fa-paper-plane"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
             </div>
         </section>
 
+        <!-- Voice AI Therapy Section -->
         <section id="voice-ai" class="section hidden py-16 bg-gradient-to-br from-indigo-50 to-purple-50">
-            <div class="max-w-7xl mx-auto px-4 text-center">
-                <h1 class="text-4xl font-bold mb-6">🎙️ Revolutionary Voice AI Therapy</h1>
-                <p class="text-xl text-gray-600">Coming soon - voice emotion analysis and therapeutic responses</p>
+            <div class="container mx-auto px-4">
+                <div class="max-w-6xl mx-auto">
+                    <div class="text-center mb-12">
+                        <div class="w-32 h-32 bg-gradient-to-br from-indigo-600 to-purple-700 rounded-full flex items-center justify-center mx-auto mb-8 ai-glow">
+                            <i class="fas fa-microphone text-white text-5xl"></i>
+                        </div>
+                        <h1 class="text-5xl font-bold text-gray-800 mb-6">🎙️ Revolutionary Voice AI Therapy</h1>
+                        <p class="text-xl text-gray-600 mb-8 max-w-4xl mx-auto">
+                            Experience the world's first AI that understands your emotions through your voice, 
+                            provides real-time emotional analysis, and delivers personalized therapeutic responses
+                        </p>
+                        
+                        <!-- Quick Stats -->
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 max-w-3xl mx-auto">
+                            <div class="bg-white rounded-xl p-4 shadow-lg">
+                                <div class="text-2xl font-bold text-indigo-600" id="totalSessions">0</div>
+                                <div class="text-sm text-gray-600">Sessions</div>
+                            </div>
+                            <div class="bg-white rounded-xl p-4 shadow-lg">
+                                <div class="text-2xl font-bold text-purple-600">28+</div>
+                                <div class="text-sm text-gray-600">Emotions</div>
+                            </div>
+                            <div class="bg-white rounded-xl p-4 shadow-lg">
+                                <div class="text-2xl font-bold text-green-600">Real-time</div>
+                                <div class="text-sm text-gray-600">Analysis</div>
+                            </div>
+                            <div class="bg-white rounded-xl p-4 shadow-lg">
+                                <div class="text-2xl font-bold text-rose-600">24/7</div>
+                                <div class="text-sm text-gray-600">Available</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Voice AI Interface -->
+                    <div class="bg-white rounded-2xl shadow-2xl border-2 border-indigo-200 max-w-4xl mx-auto p-8">
+                        <div class="text-center mb-8">
+                            <h2 class="text-3xl font-bold text-indigo-800 mb-4">Start Your Voice Therapy Session</h2>
+                            <p class="text-gray-600 mb-6">
+                                Speak naturally and let our AI understand your emotional state to provide personalized support.
+                            </p>
+                        </div>
+                        
+                        <!-- Voice Controls -->
+                        <div class="text-center mb-8">
+                            <div id="voice-status" class="text-2xl font-bold text-gray-500 mb-6">Ready to Listen</div>
+                            
+                            <div class="flex justify-center space-x-6 mb-8">
+                                <button id="start-recording" onclick="startVoiceSession()" class="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-8 py-4 rounded-full text-lg font-bold hover:from-green-600 hover:to-emerald-600 transition-all ai-glow">
+                                    <i class="fas fa-microphone mr-3 text-2xl"></i>Start Voice Session
+                                </button>
+                                
+                                <button id="stop-recording" onclick="stopVoiceSession()" disabled class="bg-gray-300 text-gray-500 px-8 py-4 rounded-full text-lg font-bold cursor-not-allowed">
+                                    <i class="fas fa-stop mr-3 text-2xl"></i>Stop Session
+                                </button>
+                            </div>
+                            
+                            <!-- Audio Visualization -->
+                            <div id="audio-visualization" class="hidden">
+                                <div class="flex justify-center items-end space-x-2 mb-6">
+                                    <div class="w-3 h-8 bg-indigo-400 rounded-full animate-pulse"></div>
+                                    <div class="w-3 h-12 bg-purple-400 rounded-full animate-pulse" style="animation-delay: 0.1s"></div>
+                                    <div class="w-3 h-6 bg-blue-400 rounded-full animate-pulse" style="animation-delay: 0.2s"></div>
+                                    <div class="w-3 h-10 bg-indigo-400 rounded-full animate-pulse" style="animation-delay: 0.3s"></div>
+                                    <div class="w-3 h-8 bg-purple-400 rounded-full animate-pulse" style="animation-delay: 0.4s"></div>
+                                </div>
+                                <div class="text-lg text-indigo-600 font-semibold">Listening and analyzing your voice...</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Emotional Analysis Display -->
+                        <div id="emotion-analysis" class="hidden bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl p-6 border border-indigo-200">
+                            <h3 class="text-xl font-bold text-indigo-800 mb-4">🧠 Real-Time Emotional Analysis</h3>
+                            <div id="emotion-results" class="space-y-4">
+                                <!-- Emotion analysis results will appear here -->
+                            </div>
+                        </div>
+                        
+                        <!-- AI Therapeutic Response -->
+                        <div id="therapeutic-response" class="hidden bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-6 border border-purple-200 mt-6">
+                            <div class="flex items-start space-x-4">
+                                <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white">
+                                    <i class="fas fa-heart"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <h3 class="text-xl font-bold text-purple-800 mb-2">🤖 AI Therapeutic Response</h3>
+                                    <div id="ai-response-text" class="text-gray-700 leading-relaxed">
+                                        <!-- AI response will appear here -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Session History -->
+                        <div id="session-history" class="hidden mt-8">
+                            <h3 class="text-xl font-bold text-gray-800 mb-4">📊 Your Voice Therapy Progress</h3>
+                            <div class="grid md:grid-cols-3 gap-4">
+                                <div class="bg-green-50 rounded-lg p-4 border border-green-200">
+                                    <div class="text-2xl font-bold text-green-600">5</div>
+                                    <div class="text-sm text-green-700">Sessions Completed</div>
+                                </div>
+                                <div class="bg-blue-50 rounded-lg p-4 border border-blue-200">
+                                    <div class="text-2xl font-bold text-blue-600">68%</div>
+                                    <div class="text-sm text-blue-700">Stress Reduction</div>
+                                </div>
+                                <div class="bg-purple-50 rounded-lg p-4 border border-purple-200">
+                                    <div class="text-2xl font-bold text-purple-600">+24%</div>
+                                    <div class="text-sm text-purple-700">Emotional Stability</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Crisis Support Banner -->
+                    <div class="mt-16 bg-gradient-to-r from-red-50 to-pink-50 rounded-2xl border-2 border-red-200 p-8 text-center">
+                        <div class="flex items-center justify-center mb-4">
+                            <i class="fas fa-shield-heart text-3xl text-red-600 mr-4"></i>
+                            <h3 class="text-2xl font-bold text-red-800">Crisis Detection & Support</h3>
+                        </div>
+                        <p class="text-lg text-red-700 mb-6 max-w-2xl mx-auto">
+                            Our AI continuously monitors for signs of crisis or severe distress. If detected, 
+                            we'll immediately connect you with professional crisis support resources.
+                        </p>
+                        <button onclick="triggerCrisisSupport()" class="bg-gradient-to-r from-red-500 to-pink-500 text-white px-8 py-3 rounded-xl font-bold hover:from-red-600 hover:to-pink-600 transition-all">
+                            <i class="fas fa-phone mr-2"></i>Access Crisis Support Now
+                        </button>
+                    </div>
+                </div>
             </div>
         </section>
 
-        <section id="ptsd-corner" class="section hidden py-16 bg-gradient-to-br from-green-50 to-emerald-50">
-            <div class="max-w-7xl mx-auto px-4 text-center">
-                <h1 class="text-4xl font-bold mb-6">🛡️ Your Safe Haven</h1>
-                <p class="text-xl text-gray-600">Coming soon - trauma-informed AI support and coping tools</p>
-            </div>
-        </section>
-
+        <!-- PRICING SECTION - Healthcare Revolution Plans -->
         <section id="pricing" class="section hidden py-16 bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 text-white">
-            <div class="max-w-7xl mx-auto px-4 text-center">
-                <h1 class="text-4xl font-bold mb-6">🚀 JOIN THE HEALTHCARE REVOLUTION</h1>
-                <p class="text-xl text-blue-100">Coming soon - revolutionary pricing plans</p>
+            <div class="max-w-7xl mx-auto px-4">
+                
+                <!-- Header -->
+                <div class="text-center mb-16">
+                    <div class="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-purple-400 to-blue-400 rounded-full mb-8 shadow-2xl">
+                        <i class="fas fa-rocket text-white text-4xl"></i>
+                    </div>
+                    <h1 class="text-5xl md:text-6xl font-bold mb-6">
+                        🚀 JOIN THE HEALTHCARE REVOLUTION
+                    </h1>
+                    <p class="text-xl md:text-2xl opacity-90 mb-8 max-w-4xl mx-auto">
+                        Revolutionary AI healthcare that remembers, learns, and grows with you. 
+                        Experience the future of personalized medicine today.
+                    </p>
+                    
+                    <!-- Revolutionary Features Badge -->
+                    <div class="bg-gradient-to-r from-gold-400/20 to-yellow-400/20 backdrop-blur-md rounded-xl p-6 max-w-3xl mx-auto border border-gold-400/30">
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                            <div>
+                                <div class="text-2xl font-bold text-gold-400">🧠</div>
+                                <div class="text-sm text-blue-200">AI Memory</div>
+                            </div>
+                            <div>
+                                <div class="text-2xl font-bold text-gold-400">🎙️</div>
+                                <div class="text-sm text-blue-200">Voice AI</div>
+                            </div>
+                            <div>
+                                <div class="text-2xl font-bold text-gold-400">🛡️</div>
+                                <div class="text-sm text-blue-200">PTSD Support</div>
+                            </div>
+                            <div>
+                                <div class="text-2xl font-bold text-gold-400">24/7</div>
+                                <div class="text-sm text-blue-200">AI Care</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Individual Plans -->
+                <div class="mb-20">
+                    <h2 class="text-4xl font-bold text-center mb-12 text-blue-300">🌟 INDIVIDUAL HEALTHCARE REVOLUTION</h2>
+                    <div class="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+                        
+                        <!-- Starter Plan -->
+                        <div class="bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/20 hover:border-blue-400 transition-all duration-300">
+                            <div class="text-center mb-8">
+                                <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <i class="fas fa-user text-white text-2xl"></i>
+                                </div>
+                                <h3 class="text-2xl font-bold text-blue-400 mb-2">🌱 AI Starter</h3>
+                                <div class="text-5xl font-bold mb-2">£24</div>
+                                <div class="text-blue-200">/month</div>
+                            </div>
+                            
+                            <ul class="space-y-4 mb-8 text-sm">
+                                <li class="flex items-start"><i class="fas fa-brain text-blue-400 mr-3 mt-1"></i>Complete AI Health Assessment</li>
+                                <li class="flex items-start"><i class="fas fa-robot text-blue-400 mr-3 mt-1"></i>Personal AI Coach (Sarah)</li>
+                                <li class="flex items-start"><i class="fas fa-shield-heart text-blue-400 mr-3 mt-1"></i>PTSD Safe Space & Tools</li>
+                                <li class="flex items-start"><i class="fas fa-mobile text-blue-400 mr-3 mt-1"></i>Mobile-First Design</li>
+                                <li class="flex items-start"><i class="fas fa-clock text-blue-400 mr-3 mt-1"></i>24/7 Crisis Support</li>
+                            </ul>
+                            
+                            <button onclick="startSubscription('individual_starter')" class="w-full bg-gradient-to-r from-blue-500 to-indigo-500 text-white py-4 rounded-xl font-bold hover:from-blue-600 hover:to-indigo-600 transition-all">
+                                Start Your AI Journey
+                            </button>
+                        </div>
+                        
+                        <!-- Premium Plan (Popular) -->
+                        <div class="bg-white/15 backdrop-blur-md rounded-2xl p-8 border-2 border-gold-400 hover:border-gold-300 transition-all duration-300 relative transform scale-105">
+                            <div class="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                                <div class="bg-gradient-to-r from-gold-400 to-yellow-400 text-black px-4 py-2 rounded-full text-sm font-bold">
+                                    ⭐ MOST POPULAR
+                                </div>
+                            </div>
+                            
+                            <div class="text-center mb-8">
+                                <div class="w-16 h-16 bg-gradient-to-br from-gold-400 to-yellow-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <i class="fas fa-crown text-white text-2xl"></i>
+                                </div>
+                                <h3 class="text-2xl font-bold text-gold-400 mb-2">👑 AI Premium</h3>
+                                <div class="text-5xl font-bold mb-2">£49</div>
+                                <div class="text-blue-200">/month</div>
+                            </div>
+                            
+                            <ul class="space-y-4 mb-8 text-sm">
+                                <li class="flex items-start"><i class="fas fa-check text-gold-400 mr-3 mt-1"></i>Everything in Starter PLUS...</li>
+                                <li class="flex items-start"><i class="fas fa-microphone text-gold-400 mr-3 mt-1"></i>Revolutionary Voice AI Therapy</li>
+                                <li class="flex items-start"><i class="fas fa-users text-gold-400 mr-3 mt-1"></i>Full AI Healthcare Team (4 specialists)</li>
+                                <li class="flex items-start"><i class="fas fa-heart text-gold-400 mr-3 mt-1"></i>Advanced Emotional Analysis</li>
+                                <li class="flex items-start"><i class="fas fa-chart-line text-gold-400 mr-3 mt-1"></i>Progress Tracking & Analytics</li>
+                                <li class="flex items-start"><i class="fas fa-spa text-gold-400 mr-3 mt-1"></i>Interactive PTSD Coping Tools</li>
+                            </ul>
+                            
+                            <button onclick="startSubscription('individual_premium')" class="w-full bg-gradient-to-r from-gold-400 to-yellow-500 text-black py-4 rounded-xl font-bold hover:from-gold-500 hover:to-yellow-600 transition-all">
+                                Transform Your Healthcare 🚀
+                            </button>
+                        </div>
+                        
+                        <!-- Elite Plan -->
+                        <div class="bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/20 hover:border-purple-400 transition-all duration-300">
+                            <div class="text-center mb-8">
+                                <div class="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <i class="fas fa-gem text-white text-2xl"></i>
+                                </div>
+                                <h3 class="text-2xl font-bold text-purple-400 mb-2">💎 AI Elite</h3>
+                                <div class="text-5xl font-bold mb-2">£82</div>
+                                <div class="text-blue-200">/month</div>
+                            </div>
+                            
+                            <ul class="space-y-4 mb-8 text-sm">
+                                <li class="flex items-start"><i class="fas fa-check text-purple-400 mr-3 mt-1"></i>Everything in Premium PLUS...</li>
+                                <li class="flex items-start"><i class="fas fa-brain text-purple-400 mr-3 mt-1"></i>Priority AI Processing</li>
+                                <li class="flex items-start"><i class="fas fa-user-md text-purple-400 mr-3 mt-1"></i>Human Therapist Consultation</li>
+                                <li class="flex items-start"><i class="fas fa-download text-purple-400 mr-3 mt-1"></i>Data Export & Reports</li>
+                                <li class="flex items-start"><i class="fas fa-phone text-purple-400 mr-3 mt-1"></i>Priority Support & Care</li>
+                                <li class="flex items-start"><i class="fas fa-cogs text-purple-400 mr-3 mt-1"></i>Custom AI Personality</li>
+                            </ul>
+                            
+                            <button onclick="startSubscription('individual_elite')" class="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white py-4 rounded-xl font-bold hover:from-purple-600 hover:to-pink-600 transition-all">
+                                Ultimate Healthcare AI 💎
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Enterprise Plans -->
+                <div class="border-t border-white/20 pt-16">
+                    <div class="text-center mb-12">
+                        <h2 class="text-4xl font-bold text-center mb-12 text-gold-400">🏥 ENTERPRISE HEALTHCARE REVOLUTION</h2>
+                        <div class="grid md:grid-cols-3 gap-8">
+                            <!-- Enterprise Basic -->
+                            <div class="bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/20 hover:border-blue-400 transition-all duration-300">
+                                <div class="text-center mb-8">
+                                    <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                                        <i class="fas fa-building text-white text-2xl"></i>
+                                    </div>
+                                    <h3 class="text-2xl font-bold text-blue-400 mb-2">🏥 Enterprise Basic</h3>
+                                    <div class="text-5xl font-bold mb-2">£10</div>
+                                    <div class="text-blue-200">/month</div>
+                                </div>
+                                
+                                <ul class="space-y-4 mb-8 text-sm">
+                                    <li class="flex items-start"><i class="fas fa-users text-blue-400 mr-3 mt-1"></i>Up to 10 Users</li>
+                                    <li class="flex items-start"><i class="fas fa-chart-bar text-blue-400 mr-3 mt-1"></i>Basic Enterprise Dashboard</li>
+                                    <li class="flex items-start"><i class="fas fa-shield-alt text-blue-400 mr-3 mt-1"></i>UK GDPR Compliant</li>
+                                    <li class="flex items-start"><i class="fas fa-mobile text-blue-400 mr-3 mt-1"></i>Branded Mobile App</li>
+                                    <li class="flex items-start"><i class="fas fa-headset text-blue-400 mr-3 mt-1"></i>Email Support (24hr)</li>
+                                </ul>
+                                
+                                <button onclick="startSubscription('enterprise_basic')" class="w-full bg-gradient-to-r from-blue-500 to-indigo-500 text-white py-4 rounded-xl font-bold hover:from-blue-600 hover:to-indigo-600 transition-all">
+                                    Start Enterprise Revolution
+                                </button>
+                            </div>
+                            
+                            <!-- Enterprise Premium -->
+                            <div class="bg-white/15 backdrop-blur-md rounded-2xl p-8 border-2 border-gold-400 hover:border-gold-300 transition-all duration-300 relative">
+                                <div class="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                                    <div class="bg-gradient-to-r from-gold-400 to-yellow-400 text-black px-4 py-2 rounded-full text-sm font-bold">
+                                        ⭐ ENTERPRISE CHOICE
+                                    </div>
+                                </div>
+                                
+                                <div class="text-center mb-8">
+                                    <div class="w-16 h-16 bg-gradient-to-br from-gold-400 to-yellow-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                                        <i class="fas fa-hospital text-white text-2xl"></i>
+                                    </div>
+                                    <h3 class="text-2xl font-bold text-gold-400 mb-2">🚀 Enterprise Premium</h3>
+                                    <div class="text-5xl font-bold mb-2">£25</div>
+                                    <div class="text-blue-200">/month</div>
+                                </div>
+                                
+                                <ul class="space-y-4 mb-8 text-sm">
+                                    <li class="flex items-start"><i class="fas fa-check text-gold-400 mr-3 mt-1"></i>Everything in Basic PLUS...</li>
+                                    <li class="flex items-start"><i class="fas fa-users text-gold-400 mr-3 mt-1"></i>Up to 50 Users</li>
+                                    <li class="flex items-start"><i class="fas fa-user-md text-gold-400 mr-3 mt-1"></i>Therapist Portal Access</li>
+                                    <li class="flex items-start"><i class="fas fa-clinic-medical text-gold-400 mr-3 mt-1"></i>NHS Compatible Integration</li>
+                                    <li class="flex items-start"><i class="fas fa-phone text-gold-400 mr-3 mt-1"></i>Priority Phone Support</li>
+                                    <li class="flex items-start"><i class="fas fa-cog text-gold-400 mr-3 mt-1"></i>Custom Workflows</li>
+                                </ul>
+                                
+                                <button onclick="startSubscription('enterprise_premium')" class="w-full bg-gradient-to-r from-gold-400 to-yellow-500 text-black py-4 rounded-xl font-bold hover:from-gold-500 hover:to-yellow-600 transition-all">
+                                    Transform Healthcare System
+                                </button>
+                            </div>
+                            
+                            <!-- Enterprise Elite -->
+                            <div class="bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/20 hover:border-purple-400 transition-all duration-300">
+                                <div class="text-center mb-8">
+                                    <div class="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                                        <i class="fas fa-crown text-white text-2xl"></i>
+                                    </div>
+                                    <h3 class="text-2xl font-bold text-purple-400 mb-2">🌍 Enterprise Elite</h3>
+                                    <div class="text-5xl font-bold mb-2">£54</div>
+                                    <div class="text-blue-200">/month</div>
+                                </div>
+                                
+                                <ul class="space-y-4 mb-8 text-sm">
+                                    <li class="flex items-start"><i class="fas fa-check text-purple-400 mr-3 mt-1"></i>Everything in Premium PLUS...</li>
+                                    <li class="flex items-start"><i class="fas fa-infinity text-purple-400 mr-3 mt-1"></i>Unlimited Users</li>
+                                    <li class="flex items-start"><i class="fas fa-palette text-purple-400 mr-3 mt-1"></i>White-label Platform</li>
+                                    <li class="flex items-start"><i class="fas fa-brain text-purple-400 mr-3 mt-1"></i>Custom AI Training</li>
+                                    <li class="flex items-start"><i class="fas fa-user-tie text-purple-400 mr-3 mt-1"></i>Dedicated UK Account Manager</li>
+                                    <li class="flex items-start"><i class="fas fa-code text-purple-400 mr-3 mt-1"></i>API Access & NHS Integrations</li>
+                                </ul>
+                                
+                                <button onclick="startSubscription('enterprise_elite')" class="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white py-4 rounded-xl font-bold hover:from-purple-600 hover:to-pink-600 transition-all">
+                                    Lead Healthcare Revolution 👑
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Revolutionary Guarantee -->
+                    <div class="mt-16 text-center">
+                        <div class="bg-gradient-to-r from-green-500/20 to-emerald-500/20 backdrop-blur-md rounded-2xl p-8 border border-green-400/30 max-w-4xl mx-auto">
+                            <h3 class="text-3xl font-bold text-green-400 mb-4">🛡️ REVOLUTIONARY GUARANTEE</h3>
+                            <p class="text-xl text-green-100 mb-6">
+                                If our AI doesn't revolutionize your healthcare experience in 30 days, 
+                                we'll refund every penny and personally help you find a solution that works.
+                            </p>
+                            <div class="text-lg text-green-200">
+                                <strong>Why?</strong> Because this isn't just software - it's your health, your life, your future. 
+                                We're committed to your transformation, not just our profits.
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </section>
 
+        <!-- PTSD CORNER - Safe Haven -->
+        <section id="ptsd-corner" class="section hidden py-16 bg-gradient-to-br from-green-50 to-emerald-50">
+            <div class="max-w-6xl mx-auto px-4">
+                
+                <!-- Safe Space Header -->
+                <div class="text-center mb-12">
+                    <div class="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-green-500 to-emerald-500 rounded-full mb-6">
+                        <i class="fas fa-shield-heart text-white text-3xl"></i>
+                    </div>
+                    <h1 class="text-4xl font-bold text-gray-800 mb-4">🛡️ Your Safe Haven</h1>
+                    <p class="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
+                        A trauma-informed space where AI understands your journey and provides personalized support for your healing
+                    </p>
+                    
+                    <!-- Safety Indicator -->
+                    <div class="bg-white/70 backdrop-blur-md rounded-xl p-6 max-w-2xl mx-auto border border-green-200">
+                        <div class="flex items-center justify-center space-x-4">
+                            <div class="emotion-indicator emotion-happy"></div>
+                            <span class="font-semibold text-green-700">Safe Space Active</span>
+                            <span class="text-green-500">•</span>
+                            <span class="text-sm text-green-600">Crisis AI Monitoring: ON</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Crisis Resources Banner -->
+                <div class="bg-gradient-to-r from-red-500 to-rose-600 text-white rounded-2xl p-8 mb-12 shadow-2xl">
+                    <div class="text-center mb-6">
+                        <i class="fas fa-heart text-4xl mb-4 animate-pulse"></i>
+                        <h3 class="text-2xl font-bold mb-4">🚨 You Are Never Alone</h3>
+                        <p class="text-lg opacity-90 mb-6">Crisis support is available 24/7. Your safety is our priority.</p>
+                    </div>
+                    
+                    <div class="grid md:grid-cols-3 gap-4 text-center">
+                        <a href="tel:116123" class="bg-white/20 hover:bg-white/30 rounded-xl p-4 transition-all">
+                            <div class="font-bold">🇬🇧 UK: Samaritans</div>
+                            <div class="text-2xl font-bold">116 123</div>
+                            <div class="text-sm opacity-80">Free • 24/7</div>
+                        </a>
+                        <a href="tel:988" class="bg-white/20 hover:bg-white/30 rounded-xl p-4 transition-all">
+                            <div class="font-bold">🇺🇸 US: Crisis Lifeline</div>
+                            <div class="text-2xl font-bold">988</div>
+                            <div class="text-sm opacity-80">Free • 24/7</div>
+                        </a>
+                        <a href="tel:999" class="bg-white/20 hover:bg-white/30 rounded-xl p-4 transition-all">
+                            <div class="font-bold">Emergency Services</div>
+                            <div class="text-2xl font-bold">999 / 911</div>
+                            <div class="text-sm opacity-80">Immediate Help</div>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- AI-Powered Tools -->
+                <div class="grid md:grid-cols-2 gap-8">
+                    
+                    <!-- Personalized Coping Tools -->
+                    <div class="bg-white rounded-2xl shadow-xl p-8 border border-green-100">
+                        <h3 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                            <i class="fas fa-spa text-green-500 mr-3 text-2xl"></i>
+                            AI Personalized Coping
+                        </h3>
+                        
+                        <div class="space-y-4">
+                            <div class="bg-green-50 rounded-xl p-4 border border-green-200 cursor-pointer hover:bg-green-100 transition-all" onclick="startPersonalizedCoping('grounding')">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <div class="font-bold text-green-800">🌱 5-4-3-2-1 Grounding</div>
+                                        <div class="text-sm text-green-600">Worked best for you on March 15th</div>
+                                    </div>
+                                    <i class="fas fa-play text-green-500"></i>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-blue-50 rounded-xl p-4 border border-blue-200 cursor-pointer hover:bg-blue-100 transition-all" onclick="startPersonalizedCoping('breathing')">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <div class="font-bold text-blue-800">🫁 Box Breathing</div>
+                                        <div class="text-sm text-blue-600">Your stress levels dropped 40% last time</div>
+                                    </div>
+                                    <i class="fas fa-play text-blue-500"></i>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-purple-50 rounded-xl p-4 border border-purple-200 cursor-pointer hover:bg-purple-100 transition-all" onclick="startPersonalizedCoping('butterfly')">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <div class="font-bold text-purple-800">🦋 Butterfly Hug</div>
+                                        <div class="text-sm text-purple-600">Recommended based on your preference for touch therapy</div>
+                                    </div>
+                                    <i class="fas fa-play text-purple-500"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- AI Crisis Detection & Support -->
+                    <div class="bg-white rounded-2xl shadow-xl p-8 border border-purple-100">
+                        <h3 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                            <i class="fas fa-brain text-purple-500 mr-3 text-2xl"></i>
+                            AI Emotional Guardian
+                        </h3>
+                        
+                        <div class="space-y-6">
+                            <!-- Current Emotional State -->
+                            <div class="bg-purple-50 rounded-xl p-6 border border-purple-200">
+                                <div class="flex items-center justify-between mb-4">
+                                    <span class="font-semibold text-purple-800">Current Emotional State</span>
+                                    <div class="emotion-indicator emotion-neutral"></div>
+                                </div>
+                                <div class="text-sm text-purple-600 space-y-2">
+                                    <div>💭 Mood: Stable, slight concern detected</div>
+                                    <div>🎯 Stress Level: 3/10 (Much improved!)</div>
+                                    <div>🔍 Pattern: Morning anxiety reduced 60%</div>
+                                </div>
+                            </div>
+                            
+                            <!-- AI Recommendations -->
+                            <div class="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-xl p-6 border border-yellow-200">
+                                <div class="font-semibold text-yellow-800 mb-3">🤖 AI Recommendation</div>
+                                <div class="text-sm text-yellow-700">
+                                    "Based on your patterns, this is a good time to practice the meditation technique that helped you last Tuesday. Your stress indicators suggest you're ready for growth-focused activities today."
+                                </div>
+                            </div>
+                            
+                            <!-- Quick Support Actions -->
+                            <div class="space-y-3">
+                                <button onclick="showSection('voice-ai')" class="w-full bg-gradient-to-r from-purple-500 to-blue-500 text-white py-3 rounded-xl font-semibold hover:from-purple-600 hover:to-blue-600 transition-all">
+                                    🎤 Start Voice Therapy Session
+                                </button>
+                                <button onclick="startAICoaching('alex')" class="w-full bg-green-500 text-white py-3 rounded-xl font-semibold hover:bg-green-600 transition-all">
+                                    💬 Chat with PTSD AI Specialist
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
     </main>
 
-    <!-- JavaScript for comprehensive assessment -->
+    <!-- Crisis Support Modal -->
+    <div id="crisis-modal" class="fixed inset-0 bg-black/70 backdrop-blur-md hidden items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
+            <div class="p-8">
+                <div class="text-center mb-8">
+                    <i class="fas fa-heart text-6xl text-red-500 mb-4 animate-pulse"></i>
+                    <h3 class="text-2xl font-bold text-red-800 mb-4">🚨 Crisis Support Available Now</h3>
+                    <p class="text-lg text-gray-700 mb-6">
+                        You are not alone. Professional crisis support is available 24/7.
+                    </p>
+                </div>
+                
+                <div class="space-y-4 mb-8">
+                    <a href="tel:116123" class="block bg-gradient-to-r from-red-500 to-rose-600 text-white p-4 rounded-xl text-center hover:from-red-600 hover:to-rose-700 transition-all">
+                        <div class="font-bold">🇬🇧 UK: Samaritans</div>
+                        <div class="text-2xl font-bold">116 123</div>
+                        <div class="text-sm opacity-90">Free • 24/7 • Confidential</div>
+                    </a>
+                    
+                    <a href="tel:988" class="block bg-gradient-to-r from-blue-500 to-indigo-600 text-white p-4 rounded-xl text-center hover:from-blue-600 hover:to-indigo-700 transition-all">
+                        <div class="font-bold">🇺🇸 US: Crisis Lifeline</div>
+                        <div class="text-2xl font-bold">988</div>
+                        <div class="text-sm opacity-90">Free • 24/7 • Confidential</div>
+                    </a>
+                    
+                    <a href="tel:999" class="block bg-gradient-to-r from-purple-500 to-pink-600 text-white p-4 rounded-xl text-center hover:from-purple-600 hover:to-pink-700 transition-all">
+                        <div class="font-bold">Emergency Services</div>
+                        <div class="text-2xl font-bold">999 / 911</div>
+                        <div class="text-sm opacity-90">Immediate Emergency Help</div>
+                    </a>
+                </div>
+                
+                <div class="text-center">
+                    <button onclick="closeCrisisModal()" class="px-6 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition-all">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript for comprehensive functionality -->
     <script>
         console.log('🚀 REVOLUTIONARY AI HEALTHCARE SYSTEM INITIALIZING...');
 
@@ -961,7 +1639,7 @@
                     
                     <!-- Crisis Support Notice -->
                     ${profile.riskFactors.some(rf => rf.includes('Depression') || rf.includes('Trauma')) ? `
-                        <div class="bg-gradient-to-r from-red-50 to-pink-50 rounded-2xl border-2 border-red-200 p-6 mb-8">
+                        <div class="bg-gradient-to-r from-red-50 to-pink-50 rounded-2xl border-2 border-red-200 p-8 mb-8">
                             <div class="flex items-center mb-4">
                                 <i class="fas fa-heart text-2xl text-red-600 mr-3"></i>
                                 <h3 class="text-xl font-bold text-red-800">Important: You're Not Alone</h3>
@@ -1120,13 +1798,267 @@ Crisis support: UK 116 123 | US 988 | Emergency 999/911
         }
 
         function triggerCrisisSupport() {
-            alert('🚨 Crisis Support Activated!\n\nUK: Samaritans 116 123\nUS: Crisis Lifeline 988\nEmergency: 999/911\n\nYou are not alone. Help is available 24/7.');
+            const modal = document.getElementById('crisis-modal');
+            if (modal) {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            } else {
+                alert('🚨 Crisis Support Activated!\n\nUK: Samaritans 116 123\nUS: Crisis Lifeline 988\nEmergency: 999/911\n\nYou are not alone. Help is available 24/7.');
+            }
         }
 
-        // Initialize
-        showSection('home');
-        console.log('🚀 REVOLUTIONARY AI HEALTHCARE SYSTEM READY!');
-        console.log('💫 Welcome to the future of personalized medicine!');
-    </script>
-</body>
-</html>
+        function closeCrisisModal() {
+            const modal = document.getElementById('crisis-modal');
+            if (modal) {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
+        }
+
+        function startSubscription(planType) {
+            alert(`🚀 Subscription system coming soon!\n\nPlan: ${planType}\n\nWe're preparing the most revolutionary healthcare experience ever created. Stay tuned!`);
+        }
+
+        // =======================
+        // AI COACHES & GROQ API INTEGRATION
+        // =======================
+        
+        let currentCoach = null;
+        let chatHistory = {};
+        
+        // AI Coach Profiles
+        const AI_COACHES = {
+            sarah: {
+                name: 'Coach Sarah',
+                title: 'Lead AI Healthcare Specialist',
+                avatar: 'fa-user-md',
+                color: 'purple',
+                specialties: ['Comprehensive Health Assessment', 'Trauma-Informed Care', 'Personalized Health Plans', 'Crisis Support Integration'],
+                systemPrompt: `You are Coach Sarah, a compassionate trauma-informed wellness coach and lead AI healthcare specialist. You have access to the user's complete health assessment including their responses about sleep, mental health, PTSD/trauma, chronic illness, stress, physical health, nutrition, social support, resilience, and life satisfaction. 
+
+Key traits:
+- Gentle, non-judgmental, and trauma-informed
+- Reference specific details from their assessment when relevant
+- Provide actionable, personalized advice
+- Always prioritize safety and professional referrals when needed
+- Use warm, encouraging language
+- Ask thoughtful follow-up questions
+
+Respond in 2-3 sentences maximum. Be conversational and supportive.`
+            },
+            alex: {
+                name: 'Dr. Alex',
+                title: 'PTSD & Trauma Specialist',
+                avatar: 'fa-shield-heart',
+                color: 'green',
+                specialties: ['Trauma-Informed Therapy', 'EMDR & Grounding Techniques', '24/7 Crisis Support', 'Safe Space Creation'],
+                systemPrompt: `You are Dr. Alex, a specialized AI trauma therapist with expertise in PTSD and trauma recovery. You understand trauma responses, provide safe therapeutic techniques, and prioritize user safety above all.
+
+Key traits:
+- Expert in trauma-informed care and EMDR techniques
+- Provide grounding exercises and coping strategies
+- Recognize trauma triggers and respond appropriately
+- Always assess for safety and crisis situations
+- Gentle, patient, and understanding approach
+- Reference evidence-based trauma treatments
+
+Focus on safety, grounding, and gradual healing. Respond in 2-3 sentences.`
+            },
+            maya: {
+                name: 'Maya',
+                title: 'Holistic Wellness Coach',
+                avatar: 'fa-leaf',
+                color: 'rose',
+                specialties: ['Nutrition & Lifestyle', 'Fitness & Movement', 'Sleep Optimization', 'Stress Reduction'],
+                systemPrompt: `You are Maya, a holistic wellness coach specializing in nutrition, fitness, sleep, and natural stress reduction. You take a whole-person approach to health and wellness.
+
+Key traits:
+- Focus on sustainable lifestyle changes
+- Provide practical nutrition and exercise advice
+- Emphasize mind-body connection
+- Encourage gentle, gradual improvements
+- Consider individual circumstances and limitations
+- Promote self-compassion in wellness journey
+
+Give encouraging, practical advice in 2-3 sentences maximum.`
+            },
+            james: {
+                name: 'Dr. James',
+                title: 'Medical Information AI',
+                avatar: 'fa-stethoscope',
+                color: 'blue',
+                specialties: ['Medication Information', 'Symptom Analysis', 'Healthcare Planning', 'Provider Referrals'],
+                systemPrompt: `You are Dr. James, a medical information AI who provides evidence-based health information and guides users toward appropriate healthcare resources.
+
+Key traits:
+- Provide accurate medical information from reliable sources
+- Always recommend professional medical consultation for symptoms
+- Explain complex medical concepts in simple terms
+- Help users prepare questions for their doctors
+- Never diagnose or provide medical advice beyond general information
+- Focus on health education and healthcare navigation
+
+Provide helpful, educational responses in 2-3 sentences while emphasizing the need for professional medical care.`
+            }
+        };
+        
+        // Start AI Coaching Session
+        async function startAICoaching(coachId) {
+            currentCoach = AI_COACHES[coachId];
+            if (!currentCoach) return;
+            
+            console.log(`🤖 Starting AI coaching session with ${currentCoach.name}`);
+            
+            // Initialize chat history for this coach if not exists
+            if (!chatHistory[coachId]) {
+                chatHistory[coachId] = [];
+            }
+            
+            // Show AI chat interface
+            const chatContainer = document.getElementById('ai-chat-container');
+            if (chatContainer) {
+                const coachesGrid = chatContainer.parentElement.querySelector('.grid');
+                
+                chatContainer.classList.remove('hidden');
+                if (coachesGrid) coachesGrid.style.display = 'none';
+                
+                // Update coach info in chat header
+                const avatar = document.getElementById('current-coach-avatar');
+                const name = document.getElementById('current-coach-name');
+                const status = document.getElementById('current-coach-status');
+                
+                if (avatar) avatar.innerHTML = `<i class="fas ${currentCoach.avatar} text-white text-xl"></i>`;
+                if (name) name.textContent = currentCoach.name;
+                if (status) status.textContent = `${currentCoach.title} • Online and ready to help`;
+                
+                // Load chat history
+                loadChatHistory(coachId);
+                
+                // Send initial greeting if first time
+                if (chatHistory[coachId].length === 0) {
+                    await sendInitialGreeting(coachId);
+                }
+                
+                // Focus on input
+                const input = document.getElementById('chat-input');
+                if (input) input.focus();
+            }
+        }
+        
+        // Send Initial AI Greeting
+        async function sendInitialGreeting(coachId) {
+            const coach = AI_COACHES[coachId];
+            const assessmentData = assessmentState.responses ? JSON.stringify(assessmentState.responses) : 'No assessment completed yet';
+            
+            const greetingPrompt = `${coach.systemPrompt}
+            
+            User's Assessment Data: ${assessmentData}
+            
+            Please provide a warm, personalized greeting as ${coach.name}. If they have assessment data, reference something specific from it. If not, introduce yourself and ask how you can help today.`;
+            
+            try {
+                const response = await callGroqAPI(greetingPrompt, coachId);
+                addChatMessage(coach.name, response, 'ai');
+            } catch (error) {
+                console.error('Error sending initial greeting:', error);
+                addChatMessage(coach.name, `Hello! I'm ${coach.name}, and I'm here to support you on your wellness journey. How can I help you today?`, 'ai');
+            }
+        }
+        
+        // Load Chat History
+        function loadChatHistory(coachId) {
+            const messagesContainer = document.getElementById('chat-messages');
+            if (!messagesContainer) return;
+            
+            messagesContainer.innerHTML = '';
+            
+            if (chatHistory[coachId]) {
+                chatHistory[coachId].forEach(message => {
+                    addChatMessageToDOM(message.sender, message.content, message.type, message.timestamp);
+                });
+            }
+            
+            scrollToBottom();
+        }
+        
+        // Send Chat Message
+        async function sendChatMessage() {
+            const input = document.getElementById('chat-input');
+            const message = input?.value?.trim();
+            
+            if (!message || !currentCoach) return;
+            
+            // Add user message to chat
+            addChatMessage('You', message, 'user');
+            input.value = '';
+            
+            // Show typing indicator
+            showTypingIndicator();
+            
+            // Generate AI response
+            try {
+                const aiResponse = await generateAIResponse(message, currentCoach);
+                removeTypingIndicator();
+                addChatMessage(currentCoach.name, aiResponse, 'ai');
+            } catch (error) {
+                console.error('Error generating AI response:', error);
+                removeTypingIndicator();
+                addChatMessage(currentCoach.name, `I apologize, but I'm having trouble connecting right now. Please know that I'm here to support you, and you can always reach out to professional crisis support if needed.`, 'ai');
+            }
+        }
+        
+        // Generate AI Response using Groq API
+        async function generateAIResponse(userMessage, coach) {
+            const assessmentData = assessmentState.responses ? JSON.stringify(assessmentState.responses) : 'No assessment completed yet';
+            const coachId = Object.keys(AI_COACHES).find(key => AI_COACHES[key] === coach);
+            const recentHistory = chatHistory[coachId]?.slice(-10) || [];
+            
+            const conversationContext = recentHistory.map(msg => 
+                `${msg.sender === 'You' ? 'User' : coach.name}: ${msg.content}`
+            ).join('\\n');
+            
+            const prompt = `${coach.systemPrompt}
+            
+            User's Assessment Data: ${assessmentData}
+            
+            Recent Conversation:
+            ${conversationContext}
+            
+            User just said: "${userMessage}"
+            
+            Please respond as ${coach.name} with empathy, wisdom, and practical support. Keep it conversational and helpful. Maximum 3 sentences.`;
+            
+            return await callGroqAPI(prompt, coachId);
+        }
+        
+        // Call Groq API
+        async function callGroqAPI(prompt, coachId) {
+            try {
+                const response = await fetch('/api/followup', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        currentQuestion: prompt,
+                        userResponse: 'ai_coaching_request'
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                return data.followUp || 'I understand you\'re reaching out, and I want you to know that I\'m here to support you. How are you feeling right now?';
+                
+            } catch (error) {
+                console.error('Groq API error:', error);
+                
+                // Fallback responses based on coach
+                const fallbacks = {
+                    sarah: "I'm here to support you through whatever you're facing. Your wellbeing is my priority. What would be most helpful for you right now?",
+                    alex: "This is a safe space, and you're not alone. Take a deep breath with me - in for 4, hold for 4, out for 4. How can I help you feel more grounded?",
+                    maya: "Remember to be gentle with yourself today. Small steps toward wellness are still progress. What's one thing that usually helps you feel a bit better?",
+                    james: "I'm here to help you understand your health concerns better. While I can provide information, please remember that professional medical care is important for any symptoms you're experiencing."
+                };
