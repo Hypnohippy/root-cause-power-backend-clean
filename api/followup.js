@@ -11,7 +11,7 @@ export default async function handler(req, res) {
     // Use whichever key you have set in Vercel
     const apiKey = process.env.GROQ_API_KEY || process.env.OPENAI_API_KEY;
 
-    // No key configured? Always return a useful follow-up so UI never breaks.
+    // No key configured? Always return a useful follow-up so the UI never breaks.
     if (!apiKey) {
       return res.status(200).json({ followUp: fallback });
     }
