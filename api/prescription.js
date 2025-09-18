@@ -1,83 +1,223 @@
-// /api/prescription.js (Vercel Node Serverless, CommonJS + safe JSON body parsing)
-module.exports = async (req, res) => {
+// /api/prescription.js - AI-Generated Health Recommendations
+
+export default async function handler(req, res) {
+  // Enable CORS
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+
+  if (req.method === 'OPTIONS') {
+    res.status(200).end();
+    return;
+  }
+
   if (req.method !== 'POST') {
-    res.statusCode = 405;
-    res.setHeader('Content-Type', 'application/json');
-    return res.end(JSON.stringify({ error: 'Method not allowed' }));
+    return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  // Robust JSON body parsing (works even when req.body is undefined)
-  let body = {};
   try {
-    if (req.body && typeof req.body === 'object') {
-      body = req.body;
-    } else {
-      const chunks = [];
-      for await (const chunk of req) chunks.push(chunk);
-      const raw = Buffer.concat(chunks).toString('utf8');
-      body = raw ? JSON.parse(raw) : {};
+    const { 
+      assessmentData, 
+      symptoms = [], 
+      goals = [],
+      riskFactors = [],
+      currentConditions = []
+    } = req.body;
+
+    if (!assessmentData) {
+      return res.status(400).json({ error: 'Assessment data is required' });
     }
-  } catch {
-    body = {};
-  }
 
-  const { assessmentContext } = body;
-  const fallback = `Short, kind prescription:
-- 2-minute box breathing before bed
-- Morning sunlight 5–10 minutes
-- Keep a gentle sleep log for 3 days
-- If distress rises, pause and practice grounding (5-4-3-2-1)
-- Celebrate one small win each day`;
+    // Use Groq to generate personalized health recommendations
+    const apiKey = process.env.GROQ_API_KEY;
+    if (!apiKey) {
+      return res.status(500).json({ error: 'API service not configured' });
+    }
 
-  const apiKey = process.env.GROQ_API_KEY || process.env.OPENAI_API_KEY;
+    // Build context for AI prescription generation
+    const contextPrompt = `
+Generate a comprehensive, personalized health and wellness prescription based on:
 
-  // No key? Always return a helpful prescription so the UI never breaks.
-  if (!apiKey) {
-    res.statusCode = 200;
-    res.setHeader('Content-Type', 'application/json');
-    return res.end(JSON.stringify({ prescription: fallback }));
-  }
+Assessment Scores:
+${Object.entries(assessmentData.responses || {}).map(([key, value]) => `${key}: ${value}`).join('\n')}
 
-  try {
-    const r = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+Risk Factors: ${riskFactors.join(', ') || 'None identified'}
+Current Symptoms: ${symptoms.join(', ') || 'None reported'}
+Health Goals: ${goals.join(', ') || 'General wellness'}
+Existing Conditions: ${currentConditions.join(', ') || 'None reported'}
+
+Create a structured prescription with:
+1. Immediate priorities (top 3)
+2. Lifestyle modifications 
+3. Nutrition recommendations
+4. Mental health support
+5. Physical wellness plan
+6. Follow-up timeline
+
+Be specific, actionable, and trauma-informed. Include crisis resources if mental health risks are detected.
+`;
+
+    const groqResponse = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${apiKey}`
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        model: 'llama-3.3-70b-versatile',
-        temperature: 0.4,
-        max_tokens: 300,
         messages: [
           {
             role: 'system',
-            content:
-              'You are a gentle, trauma-informed coach named Sarah. Create a concise, actionable recovery prescription in 4–6 short bullet lines. Avoid medical advice and diagnosis.'
+            content: 'You are a compassionate AI health advisor creating personalized wellness prescriptions. Be specific, actionable, and always emphasize professional medical consultation for serious concerns.'
           },
           {
             role: 'user',
-            content: `Use this assessment context to produce the prescription:\n${assessmentContext}\nReturn only the prescription, no extra commentary.`
+            content: contextPrompt
           }
-        ]
+        ],
+        model: 'llama-3.1-70b-versatile',
+        temperature: 0.7,
+        max_tokens: 800,
+        top_p: 0.9
       })
     });
 
-    const data = await r.json().catch(() => ({}));
+    if (!groqResponse.ok) {
+      throw new Error('Failed to generate prescription');
+    }
 
-    const text =
-      (data && data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content
-        ? String(data.choices[0].message.content).trim()
-        : '') || fallback;
+    const groqData = await groqResponse.json();
+    const aiPrescription = groqData.choices[0].message.content;
 
-    // Always return 200 with a usable prescription (graceful)
-    res.statusCode = 200;
-    res.setHeader('Content-Type', 'application/json');
-    return res.end(JSON.stringify({ prescription: text }));
-  } catch (err) {
-    console.error('Prescription handler error', err);
-    res.statusCode = 200;
-    res.setHeader('Content-Type', 'application/json');
-    return res.end(JSON.stringify({ prescription: fallback }));
+    // Structure the response
+    const prescription = {
+      id: `prescription_${Date.now()}`,
+      patientSummary: {
+        riskLevel: calculateRiskLevel(assessmentData),
+        primaryConcerns: identifyPrimaryConcerns(assessmentData, symptoms),
+        strengths: identifyStrengths(assessmentData)
+      },
+      aiRecommendations: aiPrescription,
+      structuredPlan: {
+        immediate: generateImmediateActions(assessmentData),
+        weekly: generateWeeklyPlan(assessmentData),
+        monthly: generateMonthlyGoals(assessmentData)
+      },
+      resources: {
+        crisis: [
+          { name: 'UK Samaritans', contact: '116 123', available: '24/7' },
+          { name: 'US Crisis Lifeline', contact: '988', available: '24/7' },
+          { name: 'Emergency Services', contact: '999/911', available: '24/7' }
+        ],
+        support: [
+          { name: 'Mind UK', url: 'https://www.mind.org.uk', type: 'Mental Health' },
+          { name: 'NHS 111', contact: '111', type: 'Health Advice' },
+          { name: 'PTSD UK', url: 'https://www.ptsduk.org', type: 'Trauma Support' }
+        ]
+      },
+      followUp: {
+        checkIn: '1 week',
+        reassessment: '4 weeks',
+        professionalReferral: shouldRecommendProfessional(assessmentData)
+      },
+      timestamp: new Date().toISOString(),
+      disclaimer: 'This AI-generated prescription is for educational purposes only and does not replace professional medical advice. Please consult with healthcare providers for personalized treatment.'
+    };
+
+    res.status(200).json({
+      success: true,
+      prescription: prescription
+    });
+
+  } catch (error) {
+    console.error('Prescription API Error:', error);
+    res.status(500).json({ 
+      error: 'Internal server error',
+      message: process.env.NODE_ENV === 'development' ? error.message : 'Prescription generation failed'
+    });
   }
-};
+}
+
+// Helper functions
+function calculateRiskLevel(assessmentData) {
+  const responses = assessmentData.responses || {};
+  let riskScore = 0;
+
+  // Higher risk indicators
+  if (responses.mental_health <= 1) riskScore += 3;
+  if (responses.ptsd_trauma >= 3) riskScore += 3;
+  if (responses.anxiety_stress >= 4) riskScore += 2;
+  if (responses.sleep <= 2) riskScore += 1;
+  if (responses.social_support <= 2) riskScore += 1;
+
+  if (riskScore >= 6) return 'high';
+  if (riskScore >= 3) return 'medium';
+  return 'low';
+}
+
+function identifyPrimaryConcerns(assessmentData, symptoms) {
+  const concerns = [];
+  const responses = assessmentData.responses || {};
+
+  if (responses.mental_health <= 1) concerns.push('Mental health crisis risk');
+  if (responses.ptsd_trauma >= 3) concerns.push('Trauma/PTSD symptoms');
+  if (responses.anxiety_stress >= 4) concerns.push('High anxiety/stress levels');
+  if (responses.sleep <= 2) concerns.push('Sleep disturbances');
+
+  return concerns.slice(0, 3); // Top 3 concerns
+}
+
+function identifyStrengths(assessmentData) {
+  const strengths = [];
+  const responses = assessmentData.responses || {};
+
+  if (responses.coping_resilience >= 4) strengths.push('Strong coping skills');
+  if (responses.social_support >= 4) strengths.push('Good social support');
+  if (responses.physical_health >= 4) strengths.push('Good physical health');
+  if (responses.life_satisfaction >= 4) strengths.push('High life satisfaction');
+
+  return strengths;
+}
+
+function generateImmediateActions(assessmentData) {
+  const actions = [];
+  const responses = assessmentData.responses || {};
+
+  if (responses.mental_health <= 1) {
+    actions.push('Contact mental health crisis support immediately');
+  }
+  if (responses.sleep <= 2) {
+    actions.push('Establish consistent sleep routine tonight');
+  }
+  if (responses.anxiety_stress >= 4) {
+    actions.push('Practice grounding technique (5-4-3-2-1 method)');
+  }
+
+  return actions;
+}
+
+function generateWeeklyPlan(assessmentData) {
+  return [
+    'Complete daily mood tracking',
+    'Practice 10 minutes of mindfulness/meditation',
+    'Engage in 30 minutes of physical activity 3x per week',
+    'Connect with support person at least twice',
+    'Maintain consistent sleep schedule'
+  ];
+}
+
+function generateMonthlyGoals(assessmentData) {
+  return [
+    'Complete comprehensive health check-up',
+    'Establish regular therapy/counseling if recommended',
+    'Build sustainable wellness routine',
+    'Reassess and adjust health goals'
+  ];
+}
+
+function shouldRecommendProfessional(assessmentData) {
+  const responses = assessmentData.responses || {};
+
+  return responses.mental_health <= 1 || 
+         responses.ptsd_trauma >= 3 || 
+         responses.chronic_illness >= 3;
+}
