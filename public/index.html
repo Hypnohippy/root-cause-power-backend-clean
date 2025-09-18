@@ -18,6 +18,81 @@
     
     <script>
     console.log('🔌 Using direct WebSocket approach for Hume EVI (more reliable than SDK)');
+        // 🚨 IMMEDIATE DASHBOARD FIX - Define function RIGHT NOW
+window.initializeDashboard = function() {
+    console.log('🔄 Dashboard: Starting initialization...');
+    
+    try {
+        const storedResults = localStorage.getItem('assessmentResults');
+        console.log('📊 Assessment results check:', storedResults ? '✅ Found' : '❌ Not found');
+        
+        if (storedResults) {
+            const assessmentData = JSON.parse(storedResults);
+            console.log('✅ Successfully parsed assessment results');
+            
+            const dashboardArea = document.querySelector('#dashboard-content') || 
+                                 document.querySelector('.dashboard-content') ||
+                                 document.querySelector('[id*="dashboard"]');
+            
+            if (dashboardArea) {
+                if (assessmentData.scores) {
+                    const scoresHtml = Object.entries(assessmentData.scores)
+                        .map(([category, score]) => `
+                            <div class="score-item p-3 border rounded mb-2">
+                                <span class="font-semibold">${category}:</span> 
+                                <span class="text-lg">${score}/10</span>
+                            </div>
+                        `).join('');
+                        
+                    dashboardArea.innerHTML = `
+                        <div class="assessment-results p-6">
+                            <h2 class="text-2xl font-bold mb-4">Your Assessment Results</h2>
+                            <div class="scores-grid">${scoresHtml}</div>
+                            <div class="mt-4">
+                                <button onclick="navigateToSection('assessment')" class="bg-blue-500 text-white px-4 py-2 rounded mr-2">
+                                    Retake Assessment
+                                </button>
+                                <button onclick="navigateToSection('coaches')" class="bg-green-500 text-white px-4 py-2 rounded">
+                                    Talk to AI Coach
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    dashboardArea.innerHTML = `
+                        <div class="p-6">
+                            <h2 class="text-2xl font-bold mb-4">Assessment Complete!</h2>
+                            <p>Your results have been processed. View your personalized recommendations.</p>
+                        </div>
+                    `;
+                }
+            }
+        } else {
+            const dashboardArea = document.querySelector('#dashboard-content') || 
+                                 document.querySelector('.dashboard-content') ||
+                                 document.querySelector('[id*="dashboard"]');
+            
+            if (dashboardArea) {
+                dashboardArea.innerHTML = `
+                    <div class="welcome-dashboard p-8 text-center">
+                        <h2 class="text-3xl font-bold mb-4">Welcome to Root Cause Power</h2>
+                        <p class="text-lg mb-6">Take our health assessment to get personalized recommendations.</p>
+                        <button onclick="navigateToSection('assessment')" class="bg-blue-600 text-white px-8 py-3 rounded-lg">
+                            Start Assessment
+                        </button>
+                    </div>
+                `;
+            }
+        }
+        
+        console.log('✅ Dashboard initialization completed successfully');
+        
+    } catch (error) {
+        console.error('❌ Dashboard initialization error:', error);
+    }
+};
+
+console.log('✅ initializeDashboard IMMEDIATELY assigned to window - should be available now!');
 
 // ===== DEFINE COACH DAVID FUNCTIONS IMMEDIATELY =====
 console.log('🚀 Defining Coach David functions at start of script...');
