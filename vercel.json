@@ -1,17 +1,13 @@
 {
+  "functions": {
+    "api/*.js": {
+      "runtime": "nodejs20.x"
+    }
+  },
   "rewrites": [
     {
       "source": "/",
       "destination": "/public/index.html"
-    },
-    {
-      "source": "/public/(.*)",
-      "destination": "/public/$1"
     }
-  ],
-  "functions": {
-    "api/**/*.js": {
-      "runtime": "nodejs18.x"
-    }
-  }
+  ]
 }
