@@ -17875,7 +17875,38 @@ function showWelcomeMessage() {
     </script>  ← Keep this closing tag
 
     </script>
+  // DEBUGGING: Force dashboard initialization on page load
+window.addEventListener('DOMContentLoaded', function() {
+    console.log('🔍 Page loaded, checking for dashboard...');
     
+    setTimeout(function() {
+        console.log('🔍 Attempting to initialize dashboard...');
+        if (typeof initializeDashboard === 'function') {
+            console.log('✅ initializeDashboard function exists, calling it...');
+            initializeDashboard();
+        } else {
+            console.log('❌ initializeDashboard function not found');
+        }
+    }, 1000);
+});
+
+// DEBUGGING: Also try when navigating to dashboard
+const originalNavigate = window.navigateToSection;
+window.navigateToSection = function(section) {
+    console.log('🔍 Navigating to section:', section);
+    if (originalNavigate) {
+        originalNavigate(section);
+    }
+    
+    if (section === 'dashboard') {
+        setTimeout(function() {
+            console.log('🔍 Dashboard section loaded, initializing...');
+            if (typeof initializeDashboard === 'function') {
+                initializeDashboard();
+            }
+        }, 500);
+    }
+};  
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js/vcd15cbe7772f49c399c6a5babf22c1241717689176015" integrity="sha512-ZpsOmlRQV6y907TI0dKBHq9Md29nnaEIPlkf84rnaERnq6zvWvPUqr2ft8M1aS28oN72PdrCzSjY4U6VaAw1EQ==" data-cf-beacon='{"rayId":"980ef2773f407719","serverTiming":{"name":{"cfExtPri":true,"cfEdge":true,"cfOrigin":true,"cfL4":true,"cfSpeedBrain":true,"cfCacheStatus":true}},"version":"2025.8.0","token":"4edd5f8ec12a48cfa682ab8261b80a79"}' crossorigin="anonymous"></script>
 </body>
 </html>
