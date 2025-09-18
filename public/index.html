@@ -16,155 +16,83 @@
         }
     </style>
     
+    <!-- DIRECT WEBSOCKET APPROACH - NO SDK NEEDED -->
     <script>
-    console.log('🔌 Using direct WebSocket approach for Hume EVI (more reliable than SDK)');
-        // 🚨 IMMEDIATE DASHBOARD FIX - Define function RIGHT NOW
-window.initializeDashboard = function() {
-    console.log('🔄 Dashboard: Starting initialization...');
-    
-    try {
-        const storedResults = localStorage.getItem('assessmentResults');
-        console.log('📊 Assessment results check:', storedResults ? '✅ Found' : '❌ Not found');
+        console.log('🔌 Using direct WebSocket approach for Hume EVI (more reliable than SDK)');
         
-        if (storedResults) {
-            const assessmentData = JSON.parse(storedResults);
-            console.log('✅ Successfully parsed assessment results');
+        // ===== DEFINE COACH DAVID FUNCTIONS IMMEDIATELY =====
+        console.log('🚀 Defining Coach David functions at start of script...');
+        
+        // ===== CRITICAL: NAVIGATION FUNCTION FIRST =====
+        // Define navigation function immediately so HTML onclick handlers work
+        window.navigateToSection = function(sectionId) {
+            console.log('🔄 EARLY Navigation to:', sectionId);
             
-            const dashboardArea = document.querySelector('#dashboard-content') || 
-                                 document.querySelector('.dashboard-content') ||
-                                 document.querySelector('[id*="dashboard"]');
+            // Hide all sections
+            document.querySelectorAll('.section').forEach(section => {
+                section.style.display = 'none';
+                section.classList.remove('active');
+            });
             
-            if (dashboardArea) {
-                if (assessmentData.scores) {
-                    const scoresHtml = Object.entries(assessmentData.scores)
-                        .map(([category, score]) => `
-                            <div class="score-item p-3 border rounded mb-2">
-                                <span class="font-semibold">${category}:</span> 
-                                <span class="text-lg">${score}/10</span>
-                            </div>
-                        `).join('');
-                        
-                    dashboardArea.innerHTML = `
-                        <div class="assessment-results p-6">
-                            <h2 class="text-2xl font-bold mb-4">Your Assessment Results</h2>
-                            <div class="scores-grid">${scoresHtml}</div>
-                            <div class="mt-4">
-                                <button onclick="navigateToSection('assessment')" class="bg-blue-500 text-white px-4 py-2 rounded mr-2">
-                                    Retake Assessment
-                                </button>
-                                <button onclick="navigateToSection('coaches')" class="bg-green-500 text-white px-4 py-2 rounded">
-                                    Talk to AI Coach
-                                </button>
-                            </div>
-                        </div>
-                    `;
-                } else {
-                    dashboardArea.innerHTML = `
-                        <div class="p-6">
-                            <h2 class="text-2xl font-bold mb-4">Assessment Complete!</h2>
-                            <p>Your results have been processed. View your personalized recommendations.</p>
-                        </div>
-                    `;
+            // Show target section
+            const target = document.getElementById(sectionId);
+            if (target) {
+                target.style.display = 'block';
+                target.classList.add('active');
+                console.log('✅ Showing:', sectionId);
+                
+                // Update nav buttons
+                document.querySelectorAll('.nav-button').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                const navBtn = document.getElementById('nav-' + sectionId);
+                if (navBtn) {
+                    navBtn.classList.add('active');
                 }
+                
+                // Scroll to top
+                window.scrollTo(0, 0);
+                
+                // Section-specific initialization
+                if (sectionId === 'dashboard') {
+                    console.log('🔄 Dashboard section selected, will initialize...');
+                    setTimeout(() => {
+                        if (window.initializeDashboard) {
+                            console.log('📊 Calling initializeDashboard...');
+                            window.initializeDashboard();
+                        } else {
+                            console.log('⏳ initializeDashboard not ready yet, retrying...');
+                            setTimeout(() => {
+                                if (window.initializeDashboard) {
+                                    console.log('📊 Calling initializeDashboard (retry)...');
+                                    window.initializeDashboard();
+                                } else {
+                                    console.error('❌ initializeDashboard function not found after retry');
+                                }
+                            }, 500);
+                        }
+                    }, 100);
+                } else if (sectionId === 'assessment') {
+                    setTimeout(() => {
+                        if (window.startIntelligentAssessment) {
+                            window.startIntelligentAssessment();
+                        }
+                    }, 100);
+                }
+            } else {
+                console.error('❌ Section not found:', sectionId);
             }
-        } else {
-            const dashboardArea = document.querySelector('#dashboard-content') || 
-                                 document.querySelector('.dashboard-content') ||
-                                 document.querySelector('[id*="dashboard"]');
-            
-            if (dashboardArea) {
-                dashboardArea.innerHTML = `
-                    <div class="welcome-dashboard p-8 text-center">
-                        <h2 class="text-3xl font-bold mb-4">Welcome to Root Cause Power</h2>
-                        <p class="text-lg mb-6">Take our health assessment to get personalized recommendations.</p>
-                        <button onclick="navigateToSection('assessment')" class="bg-blue-600 text-white px-8 py-3 rounded-lg">
-                            Start Assessment
-                        </button>
-                    </div>
-                `;
-            }
-        }
+        };
         
-        console.log('✅ Dashboard initialization completed successfully');
+        // Also make it available as global function
+        navigateToSection = window.navigateToSection;
         
-    } catch (error) {
-        console.error('❌ Dashboard initialization error:', error);
-    }
-};
-
-console.log('✅ initializeDashboard IMMEDIATELY assigned to window - should be available now!');
-
-// ===== DEFINE COACH DAVID FUNCTIONS IMMEDIATELY =====
-console.log('🚀 Defining Coach David functions at start of script...');
-
-// 🚨 CRITICAL FIX: Define initializeDashboard function EARLY and assign to window
-function initializeDashboard() {
-    console.log('🔄 Dashboard: Starting initialization...');
-    
-    try {
-        const storedResults = localStorage.getItem('assessmentResults');
-        console.log('📊 Assessment results check:', storedResults ? '✅ Found' : '❌ Not found');
+        console.log('✅ Early navigation function defined and ready');
         
-        if (storedResults) {
-            const assessmentData = JSON.parse(storedResults);
-            console.log('✅ Successfully parsed assessment results');
-            
-            const dashboardArea = document.querySelector('#dashboard-content') || 
-                                 document.querySelector('.dashboard-content') ||
-                                 document.querySelector('[id*="dashboard"]');
-            
-            if (dashboardArea && assessmentData.scores) {
-                const scoresHtml = Object.entries(assessmentData.scores)
-                    .map(([category, score]) => `
-                        <div class="score-item p-3 border rounded mb-2">
-                            <span class="font-semibold">${category}:</span> 
-                            <span class="text-lg">${score}/10</span>
-                        </div>
-                    `).join('');
-                    
-                dashboardArea.innerHTML = `
-                    <div class="assessment-results p-6">
-                        <h2 class="text-2xl font-bold mb-4">Your Assessment Results</h2>
-                        <div class="scores-grid">${scoresHtml}</div>
-                        <div class="mt-4">
-                            <button onclick="navigateToSection('assessment')" class="bg-blue-500 text-white px-4 py-2 rounded mr-2">
-                                Retake Assessment
-                            </button>
-                            <button onclick="navigateToSection('coaches')" class="bg-green-500 text-white px-4 py-2 rounded">
-                                Talk to AI Coach
-                            </button>
-                        </div>
-                    </div>
-                `;
-            }
-        } else {
-            const dashboardArea = document.querySelector('#dashboard-content') || 
-                                 document.querySelector('.dashboard-content') ||
-                                 document.querySelector('[id*="dashboard"]');
-            
-            if (dashboardArea) {
-                dashboardArea.innerHTML = `
-                    <div class="welcome-dashboard p-8 text-center">
-                        <h2 class="text-3xl font-bold mb-4">Welcome to Root Cause Power</h2>
-                        <p class="text-lg mb-6">Take our health assessment to get personalized recommendations.</p>
-                        <button onclick="navigateToSection('assessment')" class="bg-blue-600 text-white px-8 py-3 rounded-lg">
-                            Start Assessment
-                        </button>
-                    </div>
-                `;
-            }
-        }
+        // ===== CRITICAL: NUTRITION FUNCTIONS FIRST =====
+        // Define nutrition functions immediately to prevent ReferenceError
+        console.log('🥗 CRITICAL: Nutrition functions will be defined later in proper location...');
         
-        console.log('✅ Dashboard initialization completed successfully');
-        
-    } catch (error) {
-        console.error('❌ Dashboard initialization error:', error);
-    }
-}
-
-// 🚨 CRITICAL: Assign to window object to ensure global access
-window.initializeDashboard = initializeDashboard;
-console.log('✅ initializeDashboard assigned to window object');        
         // REAL API-CONNECTED FOOD SEARCH FUNCTION
         window.searchFood = async function() {
             console.log('🔍 Real API food search activated');
@@ -2737,7 +2665,7 @@ console.log('✅ initializeDashboard assigned to window object');
                                     <span class="text-green-400">Dec 2024</span>
                                     <span class="text-slate-400">American Heart Association</span>
                                 </div>
-                                <button onclick="openInAppArticle('heart-health-study', 'Heart Health & Exercise Study', '#search-pubmed-exercise-heart-health')" class="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-500 rounded text-white text-sm font-medium transition-colors">
+                                <button onclick="openInAppArticle('heart-health-study', 'Heart Health & Exercise Study', 'https://pubmed.ncbi.nlm.nih.gov/35093707/')" class="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-500 rounded text-white text-sm font-medium transition-colors">
                                     📖 Read Full Study
                                 </button>
                             </div>
@@ -2787,7 +2715,7 @@ console.log('✅ initializeDashboard assigned to window object');
                                     <span class="text-green-400">Oct 2024</span>
                                     <span class="text-slate-400">Nature Medicine</span>
                                 </div>
-                                <button onclick="openInAppArticle('mediterranean-diet-study', 'Mediterranean Diet and Cardiovascular Health Study', 'https://pubmed.ncbi.nlm.nih.gov/29897866/')" class="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-500 rounded text-white text-sm font-medium transition-colors">
+                                <button onclick="openInAppArticle('mediterranean-diet-study', 'Mediterranean Diet and Longevity Study', 'https://pubmed.ncbi.nlm.nih.gov/37532309/')" class="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-500 rounded text-white text-sm font-medium transition-colors">
                                     📖 Read Full Study
                                 </button>
                             </div>
@@ -3158,7 +3086,7 @@ console.log('✅ initializeDashboard assigned to window object');
                         </div>
                         <div class="flex items-center space-x-3">
                             <button onclick="openOriginalArticle('${originalUrl}')" class="px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg text-white text-sm font-medium transition-colors">
-                                <i class="fas fa-search mr-2"></i>Find Research
+                                <i class="fas fa-external-link-alt mr-2"></i>View Original
                             </button>
                             <button onclick="closeArticleViewer()" class="text-slate-400 hover:text-white text-2xl">
                                 <i class="fas fa-times"></i>
@@ -3243,179 +3171,7 @@ console.log('✅ initializeDashboard assigned to window object');
         };
 
         window.openOriginalArticle = function(url) {
-            // Show a helpful modal instead of potentially wrong links
-            const modal = document.createElement('div');
-            modal.className = 'fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4';
-            modal.innerHTML = `
-                <div class="bg-slate-800 rounded-xl p-6 w-full max-w-md border border-slate-600">
-                    <div class="text-center">
-                        <div class="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <i class="fas fa-search text-white text-xl"></i>
-                        </div>
-                        <h3 class="text-xl font-bold text-slate-100 mb-3">Find Original Research</h3>
-                        <p class="text-slate-300 mb-6">
-                            To find the original research study, we recommend searching for the specific study details on:
-                        </p>
-                        
-                        <div class="space-y-3">
-                            <button onclick="searchPubMed(); closeModal();" class="w-full bg-green-600 hover:bg-green-700 p-3 rounded-lg text-white font-medium transition-colors">
-                                <i class="fas fa-search mr-2"></i>Search PubMed
-                            </button>
-                            <button onclick="searchGoogleScholar(); closeModal();" class="w-full bg-blue-600 hover:bg-blue-700 p-3 rounded-lg text-white font-medium transition-colors">
-                                <i class="fas fa-graduation-cap mr-2"></i>Search Google Scholar
-                            </button>
-                            <button onclick="askCoachAboutStudy(); closeModal();" class="w-full bg-purple-600 hover:bg-purple-700 p-3 rounded-lg text-white font-medium transition-colors">
-                                <i class="fas fa-comments mr-2"></i>Discuss with AI Coach
-                            </button>
-                        </div>
-                        
-                        <button onclick="closeModal()" class="mt-4 text-slate-400 hover:text-white text-sm">
-                            Close
-                        </button>
-                    </div>
-                </div>
-            `;
-            
-            document.body.appendChild(modal);
-            window.currentModal = modal;
-            document.body.style.overflow = 'hidden';
-        };
-        
-        window.searchPubMed = function() {
-            window.open('https://pubmed.ncbi.nlm.nih.gov/', '_blank');
-        };
-        
-        window.searchGoogleScholar = function() {
-            window.open('https://scholar.google.com/', '_blank');
-        };
-        
-        window.askCoachAboutStudy = function() {
-            // Get the current article being viewed
-            const articleTitle = document.querySelector('#article-viewer-modal h2')?.textContent || 'this research study';
-            
-            // Close the research modal first
-            closeArticleViewer();
-            
-            setTimeout(() => {
-                // Determine best coach based on study topic
-                const coachId = getRelevantCoachForStudy(articleTitle);
-                
-                // Store study context for coach
-                localStorage.setItem('studyDiscussionContext', JSON.stringify({
-                    studyTitle: articleTitle,
-                    timestamp: new Date().toISOString(),
-                    requestType: 'study_discussion'
-                }));
-                
-                // Navigate and open specific coach
-                navigateToSection('coaches');
-                
-                setTimeout(() => {
-                    startStudyDiscussionWithCoach(coachId, articleTitle);
-                }, 1500);
-            }, 500);
-        };
-
-        function getRelevantCoachForStudy(studyTitle) {
-            const title = studyTitle.toLowerCase();
-            
-            // Match study topics to appropriate coaches
-            if (title.includes('trauma') || title.includes('ptsd') || title.includes('emdr')) {
-                return 'elena'; // Coach Elena - EMDR & Trauma Specialist
-            } else if (title.includes('mindfulness') || title.includes('meditation') || title.includes('anxiety') || title.includes('stress')) {
-                return 'sarah'; // Coach Sarah - CBT & Mindfulness Specialist  
-            } else if (title.includes('diet') || title.includes('nutrition') || title.includes('exercise') || title.includes('sleep')) {
-                return 'alex'; // Coach Alex - Wellness & Lifestyle Coach (or sarah for holistic approach)
-            } else if (title.includes('depression') || title.includes('cbt') || title.includes('cognitive')) {
-                return 'sarah'; // Coach Sarah - CBT specialist
-            } else {
-                return 'sarah'; // Default to Sarah for general mental health topics
-            }
-        }
-
-        function startStudyDiscussionWithCoach(coachId, studyTitle) {
-            console.log(`🤖 Starting study discussion with ${coachId} about: ${studyTitle}`);
-            
-            if (typeof window.startChatWithCoach === 'function') {
-                // Store the study context message
-                const contextMessage = generateStudyDiscussionMessage(studyTitle);
-                
-                // Open the specific coach
-                window.startChatWithCoach(coachId);
-                
-                // Wait a moment then inject the study context
-                setTimeout(() => {
-                    injectStudyDiscussionContext(contextMessage);
-                }, 2000);
-            } else {
-                console.error('❌ Coach system not available');
-            }
-        }
-
-        function generateStudyDiscussionMessage(studyTitle) {
-            return `Hello! I just read the research article "${studyTitle}" in the knowledge library and I'm interested in discussing how this research might apply to my health journey. Could you help me understand the key takeaways and how I might implement the findings in my daily routine?`;
-        }
-
-        function injectStudyDiscussionContext(message) {
-            // Try to find and populate the chat input with study context
-            const chatInput = document.querySelector('#text-chat-input') || 
-                             document.querySelector('[id*="chat-input"]') || 
-                             document.querySelector('input[placeholder*="message" i]');
-            
-            if (chatInput) {
-                chatInput.value = message;
-                chatInput.focus();
-                
-                // Show user the prepared message
-                setTimeout(() => {
-                    const shouldSend = confirm('I\'ve prepared a message about the research study you were reading. Would you like me to send it to start the discussion?');
-                    if (shouldSend) {
-                        // Try to send the message
-                        if (typeof window.sendTextChatMessage === 'function') {
-                            window.sendTextChatMessage();
-                        } else {
-                            const sendButton = document.querySelector('button[onclick*="sendTextChatMessage"]');
-                            if (sendButton) sendButton.click();
-                        }
-                    }
-                }, 1000);
-            } else {
-                // Show modal with context if input not found
-                showStudyContextModal(message);
-            }
-        }
-
-        function showStudyContextModal(message) {
-            const modal = document.createElement('div');
-            modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
-            modal.innerHTML = `
-                <div class="bg-slate-800 rounded-xl p-6 w-full max-w-lg">
-                    <h3 class="text-lg font-bold text-slate-100 mb-4">📚 Study Discussion Starter</h3>
-                    <p class="text-slate-300 mb-4">Here's a message to start discussing the research with your coach:</p>
-                    <div class="bg-slate-700 p-4 rounded-lg mb-4">
-                        <textarea readonly class="w-full bg-transparent text-slate-100 h-24 resize-none focus:outline-none">${message}</textarea>
-                    </div>
-                    <div class="flex gap-3">
-                        <button onclick="copyStudyMessage(); closeModal();" class="flex-1 bg-blue-600 hover:bg-blue-700 p-3 rounded-lg text-white font-medium">
-                            📋 Copy Message
-                        </button>
-                        <button onclick="closeModal()" class="px-6 bg-slate-600 hover:bg-slate-700 p-3 rounded-lg text-white font-medium">
-                            Close
-                        </button>
-                    </div>
-                </div>
-            `;
-            document.body.appendChild(modal);
-            window.currentModal = modal;
-        }
-
-        window.copyStudyMessage = function() {
-            const textarea = document.querySelector('#currentModal textarea');
-            if (textarea) {
-                textarea.select();
-                document.execCommand('copy');
-                alert('Message copied! Paste it in the coach chat to start your discussion.');
-            }
+            window.open(url, '_blank');
         };
 
         // Article content functions
@@ -3435,15 +3191,7 @@ console.log('✅ initializeDashboard assigned to window object');
                 'breathing-anxiety-study': 'Clinical study on various breathing techniques for acute anxiety management, including physiological measurements and subjective experience reports.',
                 'mindfulness-inflammation-study': 'Research examining the relationship between mindfulness practices and inflammatory biomarkers, exploring the mind-body connection in health.',
                 'acupuncture-pain-study': 'Meta-analysis of acupuncture effectiveness for chronic pain conditions, comparing real acupuncture, sham treatments, and standard medical care.',
-                'yoga-meditation-study': 'Comprehensive study on the combined effects of yoga and meditation practices on mental health, stress reduction, and overall wellbeing.',
-                'mediterranean-diet-cardiovascular': 'Large-scale longitudinal study examining cardiovascular health outcomes in populations following Mediterranean dietary patterns over 5+ years.',
-                'intermittent-fasting-study': 'Clinical research on various intermittent fasting protocols and their effects on metabolic health, weight management, and longevity markers.',
-                'mindfulness-brain-study': 'Neuroimaging study investigating structural brain changes associated with regular mindfulness meditation practice.',
-                'exercise-depression-study': 'Comparative study examining exercise interventions as both standalone and adjunct treatments for major depressive disorder.',
-                'sleep-memory-study': 'Research on the relationship between sleep quality, sleep stages, and memory consolidation processes.',
-                'social-support-study': 'Investigation into the role of social support networks in mental health recovery and resilience building.',
-                'trauma-therapy-study': 'Comparative analysis of different trauma-informed therapy approaches and their effectiveness for PTSD treatment.',
-                'digital-mental-health-study': 'Research on digital mental health platforms, apps, and online interventions for various psychological conditions.'
+                'yoga-meditation-study': 'Comprehensive study on the combined effects of yoga and meditation practices on mental health, stress reduction, and overall wellbeing.'
             };
             return summaries[articleId] || 'This research provides valuable insights into evidence-based approaches for health and wellness improvement.';
         }
@@ -3505,139 +3253,7 @@ console.log('✅ initializeDashboard assigned to window object');
             return `This research provides evidence-based strategies that can be integrated into your daily routine. Consider discussing these findings with your healthcare provider or AI coach to develop a personalized implementation plan that fits your specific needs and circumstances.`;
         }
         
-        // AUTO-UPDATING RESEARCH CONTENT SYSTEM
-        function checkForNewResearch() {
-            const lastUpdate = localStorage.getItem('lastResearchUpdate');
-            const oneWeek = 7 * 24 * 60 * 60 * 1000; // One week in milliseconds
-            const now = Date.now();
-            
-            if (!lastUpdate || (now - parseInt(lastUpdate)) > oneWeek) {
-                console.log('🔬 Checking for new research articles...');
-                
-                // Show notification about new content
-                showNewResearchNotification();
-                
-                // Update timestamp
-                localStorage.setItem('lastResearchUpdate', now.toString());
-            }
-        }
-
-        function showNewResearchNotification() {
-            // Only show if user has been active on platform
-            const hasCompletedAssessment = localStorage.getItem('hasCompletedAssessment');
-            if (!hasCompletedAssessment) return;
-
-            setTimeout(() => {
-                const notification = document.createElement('div');
-                notification.className = 'fixed top-4 right-4 bg-gradient-to-r from-blue-500 to-purple-600 text-white p-4 rounded-xl shadow-2xl z-50 max-w-sm transform translate-x-full transition-transform duration-500';
-                notification.innerHTML = `
-                    <div class="flex items-start gap-3">
-                        <div class="flex-shrink-0 w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
-                            <i class="fas fa-flask text-sm"></i>
-                        </div>
-                        <div class="flex-1">
-                            <h4 class="font-semibold mb-1">New Research Available!</h4>
-                            <p class="text-sm opacity-90">Fresh studies have been added to the Knowledge Library</p>
-                            <button onclick="goToNewResearch()" class="mt-2 text-xs bg-white/20 hover:bg-white/30 px-3 py-1 rounded-full transition-colors">
-                                View New Studies
-                            </button>
-                        </div>
-                        <button onclick="dismissResearchNotification()" class="flex-shrink-0 text-white/60 hover:text-white">
-                            <i class="fas fa-times text-sm"></i>
-                        </button>
-                    </div>
-                `;
-                
-                document.body.appendChild(notification);
-                
-                // Slide in animation
-                setTimeout(() => {
-                    notification.style.transform = 'translateX(0)';
-                }, 100);
-                
-                // Auto-dismiss after 10 seconds
-                setTimeout(() => {
-                    dismissResearchNotification();
-                }, 10000);
-                
-                window.currentResearchNotification = notification;
-            }, 3000); // Show after 3 seconds on page
-        }
-
-        window.goToNewResearch = function() {
-            dismissResearchNotification();
-            navigateToSection('knowledge-library');
-            
-            // Highlight new research badge
-            setTimeout(() => {
-                showNewResearchHighlight();
-            }, 1000);
-        };
-
-        window.dismissResearchNotification = function() {
-            if (window.currentResearchNotification) {
-                window.currentResearchNotification.style.transform = 'translateX(full)';
-                setTimeout(() => {
-                    if (window.currentResearchNotification) {
-                        window.currentResearchNotification.remove();
-                        window.currentResearchNotification = null;
-                    }
-                }, 500);
-            }
-        };
-
-        function showNewResearchHighlight() {
-            // Add "NEW" badges to recent articles
-            const knowledgeCards = document.querySelectorAll('.knowledge-library .bg-slate-700');
-            
-            // Add NEW badge to first 2-3 articles
-            knowledgeCards.forEach((card, index) => {
-                if (index < 3) {
-                    const badge = document.createElement('div');
-                    badge.className = 'absolute top-2 left-2 bg-green-500 text-white text-xs px-2 py-1 rounded-full font-bold animate-pulse';
-                    badge.textContent = 'NEW';
-                    badge.style.position = 'absolute';
-                    badge.style.zIndex = '10';
-                    
-                    card.style.position = 'relative';
-                    card.appendChild(badge);
-                    
-                    // Remove badge after 30 seconds
-                    setTimeout(() => {
-                        badge.remove();
-                    }, 30000);
-                }
-            });
-        }
-
-        // API Integration for Future Research Updates
-        async function fetchLatestResearch() {
-            // This would connect to a research API service
-            // For now, return simulated new articles
-            return {
-                newArticles: [
-                    {
-                        title: "🧬 Personalized Nutrition Based on Genetic Testing",
-                        summary: "Latest research on how genetic variations affect nutrient metabolism and dietary recommendations.",
-                        category: "nutrition",
-                        date: new Date().toISOString()
-                    },
-                    {
-                        title: "🧠 Digital Therapeutics for ADHD Management",
-                        summary: "Clinical trial results on app-based interventions for attention and focus improvement.",
-                        category: "mental-health", 
-                        date: new Date().toISOString()
-                    }
-                ]
-            };
-        }
-
-        // Initialize research update checking
-        window.addEventListener('load', () => {
-            setTimeout(checkForNewResearch, 2000);
-        });
-
-        console.log('✅ NAVIGATION + KNOWLEDGE LIBRARY + AUTO-RESEARCH-UPDATES DEFINED - Should work now!');
+        console.log('✅ NAVIGATION + KNOWLEDGE LIBRARY FUNCTIONS DEFINED EARLY - Should work now!');
         
         // ===== EMERGENCY NUTRITION FUNCTIONS INJECTION =====
         console.log('🥗 Defining nutrition functions early to prevent ReferenceError...');
@@ -6685,7 +6301,7 @@ Created with Root Cause Power Nutrition System
                     
                     // Initialize section-specific functionality
                     if (sectionId === 'dashboard') {
-                        window.initializeDashboard();
+                        initializeDashboard();
                     }
                     
                     // Close mobile menu
@@ -8441,13 +8057,13 @@ Created with Root Cause Power Nutrition System
                                         <h4 class="text-xl font-bold text-green-400 mb-3">🍏 Mediterranean Diet and Cardiovascular Health</h4>
                                         <p class="text-slate-300 mb-4">Estruch, R. et al. (2018). Primary Prevention of Cardiovascular Disease with a Mediterranean Diet Supplemented with Extra-Virgin Olive Oil or Nuts. <em>New England Journal of Medicine, 378</em>(25), e34.</p>
                                         <p class="mb-4">
-                                            <button onclick="openInAppArticle('nejm-mediterranean-diet', 'NEJM Mediterranean Diet Study', 'https://www.nejm.org/doi/full/10.1056/NEJMoa1800389')" class="inline-flex items-center text-blue-400 hover:text-blue-300 text-sm font-medium">
-                                                <i class="fas fa-book-open mr-2"></i>Read Full Article
-                                            </button>
+                                            <a href="https://www.nejm.org/doi/full/10.1056/NEJMoa1800389" target="_blank" class="inline-flex items-center text-blue-400 hover:text-blue-300 text-sm font-medium">
+                                                <i class="fas fa-external-link-alt mr-2"></i>Read Full Article
+                                            </a>
                                             <span class="mx-3 text-slate-500">|</span>
-                                            <button onclick="openInAppArticle('mediterranean-diet-cardiovascular', 'Mediterranean Diet and Cardiovascular Health', 'https://pubmed.ncbi.nlm.nih.gov/29897866/')" class="inline-flex items-center text-green-400 hover:text-green-300 text-sm font-medium">
-                                                <i class="fas fa-search mr-2"></i>View Study
-                                            </button>
+                                            <a href="https://pubmed.ncbi.nlm.nih.gov/29897866/" target="_blank" class="inline-flex items-center text-green-400 hover:text-green-300 text-sm font-medium">
+                                                <i class="fas fa-search mr-2"></i>PubMed
+                                            </a>
                                         </p>
                                         <div class="bg-slate-600 p-4 rounded mb-4">
                                             <h5 class="font-semibold text-slate-100 mb-2">Key Findings:</h5>
@@ -8465,13 +8081,13 @@ Created with Root Cause Power Nutrition System
                                         <h4 class="text-xl font-bold text-green-400 mb-3">🥜 Intermittent Fasting and Metabolic Health</h4>
                                         <p class="text-slate-300 mb-4">Longo, V.D., & Mattson, M.P. (2014). Fasting: molecular mechanisms and clinical applications. <em>Cell Metabolism, 19</em>(2), 181-192.</p>
                                         <p class="mb-4">
-                                            <button onclick="openInAppArticle('cell-metabolism-study', 'Cell Metabolism Research', 'https://www.cell.com/cell-metabolism/fulltext/S1550-4131(14)00224-7')" class="inline-flex items-center text-blue-400 hover:text-blue-300 text-sm font-medium">
+                                            <a href="https://www.cell.com/cell-metabolism/fulltext/S1550-4131(14)00224-7" target="_blank" class="inline-flex items-center text-blue-400 hover:text-blue-300 text-sm font-medium">
                                                 <i class="fas fa-external-link-alt mr-2"></i>Read Full Article
                                             </a>
                                             <span class="mx-3 text-slate-500">|</span>
-                                            <button onclick="openInAppArticle('intermittent-fasting-study', 'Intermittent Fasting and Metabolic Health', 'https://pubmed.ncbi.nlm.nih.gov/24440038/')" class="inline-flex items-center text-green-400 hover:text-green-300 text-sm font-medium">
-                                                <i class="fas fa-search mr-2"></i>View Study
-                                            </button>
+                                            <a href="https://pubmed.ncbi.nlm.nih.gov/24440038/" target="_blank" class="inline-flex items-center text-green-400 hover:text-green-300 text-sm font-medium">
+                                                <i class="fas fa-search mr-2"></i>PubMed
+                                            </a>
                                         </p>
                                         <div class="bg-slate-600 p-4 rounded mb-4">
                                             <h5 class="font-semibold text-slate-100 mb-2">Clinical Benefits:</h5>
@@ -8521,13 +8137,13 @@ Created with Root Cause Power Nutrition System
                                 <h3 class="text-xl font-bold text-blue-400 mb-3">🧠 CBT Efficacy for Depression and Anxiety</h3>
                                 <p class="text-slate-300 mb-4">Hofmann, S.G., Asnaani, A., Vonk, I.J., Sawyer, A.T., & Fang, A. (2012). The efficacy of cognitive behavioral therapy: A review of meta-analyses. <em>Cognitive Therapy and Research, 36</em>(5), 427-440.</p>
                                 <p class="mb-4">
-                                    <button onclick="openInAppArticle('springer-cognitive-study', 'Springer Cognitive Research', 'https://link.springer.com/article/10.1007/s10608-012-9476-1')" class="inline-flex items-center text-blue-400 hover:text-blue-300 text-sm font-medium">
+                                    <a href="https://link.springer.com/article/10.1007/s10608-012-9476-1" target="_blank" class="inline-flex items-center text-blue-400 hover:text-blue-300 text-sm font-medium">
                                         <i class="fas fa-external-link-alt mr-2"></i>Read Full Article
                                     </a>
                                     <span class="mx-3 text-slate-500">|</span>
-                                    <button onclick="openInAppArticle('mindfulness-brain-study', 'Mindfulness and Brain Structure Changes', 'https://pubmed.ncbi.nlm.nih.gov/23008119/')" class="inline-flex items-center text-green-400 hover:text-green-300 text-sm font-medium">
-                                        <i class="fas fa-search mr-2"></i>View Study
-                                    </button>
+                                    <a href="https://pubmed.ncbi.nlm.nih.gov/23008119/" target="_blank" class="inline-flex items-center text-green-400 hover:text-green-300 text-sm font-medium">
+                                        <i class="fas fa-search mr-2"></i>PubMed
+                                    </a>
                                 </p>
                                 <div class="bg-slate-600 p-4 rounded mb-4">
                                     <h4 class="font-semibold text-slate-100 mb-2">Treatment Outcomes:</h4>
@@ -8545,13 +8161,13 @@ Created with Root Cause Power Nutrition System
                                 <h3 class="text-xl font-bold text-blue-400 mb-3">👁️ EMDR for Trauma Processing</h3>
                                 <p class="text-slate-300 mb-4">Chen, Y.R., Hung, K.W., Tsai, J.C., Chu, H., Chung, M.H., Chen, S.R., et al. (2014). Efficacy of eye-movement desensitization and reprocessing for patients with posttraumatic-stress disorder. <em>PLoS One, 9</em>(8), e103676.</p>
                                 <p class="mb-4">
-                                    <button onclick="openInAppArticle('plos-emdr-study', 'PLOS EMDR Efficacy Study', 'https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0103676')" class="inline-flex items-center text-blue-400 hover:text-blue-300 text-sm font-medium">
-                                        <i class="fas fa-book-open mr-2"></i>Read Full Article
-                                    </button>
+                                    <a href="https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0103676" target="_blank" class="inline-flex items-center text-blue-400 hover:text-blue-300 text-sm font-medium">
+                                        <i class="fas fa-external-link-alt mr-2"></i>Read Full Article
+                                    </a>
                                     <span class="mx-3 text-slate-500">|</span>
-                                    <button onclick="openInAppArticle('exercise-depression-study', 'Exercise as Treatment for Depression', 'https://pubmed.ncbi.nlm.nih.gov/25099381/')" class="inline-flex items-center text-green-400 hover:text-green-300 text-sm font-medium">
-                                        <i class="fas fa-search mr-2"></i>View Study
-                                    </button>
+                                    <a href="https://pubmed.ncbi.nlm.nih.gov/25099381/" target="_blank" class="inline-flex items-center text-green-400 hover:text-green-300 text-sm font-medium">
+                                        <i class="fas fa-search mr-2"></i>PubMed
+                                    </a>
                                 </p>
                                 <div class="bg-slate-600 p-4 rounded mb-4">
                                     <h4 class="font-semibold text-slate-100 mb-2">Clinical Efficacy:</h4>
@@ -8689,13 +8305,13 @@ Created with Root Cause Power Nutrition System
                                 <h3 class="text-xl font-bold text-orange-400 mb-3">💪 High-Intensity Interval Training (HIIT) for Mental Health</h3>
                                 <p class="text-slate-300 mb-4">Stonerock, G.L., Hoffman, B.M., Smith, P.J., & Blumenthal, J.A. (2015). Exercise as treatment for anxiety: Systematic review and analysis. <em>Annals of Behavioral Medicine, 49</em>(4), 542-556.</p>
                                 <p class="mb-4">
-                                    <button onclick="openInAppArticle('springer-behavioral-study', 'Springer Behavioral Medicine Research', 'https://link.springer.com/article/10.1007/s12160-014-9685-9')" class="inline-flex items-center text-orange-400 hover:text-orange-300 text-sm font-medium">
+                                    <a href="https://link.springer.com/article/10.1007/s12160-014-9685-9" target="_blank" class="inline-flex items-center text-orange-400 hover:text-orange-300 text-sm font-medium">
                                         <i class="fas fa-external-link-alt mr-2"></i>Read Full Article
                                     </a>
                                     <span class="mx-3 text-slate-500">|</span>
-                                    <button onclick="openInAppArticle('sleep-memory-study', 'Sleep Quality and Memory Consolidation', 'https://pubmed.ncbi.nlm.nih.gov/25617134/')" class="inline-flex items-center text-green-400 hover:text-green-300 text-sm font-medium">
-                                        <i class="fas fa-search mr-2"></i>View Study
-                                    </button>
+                                    <a href="https://pubmed.ncbi.nlm.nih.gov/25617134/" target="_blank" class="inline-flex items-center text-green-400 hover:text-green-300 text-sm font-medium">
+                                        <i class="fas fa-search mr-2"></i>PubMed
+                                    </a>
                                 </p>
                                 <div class="bg-slate-600 p-4 rounded mb-4">
                                     <h4 class="font-semibold text-slate-100 mb-2">Key Findings:</h4>
@@ -8743,13 +8359,13 @@ Created with Root Cause Power Nutrition System
                                 <h3 class="text-xl font-bold text-red-400 mb-3">🔬 Mindfulness-Based Stress Reduction (MBSR) Efficacy</h3>
                                 <p class="text-slate-300 mb-4">Goyal, M., Singh, S., Sibinga, E.M., et al. (2014). Meditation programs for psychological stress and well-being: A systematic review and meta-analysis. <em>JAMA Internal Medicine, 174</em>(3), 357-368.</p>
                                 <p class="mb-4">
-                                    <button onclick="openInAppArticle('jama-internal-study', 'JAMA Internal Medicine Research', 'https://jamanetwork.com/journals/jamainternalmedicine/fullarticle/1809754')" class="inline-flex items-center text-red-400 hover:text-red-300 text-sm font-medium">
+                                    <a href="https://jamanetwork.com/journals/jamainternalmedicine/fullarticle/1809754" target="_blank" class="inline-flex items-center text-red-400 hover:text-red-300 text-sm font-medium">
                                         <i class="fas fa-external-link-alt mr-2"></i>Read Full Article
                                     </a>
                                     <span class="mx-3 text-slate-500">|</span>
-                                    <button onclick="openInAppArticle('social-support-study', 'Social Support and Mental Health Recovery', 'https://pubmed.ncbi.nlm.nih.gov/24395196/')" class="inline-flex items-center text-green-400 hover:text-green-300 text-sm font-medium">
-                                        <i class="fas fa-search mr-2"></i>View Study
-                                    </button>
+                                    <a href="https://pubmed.ncbi.nlm.nih.gov/24395196/" target="_blank" class="inline-flex items-center text-green-400 hover:text-green-300 text-sm font-medium">
+                                        <i class="fas fa-search mr-2"></i>PubMed
+                                    </a>
                                 </p>
                                 <div class="bg-slate-600 p-4 rounded mb-4">
                                     <h4 class="font-semibold text-slate-100 mb-2">Stress Reduction Outcomes:</h4>
@@ -8798,13 +8414,13 @@ Created with Root Cause Power Nutrition System
                                 <h3 class="text-xl font-bold text-teal-400 mb-3">🌱 Acupuncture for Depression: Systematic Review</h3>
                                 <p class="text-slate-300 mb-4">Smith, C.A., Armour, M., Lee, M.S., Wang, L.Q., & Hay, P.J. (2018). Acupuncture for depression. <em>Cochrane Database of Systematic Reviews, 3</em>, CD004046.</p>
                                 <p class="mb-4">
-                                    <button onclick="openInAppArticle('cochrane-review-study', 'Cochrane Systematic Review', 'https://www.cochranelibrary.com/cdsr/doi/10.1002/14651858.CD004046.pub4/full')" class="inline-flex items-center text-teal-400 hover:text-teal-300 text-sm font-medium">
+                                    <a href="https://www.cochranelibrary.com/cdsr/doi/10.1002/14651858.CD004046.pub4/full" target="_blank" class="inline-flex items-center text-teal-400 hover:text-teal-300 text-sm font-medium">
                                         <i class="fas fa-external-link-alt mr-2"></i>Read Full Article
                                     </a>
                                     <span class="mx-3 text-slate-500">|</span>
-                                    <button onclick="openInAppArticle('trauma-therapy-study', 'Trauma-Informed Therapy Approaches', 'https://pubmed.ncbi.nlm.nih.gov/29502347/')" class="inline-flex items-center text-green-400 hover:text-green-300 text-sm font-medium">
-                                        <i class="fas fa-search mr-2"></i>View Study
-                                    </button>
+                                    <a href="https://pubmed.ncbi.nlm.nih.gov/29502347/" target="_blank" class="inline-flex items-center text-green-400 hover:text-green-300 text-sm font-medium">
+                                        <i class="fas fa-search mr-2"></i>PubMed
+                                    </a>
                                 </p>
                                 <div class="bg-slate-600 p-4 rounded mb-4">
                                     <h4 class="font-semibold text-slate-100 mb-2">Clinical Outcomes:</h4>
@@ -8823,13 +8439,13 @@ Created with Root Cause Power Nutrition System
                                 <h3 class="text-xl font-bold text-cyan-400 mb-3">🍃 Herbal Medicine for Anxiety: St. John's Wort</h3>
                                 <p class="text-slate-300 mb-4">Ng, Q.X., Venkatanarayanan, N., & Ho, C.Y. (2017). Clinical use of Hypericum perforatum (St John's wort) in depression: A meta-analysis. <em>Journal of Affective Disorders, 210</em>, 211-221.</p>
                                 <p class="mb-4">
-                                    <button onclick="openInAppArticle('sciencedirect-study', 'ScienceDirect Research Article', 'https://www.sciencedirect.com/science/article/pii/S0165032716313434')" class="inline-flex items-center text-cyan-400 hover:text-cyan-300 text-sm font-medium"></button>
+                                    <a href="https://www.sciencedirect.com/science/article/pii/S0165032716313434" target="_blank" class="inline-flex items-center text-cyan-400 hover:text-cyan-300 text-sm font-medium">
                                         <i class="fas fa-external-link-alt mr-2"></i>Read Full Article
                                     </a>
                                     <span class="mx-3 text-slate-500">|</span>
-                                    <button onclick="openInAppArticle('digital-mental-health-study', 'Digital Mental Health Interventions', 'https://pubmed.ncbi.nlm.nih.gov/27969168/')" class="inline-flex items-center text-green-400 hover:text-green-300 text-sm font-medium">
-                                        <i class="fas fa-search mr-2"></i>View Study
-                                    </button>
+                                    <a href="https://pubmed.ncbi.nlm.nih.gov/27969168/" target="_blank" class="inline-flex items-center text-green-400 hover:text-green-300 text-sm font-medium">
+                                        <i class="fas fa-search mr-2"></i>PubMed
+                                    </a>
                                 </p>
                                 <div class="bg-slate-600 p-4 rounded mb-4">
                                     <h4 class="font-semibold text-slate-100 mb-2">Efficacy Profile:</h4>
@@ -16214,21 +15830,6 @@ The PTSD Corner has additional EMDR and trauma techniques. I'll be back soon.`
         };
 
         function generateContextualGreeting(coach, assessmentData) {
-            // Check if this is a study discussion context
-            const studyContext = localStorage.getItem('studyDiscussionContext');
-            if (studyContext) {
-                try {
-                    const context = JSON.parse(studyContext);
-                    // Clear the context so it doesn't persist
-                    localStorage.removeItem('studyDiscussionContext');
-                    
-                    const userName = localStorage.getItem('userName') || 'there';
-                    return `Hello ${userName}! I'm ${coach.name}, your ${coach.specialty}. I see you're interested in discussing "${context.studyTitle}" from our research library. That's excellent - I love when people dive deep into the science behind health and wellness! I'm here to help you understand how this research applies to your specific situation and how you can implement the findings in your daily life. What aspects of this study are you most curious about?`;
-                } catch (error) {
-                    console.error('Error parsing study context:', error);
-                }
-            }
-            
             const goals = assessmentData.goals || [];
             const healthScores = assessmentData.healthScores || {};
             
@@ -17873,6 +17474,6 @@ The PTSD Corner has additional EMDR and trauma techniques. I'll be back soon.`
         }
     </script>
     
-<script defer src="https://static.cloudflareinsights.com/beacon.min.js/vcd15cbe7772f49c399c6a5babf22c1241717689176015" integrity="sha512-ZpsOmlRQV6y907TI0dKBHq9Md29nnaEIPlkf84rnaERnq6zvWvPUqr2ft8M1aS28oN72PdrCzSjY4U6VaAw1EQ==" data-cf-beacon='{"rayId":"980ef2773f407719","serverTiming":{"name":{"cfExtPri":true,"cfEdge":true,"cfOrigin":true,"cfL4":true,"cfSpeedBrain":true,"cfCacheStatus":true}},"version":"2025.8.0","token":"4edd5f8ec12a48cfa682ab8261b80a79"}' crossorigin="anonymous"></script>
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/vcd15cbe7772f49c399c6a5babf22c1241717689176015" integrity="sha512-ZpsOmlRQV6y907TI0dKBHq9Md29nnaEIPlkf84rnaERnq6zvWvPUqr2ft8M1aS28oN72PdrCzSjY4U6VaAw1EQ==" data-cf-beacon='{"rayId":"98130cdac9d2d856","serverTiming":{"name":{"cfExtPri":true,"cfEdge":true,"cfOrigin":true,"cfL4":true,"cfSpeedBrain":true,"cfCacheStatus":true}},"version":"2025.8.0","token":"4edd5f8ec12a48cfa682ab8261b80a79"}' crossorigin="anonymous"></script>
 </body>
 </html>
