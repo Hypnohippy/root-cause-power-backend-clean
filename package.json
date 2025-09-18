@@ -1,4 +1,5 @@
 {
+  "type": "module",
   "name": "root-cause-power-platform",
   "version": "1.0.0",
   "description": "AI-powered PTSD support platform with Hume voice coaching",
