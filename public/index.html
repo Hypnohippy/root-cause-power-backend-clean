@@ -17799,6 +17799,81 @@ The PTSD Corner has additional EMDR and trauma techniques. I'll be back soon.`
                 </div>
             `;
         }
+                }
+        undefined  ← DELETE this line
+        
+// Dashboard initialization function - FIX FOR HANGING DASHBOARD
+function initializeDashboard() {
+    console.log('🚀 Initializing dashboard...');
+    
+    // Get assessment results
+    const assessmentResults = window.assessmentResults || {};
+    
+    if (assessmentResults.completed) {
+        console.log('📊 Loading assessment results:', assessmentResults);
+        
+        // Update dashboard with results
+        displayDashboardContent(assessmentResults);
+        
+        console.log('✅ Dashboard initialized successfully!');
+    } else {
+        console.log('⚠️ No assessment results found');
+        showWelcomeMessage();
+    }
+}
+
+// Display dashboard content
+function displayDashboardContent(results) {
+    const dashboardElement = document.getElementById('dashboard-content') || 
+                           document.querySelector('.dashboard-content') ||
+                           document.querySelector('#dashboard');
+    
+    if (dashboardElement && results.healthScores) {
+        dashboardElement.innerHTML = `
+            <div class="p-6 bg-white rounded-lg shadow-lg">
+                <h3 class="text-2xl font-bold mb-4 text-blue-600">Your Health Assessment Results</h3>
+                <p class="text-gray-600 mb-4">Assessment completed: ${new Date(results.timestamp).toLocaleString()}</p>
+                
+                <div class="grid grid-cols-2 gap-4 mb-6">
+                    ${Object.entries(results.healthScores || {}).map(([key, value]) => 
+                        `<div class="bg-blue-50 p-3 rounded">
+                            <div class="text-sm text-gray-600">${key.replace('_', ' ').toUpperCase()}</div>
+                            <div class="text-xl font-bold text-blue-600">${value}</div>
+                        </div>`
+                    ).join('')}
+                </div>
+                
+                <div class="text-center">
+                    <button onclick="navigateToSection('coaches')" class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700">
+                        Talk to AI Coach
+                    </button>
+                </div>
+            </div>
+        `;
+    }
+}
+
+// Show welcome message if no results
+function showWelcomeMessage() {
+    const dashboardElement = document.getElementById('dashboard-content') || 
+                           document.querySelector('.dashboard-content') ||
+                           document.querySelector('#dashboard');
+    
+    if (dashboardElement) {
+        dashboardElement.innerHTML = `
+            <div class="text-center p-8 bg-white rounded-lg shadow-lg">
+                <h3 class="text-2xl font-bold mb-4 text-blue-600">Welcome to Your Health Dashboard</h3>
+                <p class="text-gray-600 mb-6">Complete the assessment to see your personalized health insights.</p>
+                <button onclick="navigateToSection('assessment')" class="bg-blue-600 text-white px-6 py-3 rounded hover:bg-blue-700">
+                    Take Assessment Now
+                </button>
+            </div>
+        `;
+    }
+}
+
+    </script>  ← Keep this closing tag
+
     </script>
     
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js/vcd15cbe7772f49c399c6a5babf22c1241717689176015" integrity="sha512-ZpsOmlRQV6y907TI0dKBHq9Md29nnaEIPlkf84rnaERnq6zvWvPUqr2ft8M1aS28oN72PdrCzSjY4U6VaAw1EQ==" data-cf-beacon='{"rayId":"980ef2773f407719","serverTiming":{"name":{"cfExtPri":true,"cfEdge":true,"cfOrigin":true,"cfL4":true,"cfSpeedBrain":true,"cfCacheStatus":true}},"version":"2025.8.0","token":"4edd5f8ec12a48cfa682ab8261b80a79"}' crossorigin="anonymous"></script>
