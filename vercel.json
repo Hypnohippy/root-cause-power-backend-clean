@@ -1,15 +1,27 @@
 {
-  "version": 2,
-  "builds": [
-    {
-      "src": "server.js",
-      "use": "@vercel/node"
+  "functions": {
+    "api/*.js": {
+      "runtime": "nodejs18.x"
     }
-  ],
+  },
   "routes": [
     {
+      "src": "/api/(.*)",
+      "dest": "/api/$1"
+    },
+    {
       "src": "/(.*)",
-      "dest": "/server.js"
+      "dest": "/revolutionary-index.html"
     }
-  ]
+  ],
+  "env": {
+    "GROQ_API_KEY": "@groq-api-key",
+    "HUME_API_KEY": "@hume-api-key",
+    "HUME_SECRET_KEY": "@hume-secret-key"
+  },
+  "build": {
+    "env": {
+      "NODE_ENV": "production"
+    }
+  }
 }
