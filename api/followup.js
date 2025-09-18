@@ -1,84 +1,111 @@
-// /api/followup.js (Vercel Node Serverless, CommonJS + safe JSON body parsing)
-module.exports = async (req, res) => {
+// /api/followup.js - Groq AI Integration for Assessment Follow-ups and Coach Responses
+
+export default async function handler(req, res) {
+  // Enable CORS for frontend communication
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+
+  if (req.method === 'OPTIONS') {
+    res.status(200).end();
+    return;
+  }
+
   if (req.method !== 'POST') {
-    res.statusCode = 405;
-    res.setHeader('Content-Type', 'application/json');
-    return res.end(JSON.stringify({ error: 'Method not allowed' }));
+    return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  // Robust JSON body parsing (works even when req.body is undefined)
-  let body = {};
   try {
-    if (req.body && typeof req.body === 'object') {
-      body = req.body;
-    } else {
-      const chunks = [];
-      for await (const chunk of req) chunks.push(chunk);
-      const raw = Buffer.concat(chunks).toString('utf8');
-      body = raw ? JSON.parse(raw) : {};
+    const { prompt, context, type = 'followup' } = req.body;
+
+    if (!prompt) {
+      return res.status(400).json({ error: 'Prompt is required' });
     }
-  } catch {
-    body = {};
-  }
 
-  const { currentQuestion, userResponse } = body;
-  const fallback =
-    'Thanks for sharing. What tends to make your sleep better or worse lately?';
+    // Get Groq API key from environment
+    const apiKey = process.env.GROQ_API_KEY;
+    if (!apiKey) {
+      return res.status(500).json({ error: 'Groq API key not configured' });
+    }
 
-  const apiKey = process.env.GROQ_API_KEY || process.env.OPENAI_API_KEY;
+    // Determine system prompt based on type
+    let systemPrompt = '';
 
-  // No key? Always return a helpful follow-up so the UI never breaks.
-  if (!apiKey) {
-    res.statusCode = 200;
-    res.setHeader('Content-Type', 'application/json');
-    return res.end(JSON.stringify({ followUp: fallback }));
-  }
+    switch (type) {
+      case 'followup':
+        systemPrompt = `You are a compassionate healthcare assessment AI. Generate empathetic follow-up questions based on the user's response. Be supportive and trauma-informed. Ask only ONE follow-up question that helps understand their situation better.`;
+        break;
+      case 'coach_sarah':
+        systemPrompt = `You are Coach Sarah, the Lead AI Healthcare Specialist. You're warm, professional, and provide evidence-based wellness guidance. Keep responses under 150 words and always end with encouragement.`;
+        break;
+      case 'coach_alex':
+        systemPromet = `You are Dr. Alex, a PTSD & Trauma Specialist. You're calm, understanding, and trauma-informed. Provide gentle support and coping strategies. Be especially sensitive to triggers and always prioritize safety.`;
+        break;
+      case 'coach_maya':
+        systemPrompt = `You are Maya, a Holistic Wellness Coach. You focus on nutrition, fitness, and lifestyle. Be enthusiastic but realistic, providing practical wellness tips that are easy to implement.`;
+        break;
+      case 'coach_james':
+        systemPrompt = `You are Dr. James, a Medical Information AI. Provide evidence-based health information while emphasizing that you don't replace professional medical advice. Be clear, informative, and encouraging about seeking professional help when needed.`;
+        break;
+      default:
+        systemPrompt = `You are a helpful AI assistant providing health and wellness support.`;
+    }
 
-  try {
-    const r = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    // Prepare the request to Groq
+    const groqResponse = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${apiKey}`
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        model: 'llama-3.3-70b-versatile',
-        temperature: 0.4,
-        max_tokens: 120,
         messages: [
           {
             role: 'system',
-            content:
-              'You are a gentle, trauma-informed coach named Sarah. Ask ONE concise, compassionate follow-up question based on the user’s response. Avoid medical advice.'
+            content: systemPrompt
           },
           {
-            role: 'user',
-            content: `Question: ${currentQuestion}\nUser response: ${userResponse}\nAsk ONE short, compassionate follow-up question.`
+            role: 'user', 
+            content: context ? `Context: ${context}\n\nUser: ${prompt}` : prompt
           }
-        ]
+        ],
+        model: 'llama-3.1-70b-versatile',
+        temperature: 0.7,
+        max_tokens: 200,
+        top_p: 0.9
       })
     });
 
-    const data = await r.json().catch(() => ({}));
+    if (!groqResponse.ok) {
+      const errorText = await groqResponse.text();
+      console.error('Groq API Error:', errorText);
+      return res.status(500).json({ 
+        error: 'Failed to generate response',
+        details: process.env.NODE_ENV === 'development' ? errorText : undefined
+      });
+    }
 
-    const followUp =
-      (data && data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content
-        ? String(data.choices[0].message.content).trim()
-        : '') || fallback;
+    const data = await groqResponse.json();
 
-    // Always return 200 with a usable follow-up (graceful)
-    res.statusCode = 200;
-    res.setHeader('Content-Type', 'application/json');
-    return res.end(JSON.stringify({ followUp }));
-  } catch (err) {
-    console.error('Followup handler error', err);
-    res.statusCode = 200;
-    res.setHeader('Content-Type', 'application/json');
-    return res.end(
-      JSON.stringify({
-        followUp:
-          'Thank you. Could you share a bit more about what affects your sleep lately?'
-      })
-    );
+    if (!data.choices || !data.choices[0]) {
+      return res.status(500).json({ error: 'Invalid response from AI service' });
+    }
+
+    const response = data.choices[0].message.content.trim();
+
+    // Return the response
+    res.status(200).json({
+      success: true,
+      response: response,
+      type: type,
+      timestamp: new Date().toISOString()
+    });
+
+  } catch (error) {
+    console.error('Followup API Error:', error);
+    res.status(500).json({ 
+      error: 'Internal server error',
+      message: process.env.NODE_ENV === 'development' ? error.message : 'Something went wrong'
+    });
   }
-};
+}
