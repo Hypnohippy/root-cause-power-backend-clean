@@ -17802,111 +17802,45 @@ The PTSD Corner has additional EMDR and trauma techniques. I'll be back soon.`
                 }
         undefined  ← DELETE this line
         
-// Dashboard initialization function - FIX FOR HANGING DASHBOARD
+// Dashboard fix - Clean version
 function initializeDashboard() {
-    console.log('🚀 Initializing dashboard...');
+    console.log('Dashboard loading...');
     
-    // Get assessment results
-    const assessmentResults = window.assessmentResults || {};
+    const results = window.assessmentResults || {};
+    const dashElement = document.querySelector('#dashboard') || document.querySelector('.dashboard-content') || document.querySelector('[class*="dashboard"]');
     
-    if (assessmentResults.completed) {
-        console.log('📊 Loading assessment results:', assessmentResults);
-        
-        // Update dashboard with results
-        displayDashboardContent(assessmentResults);
-        
-        console.log('✅ Dashboard initialized successfully!');
-    } else {
-        console.log('⚠️ No assessment results found');
-        showWelcomeMessage();
-    }
-}
-
-// Display dashboard content
-function displayDashboardContent(results) {
-    const dashboardElement = document.getElementById('dashboard-content') || 
-                           document.querySelector('.dashboard-content') ||
-                           document.querySelector('#dashboard');
-    
-    if (dashboardElement && results.healthScores) {
-        dashboardElement.innerHTML = `
-            <div class="p-6 bg-white rounded-lg shadow-lg">
-                <h3 class="text-2xl font-bold mb-4 text-blue-600">Your Health Assessment Results</h3>
-                <p class="text-gray-600 mb-4">Assessment completed: ${new Date(results.timestamp).toLocaleString()}</p>
-                
-                <div class="grid grid-cols-2 gap-4 mb-6">
-                    ${Object.entries(results.healthScores || {}).map(([key, value]) => 
-                        `<div class="bg-blue-50 p-3 rounded">
-                            <div class="text-sm text-gray-600">${key.replace('_', ' ').toUpperCase()}</div>
-                            <div class="text-xl font-bold text-blue-600">${value}</div>
-                        </div>`
-                    ).join('')}
-                </div>
-                
-                <div class="text-center">
-                    <button onclick="navigateToSection('coaches')" class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700">
-                        Talk to AI Coach
-                    </button>
-                </div>
-            </div>
-        `;
-    }
-}
-
-// Show welcome message if no results
-function showWelcomeMessage() {
-    const dashboardElement = document.getElementById('dashboard-content') || 
-                           document.querySelector('.dashboard-content') ||
-                           document.querySelector('#dashboard');
-    
-    if (dashboardElement) {
-        dashboardElement.innerHTML = `
-            <div class="text-center p-8 bg-white rounded-lg shadow-lg">
-                <h3 class="text-2xl font-bold mb-4 text-blue-600">Welcome to Your Health Dashboard</h3>
-                <p class="text-gray-600 mb-6">Complete the assessment to see your personalized health insights.</p>
-                <button onclick="navigateToSection('assessment')" class="bg-blue-600 text-white px-6 py-3 rounded hover:bg-blue-700">
-                    Take Assessment Now
-                </button>
-            </div>
-        `;
-    }
-}
-
-    </script>  ← Keep this closing tag
-
-    </script>
-  // DEBUGGING: Force dashboard initialization on page load
-window.addEventListener('DOMContentLoaded', function() {
-    console.log('🔍 Page loaded, checking for dashboard...');
-    
-    setTimeout(function() {
-        console.log('🔍 Attempting to initialize dashboard...');
-        if (typeof initializeDashboard === 'function') {
-            console.log('✅ initializeDashboard function exists, calling it...');
-            initializeDashboard();
+    if (dashElement) {
+        if (results.completed) {
+            dashElement.innerHTML = '<div style="padding:20px; background:white; border-radius:10px; margin:20px;"><h2 style="color:#2563eb;">Assessment Complete!</h2><p>Your health assessment results are ready.</p><button onclick="navigateToSection(\'coaches\')" style="background:#2563eb; color:white; padding:10px 20px; border:none; border-radius:5px;">Talk to AI Coach</button></div>';
         } else {
-            console.log('❌ initializeDashboard function not found');
+            dashElement.innerHTML = '<div style="padding:20px; background:white; border-radius:10px; margin:20px; text-align:center;"><h2 style="color:#2563eb;">Welcome!</h2><p>Take your health assessment to get started.</p><button onclick="navigateToSection(\'assessment\')" style="background:#2563eb; color:white; padding:10px 20px; border:none; border-radius:5px;">Take Assessment</button></div>';
+        }
+        console.log('Dashboard updated successfully');
+    } else {
+        console.log('Dashboard element not found');
+    }
+}
+
+// Auto-run dashboard
+window.addEventListener('load', function() {
+    setTimeout(function() {
+        if (typeof initializeDashboard === 'function') {
+            initializeDashboard();
         }
     }, 1000);
 });
 
-// DEBUGGING: Also try when navigating to dashboard
-const originalNavigate = window.navigateToSection;
-window.navigateToSection = function(section) {
-    console.log('🔍 Navigating to section:', section);
-    if (originalNavigate) {
-        originalNavigate(section);
-    }
-    
-    if (section === 'dashboard') {
-        setTimeout(function() {
-            console.log('🔍 Dashboard section loaded, initializing...');
-            if (typeof initializeDashboard === 'function') {
-                initializeDashboard();
-            }
-        }, 500);
-    }
-};  
+// Run when navigating to dashboard
+const originalNav = window.navigateToSection;
+if (originalNav) {
+    window.navigateToSection = function(section) {
+        originalNav(section);
+        if (section === 'dashboard') {
+            setTimeout(initializeDashboard, 500);
+        }
+    };
+}
+</script>
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js/vcd15cbe7772f49c399c6a5babf22c1241717689176015" integrity="sha512-ZpsOmlRQV6y907TI0dKBHq9Md29nnaEIPlkf84rnaERnq6zvWvPUqr2ft8M1aS28oN72PdrCzSjY4U6VaAw1EQ==" data-cf-beacon='{"rayId":"980ef2773f407719","serverTiming":{"name":{"cfExtPri":true,"cfEdge":true,"cfOrigin":true,"cfL4":true,"cfSpeedBrain":true,"cfCacheStatus":true}},"version":"2025.8.0","token":"4edd5f8ec12a48cfa682ab8261b80a79"}' crossorigin="anonymous"></script>
 </body>
 </html>
