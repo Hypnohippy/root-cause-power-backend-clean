@@ -1,5 +1,6 @@
 
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1793,6 +1794,70 @@ I'm here to provide personalized, evidence-based health guidance. What aspect of
         .section.active {
             display: block !important;
         }
+    </style>
+
+    /* ADD: Enhanced Button Text Alignment Fixes */
+    <style>
+    /* Ensure all buttons have proper text alignment */
+    button, .btn {
+        text-align: center !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        white-space: nowrap;
+    }
+
+    /* Fix specific button classes */
+    .bg-gradient-to-r, .bg-blue-500, .bg-purple-600, .bg-slate-700 {
+        text-align: center !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+
+    /* Fix mobile menu buttons */
+    .mobile-menu button, #mobile-menu button {
+        text-align: left !important;
+        justify-content: flex-start !important;
+    }
+
+    /* Fix icon alignment within buttons */
+    button i, .btn i {
+        margin-right: 8px;
+        vertical-align: middle;
+    }
+
+    /* Fix last icon in button (no right margin) */
+    button i:last-child, .btn i:last-child {
+        margin-right: 0;
+        margin-left: 8px;
+    }
+
+    /* Fix button text wrapping issues */
+    button span, .btn span {
+        display: inline-block;
+        text-align: center;
+    }
+
+    /* Ensure consistent button heights and alignment */
+    button, .btn {
+        min-height: 44px;
+        line-height: 1.5;
+    }
+
+    /* Fix assessment and navigation buttons specifically */
+    .assessment-button, .nav-button, .action-button {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        text-align: center !important;
+    }
+
+    /* Fix pricing plan buttons */
+    .pricing-button, .plan-button {
+        width: 100%;
+        text-align: center !important;
+        justify-content: center !important;
+    }
     </style>
     
     <!-- DIRECT WEBSOCKET APPROACH - NO SDK NEEDED -->
@@ -4390,7 +4455,13 @@ I'm here to provide personalized, evidence-based health guidance. What aspect of
             
             // Store in localStorage for dashboard access
             localStorage.setItem('lastAssessmentResults', JSON.stringify(assessmentResults));
-            localStorage.setItem('hasCompletedAssessment', 'true');
+            localStorage.setItem('hasCompletedAssessment', 'true'
+
+    // ADD: Track assessment attempts for limit enforcement
+    const currentAttempts = parseInt(localStorage.getItem('assessmentAttempts') || '0');
+    const newAttempts = currentAttempts + 1;
+    localStorage.setItem('assessmentAttempts', newAttempts.toString());
+    console.log(`📊 Assessment completed! Total attempts: ${newAttempts}`););
             
             console.log('✅ Assessment results stored for automatic dashboard update:', assessmentResults);
             console.log('🎯 Stress Management Score:', healthScores.stress_management);
@@ -12908,6 +12979,39 @@ Created with Root Cause Power Nutrition System
         ];
         
         function startAssessment() {
+    // ADD: Check assessment limit before starting
+    const assessmentAttempts = parseInt(localStorage.getItem('assessmentAttempts') || '0');
+    const userPlan = localStorage.getItem('userPlan') || 'free';
+    const maxAssessments = userPlan === 'free' ? 1 : -1; // Free: 1, Premium: unlimited
+
+    if (maxAssessments > 0 && assessmentAttempts >= maxAssessments) {
+        // Show limit reached modal
+        showModal('Assessment Limit Reached', 
+            `<div class="text-center">
+                <div class="text-6xl mb-4">⏸️</div>
+                <h3 class="text-xl font-bold text-slate-100 mb-4">Assessment Limit Reached</h3>
+                <p class="text-slate-300 mb-6">
+                    Free users can take 1 health assessment.<br>
+                    You have completed ${assessmentAttempts} assessment(s).
+                </p>
+                <p class="text-slate-300 mb-6">
+                    Upgrade to Premium for unlimited assessments and advanced features.
+                </p>
+                <div class="flex gap-3 justify-center">
+                    <button onclick="navigateToSection('pricing'); closeModal();" 
+                            class="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-6 py-3 rounded-lg font-semibold hover:from-blue-600 hover:to-purple-700 transition-all">
+                        <i class="fas fa-crown mr-2"></i>Upgrade to Premium
+                    </button>
+                    <button onclick="closeModal()" 
+                            class="bg-slate-700 text-slate-300 px-6 py-3 rounded-lg hover:bg-slate-600 transition-all">
+                        Close
+                    </button>
+                </div>
+            </div>`
+        );
+        return; // Stop assessment from starting
+    }
+
             console.log('📋 Starting comprehensive assessment...');
             
             // Ensure we're in the assessment section
@@ -31615,6 +31719,134 @@ console.log('✅ WEEKLY TRENDS CHART CONSOLIDATION FIX LOADED! 🚀');
 console.log('📊 Available: updateWeeklyTrendsChartData()');
 </script>
 
-<script defer src="https://static.cloudflareinsights.com/beacon.min.js/vcd15cbe7772f49c399c6a5babf22c1241717689176015" integrity="sha512-ZpsOmlRQV6y907TI0dKBHq9Md29nnaEIPlkf84rnaERnq6zvWvPUqr2ft8M1aS28oN72PdrCzSjY4U6VaAw1EQ==" data-cf-beacon='{"rayId":"985d46dffbedf9a2","serverTiming":{"name":{"cfExtPri":true,"cfEdge":true,"cfOrigin":true,"cfL4":true,"cfSpeedBrain":true,"cfCacheStatus":true}},"version":"2025.9.1","token":"4edd5f8ec12a48cfa682ab8261b80a79"}' crossorigin="anonymous"></script>
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/vcd15cbe7772f49c399c6a5babf22c1241717689176015" integrity="sha512-ZpsOmlRQV6y907TI0dKBHq9Md29nnaEIPlkf84rnaERnq6zvWvPUqr2ft8M1aS28oN72PdrCzSjY4U6VaAw1EQ==" data-cf-beacon='{"rayId":"985d46dffbedf9a2","serverTiming":{"name":{"cfExtPri":true,"cfEdge":true,"cfOrigin":true,"cfL4":true,"cfSpeedBrain":true,"cfCacheStatus":true}},"version":"2025.9.1","token":"4edd5f8ec12a48cfa682ab8261b80a79"}' crossorigin="anonymous">
+    // ADD: Mobile Menu Toggle Functionality
+    function toggleMobileMenu() {
+        const mobileMenu = document.getElementById('mobile-menu');
+        const hamburgerIcon = document.querySelector('.md\\:hidden i.fas.fa-bars');
+
+        if (mobileMenu.classList.contains('hidden')) {
+            // Show menu
+            mobileMenu.classList.remove('hidden');
+            mobileMenu.classList.add('block');
+            if (hamburgerIcon) {
+                hamburgerIcon.classList.remove('fa-bars');
+                hamburgerIcon.classList.add('fa-times');
+            }
+        } else {
+            // Hide menu
+            mobileMenu.classList.add('hidden');
+            mobileMenu.classList.remove('block');
+            if (hamburgerIcon) {
+                hamburgerIcon.classList.remove('fa-times');
+                hamburgerIcon.classList.add('fa-bars');
+            }
+        }
+    }
+
+    function closeMobileMenu() {
+        const mobileMenu = document.getElementById('mobile-menu');
+        const hamburgerIcon = document.querySelector('.md\\:hidden i.fas');
+
+        mobileMenu.classList.add('hidden');
+        mobileMenu.classList.remove('block');
+        if (hamburgerIcon) {
+            hamburgerIcon.classList.remove('fa-times');
+            hamburgerIcon.classList.add('fa-bars');
+        }
+    }
+
+    // ADD: Close mobile menu when clicking outside
+    document.addEventListener('click', function(event) {
+        const mobileMenu = document.getElementById('mobile-menu');
+        const hamburgerButton = document.querySelector('.md\\:hidden');
+
+        if (!mobileMenu.contains(event.target) && !hamburgerButton.contains(event.target)) {
+            closeMobileMenu();
+        }
+    });
+
+    // ADD: Dynamic Credits Display Functionality
+    function loadUserCredits() {
+        const userPlan = localStorage.getItem('userPlan') || 'free';
+        const creditsUsed = parseInt(localStorage.getItem('creditsUsed') || '0');
+
+        let creditsRemaining;
+        let displayText;
+
+        switch(userPlan.toLowerCase()) {
+            case 'free':
+                creditsRemaining = Math.max(0, 50 - creditsUsed);
+                displayText = creditsRemaining.toString();
+                break;
+            case 'pro':
+            case 'professional':
+                creditsRemaining = Math.max(0, 150 - creditsUsed);
+                displayText = creditsRemaining.toString();
+                break;
+            case 'enterprise':
+            case 'premium':
+                displayText = 'Unlimited';
+                break;
+            default:
+                displayText = '50'; // Default to free tier
+        }
+
+        const creditsElement = document.getElementById('credits-remaining');
+        if (creditsElement) {
+            creditsElement.textContent = displayText;
+            creditsElement.className = creditsRemaining > 10 || userPlan === 'enterprise' ? 
+                'text-green-400 font-bold' : 'text-yellow-400 font-bold';
+        }
+
+        console.log(`💳 Credits loaded: ${displayText} (Plan: ${userPlan})`);
+        return displayText;
+    }
+
+    // ADD: Function to use credits and update display
+    function useCredit(amount = 1) {
+        const userPlan = localStorage.getItem('userPlan') || 'free';
+        if (userPlan === 'enterprise' || userPlan === 'premium') {
+            return true; // Unlimited credits
+        }
+
+        const creditsUsed = parseInt(localStorage.getItem('creditsUsed') || '0');
+        const maxCredits = userPlan === 'pro' ? 150 : 50;
+
+        if (creditsUsed + amount <= maxCredits) {
+            localStorage.setItem('creditsUsed', (creditsUsed + amount).toString());
+            loadUserCredits(); // Refresh display
+            return true;
+        }
+
+        // Credits exhausted
+        showModal('Credits Exhausted', 
+            `<div class="text-center">
+                <div class="text-6xl mb-4">💳</div>
+                <h3 class="text-xl font-bold text-slate-100 mb-4">No Credits Remaining</h3>
+                <p class="text-slate-300 mb-6">
+                    You have used all ${maxCredits} credits for this month.
+                </p>
+                <button onclick="navigateToSection('pricing'); closeModal();" 
+                        class="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-6 py-3 rounded-lg font-semibold hover:from-blue-600 hover:to-purple-700 transition-all">
+                    <i class="fas fa-crown mr-2"></i>Upgrade Plan
+                </button>
+            </div>`
+        );
+        return false;
+    }
+
+    // ADD: Initialize credits display when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(loadUserCredits, 500); // Small delay to ensure DOM is ready
+    });
+
+    // ADD: Refresh credits display when navigating sections
+    const originalNavigateToSection = navigateToSection;
+    navigateToSection = function(section) {
+        originalNavigateToSection(section);
+        setTimeout(loadUserCredits, 200); // Refresh after navigation
+    };
+</script>
 </body>
 </html>
