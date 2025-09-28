@@ -1,5 +1,6 @@
 
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -10053,7 +10054,7 @@ Created with Root Cause Power Nutrition System
 
                     <!-- Credit Usage -->
                     <div class="text-center mt-4">
-                        <p class="text-slate-400 text-sm">Credits remaining: <span id="credits-remaining" class="text-green-400 font-bold">Unlimited</span></p>
+                        <p class="text-slate-400 text-sm">Credits remaining: <span id="credits-remaining" class="text-green-400 font-bold">Loading...</span></p>
                     </div>
                 </div>
 
@@ -12738,15 +12739,136 @@ Created with Root Cause Power Nutrition System
             });
         }
         
+                
+        // Dynamic Credits Display Function
+        
+        // Enhanced Assessment Start with Limit Checking
+        window.startAssessmentWithLimitCheck = function() {
+            console.log('🔍 Checking assessment limits...');
+
+            // Check if user has remaining assessments
+            if (!checkUsageLimit('assessment')) {
+                console.log('❌ Assessment limit reached');
+                return false; // Limit check failed, don't start assessment
+            }
+
+            console.log('✅ Assessment limit OK, starting assessment');
+
+            // If limit check passes, navigate to assessment
+            navigateToSection('assessment');
+
+            // Update usage after starting
+            setTimeout(() => {
+                updateUsage('assessments');
+                updateCreditsDisplay(); // Refresh credits display
+            }, 1000);
+
+            return true;
+        };
+
+        // Override original assessment navigation
+        const originalNavigateToSection = window.navigateToSection;
+        window.navigateToSection = function(section) {
+            if (section === 'assessment') {
+                // For assessment, use our limit-checking version
+                return startAssessmentWithLimitCheck();
+            } else {
+                // For other sections, use original function
+                return originalNavigateToSection ? originalNavigateToSection(section) : true;
+            }
+        };
+
+
+        window.updateCreditsDisplay = function() {
+            console.log('🔄 Updating credits display...');
+
+            const userDataStr = localStorage.getItem('rootCauseUser');
+            const creditsElement = document.getElementById('credits-remaining');
+
+            if (!creditsElement) {
+                console.warn('⚠️ Credits display element not found');
+                return;
+            }
+
+            if (!userDataStr) {
+                // No user data - show free limits
+                creditsElement.textContent = '1 assessment remaining (Free)';
+                creditsElement.className = 'text-yellow-400 font-bold';
+                return;
+            }
+
+            try {
+                const userData = JSON.parse(userDataStr);
+                const subscription = userData.subscription || 'free';
+                const usage = userData.usage || { assessments: 0, coachSessions: 0 };
+
+                // Define limits (TOTAL, not monthly)
+                const limits = {
+                    'free': { assessments: 1, coachSessions: 1 },
+                    'basic': { assessments: 5, coachSessions: 3 },
+                    'premium': { assessments: 20, coachSessions: 10 },
+                    'enterprise': { assessments: -1, coachSessions: -1 }
+                };
+
+                const userLimits = limits[subscription] || limits['free'];
+                const remainingAssessments = userLimits.assessments === -1 ? 'Unlimited' : 
+                    Math.max(0, userLimits.assessments - (usage.assessments || 0));
+
+                if (remainingAssessments === 'Unlimited') {
+                    creditsElement.textContent = 'Unlimited assessments';
+                    creditsElement.className = 'text-green-400 font-bold';
+                } else if (remainingAssessments > 0) {
+                    creditsElement.textContent = `${remainingAssessments} assessment${remainingAssessments !== 1 ? 's' : ''} remaining`;
+                    creditsElement.className = remainingAssessments > 1 ? 'text-green-400 font-bold' : 'text-yellow-400 font-bold';
+                } else {
+                    creditsElement.textContent = '0 assessments remaining';
+                    creditsElement.className = 'text-red-400 font-bold';
+                }
+
+                console.log(`💳 Credits updated: ${creditsElement.textContent}`);
+
+            } catch (error) {
+                console.error('❌ Error updating credits display:', error);
+                creditsElement.textContent = 'Error loading credits';
+                creditsElement.className = 'text-red-400 font-bold';
+            }
+        };
+
+        // Update credits display when page loads and when user data changes
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(updateCreditsDisplay, 1000); // Delay to ensure elements are ready
+        });
+
+        // Also update when called directly
+        if (typeof updateCreditsDisplay !== 'undefined') {
+            setTimeout(updateCreditsDisplay, 500);
+        }
+
+
         window.toggleMobileMenu = function() {
+            console.log('🍔 Hamburger menu clicked!');
             const menu = document.getElementById('mobile-menu');
             if (menu) {
-                menu.classList.toggle('hidden');
-                console.log('📱 Mobile menu toggled');
+                const isHidden = menu.classList.contains('hidden');
+                if (isHidden) {
+                    menu.classList.remove('hidden');
+                    console.log('📱 Mobile menu shown');
+                } else {
+                    menu.classList.add('hidden');
+                    console.log('📱 Mobile menu hidden');
+                }
+
+                // Force a repaint to ensure visibility change
+                menu.offsetHeight;
+
+                console.log('📱 Menu classes after toggle:', menu.classList.toString());
             } else {
-                console.error('❌ Mobile menu element not found');
+                console.error('❌ Mobile menu element not found!');
+                // Try to find the menu element by other means
+                const allElements = document.querySelectorAll('[id*="mobile"], [class*="mobile"]');
+                console.log('🔍 Found elements with mobile:', allElements);
             }
-        }
+        };
         
         // Close mobile menu when navigation item is clicked
         function closeMobileMenu() {
@@ -19572,7 +19694,7 @@ Provide practical CBT techniques like thought records, behavioral experiments, m
                 updateChatDisplay();
                 
                 // Update credits (for display - unlimited for testing)
-                document.getElementById('credits-remaining').textContent = 'Unlimited';
+                // Credits will be set dynamically by updateCreditsDisplay()
                 
             } catch (error) {
                 console.error('❌ Error generating response:', error);
