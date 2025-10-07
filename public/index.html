@@ -28712,30 +28712,37 @@ The PTSD Corner has additional EMDR and trauma techniques. I'll be back soon.`
             document.body.appendChild(successModal);
         }
 
-        // Simulated subscription upgrade (in real app, this would process payment)
+        // Real subscription upgrade with Stripe payment
         function upgradeSubscription(planType) {
             if (planType === 'enterprise') {
                 alert(`🏢 Enterprise Plan requires consultation.\n\nFeatures requiring human resources:\n• Dedicated human coaches (additional $50-200/hr)\n• Custom branding setup (one-time $500 setup)\n• White-label configuration (one-time $1000 setup)\n• Team management training (one-time $300)\n• Custom domain & SSL (one-time $200)\n\n📞 Contact: Use Customer Support Form\n💰 Platform: $199/mo + setup fees + usage fees`);
                 return;
             }
 
-            if (planType !== 'free') {
-                alert(`🚀 Redirecting to secure payment for ${planType.charAt(0).toUpperCase() + planType.slice(1)} plan...\n\n⚠️ This is a demo - no actual payment processed.`);
-            }
+            // Use real Stripe checkout - redirect to actual payment
+            const stripeUrls = {
+                'basic': 'https://buy.stripe.com/4gMfZgeHVcmFaYF7WY0VO02',
+                'premium': 'https://buy.stripe.com/bJeaEW7ft3Q9giZ3GI0VO01', 
+                'vip': 'https://buy.stripe.com/00w6oG43h86p2s93GI0VO03'
+            };
             
-            // In demo mode, we can simulate the upgrade
-            const userData = JSON.parse(localStorage.getItem('rootCauseUser'));
-            if (userData) {
-                userData.subscription = planType;
-                userData.upgradeDate = new Date().toISOString();
-                // Reset usage when upgrading
-                userData.usage = { assessments: 0, coachSessions: 0, coachDavid: 0 };
-                localStorage.setItem('rootCauseUser', JSON.stringify(userData));
-                updateAuthenticationUI(userData);
-                
-                if (planType !== 'free') {
-                    alert(`✅ Demo upgrade successful! You now have ${planType} access.\n\nYour usage limits have been reset.`);
-                }
+            const stripeUrl = stripeUrls[planType];
+            if (stripeUrl) {
+                console.log(`💳 Redirecting to Stripe checkout for ${planType} plan`);
+                // Use the existing openEmbeddedStripeCheckout function
+                const planNames = {
+                    'basic': 'Root Cause Basic',
+                    'premium': 'Root Cause Premium', 
+                    'vip': 'Root Cause VIP Elite'
+                };
+                const prices = {
+                    'basic': '24',
+                    'premium': '49',
+                    'vip': '82'
+                };
+                openEmbeddedStripeCheckout(stripeUrl, planNames[planType], '1', prices[planType]);
+            } else {
+                alert('Payment configuration error. Please contact support.');
             }
         }
 
