@@ -16,11 +16,26 @@
     <script>
         console.log('🚨 LOADING EMERGENCY FUNCTIONS IN ISOLATED SCRIPT');
         
+        // 🧪 TESTING MODE - Add ?testing=true to URL for free testing
+        const urlParams = new URLSearchParams(window.location.search);
+        window.TESTING_MODE = urlParams.get('testing') === 'true';
+        
+        if (window.TESTING_MODE) {
+            console.log('🧪 TESTING MODE ENABLED - All actions are FREE');
+            // Add testing indicator when page loads
+            setTimeout(() => {
+                const testingBanner = document.createElement('div');
+                testingBanner.style.cssText = 'position:fixed;top:0;left:0;right:0;background:#ff6b35;color:white;text-align:center;padding:5px;z-index:9999;font-weight:bold;';
+                testingBanner.innerHTML = '🧪 TESTING MODE - No Credits Charged';
+                document.body.appendChild(testingBanner);
+            }, 1000);
+        }
+        
         // 💰 CRITICAL: Define credit costs FIRST before any other functions
         window.creditCosts = {
             'coach_david_session': 5,      // 5 credits per session (premium feature)
-            'coach_elena_session': 2,      // 2 credits per session
-            'coach_sarah_session': 2,      // 2 credits per session
+            'coach_elena_session': 1,      // 1 credit per session
+            'coach_sarah_session': 1,      // 1 credit per session
             'health_assessment': 2,        // 2 credits per assessment
             'ai_prescription': 2,          // 2 credits per AI prescription
             'voice_session_minute': 1,     // 1 credit per minute for voice sessions
@@ -1242,16 +1257,11 @@
             }
         };
         
-        // EMERGENCY COACH DAVID FIX - Add credits if needed
+        // Coach David function - NO CREDIT BOOSTING
         window.fixCoachDavidCredits = function() {
-            console.log('🔧 Emergency credit fix for Coach David testing...');
-            let userPlan = JSON.parse(localStorage.getItem('userPlan') || '{}');
-            userPlan.credits = Math.max(userPlan.credits || 0, 10); // Ensure at least 10 credits
-            localStorage.setItem('userPlan', JSON.stringify(userPlan));
-            updateCreditsDisplay();
-            console.log('✅ Credits boosted for Coach David testing');
+            console.log('🎤 Coach David function called - using real credit system');
             
-            // Now try to launch Coach David
+            // Launch Coach David without credit manipulation
             if (typeof window.launchCoachDavidWidget === 'function') {
                 window.launchCoachDavidWidget();
             }
@@ -2450,6 +2460,12 @@
         window.checkCreditsBeforeAction = function(featureName, creditCost, contextData = {}) {
             console.log(`🔍 Checking credits for ${featureName}: ${creditCost} credits needed`);
             
+            // BYPASS ALL CREDIT CHECKS IN TESTING MODE
+            if (window.TESTING_MODE) {
+                console.log(`🧪 TESTING MODE: ${featureName} allowed without credit check`);
+                return true;
+            }
+            
             // Get current user plan
             let userPlan = JSON.parse(localStorage.getItem('userPlan') || '{}');
             
@@ -2543,13 +2559,13 @@
         window.resetCreditsForTesting = function() {
             const userPlan = {
                 plan: 'free',
-                credits: 50,  // Give plenty of credits for testing
+                credits: 5,  // Restore original 5 credits for free users
                 lastUpdated: new Date().toISOString()
             };
             localStorage.setItem('userPlan', JSON.stringify(userPlan));
             updateCreditsDisplay();
-            console.log('🔄 Credits reset to 50 for testing');
-            alert('Credits reset to 50 for testing! Now you can test Coach David.');
+            console.log('🔄 Credits reset to 5 (original system)');
+            alert('Credits reset to 5 (original free user amount).');
         };
         
         // Quick add credits function
@@ -11712,7 +11728,7 @@ Created with Root Cause Power Nutrition System
                                 <h3 class="text-xl font-bold text-slate-100 mb-2">Coach David</h3>
                                 <p class="text-slate-400 text-sm mb-4">Voice Therapy Specialist</p>
                                 <div class="bg-gradient-to-r from-yellow-600 to-orange-600 text-white text-xs font-bold px-3 py-1 rounded-full mb-3 inline-block">
-                                    💰 3 Credits - Premium Voice Therapy
+                                    💰 5 Credits - Premium Voice Therapy
                                 </div>
                                 <div class="text-sm text-slate-300">
                                     <p>• Real-time voice conversations</p>
@@ -11730,7 +11746,7 @@ Created with Root Cause Power Nutrition System
                                 <h3 class="text-xl font-bold text-slate-100 mb-2">Coach Elena</h3>
                                 <p class="text-slate-400 text-sm mb-4">Trauma Recovery Specialist</p>
                                 <div class="bg-gradient-to-r from-green-600 to-emerald-600 text-white text-xs font-bold px-3 py-1 rounded-full mb-3 inline-block">
-                                    💰 1 Credit - Text Coaching
+                                    💰 2 Credits - Text Coaching
                                 </div>
                                 <div class="text-sm text-slate-300">
                                     <p>• PTSD and trauma support</p>
@@ -11748,7 +11764,7 @@ Created with Root Cause Power Nutrition System
                                 <h3 class="text-xl font-bold text-slate-100 mb-2">Coach Sarah</h3>
                                 <p class="text-slate-400 text-sm mb-4">Anxiety & Stress Specialist</p>
                                 <div class="bg-gradient-to-r from-purple-600 to-pink-600 text-white text-xs font-bold px-3 py-1 rounded-full mb-3 inline-block">
-                                    💰 1 Credit - Text Coaching
+                                    💰 2 Credits - Text Coaching
                                 </div>
                                 <div class="text-sm text-slate-300">
                                     <p>• Anxiety management</p>
@@ -11781,27 +11797,23 @@ Created with Root Cause Power Nutrition System
                             </div>
                         </div>
 
+                        <!-- Interactive Calendar with Available Slots -->
+                        <div class="mb-6">
+                            <label class="block text-slate-300 font-medium mb-2">Select Date & Time</label>
+                            <div id="booking-calendar" class="bg-slate-600 rounded-lg p-4">
+                                <!-- Calendar will be rendered here -->
+                            </div>
+                        </div>
+                        
+                        <!-- Selected Date/Time Display -->
                         <div class="grid md:grid-cols-2 gap-6 mb-6">
                             <div>
-                                <label class="block text-slate-300 font-medium mb-2">Preferred Date</label>
-                                <input type="date" id="session-date" class="w-full bg-slate-600 border border-slate-500 rounded-lg px-4 py-3 text-slate-100 focus:border-blue-500 focus:outline-none">
+                                <label class="block text-slate-300 font-medium mb-2">Selected Date</label>
+                                <input type="text" id="selected-date-display" class="w-full bg-slate-700 border border-slate-500 rounded-lg px-4 py-3 text-slate-100" readonly placeholder="Select from calendar above">
                             </div>
                             <div>
-                                <label class="block text-slate-300 font-medium mb-2">Preferred Time</label>
-                                <select id="session-time" class="w-full bg-slate-600 border border-slate-500 rounded-lg px-4 py-3 text-slate-100 focus:border-blue-500 focus:outline-none">
-                                    <option value="">Select time...</option>
-                                    <option value="09:00">9:00 AM</option>
-                                    <option value="10:00">10:00 AM</option>
-                                    <option value="11:00">11:00 AM</option>
-                                    <option value="12:00">12:00 PM</option>
-                                    <option value="13:00">1:00 PM</option>
-                                    <option value="14:00">2:00 PM</option>
-                                    <option value="15:00">3:00 PM</option>
-                                    <option value="16:00">4:00 PM</option>
-                                    <option value="17:00">5:00 PM</option>
-                                    <option value="18:00">6:00 PM</option>
-                                    <option value="19:00">7:00 PM</option>
-                                </select>
+                                <label class="block text-slate-300 font-medium mb-2">Selected Time</label>
+                                <input type="text" id="selected-time-display" class="w-full bg-slate-700 border border-slate-500 rounded-lg px-4 py-3 text-slate-100" readonly placeholder="Select from calendar above">
                             </div>
                         </div>
 
@@ -26670,23 +26682,13 @@ The PTSD Corner has additional EMDR and trauma techniques. I'll be back soon.`
         let bookings = JSON.parse(localStorage.getItem('sessionBookings') || '[]');
         let selectedCoach = '';
         
-        window.selectCoach = function(coachId) {
-            console.log('👨‍⚕️ Selecting coach:', coachId);
+        // OLD SELECTCOACH FUNCTION - DISABLED TO PREVENT DOUBLE CREDIT DEDUCTION
+        window.selectCoach_OLD = function(coachId) {
+            console.log('👨‍⚕️ OLD selectCoach disabled to prevent double charging');
             
-            // Define credit costs from our configuration
-            const creditCost = window.creditCosts[`coach_${coachId}_session`] || 1;
-            const contextData = {
-                coach: coachId,
-                feature: coachId === 'david' ? 'voice' : 'text',
-                usage: 'coaching'
-            };
-            
-            console.log(`💰 Credit cost for Coach ${coachId}: ${creditCost}`);
-            
-            // 🔥 USE COMPREHENSIVE CREDIT GATE
-            if (!checkCreditsBeforeAction(`Coach ${coachId.charAt(0).toUpperCase() + coachId.slice(1)} Session`, creditCost, contextData)) {
-                return; // Credit check failed - user redirected to pricing
-            }
+            // This function was deducting credits before the calendar
+            // Now disabled - credits only deducted when booking is confirmed
+            return;
             
             console.log(`✅ Credits approved for Coach ${coachId}!`);
             
@@ -26733,6 +26735,31 @@ The PTSD Corner has additional EMDR and trauma techniques. I'll be back soon.`
             const bookingForm = document.getElementById('booking-form');
             if (bookingForm) {
                 bookingForm.classList.remove('hidden');
+                
+                // Render calendar immediately after form becomes visible
+                setTimeout(() => {
+                    console.log('📅 Booking form shown, attempting to render calendar...');
+                    const calendarContainer = document.getElementById('booking-calendar');
+                    console.log('📅 Calendar container found:', !!calendarContainer);
+                    
+                    if (typeof renderCalendar === 'function') {
+                        console.log('📅 renderCalendar function exists, calling now...');
+                        renderCalendar();
+                    } else {
+                        console.error('❌ renderCalendar function not found!');
+                    }
+                }, 100);
+                
+                // Backup calendar rendering with longer delay
+                setTimeout(() => {
+                    const calendarContainer = document.getElementById('booking-calendar');
+                    if (calendarContainer && !calendarContainer.innerHTML.includes('calendar-grid')) {
+                        console.log('🔄 Backup calendar render attempt...');
+                        if (typeof renderCalendar === 'function') {
+                            renderCalendar();
+                        }
+                    }
+                }, 500);
             }
             
             // Populate coach name
@@ -26761,13 +26788,15 @@ The PTSD Corner has additional EMDR and trauma techniques. I'll be back soon.`
             
             const coach = document.getElementById('selected-coach').value;
             const sessionType = document.getElementById('session-type').value;
-            const date = document.getElementById('session-date').value;
-            const time = document.getElementById('session-time').value;
+            const selectedDateElement = document.getElementById('selected-date-display');
+            const selectedTimeElement = document.getElementById('selected-time-display');
+            const selectedDate = selectedDateElement.dataset.rawDate || selectedDateElement.value;
+            const selectedTime = selectedTimeElement.dataset.rawTime || selectedTimeElement.value;
             const goals = document.getElementById('session-goals').value;
             const concerns = document.getElementById('current-concerns').value;
             
-            if (!coach || !sessionType || !date || !time) {
-                alert('Please fill in all required fields.');
+            if (!coach || !sessionType || !selectedDate || !selectedTime) {
+                alert('Please fill in all required fields and select a date/time from the calendar.');
                 return;
             }
             
@@ -26776,8 +26805,8 @@ The PTSD Corner has additional EMDR and trauma techniques. I'll be back soon.`
                 coach: coach,
                 coachId: selectedCoach,
                 sessionType: sessionType,
-                date: date,
-                time: time,
+                date: selectedDate,
+                time: selectedTime,
                 goals: goals,
                 concerns: concerns,
                 status: 'confirmed',
@@ -26805,7 +26834,12 @@ The PTSD Corner has additional EMDR and trauma techniques. I'll be back soon.`
             // Update upcoming sessions
             displayUpcomingSessions();
             
-            alert('✅ Session booked successfully! You will receive a confirmation shortly.');
+            // Create calendar event with real notifications
+            if (typeof createCalendarEventAndNotification === 'function') {
+                createCalendarEventAndNotification(booking);
+            } else {
+                alert('✅ Session booked successfully! You will receive a confirmation shortly.');
+            }
         };
         
         window.cancelBooking = function() {
@@ -34888,40 +34922,85 @@ window.quickUpdateMedical = function() {
 // Fix Coach David and selectCoach functions
 window.selectCoach = function(coachId) {
     console.log('👨‍⚕️ selectCoach called with:', coachId);
+    console.log('📅 Creating NEW calendar system for coach:', coachId);
     
-    if (coachId === 'david') {
-        console.log('🎤 Coach David selected - launching voice therapy!');
-        
-        // ENSURE CREDITS FOR COACH DAVID TESTING
-        const userPlan = JSON.parse(localStorage.getItem('userPlan') || '{}');
-        if (!userPlan.credits || userPlan.credits < 10) {
-            console.log('💰 Adding credits for Coach David testing...');
-            userPlan.credits = 50; // Give enough credits for testing
-            userPlan.plan = userPlan.plan || 'premium'; // Ensure premium access
-            localStorage.setItem('userPlan', JSON.stringify(userPlan));
+    // CREATE SIMPLE WORKING CALENDAR MODAL
+    const calendarModal = document.createElement('div');
+    calendarModal.id = 'booking-calendar-modal';
+    calendarModal.className = 'fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4';
+    
+    const coachNames = {
+        'david': 'Coach David (Voice Therapy)',
+        'elena': 'Coach Elena (Text Chat)', 
+        'sarah': 'Coach Sarah (Anxiety Specialist)'
+    };
+    
+    const creditCosts = {
+        'david': 5,
+        'elena': 1,
+        'sarah': 1
+    };
+    
+    console.log('📅 Building calendar HTML for:', coachNames[coachId]);
+    
+    calendarModal.innerHTML = `
+        <div class="bg-slate-800 rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto border border-slate-600">
+            <div class="bg-gradient-to-r from-blue-600 to-purple-600 p-6 rounded-t-2xl">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-2xl font-bold text-white">📅 Book Session with ${coachNames[coachId]}</h2>
+                    <button onclick="this.closest('.fixed').remove()" class="text-white/80 hover:text-white text-2xl">
+                        ×
+                    </button>
+                </div>
+                <p class="text-white/80 mt-2">💰 Cost: ${creditCosts[coachId]} Credits</p>
+            </div>
             
-            // Update credit display
-            if (typeof window.updateCreditsDisplay === 'function') {
-                window.updateCreditsDisplay();
-            }
-        }
-        
-        // Check if the full Coach David function exists
-        if (typeof window.launchCoachDavidWidget === 'function') {
-            try {
-                window.launchCoachDavidWidget();
-            } catch (error) {
-                console.error('❌ Coach David launch error:', error);
-                alert('❌ Coach David encountered an error. Please check the console for details.');
-            }
-        } else {
-            alert('🎤 Coach David voice therapy starting...');
-            console.log('⚠️ Full Coach David function not available, showing placeholder');
-        }
-    } else {
-        console.log('👨‍⚕️ Selected coach:', coachId);
-        alert('👨‍⚕️ Coach ' + coachId + ' selected!');
-    }
+            <div class="p-6">
+                <div class="grid md:grid-cols-2 gap-6">
+                    <!-- Date Selection -->
+                    <div>
+                        <h3 class="text-lg font-semibold text-slate-200 mb-4">Select Date</h3>
+                        <div class="bg-slate-700/50 rounded-lg p-4">
+                            <div id="calendar-grid-${coachId}" class="calendar-grid">
+                                <!-- Calendar will be generated here -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Time Selection -->
+                    <div>
+                        <h3 class="text-lg font-semibold text-slate-200 mb-4">Select Time</h3>
+                        <div id="time-slots-${coachId}" class="bg-slate-700/50 rounded-lg p-4">
+                            <p class="text-slate-400 text-center">Select a date first</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-6">
+                    <div class="bg-slate-700/50 rounded-lg p-4 mb-4">
+                        <h4 class="text-white font-medium mb-2">Selected Booking</h4>
+                        <p id="booking-summary-${coachId}" class="text-slate-300">Please select date and time</p>
+                    </div>
+                    
+                    <div class="flex justify-end space-x-4">
+                        <button onclick="this.closest('.fixed').remove()" class="bg-slate-600 hover:bg-slate-700 text-white px-6 py-3 rounded-lg">
+                            Cancel
+                        </button>
+                        <button id="confirm-booking-${coachId}" onclick="confirmBooking('${coachId}')" 
+                                class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg opacity-50 cursor-not-allowed" disabled>
+                            📅 Confirm Booking
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(calendarModal);
+    console.log('📅 Calendar modal added to DOM');
+    
+    // Generate calendar immediately
+    generateSimpleCalendar(coachId);
 };
 
 // Don't override the existing Coach David - let the real one work
@@ -35407,8 +35486,742 @@ window.emergencyExitNutrition = function() {
     alert('✅ Navigation fixed! You should now be in the Knowledge Library.');
 };
 
+// ===== REAL CALENDAR BOOKING SYSTEM WITH NOTIFICATIONS =====
+console.log('📅 Loading real calendar booking system...');
+
+window.createCalendarEventAndNotification = function(booking) {
+    console.log('📅 Creating calendar event and notifications for booking:', booking);
+    
+    // Request notification permission if not already granted
+    if ('Notification' in window && Notification.permission === 'default') {
+        Notification.requestPermission();
+    }
+    
+    // Create calendar event (Google Calendar integration)
+    const eventDateTime = new Date(`${booking.date}T${booking.time}:00`);
+    const endDateTime = new Date(eventDateTime.getTime() + (60 * 60 * 1000)); // 1 hour session
+    
+    // Generate Google Calendar URL
+    const calendarUrl = generateGoogleCalendarUrl({
+        title: `${booking.sessionType} with Coach ${booking.coach}`,
+        start: eventDateTime,
+        end: endDateTime,
+        description: `Session Goals: ${booking.goals}\n\nCurrent Concerns: ${booking.concerns}\n\nBooked via Root Cause Power Platform`,
+        location: 'Online Session - Root Cause Power Platform'
+    });
+    
+    // Store calendar URL with booking
+    booking.calendarUrl = calendarUrl;
+    
+    // Send immediate confirmation notification
+    if ('Notification' in window && Notification.permission === 'granted') {
+        new Notification('📅 Session Booked Successfully!', {
+            body: `Your ${booking.sessionType} with Coach ${booking.coach} is confirmed for ${booking.date} at ${booking.time}`,
+            icon: '/favicon.ico',
+            tag: `booking-${booking.id}`
+        });
+    }
+    
+    // Show success modal with calendar integration
+    showBookingConfirmation(booking);
+};
+
+window.generateGoogleCalendarUrl = function(event) {
+    const formatDate = (date) => {
+        return date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+    };
+    
+    const params = new URLSearchParams({
+        action: 'TEMPLATE',
+        text: event.title,
+        dates: `${formatDate(event.start)}/${formatDate(event.end)}`,
+        details: event.description,
+        location: event.location
+    });
+    
+    return `https://calendar.google.com/calendar/render?${params.toString()}`;
+};
+
+window.showBookingConfirmation = function(booking) {
+    const modal = document.createElement('div');
+    modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
+    modal.innerHTML = `
+        <div class="bg-slate-900 rounded-2xl p-8 max-w-md w-full border border-slate-700">
+            <div class="text-center mb-6">
+                <div class="text-6xl mb-4">✅</div>
+                <h2 class="text-2xl font-bold text-white">Session Booked Successfully!</h2>
+                <p class="text-slate-400 text-sm mt-2">Your appointment has been confirmed</p>
+            </div>
+            
+            <div class="bg-slate-800 rounded-lg p-4 mb-6">
+                <div class="space-y-2 text-sm">
+                    <div class="flex justify-between">
+                        <span class="text-slate-400">Coach:</span>
+                        <span class="text-white font-medium">Coach ${booking.coach}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-400">Session:</span>
+                        <span class="text-white">${booking.sessionType}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-400">Date:</span>
+                        <span class="text-white font-medium">${booking.date}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-400">Time:</span>
+                        <span class="text-white font-medium">${booking.time}</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="space-y-3">
+                <button onclick="window.open('${booking.calendarUrl}', '_blank'); this.closest('.fixed').remove();" 
+                        class="w-full bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-lg text-white font-medium flex items-center justify-center">
+                    <i class="fas fa-calendar-plus mr-2"></i>Add to Google Calendar
+                </button>
+                <button onclick="this.closest('.fixed').remove();" 
+                        class="w-full bg-slate-700 hover:bg-slate-600 px-6 py-3 rounded-lg text-white">
+                    Close
+                </button>
+            </div>
+            
+            <div class="mt-4 text-center">
+                <p class="text-slate-500 text-xs">You'll receive browser notifications before your session</p>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+};
+
+// Initialize calendar when booking section loads
+window.renderCalendar = function() {
+    console.log('📅 renderCalendar function called');
+    const calendarContainer = document.getElementById('booking-calendar');
+    console.log('📅 Calendar container search result:', calendarContainer);
+    
+    if (!calendarContainer) {
+        console.error('❌ Calendar container "booking-calendar" not found in DOM!');
+        // List all elements with IDs for debugging
+        const allIds = Array.from(document.querySelectorAll('[id]')).map(el => el.id);
+        console.log('🔍 Available element IDs:', allIds.filter(id => id.includes('calendar') || id.includes('booking')));
+        setTimeout(() => renderCalendar(), 500);
+        return;
+    }
+    
+    console.log('📅 Rendering interactive calendar in container:', calendarContainer);
+    
+    const today = new Date();
+    const currentMonth = today.getMonth();
+    const currentYear = today.getFullYear();
+    
+    // Generate available time slots for the next 30 days
+    const availableSlots = generateAvailableSlots(30);
+    
+    let calendarHTML = `
+        <div class="calendar-header text-center mb-4">
+            <h3 class="text-lg font-bold text-white">${today.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</h3>
+            <p class="text-slate-400 text-sm">Click on a date to see available times</p>
+        </div>
+        <div class="calendar-grid grid grid-cols-7 gap-1 mb-4">
+    `;
+    
+    // Add day headers
+    const dayHeaders = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    dayHeaders.forEach(day => {
+        calendarHTML += `<div class="text-center text-slate-400 text-sm font-medium p-2">${day}</div>`;
+    });
+    
+    // Generate calendar days
+    const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+    const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+    
+    // Add empty cells for days before the first day of the month
+    for (let i = 0; i < firstDay; i++) {
+        calendarHTML += `<div class="p-2"></div>`;
+    }
+    
+    // Add days of the month
+    for (let day = 1; day <= daysInMonth; day++) {
+        const date = new Date(currentYear, currentMonth, day);
+        const dateString = date.toISOString().split('T')[0];
+        const hasSlots = availableSlots.some(slot => slot.date === dateString);
+        const isPast = date < today;
+        
+        let dayClass = 'p-2 text-center rounded cursor-pointer transition-colors ';
+        if (isPast) {
+            dayClass += 'text-slate-600 cursor-not-allowed';
+        } else if (hasSlots) {
+            dayClass += 'text-white bg-slate-700 hover:bg-blue-600';
+        } else {
+            dayClass += 'text-slate-500';
+        }
+        
+        calendarHTML += `
+            <div class="${dayClass}" ${hasSlots && !isPast ? `onclick="showTimeSlots('${dateString}')"` : ''}>
+                ${day}
+                ${hasSlots && !isPast ? '<div class="w-1 h-1 bg-green-400 rounded-full mx-auto mt-1"></div>' : ''}
+            </div>
+        `;
+    }
+    
+    calendarHTML += `
+        </div>
+        <div id="time-slots" class="hidden">
+            <div class="text-center mb-3">
+                <h4 class="text-white font-medium">Available Times</h4>
+                <p id="selected-date-label" class="text-slate-400 text-sm"></p>
+            </div>
+            <div id="time-slot-grid" class="grid grid-cols-3 gap-2">
+                <!-- Time slots will be populated here -->
+            </div>
+        </div>
+    `;
+    
+    calendarContainer.innerHTML = calendarHTML;
+};
+
+window.generateAvailableSlots = function(days) {
+    const slots = [];
+    const today = new Date();
+    
+    for (let i = 1; i <= days; i++) {
+        const date = new Date(today);
+        date.setDate(today.getDate() + i);
+        
+        // Skip weekends for this example (can be customized)
+        if (date.getDay() === 0 || date.getDay() === 6) continue;
+        
+        const dateString = date.toISOString().split('T')[0];
+        
+        // Generate time slots (9 AM to 7 PM)
+        const times = ['09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00'];
+        
+        times.forEach(time => {
+            slots.push({
+                date: dateString,
+                time: time,
+                available: true // In a real system, this would check actual availability
+            });
+        });
+    }
+    
+    return slots;
+};
+
+window.showTimeSlots = function(dateString) {
+    const timeSlots = document.getElementById('time-slots');
+    const dateLabel = document.getElementById('selected-date-label');
+    const timeSlotGrid = document.getElementById('time-slot-grid');
+    
+    const date = new Date(dateString);
+    dateLabel.textContent = date.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    
+    const availableSlots = generateAvailableSlots(30).filter(slot => slot.date === dateString);
+    
+    let slotsHTML = '';
+    availableSlots.forEach(slot => {
+        const time12 = convertTo12Hour(slot.time);
+        slotsHTML += `
+            <button onclick="selectTimeSlot('${slot.date}', '${slot.time}')" 
+                    class="bg-slate-700 hover:bg-blue-600 text-white px-3 py-2 rounded text-sm transition-colors">
+                ${time12}
+            </button>
+        `;
+    });
+    
+    timeSlotGrid.innerHTML = slotsHTML;
+    timeSlots.classList.remove('hidden');
+};
+
+window.selectTimeSlot = function(date, time) {
+    const dateDisplay = document.getElementById('selected-date-display');
+    const timeDisplay = document.getElementById('selected-time-display');
+    
+    const dateObj = new Date(date);
+    dateDisplay.value = dateObj.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    timeDisplay.value = convertTo12Hour(time);
+    
+    // Store raw values for form submission
+    dateDisplay.dataset.rawDate = date;
+    timeDisplay.dataset.rawTime = time;
+    
+    // Hide time slots after selection
+    document.getElementById('time-slots').classList.add('hidden');
+    
+    // Book immediately through calendar with credit deduction
+    bookThroughCalendar(date, time);
+};
+
+window.convertTo12Hour = function(time24) {
+    const [hours, minutes] = time24.split(':');
+    const hour12 = hours % 12 || 12;
+    const ampm = hours < 12 ? 'AM' : 'PM';
+    return `${hour12}:${minutes} ${ampm}`;
+};
+
+// Force calendar render when coach is selected
+setInterval(function() {
+    const bookingForm = document.getElementById('booking-form');
+    const calendarContainer = document.getElementById('booking-calendar');
+    if (bookingForm && !bookingForm.classList.contains('hidden') && calendarContainer && !calendarContainer.innerHTML.includes('calendar-grid')) {
+        console.log('🔄 Auto-rendering calendar');
+        renderCalendar();
+    }
+}, 1000);
+
+// ===== DIRECT CALENDAR BOOKING WITH CREDIT DEDUCTION =====
+
+// Book directly through calendar with immediate credit deduction
+window.bookThroughCalendar = function(date, time) {
+    const selectedCoachElement = document.getElementById('selected-coach');
+    const selectedCoach = selectedCoachElement ? selectedCoachElement.value : '';
+    
+    if (!selectedCoach) {
+        alert('Please select a coach first!');
+        return;
+    }
+    
+    // Extract coach ID
+    const coachId = selectedCoach.toLowerCase().includes('david') ? 'david' : 
+                   selectedCoach.toLowerCase().includes('elena') ? 'elena' : 
+                   selectedCoach.toLowerCase().includes('sarah') ? 'sarah' : 'david';
+    
+    const creditCost = window.creditCosts[`coach_${coachId}_session`] || 1; // Default to 1 credit, not 2
+    
+    // Check and deduct credits
+    const userPlan = JSON.parse(localStorage.getItem('userPlan') || '{}');
+    const currentCredits = userPlan.credits || 0;
+    
+    if (currentCredits < creditCost) {
+        alert(`❌ Insufficient credits!\n\nNeed: ${creditCost} credits\nHave: ${currentCredits} credits\n\nPlease purchase more credits.`);
+        return;
+    }
+    
+    // Deduct credits immediately
+    userPlan.credits = currentCredits - creditCost;
+    localStorage.setItem('userPlan', JSON.stringify(userPlan));
+    
+    // Update credit display
+    if (typeof updateCreditsDisplay === 'function') {
+        updateCreditsDisplay();
+    }
+    
+    // Create booking
+    const booking = {
+        id: Date.now().toString(),
+        coach: selectedCoach,
+        coachId: coachId,
+        sessionType: 'Calendar Booking',
+        date: date,
+        time: time,
+        goals: 'Booked through calendar',
+        concerns: '',
+        status: 'confirmed',
+        createdAt: new Date().toISOString(),
+        creditsDeducted: creditCost
+    };
+    
+    // Store booking
+    let bookings = JSON.parse(localStorage.getItem('sessionBookings') || '[]');
+    bookings.push(booking);
+    localStorage.setItem('sessionBookings', JSON.stringify(bookings));
+    
+    // Schedule push notification for session time
+    scheduleSessionNotification(booking);
+    
+    // Show confirmation
+    showCalendarBookingConfirmation(booking);
+    
+    console.log(`✅ Calendar booking: ${date} at ${time} with ${selectedCoach} (-${creditCost} credits)`);
+};
+
+// Schedule push notification for exact session time
+window.scheduleSessionNotification = function(booking) {
+    const sessionDateTime = new Date(`${booking.date}T${booking.time}:00`);
+    const now = new Date();
+    const timeUntilSession = sessionDateTime.getTime() - now.getTime();
+    
+    console.log(`🔔 Scheduling notification for ${sessionDateTime.toLocaleString()}`);
+    
+    // Request notification permission if needed
+    if ('Notification' in window && Notification.permission === 'default') {
+        Notification.requestPermission();
+    }
+    
+    // Schedule notification for exact session time
+    if (timeUntilSession > 0) {
+        setTimeout(() => {
+            if ('Notification' in window && Notification.permission === 'granted') {
+                new Notification('🎆 Your Session is Starting Now!', {
+                    body: `Your session with ${booking.coach} is starting now! Click to join.`,
+                    icon: '/favicon.ico',
+                    tag: `session-${booking.id}`,
+                    requireInteraction: true
+                });
+            }
+        }, timeUntilSession);
+        
+        // Also schedule 15-minute reminder
+        const reminderTime = timeUntilSession - (15 * 60 * 1000);
+        if (reminderTime > 0) {
+            setTimeout(() => {
+                if ('Notification' in window && Notification.permission === 'granted') {
+                    new Notification('⏰ Session Reminder', {
+                        body: `Your session with ${booking.coach} starts in 15 minutes`,
+                        icon: '/favicon.ico',
+                        tag: `reminder-${booking.id}`
+                    });
+                }
+            }, reminderTime);
+        }
+    }
+};
+
+// Show calendar booking confirmation
+window.showCalendarBookingConfirmation = function(booking) {
+    const modal = document.createElement('div');
+    modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
+    modal.innerHTML = `
+        <div class="bg-slate-900 rounded-2xl p-8 max-w-md w-full border border-slate-700">
+            <div class="text-center mb-6">
+                <div class="text-6xl mb-4">✅</div>
+                <h2 class="text-2xl font-bold text-white">Session Booked!</h2>
+                <p class="text-slate-400 text-sm mt-2">Credits deducted, notifications scheduled</p>
+            </div>
+            
+            <div class="bg-slate-800 rounded-lg p-4 mb-6">
+                <div class="space-y-2 text-sm">
+                    <div class="flex justify-between">
+                        <span class="text-slate-400">Coach:</span>
+                        <span class="text-white font-medium">${booking.coach}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-400">Date:</span>
+                        <span class="text-white font-medium">${booking.date}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-400">Time:</span>
+                        <span class="text-white font-medium">${booking.time}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-400">Credits Used:</span>
+                        <span class="text-red-400 font-medium">-${booking.creditsDeducted}</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="space-y-3">
+                <button onclick="this.closest('.fixed').remove();" 
+                        class="w-full bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-lg text-white font-medium">
+                    Perfect! I'm Ready
+                </button>
+            </div>
+            
+            <div class="mt-4 text-center">
+                <p class="text-slate-500 text-xs">You'll receive push notifications at session time</p>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+};
+
+console.log('✅ Real calendar booking system with notifications loaded!');
+console.log('💳 Direct calendar booking with credit deduction enabled!');
+
 console.log('🚨 Emergency navigation fix loaded!');
 </script>
 
 </body>
 </html>
+
+<script>
+// SIMPLE CALENDAR GENERATION FUNCTION
+window.generateSimpleCalendar = function(coachId) {
+    console.log('📅 Generating simple calendar for:', coachId);
+    
+    const calendarGrid = document.getElementById(`calendar-grid-${coachId}`);
+    if (!calendarGrid) {
+        console.error('❌ Calendar grid not found!');
+        return;
+    }
+    
+    const today = new Date();
+    const currentMonth = today.getMonth();
+    const currentYear = today.getFullYear();
+    
+    let html = `
+        <div class="text-center mb-4">
+            <h4 class="text-white font-bold">${today.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</h4>
+        </div>
+        <div class="grid grid-cols-7 gap-1 text-center">
+    `;
+    
+    // Day headers
+    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    days.forEach(day => {
+        html += `<div class="text-slate-400 text-sm font-medium p-2">${day}</div>`;
+    });
+    
+    // Generate calendar days
+    const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+    const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+    
+    // Empty cells for days before month starts
+    for (let i = 0; i < firstDay; i++) {
+        html += `<div class="p-2"></div>`;
+    }
+    
+    // Days of the month
+    for (let day = 1; day <= daysInMonth; day++) {
+        const date = new Date(currentYear, currentMonth, day);
+        const dateString = date.toDateString();
+        const isPast = date < today;
+        const isToday = date.toDateString() === today.toDateString();
+        
+        let classes = 'p-2 rounded cursor-pointer transition-colors ';
+        if (isPast) {
+            classes += 'text-slate-500 cursor-not-allowed';
+        } else if (isToday) {
+            classes += 'bg-blue-600 text-white';
+        } else {
+            classes += 'text-white bg-slate-700 hover:bg-blue-600';
+        }
+        
+        const onclick = isPast ? '' : `onclick="selectDate('${coachId}', '${dateString}')"`;
+        html += `<div class="${classes}" ${onclick}>${day}</div>`;
+    }
+    
+    html += '</div>';
+    calendarGrid.innerHTML = html;
+    console.log('✅ Calendar generated successfully');
+};
+
+// SELECT DATE FUNCTION
+window.selectDate = function(coachId, dateString) {
+    console.log('📅 Date selected:', dateString, 'for coach:', coachId);
+    
+    // Store selected date
+    window.selectedBookingDate = dateString;
+    window.selectedBookingTime = null;
+    
+    // Update calendar display (highlight selected date)
+    generateSimpleCalendar(coachId);
+    
+    // Generate time slots
+    generateTimeSlots(coachId, dateString);
+    
+    // Update booking summary
+    updateBookingSummary(coachId);
+};
+
+// GENERATE TIME SLOTS
+window.generateTimeSlots = function(coachId, dateString) {
+    console.log('⏰ Generating time slots for:', dateString);
+    
+    const timeSlotsContainer = document.getElementById(`time-slots-${coachId}`);
+    if (!timeSlotsContainer) return;
+    
+    const availableTimes = [
+        '09:00', '10:00', '11:00', '14:00', '15:00', '16:00', '17:00'
+    ];
+    
+    let html = `<div class="space-y-2">`;
+    
+    availableTimes.forEach(time => {
+        html += `
+            <button onclick="selectTime('${coachId}', '${time}')" 
+                    class="w-full bg-slate-600 hover:bg-green-600 text-white p-3 rounded-lg transition-colors text-left">
+                ${convertTo12Hour(time)}
+            </button>
+        `;
+    });
+    
+    html += '</div>';
+    timeSlotsContainer.innerHTML = html;
+};
+
+// SELECT TIME FUNCTION
+window.selectTime = function(coachId, time) {
+    console.log('⏰ Time selected:', time, 'for coach:', coachId);
+    
+    window.selectedBookingTime = time;
+    updateBookingSummary(coachId);
+    
+    // Enable confirm button
+    const confirmBtn = document.getElementById(`confirm-booking-${coachId}`);
+    if (confirmBtn) {
+        confirmBtn.disabled = false;
+        confirmBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+        confirmBtn.classList.add('animate-pulse');
+    }
+};
+
+// UPDATE BOOKING SUMMARY
+window.updateBookingSummary = function(coachId) {
+    const summaryElement = document.getElementById(`booking-summary-${coachId}`);
+    if (!summaryElement) return;
+    
+    const coachNames = {
+        'david': 'Coach David (Voice Therapy)',
+        'elena': 'Coach Elena (Text Chat)', 
+        'sarah': 'Coach Sarah (Anxiety Specialist)'
+    };
+    
+    if (window.selectedBookingDate && window.selectedBookingTime) {
+        const date = new Date(window.selectedBookingDate);
+        summaryElement.innerHTML = `
+            <strong>${coachNames[coachId]}</strong><br>
+            📅 ${date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}<br>
+            ⏰ ${convertTo12Hour(window.selectedBookingTime)}
+        `;
+    } else if (window.selectedBookingDate) {
+        summaryElement.innerHTML = `
+            <strong>${coachNames[coachId]}</strong><br>
+            📅 ${new Date(window.selectedBookingDate).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}<br>
+            ⏰ Please select a time
+        `;
+    }
+};
+
+// CONVERT TIME TO 12 HOUR FORMAT
+window.convertTo12Hour = function(time24) {
+    const [hours, minutes] = time24.split(':');
+    const hour12 = hours % 12 || 12;
+    const ampm = hours < 12 ? 'AM' : 'PM';
+    return `${hour12}:${minutes} ${ampm}`;
+};
+
+// CONFIRM BOOKING WITH PUSH NOTIFICATIONS AND CREDIT DEDUCTION
+window.confirmBooking = function(coachId) {
+    console.log('✅ Confirming booking for:', coachId);
+    
+    if (!window.selectedBookingDate || !window.selectedBookingTime) {
+        alert('❌ Please select both date and time!');
+        return;
+    }
+    
+    const creditCosts = { 'david': 5, 'elena': 1, 'sarah': 1 };
+    const coachNames = {
+        'david': 'Coach David (Voice Therapy)',
+        'elena': 'Coach Elena (Text Chat)', 
+        'sarah': 'Coach Sarah (Anxiety Specialist)'
+    };
+    
+    const creditCost = creditCosts[coachId];
+    
+    // CHECK TESTING MODE FIRST
+    if (window.TESTING_MODE) {
+        console.log('🧪 TESTING MODE: Booking confirmed without credit charges');
+    } else {
+        // CHECK CREDITS BEFORE BOOKING (normal mode)
+        const userPlan = JSON.parse(localStorage.getItem('userPlan') || '{}');
+        const currentCredits = userPlan.credits || 0;
+        
+        console.log(`💰 Current credits: ${currentCredits}, Need: ${creditCost}`);
+        
+        if (currentCredits < creditCost) {
+            alert(`❌ Insufficient Credits!\n\nNeed: ${creditCost} credits\nYou have: ${currentCredits} credits\n\nPlease purchase more credits.`);
+            return;
+        }
+        
+        // DEDUCT CREDITS NOW
+        userPlan.credits = currentCredits - creditCost;
+        localStorage.setItem('userPlan', JSON.stringify(userPlan));
+        
+        // Update credit displays immediately
+        if (typeof updateAllCreditDisplays === 'function') {
+            updateAllCreditDisplays();
+        }
+        
+        console.log(`✅ Credits deducted: ${creditCost}, Remaining: ${userPlan.credits}`);
+    }
+    
+    const booking = {
+        id: Date.now().toString(),
+        coach: coachNames[coachId],
+        coachId: coachId,
+        date: window.selectedBookingDate,
+        time: window.selectedBookingTime,
+        creditCost: creditCost,
+        timestamp: new Date().toISOString()
+    };
+    
+    // Request notification permission
+    if ('Notification' in window) {
+        if (Notification.permission === 'default') {
+            Notification.requestPermission().then(permission => {
+                if (permission === 'granted') {
+                    sendBookingNotification(booking);
+                }
+            });
+        } else if (Notification.permission === 'granted') {
+            sendBookingNotification(booking);
+        }
+    }
+    
+    // Close calendar modal
+    document.getElementById('booking-calendar-modal').remove();
+    
+    // Show success confirmation
+    showBookingSuccess(booking);
+    
+    console.log('✅ Booking confirmed:', booking);
+};
+
+// SEND PUSH NOTIFICATION
+window.sendBookingNotification = function(booking) {
+    console.log('🔔 Sending push notification for booking');
+    
+    const notification = new Notification('📅 Session Booked Successfully!', {
+        body: `Your session with ${booking.coach} is confirmed for ${new Date(booking.date).toLocaleDateString()} at ${convertTo12Hour(booking.time)}`,
+        icon: '/favicon.ico',
+        tag: `booking-${booking.id}`,
+        requireInteraction: true
+    });
+    
+    // Schedule reminder notification
+    const sessionDateTime = new Date(`${booking.date}T${booking.time}:00`);
+    const reminderTime = sessionDateTime.getTime() - (15 * 60 * 1000); // 15 minutes before
+    const now = Date.now();
+    
+    if (reminderTime > now) {
+        setTimeout(() => {
+            new Notification('⏰ Session Reminder!', {
+                body: `Your session with ${booking.coach} starts in 15 minutes!`,
+                icon: '/favicon.ico',
+                tag: `reminder-${booking.id}`,
+                requireInteraction: true
+            });
+        }, reminderTime - now);
+        console.log('⏰ Reminder notification scheduled');
+    }
+};
+
+// SHOW BOOKING SUCCESS
+window.showBookingSuccess = function(booking) {
+    const successModal = document.createElement('div');
+    successModal.className = 'fixed inset-0 z-60 bg-black/80 flex items-center justify-center p-4';
+    successModal.innerHTML = `
+        <div class="bg-slate-800 rounded-2xl p-8 max-w-md w-full border border-green-500">
+            <div class="text-center">
+                <div class="text-6xl mb-4">✅</div>
+                <h2 class="text-2xl font-bold text-white mb-4">Booking Confirmed!</h2>
+                <div class="bg-slate-700 rounded-lg p-4 mb-6 text-left">
+                    <p class="text-slate-300"><strong class="text-white">Coach:</strong> ${booking.coach}</p>
+                    <p class="text-slate-300"><strong class="text-white">Date:</strong> ${new Date(booking.date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</p>
+                    <p class="text-slate-300"><strong class="text-white">Time:</strong> ${convertTo12Hour(booking.time)}</p>
+                    <p class="text-slate-300"><strong class="text-white">Credits:</strong> ${booking.creditCost}</p>
+                </div>
+                <p class="text-slate-400 text-sm mb-6">🔔 You'll receive push notifications before your session</p>
+                <button onclick="this.closest('.fixed').remove()" 
+                        class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-medium">
+                    Perfect! 🚀
+                </button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(successModal);
+};
+
+console.log('✅ Complete calendar booking system with push notifications loaded!');</script>
+
