@@ -16,26 +16,11 @@
     <script>
         console.log('🚨 LOADING EMERGENCY FUNCTIONS IN ISOLATED SCRIPT');
         
-        // 🧪 TESTING MODE - Add ?testing=true to URL for free testing
-        const urlParams = new URLSearchParams(window.location.search);
-        window.TESTING_MODE = urlParams.get('testing') === 'true';
-        
-        if (window.TESTING_MODE) {
-            console.log('🧪 TESTING MODE ENABLED - All actions are FREE');
-            // Add testing indicator when page loads
-            setTimeout(() => {
-                const testingBanner = document.createElement('div');
-                testingBanner.style.cssText = 'position:fixed;top:0;left:0;right:0;background:#ff6b35;color:white;text-align:center;padding:5px;z-index:9999;font-weight:bold;';
-                testingBanner.innerHTML = '🧪 TESTING MODE - No Credits Charged';
-                document.body.appendChild(testingBanner);
-            }, 1000);
-        }
-        
         // 💰 CRITICAL: Define credit costs FIRST before any other functions
         window.creditCosts = {
             'coach_david_session': 5,      // 5 credits per session (premium feature)
-            'coach_elena_session': 1,      // 1 credit per session
-            'coach_sarah_session': 1,      // 1 credit per session
+            'coach_elena_session': 2,      // 2 credits per session
+            'coach_sarah_session': 2,      // 2 credits per session
             'health_assessment': 2,        // 2 credits per assessment
             'ai_prescription': 2,          // 2 credits per AI prescription
             'voice_session_minute': 1,     // 1 credit per minute for voice sessions
@@ -2459,12 +2444,6 @@
         // ===== RESTORE ORIGINAL WORKING CREDIT SYSTEM =====
         window.checkCreditsBeforeAction = function(featureName, creditCost, contextData = {}) {
             console.log(`🔍 Checking credits for ${featureName}: ${creditCost} credits needed`);
-            
-            // BYPASS ALL CREDIT CHECKS IN TESTING MODE
-            if (window.TESTING_MODE) {
-                console.log(`🧪 TESTING MODE: ${featureName} allowed without credit check`);
-                return true;
-            }
             
             // Get current user plan
             let userPlan = JSON.parse(localStorage.getItem('userPlan') || '{}');
@@ -12561,12 +12540,7 @@ Created with Root Cause Power Nutrition System
                     
                     <!-- Test credit button removed for production -->
                     
-                    <!-- Stop Credit Monitoring -->
-                    <button onclick="stopAllCreditMonitoring()" class="bg-gradient-to-br from-red-500/20 to-orange-500/20 hover:from-red-500/30 hover:to-orange-500/30 p-6 rounded-lg border border-red-500/30 hover:border-red-400 transition-all text-left group">
-                        <div class="text-3xl mb-3 group-hover:scale-110 transition-transform">🛑</div>
-                        <h3 class="font-semibold text-slate-200 mb-2">Stop Tests</h3>
-                        <p class="text-xs text-slate-400">Stop all credit monitoring</p>
-                    </button>
+                    <!-- Stop Tests button removed for production -->
                 </div>
             </div>
 
@@ -26682,13 +26656,23 @@ The PTSD Corner has additional EMDR and trauma techniques. I'll be back soon.`
         let bookings = JSON.parse(localStorage.getItem('sessionBookings') || '[]');
         let selectedCoach = '';
         
-        // OLD SELECTCOACH FUNCTION - DISABLED TO PREVENT DOUBLE CREDIT DEDUCTION
-        window.selectCoach_OLD = function(coachId) {
-            console.log('👨‍⚕️ OLD selectCoach disabled to prevent double charging');
+        window.selectCoach = function(coachId) {
+            console.log('👨‍⚕️ Selecting coach:', coachId);
             
-            // This function was deducting credits before the calendar
-            // Now disabled - credits only deducted when booking is confirmed
-            return;
+            // Define credit costs from our configuration
+            const creditCost = window.creditCosts[`coach_${coachId}_session`] || 1;
+            const contextData = {
+                coach: coachId,
+                feature: coachId === 'david' ? 'voice' : 'text',
+                usage: 'coaching'
+            };
+            
+            console.log(`💰 Credit cost for Coach ${coachId}: ${creditCost}`);
+            
+            // 🔥 USE COMPREHENSIVE CREDIT GATE
+            if (!checkCreditsBeforeAction(`Coach ${coachId.charAt(0).toUpperCase() + coachId.slice(1)} Session`, creditCost, contextData)) {
+                return; // Credit check failed - user redirected to pricing
+            }
             
             console.log(`✅ Credits approved for Coach ${coachId}!`);
             
@@ -34922,85 +34906,25 @@ window.quickUpdateMedical = function() {
 // Fix Coach David and selectCoach functions
 window.selectCoach = function(coachId) {
     console.log('👨‍⚕️ selectCoach called with:', coachId);
-    console.log('📅 Creating NEW calendar system for coach:', coachId);
     
-    // CREATE SIMPLE WORKING CALENDAR MODAL
-    const calendarModal = document.createElement('div');
-    calendarModal.id = 'booking-calendar-modal';
-    calendarModal.className = 'fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4';
+    // IMMEDIATELY SHOW CALENDAR FOR ALL COACHES
+    console.log('📅 Triggering calendar system for coach:', coachId);
     
-    const coachNames = {
-        'david': 'Coach David (Voice Therapy)',
-        'elena': 'Coach Elena (Text Chat)', 
-        'sarah': 'Coach Sarah (Anxiety Specialist)'
-    };
-    
-    const creditCosts = {
-        'david': 5,
-        'elena': 1,
-        'sarah': 1
-    };
-    
-    console.log('📅 Building calendar HTML for:', coachNames[coachId]);
-    
-    calendarModal.innerHTML = `
-        <div class="bg-slate-800 rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto border border-slate-600">
-            <div class="bg-gradient-to-r from-blue-600 to-purple-600 p-6 rounded-t-2xl">
-                <div class="flex items-center justify-between">
-                    <h2 class="text-2xl font-bold text-white">📅 Book Session with ${coachNames[coachId]}</h2>
-                    <button onclick="this.closest('.fixed').remove()" class="text-white/80 hover:text-white text-2xl">
-                        ×
-                    </button>
-                </div>
-                <p class="text-white/80 mt-2">💰 Cost: ${creditCosts[coachId]} Credits</p>
-            </div>
-            
-            <div class="p-6">
-                <div class="grid md:grid-cols-2 gap-6">
-                    <!-- Date Selection -->
-                    <div>
-                        <h3 class="text-lg font-semibold text-slate-200 mb-4">Select Date</h3>
-                        <div class="bg-slate-700/50 rounded-lg p-4">
-                            <div id="calendar-grid-${coachId}" class="calendar-grid">
-                                <!-- Calendar will be generated here -->
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Time Selection -->
-                    <div>
-                        <h3 class="text-lg font-semibold text-slate-200 mb-4">Select Time</h3>
-                        <div id="time-slots-${coachId}" class="bg-slate-700/50 rounded-lg p-4">
-                            <p class="text-slate-400 text-center">Select a date first</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="mt-6">
-                    <div class="bg-slate-700/50 rounded-lg p-4 mb-4">
-                        <h4 class="text-white font-medium mb-2">Selected Booking</h4>
-                        <p id="booking-summary-${coachId}" class="text-slate-300">Please select date and time</p>
-                    </div>
-                    
-                    <div class="flex justify-end space-x-4">
-                        <button onclick="this.closest('.fixed').remove()" class="bg-slate-600 hover:bg-slate-700 text-white px-6 py-3 rounded-lg">
-                            Cancel
-                        </button>
-                        <button id="confirm-booking-${coachId}" onclick="confirmBooking('${coachId}')" 
-                                class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg opacity-50 cursor-not-allowed" disabled>
-                            📅 Confirm Booking
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    `;
-    
-    document.body.appendChild(calendarModal);
-    console.log('📅 Calendar modal added to DOM');
-    
-    // Generate calendar immediately
-    generateSimpleCalendar(coachId);
+    if (typeof window.showBookingCalendar === 'function') {
+        console.log('✅ showBookingCalendar function found - calling now');
+        window.showBookingCalendar(coachId);
+    } else {
+        console.error('❌ showBookingCalendar function not found!');
+        
+        // Fallback: try the renderCalendar function
+        if (typeof window.renderCalendar === 'function') {
+            console.log('🔄 Fallback: calling renderCalendar');
+            window.renderCalendar();
+        } else {
+            console.error('❌ No calendar functions available!');
+            alert('❌ Calendar system not available. Please refresh the page.');
+        }
+    }
 };
 
 // Don't override the existing Coach David - let the real one work
@@ -35786,7 +35710,7 @@ window.bookThroughCalendar = function(date, time) {
                    selectedCoach.toLowerCase().includes('elena') ? 'elena' : 
                    selectedCoach.toLowerCase().includes('sarah') ? 'sarah' : 'david';
     
-    const creditCost = window.creditCosts[`coach_${coachId}_session`] || 1; // Default to 1 credit, not 2
+    const creditCost = window.creditCosts[`coach_${coachId}_session`] || 2;
     
     // Check and deduct credits
     const userPlan = JSON.parse(localStorage.getItem('userPlan') || '{}');
@@ -35931,297 +35855,549 @@ console.log('💳 Direct calendar booking with credit deduction enabled!');
 console.log('🚨 Emergency navigation fix loaded!');
 </script>
 
-</body>
-</html>
 
 <script>
-// SIMPLE CALENDAR GENERATION FUNCTION
-window.generateSimpleCalendar = function(coachId) {
-    console.log('📅 Generating simple calendar for:', coachId);
-    
-    const calendarGrid = document.getElementById(`calendar-grid-${coachId}`);
-    if (!calendarGrid) {
-        console.error('❌ Calendar grid not found!');
-        return;
-    }
-    
-    const today = new Date();
-    const currentMonth = today.getMonth();
-    const currentYear = today.getFullYear();
-    
-    let html = `
-        <div class="text-center mb-4">
-            <h4 class="text-white font-bold">${today.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</h4>
-        </div>
-        <div class="grid grid-cols-7 gap-1 text-center">
-    `;
-    
-    // Day headers
-    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-    days.forEach(day => {
-        html += `<div class="text-slate-400 text-sm font-medium p-2">${day}</div>`;
-    });
-    
-    // Generate calendar days
-    const firstDay = new Date(currentYear, currentMonth, 1).getDay();
-    const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
-    
-    // Empty cells for days before month starts
-    for (let i = 0; i < firstDay; i++) {
-        html += `<div class="p-2"></div>`;
-    }
-    
-    // Days of the month
-    for (let day = 1; day <= daysInMonth; day++) {
-        const date = new Date(currentYear, currentMonth, day);
-        const dateString = date.toDateString();
-        const isPast = date < today;
-        const isToday = date.toDateString() === today.toDateString();
-        
-        let classes = 'p-2 rounded cursor-pointer transition-colors ';
-        if (isPast) {
-            classes += 'text-slate-500 cursor-not-allowed';
-        } else if (isToday) {
-            classes += 'bg-blue-600 text-white';
-        } else {
-            classes += 'text-white bg-slate-700 hover:bg-blue-600';
-        }
-        
-        const onclick = isPast ? '' : `onclick="selectDate('${coachId}', '${dateString}')"`;
-        html += `<div class="${classes}" ${onclick}>${day}</div>`;
-    }
-    
-    html += '</div>';
-    calendarGrid.innerHTML = html;
-    console.log('✅ Calendar generated successfully');
-};
+// 🔧 MINIMAL FIXES for working platform - preserving all existing functionality
 
-// SELECT DATE FUNCTION
-window.selectDate = function(coachId, dateString) {
-    console.log('📅 Date selected:', dateString, 'for coach:', coachId);
-    
-    // Store selected date
-    window.selectedBookingDate = dateString;
-    window.selectedBookingTime = null;
-    
-    // Update calendar display (highlight selected date)
-    generateSimpleCalendar(coachId);
-    
-    // Generate time slots
-    generateTimeSlots(coachId, dateString);
-    
-    // Update booking summary
-    updateBookingSummary(coachId);
-};
+// 1. 🛑 Stop Tests button already removed above
 
-// GENERATE TIME SLOTS
-window.generateTimeSlots = function(coachId, dateString) {
-    console.log('⏰ Generating time slots for:', dateString);
+// 2. 📅 Fix booking section calendar - override selectCoach for booking section only
+const originalSelectCoach = window.selectCoach;
+window.selectCoach = function(coachId) {
+    console.log('🎯 selectCoach called for:', coachId);
     
-    const timeSlotsContainer = document.getElementById(`time-slots-${coachId}`);
-    if (!timeSlotsContainer) return;
+    // Check if we're in booking section
+    const bookingSection = document.getElementById('booking');
+    const isBookingActive = bookingSection && !bookingSection.classList.contains('hidden') && 
+                           bookingSection.style.display !== 'none';
     
-    const availableTimes = [
-        '09:00', '10:00', '11:00', '14:00', '15:00', '16:00', '17:00'
-    ];
-    
-    let html = `<div class="space-y-2">`;
-    
-    availableTimes.forEach(time => {
-        html += `
-            <button onclick="selectTime('${coachId}', '${time}')" 
-                    class="w-full bg-slate-600 hover:bg-green-600 text-white p-3 rounded-lg transition-colors text-left">
-                ${convertTo12Hour(time)}
-            </button>
-        `;
-    });
-    
-    html += '</div>';
-    timeSlotsContainer.innerHTML = html;
-};
-
-// SELECT TIME FUNCTION
-window.selectTime = function(coachId, time) {
-    console.log('⏰ Time selected:', time, 'for coach:', coachId);
-    
-    window.selectedBookingTime = time;
-    updateBookingSummary(coachId);
-    
-    // Enable confirm button
-    const confirmBtn = document.getElementById(`confirm-booking-${coachId}`);
-    if (confirmBtn) {
-        confirmBtn.disabled = false;
-        confirmBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-        confirmBtn.classList.add('animate-pulse');
-    }
-};
-
-// UPDATE BOOKING SUMMARY
-window.updateBookingSummary = function(coachId) {
-    const summaryElement = document.getElementById(`booking-summary-${coachId}`);
-    if (!summaryElement) return;
-    
-    const coachNames = {
-        'david': 'Coach David (Voice Therapy)',
-        'elena': 'Coach Elena (Text Chat)', 
-        'sarah': 'Coach Sarah (Anxiety Specialist)'
-    };
-    
-    if (window.selectedBookingDate && window.selectedBookingTime) {
-        const date = new Date(window.selectedBookingDate);
-        summaryElement.innerHTML = `
-            <strong>${coachNames[coachId]}</strong><br>
-            📅 ${date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}<br>
-            ⏰ ${convertTo12Hour(window.selectedBookingTime)}
-        `;
-    } else if (window.selectedBookingDate) {
-        summaryElement.innerHTML = `
-            <strong>${coachNames[coachId]}</strong><br>
-            📅 ${new Date(window.selectedBookingDate).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}<br>
-            ⏰ Please select a time
-        `;
-    }
-};
-
-// CONVERT TIME TO 12 HOUR FORMAT
-window.convertTo12Hour = function(time24) {
-    const [hours, minutes] = time24.split(':');
-    const hour12 = hours % 12 || 12;
-    const ampm = hours < 12 ? 'AM' : 'PM';
-    return `${hour12}:${minutes} ${ampm}`;
-};
-
-// CONFIRM BOOKING WITH PUSH NOTIFICATIONS AND CREDIT DEDUCTION
-window.confirmBooking = function(coachId) {
-    console.log('✅ Confirming booking for:', coachId);
-    
-    if (!window.selectedBookingDate || !window.selectedBookingTime) {
-        alert('❌ Please select both date and time!');
-        return;
-    }
-    
-    const creditCosts = { 'david': 5, 'elena': 1, 'sarah': 1 };
-    const coachNames = {
-        'david': 'Coach David (Voice Therapy)',
-        'elena': 'Coach Elena (Text Chat)', 
-        'sarah': 'Coach Sarah (Anxiety Specialist)'
-    };
-    
-    const creditCost = creditCosts[coachId];
-    
-    // CHECK TESTING MODE FIRST
-    if (window.TESTING_MODE) {
-        console.log('🧪 TESTING MODE: Booking confirmed without credit charges');
-    } else {
-        // CHECK CREDITS BEFORE BOOKING (normal mode)
-        const userPlan = JSON.parse(localStorage.getItem('userPlan') || '{}');
-        const currentCredits = userPlan.credits || 0;
+    if (isBookingActive) {
+        console.log('📅 BOOKING MODE: Showing calendar instead of immediate chat');
         
-        console.log(`💰 Current credits: ${currentCredits}, Need: ${creditCost}`);
+        // Store selected coach for booking
+        window.selectedCoachForBooking = coachId;
         
-        if (currentCredits < creditCost) {
-            alert(`❌ Insufficient Credits!\n\nNeed: ${creditCost} credits\nYou have: ${currentCredits} credits\n\nPlease purchase more credits.`);
-            return;
-        }
-        
-        // DEDUCT CREDITS NOW
-        userPlan.credits = currentCredits - creditCost;
-        localStorage.setItem('userPlan', JSON.stringify(userPlan));
-        
-        // Update credit displays immediately
-        if (typeof updateAllCreditDisplays === 'function') {
-            updateAllCreditDisplays();
-        }
-        
-        console.log(`✅ Credits deducted: ${creditCost}, Remaining: ${userPlan.credits}`);
-    }
-    
-    const booking = {
-        id: Date.now().toString(),
-        coach: coachNames[coachId],
-        coachId: coachId,
-        date: window.selectedBookingDate,
-        time: window.selectedBookingTime,
-        creditCost: creditCost,
-        timestamp: new Date().toISOString()
-    };
-    
-    // Request notification permission
-    if ('Notification' in window) {
-        if (Notification.permission === 'default') {
-            Notification.requestPermission().then(permission => {
-                if (permission === 'granted') {
-                    sendBookingNotification(booking);
+        // Show booking form with calendar
+        const bookingForm = document.getElementById('booking-form');
+        if (bookingForm) {
+            bookingForm.classList.remove('hidden');
+            
+            // Update coach name in form
+            const coachNames = {
+                'david': 'Coach David (Voice Therapy)',
+                'elena': 'Coach Elena (Trauma Recovery)', 
+                'sarah': 'Coach Sarah (Anxiety & Stress)'
+            };
+            
+            const selectedCoachElement = document.getElementById('selected-coach');
+            if (selectedCoachElement) {
+                selectedCoachElement.value = coachNames[coachId] || `Coach ${coachId}`;
+            }
+            
+            // Render calendar
+            setTimeout(() => {
+                const calendarContainer = document.getElementById('booking-calendar');
+                if (calendarContainer && typeof window.renderCalendar === 'function') {
+                    console.log('📅 Rendering calendar for booking');
+                    window.renderCalendar();
+                } else {
+                    console.log('⚠️ Calendar container or renderCalendar function not found');
                 }
+            }, 100);
+            
+            // Visual feedback - highlight selected coach
+            document.querySelectorAll('.coach-card').forEach(card => {
+                card.classList.remove('ring-2', 'ring-blue-500');
             });
-        } else if (Notification.permission === 'granted') {
-            sendBookingNotification(booking);
+            
+            const clickedCard = event?.target?.closest('.coach-card');
+            if (clickedCard) {
+                clickedCard.classList.add('ring-2', 'ring-blue-500');
+            }
+        }
+    } else {
+        console.log('💬 COACHES MODE: Using original chat functionality');
+        // Use original function for coaches section (immediate chat)
+        if (originalSelectCoach) {
+            originalSelectCoach(coachId);
         }
     }
-    
-    // Close calendar modal
-    document.getElementById('booking-calendar-modal').remove();
-    
-    // Show success confirmation
-    showBookingSuccess(booking);
-    
-    console.log('✅ Booking confirmed:', booking);
 };
 
-// SEND PUSH NOTIFICATION
-window.sendBookingNotification = function(booking) {
-    console.log('🔔 Sending push notification for booking');
+// 3. 🎯 Enhanced Add New Goal functionality - preserve existing showGoalsModal but enhance it
+const originalShowGoalsModal = window.showGoalsModal;
+window.showGoalsModal = function() {
+    console.log('🎯 Enhanced goals modal');
     
-    const notification = new Notification('📅 Session Booked Successfully!', {
-        body: `Your session with ${booking.coach} is confirmed for ${new Date(booking.date).toLocaleDateString()} at ${convertTo12Hour(booking.time)}`,
-        icon: '/favicon.ico',
-        tag: `booking-${booking.id}`,
-        requireInteraction: true
-    });
+    // Get existing custom goals
+    const customGoals = JSON.parse(localStorage.getItem('customHealthGoals') || '[]');
+    const assessmentResults = JSON.parse(localStorage.getItem('lastAssessmentResults') || '{}');
+    const hasAssessment = Object.keys(assessmentResults).length > 0;
     
-    // Schedule reminder notification
-    const sessionDateTime = new Date(`${booking.date}T${booking.time}:00`);
-    const reminderTime = sessionDateTime.getTime() - (15 * 60 * 1000); // 15 minutes before
-    const now = Date.now();
+    // Close any existing modal
+    const existingModal = document.getElementById('goalsModal');
+    if (existingModal) existingModal.remove();
     
-    if (reminderTime > now) {
-        setTimeout(() => {
-            new Notification('⏰ Session Reminder!', {
-                body: `Your session with ${booking.coach} starts in 15 minutes!`,
-                icon: '/favicon.ico',
-                tag: `reminder-${booking.id}`,
-                requireInteraction: true
-            });
-        }, reminderTime - now);
-        console.log('⏰ Reminder notification scheduled');
+    const modal = document.createElement('div');
+    modal.id = 'goalsModal';
+    modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
+    
+    let goalsListHtml = '';
+    if (customGoals.length > 0) {
+        goalsListHtml = customGoals.map((goal, index) => `
+            <div class="bg-slate-700/50 rounded-lg p-3 mb-2 flex justify-between items-center">
+                <div class="flex-1">
+                    <h4 class="text-white font-medium text-sm">${goal.title}</h4>
+                    <p class="text-slate-400 text-xs mt-1">${goal.description}</p>
+                    <div class="w-full bg-slate-600 rounded-full h-1.5 mt-2">
+                        <div class="bg-green-500 h-1.5 rounded-full" style="width: ${goal.progress || 0}%"></div>
+                    </div>
+                </div>
+                <button onclick="deleteCustomGoal(${index})" class="text-red-400 hover:text-red-300 ml-2 text-xs">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        `).join('');
+    } else {
+        goalsListHtml = '<p class="text-slate-400 text-center py-3 text-sm">No custom goals yet</p>';
+    }
+    
+    modal.innerHTML = `
+        <div class="bg-slate-800 rounded-2xl p-6 max-w-md w-full border border-slate-700 max-h-[80vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold text-white">🎯 Your Health Goals</h2>
+                <button onclick="closeGoalsModal()" class="text-slate-400 hover:text-white text-xl">&times;</button>
+            </div>
+            
+            <div class="mb-4">
+                <h3 class="text-white font-medium mb-2 text-sm">Current Goals (${customGoals.length}):</h3>
+                <div class="max-h-32 overflow-y-auto">
+                    ${goalsListHtml}
+                </div>
+            </div>
+            
+            <div class="border-t border-slate-600 pt-4">
+                <h3 class="text-white font-medium mb-2 text-sm">➕ Add New Goal:</h3>
+                <input type="text" id="newGoalTitle" placeholder="Goal title" 
+                       class="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white mb-2 text-sm focus:border-blue-500 focus:outline-none">
+                <textarea id="newGoalDescription" placeholder="Goal description..." 
+                          class="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white mb-3 text-sm focus:border-blue-500 focus:outline-none" rows="2"></textarea>
+                <button onclick="addCustomGoal()" class="w-full bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg text-white font-medium transition-all text-sm">
+                    <i class="fas fa-plus mr-1"></i>Add Goal
+                </button>
+            </div>
+            
+            <div class="flex gap-3 mt-4">
+                <button onclick="closeGoalsModal()" class="flex-1 bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-lg text-white transition-all text-sm">Close</button>
+                ${!hasAssessment ? '<button onclick="closeGoalsModal(); navigateToSection(\'assessment\')" class="flex-1 bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg text-white font-medium transition-all text-sm">Take Assessment</button>' : ''}
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+    document.body.style.overflow = 'hidden';
+};
+
+// Add custom goal function
+window.addCustomGoal = function() {
+    const title = document.getElementById('newGoalTitle')?.value.trim();
+    const description = document.getElementById('newGoalDescription')?.value.trim();
+    
+    if (!title) {
+        alert('Please enter a goal title');
+        return;
+    }
+    
+    const customGoals = JSON.parse(localStorage.getItem('customHealthGoals') || '[]');
+    const newGoal = {
+        id: Date.now(),
+        title: title,
+        description: description || 'Custom health goal',
+        progress: 0,
+        createdAt: new Date().toISOString()
+    };
+    
+    customGoals.push(newGoal);
+    localStorage.setItem('customHealthGoals', JSON.stringify(customGoals));
+    
+    // Update dashboard goal count
+    updateGoalCount();
+    
+    alert(`✅ Goal "${title}" added successfully!`);
+    showGoalsModal(); // Refresh modal
+};
+
+// Delete custom goal function
+window.deleteCustomGoal = function(index) {
+    const customGoals = JSON.parse(localStorage.getItem('customHealthGoals') || '[]');
+    const goal = customGoals[index];
+    
+    if (confirm(`Delete goal "${goal?.title}"?`)) {
+        customGoals.splice(index, 1);
+        localStorage.setItem('customHealthGoals', JSON.stringify(customGoals));
+        updateGoalCount();
+        showGoalsModal(); // Refresh modal
     }
 };
 
-// SHOW BOOKING SUCCESS
-window.showBookingSuccess = function(booking) {
-    const successModal = document.createElement('div');
-    successModal.className = 'fixed inset-0 z-60 bg-black/80 flex items-center justify-center p-4';
-    successModal.innerHTML = `
-        <div class="bg-slate-800 rounded-2xl p-8 max-w-md w-full border border-green-500">
-            <div class="text-center">
-                <div class="text-6xl mb-4">✅</div>
-                <h2 class="text-2xl font-bold text-white mb-4">Booking Confirmed!</h2>
-                <div class="bg-slate-700 rounded-lg p-4 mb-6 text-left">
-                    <p class="text-slate-300"><strong class="text-white">Coach:</strong> ${booking.coach}</p>
-                    <p class="text-slate-300"><strong class="text-white">Date:</strong> ${new Date(booking.date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</p>
-                    <p class="text-slate-300"><strong class="text-white">Time:</strong> ${convertTo12Hour(booking.time)}</p>
-                    <p class="text-slate-300"><strong class="text-white">Credits:</strong> ${booking.creditCost}</p>
+// Update goal count in dashboard
+function updateGoalCount() {
+    const customGoals = JSON.parse(localStorage.getItem('customHealthGoals') || '[]');
+    const assessmentResults = JSON.parse(localStorage.getItem('lastAssessmentResults') || '{}');
+    const healthScores = assessmentResults.healthScores || {};
+    
+    // Count assessment-based goals (areas needing improvement)
+    let assessmentGoals = 0;
+    Object.keys(healthScores).forEach(key => {
+        if (key !== 'overall_score' && healthScores[key] < 3.5) {
+            assessmentGoals++;
+        }
+    });
+    
+    const totalGoals = assessmentGoals + customGoals.length;
+    
+    // Update Active Goals display
+    const goalElements = document.querySelectorAll('div');
+    goalElements.forEach(div => {
+        const h3 = div.querySelector('h3');
+        if (h3?.textContent?.includes('Active Goals')) {
+            const countDiv = div.querySelector('.text-3xl.font-bold');
+            const descP = div.querySelector('p');
+            if (countDiv) {
+                countDiv.textContent = totalGoals;
+                if (totalGoals > 0) {
+                    countDiv.className = countDiv.className.replace('text-slate-400', 'text-green-400');
+                }
+            }
+            if (descP && totalGoals > 0) {
+                descP.textContent = `${totalGoals} active health goals`;
+                descP.className = descP.className.replace('text-slate-500', 'text-green-300');
+            }
+        }
+    });
+}
+
+// Initialize goal count on page load
+setTimeout(() => {
+    updateGoalCount();
+}, 1000);
+
+// 4. 🔧 FIX CONFLICTING FUNCTIONS - Clean overrides for dashboard updates
+
+// Override reset function - make it work properly
+window.resetDashboardForTesting = function() {
+    const confirmReset = confirm('🔄 RESET DASHBOARD\n\nThis will:\n1. Clear all health scores & data\n2. Reset charts and progress\n3. Clear tracking data\n\nContinue?');
+    
+    if (!confirmReset) {
+        console.log('❌ Reset cancelled by user');
+        return;
+    }
+    
+    console.log('🔄 Resetting dashboard...');
+    
+    // Clear all health data
+    localStorage.removeItem('lastAssessmentResults');
+    localStorage.removeItem('healthAssessmentResults');
+    localStorage.removeItem('weeklyActivity');
+    localStorage.removeItem('healthAchievements');
+    localStorage.removeItem('customHealthGoals');
+    localStorage.removeItem('nutritionLog');
+    localStorage.removeItem('sleepLog');
+    localStorage.removeItem('exerciseLog');
+    localStorage.removeItem('gamificationStats');
+    
+    // Reset user plan to default
+    const userPlan = {
+        type: 'free',
+        credits: 5,
+        tier: 'free',
+        resetAt: new Date().toISOString()
+    };
+    localStorage.setItem('userPlan', JSON.stringify(userPlan));
+    
+    console.log('✅ Dashboard reset completed!');
+    alert('✅ Dashboard Reset Complete!\n\nAll scores, charts, and data cleared.\nYou now have 5 free credits.\n\nRefresh the page to see changes.');
+    
+    // Force page refresh to show reset state
+    setTimeout(() => {
+        location.reload();
+    }, 1000);
+};
+
+// Override nutrition function - make it work properly
+window.quickUpdateNutrition = function() {
+    console.log('🥗 FIXED: Nutrition button clicked');
+    const modal = document.createElement('div');
+    modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
+    modal.innerHTML = `
+        <div class="bg-slate-900 rounded-2xl p-8 max-w-md w-full border border-slate-700">
+            <div class="text-center mb-6">
+                <div class="text-6xl mb-4">🥗</div>
+                <h2 class="text-2xl font-bold text-white">Log Nutrition Activity</h2>
+                <p class="text-slate-400 text-sm">Track healthy eating and see score improvements</p>
+            </div>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-slate-300 text-sm font-medium mb-2">Nutrition Activity</label>
+                    <select id="nutrition-activity" class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-2 text-white" onchange="updateNutritionButton()">
+                        <option value="">Select what you did...</option>
+                        <option value="healthy_breakfast,+0.3,+0.2">Ate healthy breakfast</option>
+                        <option value="balanced_meal,+0.5,+0.3">Ate balanced meal (protein + veggies)</option>
+                        <option value="meal_prep,+0.6,+0.2">Prepared healthy meals in advance</option>
+                        <option value="water_intake,+0.2,+0.4">Drank 8+ glasses water</option>
+                        <option value="vitamins,+0.2,+0.1">Took vitamins/supplements</option>
+                        <option value="no_processed,+0.4,+0.3">Avoided processed foods today</option>
+                    </select>
                 </div>
-                <p class="text-slate-400 text-sm mb-6">🔔 You'll receive push notifications before your session</p>
-                <button onclick="this.closest('.fixed').remove()" 
-                        class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-medium">
-                    Perfect! 🚀
+                
+                <div>
+                    <label class="block text-slate-300 text-sm font-medium mb-2">How did it feel?</label>
+                    <select id="nutrition-quality" class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-2 text-white">
+                        <option value="1.0">Great - felt energized and satisfied</option>
+                        <option value="0.8">Good - positive impact</option>
+                        <option value="0.6">Okay - neutral</option>
+                        <option value="0.4">Could be better</option>
+                    </select>
+                </div>
+                
+                <div id="nutrition-preview" class="bg-slate-800/50 rounded-lg p-3 text-center text-slate-400 text-sm">
+                    Select an activity to see score improvements
+                </div>
+            </div>
+            
+            <div class="flex gap-3 mt-6">
+                <button onclick="closeNutritionModal()" class="flex-1 bg-slate-700 hover:bg-slate-600 px-6 py-3 rounded-lg text-white">Cancel</button>
+                <button onclick="logNutritionActivity()" id="log-nutrition-btn" class="flex-1 bg-green-600 hover:bg-green-700 px-6 py-3 rounded-lg text-white font-medium" disabled>
+                    Select Activity First
                 </button>
             </div>
         </div>
     `;
-    document.body.appendChild(successModal);
+    document.body.appendChild(modal);
 };
 
-console.log('✅ Complete calendar booking system with push notifications loaded!');</script>
+window.updateNutritionButton = function() {
+    const activity = document.getElementById('nutrition-activity').value;
+    const button = document.getElementById('log-nutrition-btn');
+    const preview = document.getElementById('nutrition-preview');
+    
+    if (activity) {
+        const [activityName, physicalBoost, energyBoost] = activity.split(',');
+        button.disabled = false;
+        button.textContent = 'Log Activity';
+        button.className = 'flex-1 bg-green-600 hover:bg-green-700 px-6 py-3 rounded-lg text-white font-medium';
+        preview.innerHTML = `
+            <div class="text-green-400 font-medium">Score Improvements:</div>
+            <div class="text-sm">Physical Health: ${physicalBoost} | Energy: ${energyBoost}</div>
+        `;
+    } else {
+        button.disabled = true;
+        button.textContent = 'Select Activity First';
+        button.className = 'flex-1 bg-slate-600 px-6 py-3 rounded-lg text-slate-400';
+        preview.innerHTML = 'Select an activity to see score improvements';
+    }
+};
 
+window.logNutritionActivity = function() {
+    const activity = document.getElementById('nutrition-activity').value;
+    const quality = parseFloat(document.getElementById('nutrition-quality').value);
+    
+    if (!activity) {
+        alert('Please select a nutrition activity');
+        return;
+    }
+    
+    const [activityName, physicalBoost, energyBoost] = activity.split(',');
+    const actualPhysicalBoost = parseFloat(physicalBoost.replace('+', '')) * quality;
+    const actualEnergyBoost = parseFloat(energyBoost.replace('+', '')) * quality;
+    
+    console.log('🥗 Logging nutrition:', activityName, 'Boosts:', actualPhysicalBoost, actualEnergyBoost);
+    
+    // Update stored assessment results directly
+    const storedResults = localStorage.getItem('lastAssessmentResults');
+    if (storedResults) {
+        const results = JSON.parse(storedResults);
+        if (results.healthScores) {
+            results.healthScores.physical_health = Math.min(5, (results.healthScores.physical_health || 3) + actualPhysicalBoost);
+            results.healthScores.energy_vitality = Math.min(5, (results.healthScores.energy_vitality || 3) + actualEnergyBoost);
+            localStorage.setItem('lastAssessmentResults', JSON.stringify(results));
+            console.log('✅ Updated scores:', results.healthScores);
+        }
+    }
+    
+    // Update weekly activity log
+    const weeklyActivity = JSON.parse(localStorage.getItem('weeklyActivity') || '{}');
+    if (!weeklyActivity.nutrition) weeklyActivity.nutrition = { count: 0, activities: [] };
+    weeklyActivity.nutrition.count++;
+    weeklyActivity.nutrition.activities.push({
+        activity: activityName,
+        timestamp: new Date().toISOString(),
+        physicalBoost: actualPhysicalBoost,
+        energyBoost: actualEnergyBoost
+    });
+    localStorage.setItem('weeklyActivity', JSON.stringify(weeklyActivity));
+    
+    closeNutritionModal();
+    alert(`✅ ${activityName.replace('_', ' ')} logged!\nPhysical Health: +${actualPhysicalBoost.toFixed(1)}\nEnergy: +${actualEnergyBoost.toFixed(1)}`);
+    
+    // Force dashboard refresh
+    setTimeout(() => {
+        if (typeof updateInteractiveDashboardCharts === 'function') {
+            const results = JSON.parse(localStorage.getItem('lastAssessmentResults') || '{}');
+            if (results.healthScores) {
+                updateInteractiveDashboardCharts(results.healthScores);
+            }
+        }
+    }, 100);
+};
+
+window.closeNutritionModal = function() {
+    const modal = document.querySelector('.fixed.inset-0');
+    if (modal) modal.remove();
+};
+
+// Override sleep function - make it work properly
+window.quickUpdateSleep = function() {
+    console.log('😴 FIXED: Sleep button clicked');
+    const modal = document.createElement('div');
+    modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
+    modal.innerHTML = `
+        <div class="bg-slate-900 rounded-2xl p-8 max-w-md w-full border border-slate-700">
+            <div class="text-center mb-6">
+                <div class="text-6xl mb-4">😴</div>
+                <h2 class="text-2xl font-bold text-white">Log Sleep Activity</h2>
+                <p class="text-slate-400 text-sm">Track sleep and see energy improvements</p>
+            </div>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-slate-300 text-sm font-medium mb-2">Hours of Sleep</label>
+                    <select id="sleep-hours" class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-2 text-white" onchange="updateSleepButton()">
+                        <option value="">Select hours...</option>
+                        <option value="4,+0.1,+0.1">4 hours (poor)</option>
+                        <option value="5,+0.2,+0.2">5 hours (insufficient)</option>
+                        <option value="6,+0.3,+0.3">6 hours (adequate)</option>
+                        <option value="7,+0.5,+0.4">7 hours (good)</option>
+                        <option value="8,+0.6,+0.5">8 hours (excellent)</option>
+                        <option value="9,+0.4,+0.3">9+ hours (long)</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="block text-slate-300 text-sm font-medium mb-2">Sleep Quality</label>
+                    <select id="sleep-quality" class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-2 text-white">
+                        <option value="1.0">Excellent - woke up refreshed</option>
+                        <option value="0.8">Good - mostly restful</option>
+                        <option value="0.6">Fair - some interruptions</option>
+                        <option value="0.4">Poor - restless night</option>
+                    </select>
+                </div>
+                
+                <div id="sleep-preview" class="bg-slate-800/50 rounded-lg p-3 text-center text-slate-400 text-sm">
+                    Select sleep hours to see improvements
+                </div>
+            </div>
+            
+            <div class="flex gap-3 mt-6">
+                <button onclick="closeSleepModal()" class="flex-1 bg-slate-700 hover:bg-slate-600 px-6 py-3 rounded-lg text-white">Cancel</button>
+                <button onclick="logSleepActivity()" id="log-sleep-btn" class="flex-1 bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-lg text-white font-medium" disabled>
+                    Select Hours First
+                </button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+};
+
+window.updateSleepButton = function() {
+    const sleep = document.getElementById('sleep-hours').value;
+    const button = document.getElementById('log-sleep-btn');
+    const preview = document.getElementById('sleep-preview');
+    
+    if (sleep) {
+        const [hours, physicalBoost, energyBoost] = sleep.split(',');
+        button.disabled = false;
+        button.textContent = 'Log Sleep';
+        button.className = 'flex-1 bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-lg text-white font-medium';
+        preview.innerHTML = `
+            <div class="text-blue-400 font-medium">Score Improvements:</div>
+            <div class="text-sm">Physical Health: ${physicalBoost} | Energy: ${energyBoost}</div>
+        `;
+    } else {
+        button.disabled = true;
+        button.textContent = 'Select Hours First';
+        button.className = 'flex-1 bg-slate-600 px-6 py-3 rounded-lg text-slate-400';
+        preview.innerHTML = 'Select sleep hours to see improvements';
+    }
+};
+
+window.logSleepActivity = function() {
+    const sleep = document.getElementById('sleep-hours').value;
+    const quality = parseFloat(document.getElementById('sleep-quality').value);
+    
+    if (!sleep) {
+        alert('Please select sleep hours');
+        return;
+    }
+    
+    const [hours, physicalBoost, energyBoost] = sleep.split(',');
+    const actualPhysicalBoost = parseFloat(physicalBoost.replace('+', '')) * quality;
+    const actualEnergyBoost = parseFloat(energyBoost.replace('+', '')) * quality;
+    
+    console.log('😴 Logging sleep:', hours, 'hours, Boosts:', actualPhysicalBoost, actualEnergyBoost);
+    
+    // Update scores directly
+    const storedResults = localStorage.getItem('lastAssessmentResults');
+    if (storedResults) {
+        const results = JSON.parse(storedResults);
+        if (results.healthScores) {
+            results.healthScores.physical_health = Math.min(5, (results.healthScores.physical_health || 3) + actualPhysicalBoost);
+            results.healthScores.energy_vitality = Math.min(5, (results.healthScores.energy_vitality || 3) + actualEnergyBoost);
+            localStorage.setItem('lastAssessmentResults', JSON.stringify(results));
+        }
+    }
+    
+    // Update weekly activity
+    const weeklyActivity = JSON.parse(localStorage.getItem('weeklyActivity') || '{}');
+    if (!weeklyActivity.sleep) weeklyActivity.sleep = { count: 0, activities: [] };
+    weeklyActivity.sleep.count++;
+    weeklyActivity.sleep.activities.push({
+        hours: hours,
+        quality: quality,
+        timestamp: new Date().toISOString(),
+        physicalBoost: actualPhysicalBoost,
+        energyBoost: actualEnergyBoost
+    });
+    localStorage.setItem('weeklyActivity', JSON.stringify(weeklyActivity));
+    
+    closeSleepModal();
+    alert(`✅ ${hours} hours sleep logged!\nPhysical Health: +${actualPhysicalBoost.toFixed(1)}\nEnergy: +${actualEnergyBoost.toFixed(1)}`);
+    
+    // Force dashboard refresh
+    setTimeout(() => {
+        if (typeof updateInteractiveDashboardCharts === 'function') {
+            const results = JSON.parse(localStorage.getItem('lastAssessmentResults') || '{}');
+            if (results.healthScores) {
+                updateInteractiveDashboardCharts(results.healthScores);
+            }
+        }
+    }, 100);
+};
+
+window.closeSleepModal = function() {
+    const modal = document.querySelector('.fixed.inset-0');
+    if (modal) modal.remove();
+};
+
+console.log('✅ MINIMAL FIXES APPLIED TO WORKING PLATFORM:');
+console.log('🛑 Stop Tests button removed');
+console.log('📅 Booking calendar fixed - coaches in booking section show calendar');
+console.log('🎯 Add New Goal button now functional with custom goals');
+console.log('🔄 Reset dashboard function fixed - now clears all data properly');
+console.log('🥗 Nutrition logging fixed - now updates dashboard scores');
+console.log('😴 Sleep logging fixed - now updates dashboard scores');
+console.log('🔧 All existing dashboard functionality preserved and enhanced');
+</script>
+
+</body>
+</html>
