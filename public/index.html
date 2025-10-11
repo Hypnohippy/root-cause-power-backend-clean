@@ -1,6 +1,7 @@
 
 
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -711,7 +712,7 @@
                     <div class="flex gap-3 mt-6">
                         <button onclick="closeActivityModal()" 
                             class="flex-1 bg-slate-700 hover:bg-slate-600 px-6 py-3 rounded-lg text-white">Cancel</button>
-                        <button onclick="logNutrition()" id="log-nutrition-btn"
+                        <button onclick="logDetailedActivity('nutrition'); closeActivityModal();" id="log-nutrition-btn"
                             class="flex-1 bg-orange-600 hover:bg-orange-700 px-6 py-3 rounded-lg text-white font-medium" disabled>
                             Select Activity First
                         </button>
@@ -722,11 +723,7 @@
         };
         
         // Fixed Sleep Button
-        window.quickUpdateSleep = function() {
-            console.log('😴 Sleep button clicked - ORIGINAL DESIGN RESTORED!');
-            const modal = document.createElement('div');
-            modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
-            modal.innerHTML = `
+        // ❌ REMOVED OLD SLEEP FUNCTION - CAUSING CONFLICTS
                 <div class="bg-slate-900 rounded-2xl p-8 max-w-md w-full border border-slate-700">
                     <div class="text-center mb-6">
                         <div class="text-6xl mb-4">😴</div>
@@ -912,9 +909,7 @@
             // Close modal and show success
             closeActivityModal();
             if (typeof showSuccessMessage === 'function') {
-                showSuccessMessage('🏃‍♂️ Exercise logged successfully!');
             } else {
-                alert('🏃‍♂️ Exercise logged successfully!');
             }
         };
         
@@ -932,9 +927,7 @@
             // Close modal and show success
             closeActivityModal();
             if (typeof showSuccessMessage === 'function') {
-                showSuccessMessage('🥗 Nutrition logged successfully!');
             } else {
-                alert('🥗 Nutrition logged successfully!');
             }
         };
         
@@ -953,9 +946,7 @@
             // Close modal and show success
             closeActivityModal();
             if (typeof showSuccessMessage === 'function') {
-                showSuccessMessage('😴 Sleep logged successfully!');
             } else {
-                alert('😴 Sleep logged successfully!');
             }
         };
         
@@ -974,9 +965,7 @@
             // Close modal and show success
             closeActivityModal();
             if (typeof showSuccessMessage === 'function') {
-                showSuccessMessage('🧠 Mental wellness logged successfully!');
             } else {
-                alert('🧠 Mental wellness logged successfully!');
             }
         };
         
@@ -1194,9 +1183,7 @@
             // Close modal and show success
             closeActivityModal();
             if (typeof showSuccessMessage === 'function') {
-                showSuccessMessage('💊 Medication logged successfully!');
             } else {
-                alert('💊 Medication logged successfully!');
             }
         };
         
@@ -1215,9 +1202,7 @@
             // Close modal and show success
             closeActivityModal();
             if (typeof showSuccessMessage === 'function') {
-                showSuccessMessage('👥 Social activity logged successfully!');
             } else {
-                alert('👥 Social activity logged successfully!');
             }
         };
         
@@ -1236,9 +1221,7 @@
             // Close modal and show success
             closeActivityModal();
             if (typeof showSuccessMessage === 'function') {
-                showSuccessMessage('⚕️ Medical event logged successfully!');
             } else {
-                alert('⚕️ Medical event logged successfully!');
             }
         };
         
@@ -1600,8 +1583,13 @@
                 });
             }, 200);
             
+            // Clear Progress Timeline and Recent Achievements
+            if (typeof clearTimelineAndAchievements === 'function') {
+                clearTimelineAndAchievements();
+            }
+            
             console.log('✅ Dashboard reset completed for testing!');
-            alert('✅ Dashboard Reset Complete!\n\n📄 Dashboard snapshot downloaded to your device\n🔄 All scores, charts, and data cleared\n🎯 Active Recovery Actions reset to 0\n\n📋 Next steps:\n1. Take assessment to establish baseline\n2. Test activity logging\n3. Verify score improvements\n4. Check Active Recovery shows "This week: 0/X"');
+            alert('✅ Dashboard Reset Complete!\n\n📄 Dashboard snapshot downloaded to your device\n🔄 All scores, charts, and data cleared\n🎯 Active Recovery Actions reset to 0\n📅 Progress Timeline reset to zero\n🏆 Recent Achievements reset to zero\n\n📋 Next steps:\n1. Take assessment to establish baseline\n2. Test activity logging\n3. Verify score improvements\n4. Check Active Recovery shows "This week: 0/X"');
         };
         
         // Make function easily accessible
@@ -2235,21 +2223,102 @@
             document.body.style.overflow = 'auto';
         };
         
+        // 🎯 VIEW GOALS MODAL FUNCTION - Shows existing goals from assessment
+        window.showViewGoalsModal = function() {
+            console.log('👁️ Showing view goals modal');
+            
+            const assessmentResults = JSON.parse(localStorage.getItem('lastAssessmentResults') || '{}');
+            const userGoals = assessmentResults.goals || [];
+            const hasAssessment = localStorage.getItem('hasCompletedAssessment') === 'true';
+            
+            const modal = document.createElement('div');
+            modal.id = 'viewGoalsModal';
+            modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
+            
+            let goalsContent = '';
+            if (userGoals.length > 0) {
+                const goalsHtml = userGoals.map((goal, index) => {
+                    const priorityClass = goal.priority === 'high' ? 'bg-red-500/20 text-red-400' :
+                                        goal.priority === 'medium' ? 'bg-yellow-500/20 text-yellow-400' :
+                                        'bg-blue-500/20 text-blue-400';
+                    const priorityText = goal.priority ? goal.priority.charAt(0).toUpperCase() + goal.priority.slice(1) : 'Medium';
+                    const descriptionHtml = goal.description && goal.title !== goal.description ? 
+                        '<p class="text-slate-300 text-sm mt-1">' + goal.description + '</p>' : '';
+                    
+                    return '<div class="bg-slate-600 p-3 rounded-lg">' +
+                            '<div class="flex items-start justify-between">' +
+                                '<div class="flex-1">' +
+                                    '<h4 class="text-white font-medium">' + (goal.title || goal.description || 'Goal ' + (index + 1)) + '</h4>' +
+                                    descriptionHtml +
+                                    '<div class="flex items-center mt-2">' +
+                                        '<span class="text-xs px-2 py-1 rounded-full ' + priorityClass + '">' +
+                                            priorityText + ' Priority' +
+                                        '</span>' +
+                                        '<span class="text-slate-400 text-xs ml-2">Progress: ' + (goal.progress || 0) + '%</span>' +
+                                    '</div>' +
+                                '</div>' +
+                            '</div>' +
+                        '</div>';
+                }).join('');
+                
+                goalsContent = '<div class="bg-slate-700 p-4 rounded-lg">' +
+                    '<h3 class="text-green-400 font-semibold mb-3">🌟 Your Active Goals</h3>' +
+                    '<div class="space-y-3">' + goalsHtml + '</div>' +
+                '</div>';
+            } else if (hasAssessment) {
+                goalsContent = '<div class="bg-slate-700 p-4 rounded-lg text-center">' +
+                    '<div class="text-4xl mb-3">🎯</div>' +
+                    '<h3 class="text-slate-200 font-semibold mb-2">No Custom Goals Set</h3>' +
+                    '<p class="text-slate-400 text-sm">You completed the assessment but didn\'t set any custom goals.</p>' +
+                '</div>';
+            } else {
+                goalsContent = '<div class="bg-slate-700 p-4 rounded-lg text-center">' +
+                    '<div class="text-4xl mb-3">📋</div>' +
+                    '<h3 class="text-slate-200 font-semibold mb-2">Complete Assessment First</h3>' +
+                    '<p class="text-slate-400 text-sm">Take your health assessment to set personalized goals.</p>' +
+                '</div>';
+            }
+            
+            const progressSection = userGoals.length > 0 ? 
+                '<div class="bg-slate-700 p-4 rounded-lg">' +
+                    '<h3 class="text-blue-400 font-semibold mb-2">📈 Goal Progress</h3>' +
+                    '<p class="text-slate-300 text-sm">Track progress by logging daily activities.</p>' +
+                '</div>' : '';
+            
+            const buttonSection = !hasAssessment ? 
+                '<button onclick="closeViewGoalsModal(); navigateToSection(\'assessment\')" class="flex-1 bg-green-600 hover:bg-green-700 px-6 py-3 rounded-lg text-white font-medium transition-all">Take Assessment</button>' :
+                '<button onclick="closeViewGoalsModal(); showAddGoalsModal()" class="flex-1 bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-lg text-white font-medium transition-all">Add New Goal</button>';
+            
+            modal.innerHTML = '<div class="bg-slate-800 rounded-2xl p-6 max-w-lg w-full border border-slate-700 max-h-[80vh] overflow-y-auto">' +
+                '<div class="flex justify-between items-center mb-6">' +
+                    '<h2 class="text-2xl font-bold text-white">👁️ View Your Goals</h2>' +
+                    '<button onclick="closeViewGoalsModal()" class="text-slate-400 hover:text-white text-2xl">&times;</button>' +
+                '</div>' +
+                '<div class="space-y-4">' + goalsContent + progressSection + '</div>' +
+                '<div class="flex gap-3 mt-6">' +
+                    '<button onclick="closeViewGoalsModal()" class="flex-1 bg-slate-700 hover:bg-slate-600 px-6 py-3 rounded-lg text-white transition-all">Close</button>' +
+                    buttonSection +
+                '</div>' +
+            '</div>';
+            document.body.appendChild(modal);
+            document.body.style.overflow = 'hidden';
+        };
+        
+        window.closeViewGoalsModal = function() {
+            const modal = document.getElementById('viewGoalsModal');
+            if (modal) modal.remove();
+            document.body.style.overflow = 'auto';
+        };
+        
         // Function to update dashboard goals display
         window.updateDashboardGoalsDisplay = function() {
             console.log('🎯 Updating dashboard goals display...');
             
-            // Get stored goals or calculate from assessment
+            // Get actual user goals from assessment results
             const assessmentResults = JSON.parse(localStorage.getItem('lastAssessmentResults') || '{}');
-            const healthScores = assessmentResults.healthScores || {};
-            
-            let activeGoalsCount = 0;
-            // Count areas that need improvement as active goals
-            Object.keys(healthScores).forEach(key => {
-                if (key !== 'overall_score' && healthScores[key] < 3.5) {
-                    activeGoalsCount++;
-                }
-            });
+            const userGoals = assessmentResults.goals || [];
+            const activeGoalsCount = userGoals.filter(function(goal) { return !goal.completed; }).length;
+            console.log('Found ' + activeGoalsCount + ' active goals');
             
             // Update the dashboard display
             const goalsCountElement = document.getElementById('active-goals-count');
@@ -2258,14 +2327,108 @@
                 console.log(`✅ Updated goals count to: ${activeGoalsCount}`);
             }
             
-            // Update goals card display
-            const goalsCards = document.querySelectorAll('.text-3xl.font-bold.text-slate-400');
+            // Update goals card display - find the Active Goals card and update it
+            const goalsCards = document.querySelectorAll('.text-3xl.font-bold');
             goalsCards.forEach(card => {
-                if (card.textContent === '0' && card.parentElement.textContent.includes('Active Goals')) {
+                const parentText = card.parentElement ? card.parentElement.textContent : '';
+                if (parentText.includes('Active Goals')) {
                     card.textContent = activeGoalsCount;
                     card.className = activeGoalsCount > 0 ? 'text-3xl font-bold text-green-400' : 'text-3xl font-bold text-slate-400';
+                    console.log('Updated Active Goals card to: ' + activeGoalsCount);
                 }
             });
+        };
+        
+        // 🎯 ADD GOALS MODAL FUNCTION - For adding new goals
+        window.showAddGoalsModal = function() {
+            console.log('➕ Showing add goals modal');
+            
+            const modal = document.createElement('div');
+            modal.id = 'addGoalsModal';
+            modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
+            modal.innerHTML = '<div class="bg-slate-800 rounded-2xl p-6 max-w-md w-full border border-slate-700">' +
+                '<div class="flex justify-between items-center mb-6">' +
+                    '<h2 class="text-2xl font-bold text-white">➕ Add New Goal</h2>' +
+                    '<button onclick="closeAddGoalsModal()" class="text-slate-400 hover:text-white text-2xl">&times;</button>' +
+                '</div>' +
+                '<form id="newGoalForm" class="space-y-4">' +
+                    '<div>' +
+                        '<label class="block text-slate-300 text-sm font-medium mb-2">Goal Title *</label>' +
+                        '<input type="text" id="goalTitle" placeholder="e.g., Exercise 30 minutes daily" class="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white placeholder-slate-400 focus:border-green-500 focus:outline-none" required>' +
+                    '</div>' +
+                    '<div>' +
+                        '<label class="block text-slate-300 text-sm font-medium mb-2">Description</label>' +
+                        '<textarea id="goalDescription" placeholder="Describe your goal in more detail..." rows="3" class="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white placeholder-slate-400 focus:border-green-500 focus:outline-none resize-none"></textarea>' +
+                    '</div>' +
+                    '<div>' +
+                        '<label class="block text-slate-300 text-sm font-medium mb-2">Priority</label>' +
+                        '<select id="goalPriority" class="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:border-green-500 focus:outline-none">' +
+                            '<option value="medium">Medium Priority</option>' +
+                            '<option value="high">High Priority</option>' +
+                            '<option value="low">Low Priority</option>' +
+                        '</select>' +
+                    '</div>' +
+                '</form>' +
+                '<div class="flex gap-3 mt-6">' +
+                    '<button onclick="closeAddGoalsModal()" class="flex-1 bg-slate-700 hover:bg-slate-600 px-6 py-3 rounded-lg text-white transition-all">Cancel</button>' +
+                    '<button onclick="saveNewGoal()" class="flex-1 bg-green-600 hover:bg-green-700 px-6 py-3 rounded-lg text-white font-medium transition-all">Save Goal</button>' +
+                '</div>' +
+            '</div>';
+            document.body.appendChild(modal);
+            document.body.style.overflow = 'hidden';
+            
+            setTimeout(() => {
+                const titleInput = document.getElementById('goalTitle');
+                if (titleInput) titleInput.focus();
+            }, 100);
+        };
+        
+        window.closeAddGoalsModal = function() {
+            const modal = document.getElementById('addGoalsModal');
+            if (modal) modal.remove();
+            document.body.style.overflow = 'auto';
+        };
+        
+        window.saveNewGoal = function() {
+            const title = document.getElementById('goalTitle').value.trim();
+            const description = document.getElementById('goalDescription').value.trim();
+            const priority = document.getElementById('goalPriority').value;
+            
+            if (!title) {
+                alert('Please enter a goal title.');
+                return;
+            }
+            
+            const assessmentResults = JSON.parse(localStorage.getItem('lastAssessmentResults') || '{}');
+            const currentGoals = assessmentResults.goals || [];
+            
+            const newGoal = {
+                id: 'goal_' + Date.now(),
+                title: title,
+                description: description,
+                priority: priority,
+                progress: 0,
+                created: new Date().toISOString(),
+                completed: false
+            };
+            
+            currentGoals.push(newGoal);
+            assessmentResults.goals = currentGoals;
+            localStorage.setItem('lastAssessmentResults', JSON.stringify(assessmentResults));
+            
+            if (typeof updateDashboardGoalsDisplay === 'function') {
+                updateDashboardGoalsDisplay();
+            }
+            
+            closeAddGoalsModal();
+            
+            if (typeof showSuccessMessage === 'function') {
+                showSuccessMessage('🎯 Goal "' + title + '" has been added successfully!');
+            } else {
+                alert('🎯 Goal "' + title + '" has been added successfully!');
+            }
+            
+            console.log('✅ New goal saved:', newGoal);
         };
         
         // 🔄 FIX MISSING QUICK UPDATE FUNCTIONS
@@ -2645,7 +2808,6 @@
             localStorage.setItem('weeklyActivity', JSON.stringify(activityData));
             
             closeQuickUpdateModal();
-            alert('💊 Medication logged successfully!');
             updateDashboardStats();
         };
         
@@ -2675,7 +2837,6 @@
             localStorage.setItem('weeklyActivity', JSON.stringify(activityData));
             
             closeQuickUpdateModal();
-            alert('👥 Social activity logged successfully!');
             updateDashboardStats();
         };
         
@@ -2705,7 +2866,6 @@
             localStorage.setItem('weeklyActivity', JSON.stringify(activityData));
             
             closeQuickUpdateModal();
-            alert('⚕️ Medical event logged successfully!');
             updateDashboardStats();
         };
         
@@ -12158,7 +12318,7 @@ Created with Root Cause Power Nutrition System
                     </div>
                     <div class="text-3xl font-bold text-slate-400 mb-2">0</div>
                     <p class="text-sm text-slate-500">Complete assessment to get personalized goals</p>
-                    <button onclick="showGoalsModal()" class="mt-2 text-xs bg-green-500/20 text-green-400 px-3 py-1 rounded-full hover:bg-green-500/30 transition-all">
+                    <button onclick="showViewGoalsModal()" class="mt-2 text-xs bg-green-500/20 text-green-400 px-3 py-1 rounded-full hover:bg-green-500/30 transition-all">
                         View Goals
                     </button>
                 </div>
@@ -12325,98 +12485,86 @@ Created with Root Cause Power Nutrition System
                     </div>
                 </div>
 
-                <button onclick="showGoalsModal()" class="bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 px-6 py-3 rounded-lg text-white font-semibold transition-all shadow-lg hover:shadow-xl">
+                <button onclick="showAddGoalsModal()" class="bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 px-6 py-3 rounded-lg text-white font-semibold transition-all shadow-lg hover:shadow-xl">
                     + Add New Goal
                 </button>
             </div>
 
-            <!-- Progress Timeline Section -->
+            <!-- Memory Game Section -->
             <div class="bg-gradient-to-br from-slate-800/50 to-slate-900/50 p-8 rounded-xl border border-slate-700 shadow-lg mb-8">
-                <h2 class="text-2xl font-bold text-slate-200 mb-6 flex items-center">
-                    <span class="text-3xl mr-3">📅</span>
-                    Progress Timeline
-                </h2>
-
-                <div class="space-y-4">
-                    <!-- Timeline Item 1 -->
-                    <div class="flex items-start space-x-4">
-                        <div class="flex-shrink-0 w-3 h-3 bg-green-400 rounded-full mt-2"></div>
-                        <div class="flex-grow">
-                            <div class="flex justify-between items-center">
-                                <h3 class="font-semibold text-slate-200">Completed Daily Exercise Goal</h3>
-                                <span class="text-xs text-slate-400">Today</span>
-                            </div>
-                            <p class="text-sm text-slate-400">Achieved 30-minute workout session</p>
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-slate-200 flex items-center">
+                        <span class="text-3xl mr-3">🧠</span>
+                        Wellness Memory Challenge
+                    </h2>
+                    <div class="flex items-center space-x-4">
+                        <div class="text-center">
+                            <div class="text-sm text-slate-400">Score</div>
+                            <div id="memory-score" class="text-xl font-bold text-green-400">0</div>
                         </div>
-                    </div>
-
-                    <!-- Timeline Item 2 -->
-                    <div class="flex items-start space-x-4">
-                        <div class="flex-shrink-0 w-3 h-3 bg-blue-400 rounded-full mt-2"></div>
-                        <div class="flex-grow">
-                            <div class="flex justify-between items-center">
-                                <h3 class="font-semibold text-slate-200">Sleep Quality Improvement Milestone</h3>
-                                <span class="text-xs text-slate-400">Yesterday</span>
-                            </div>
-                            <p class="text-sm text-slate-400">Achieved 7+ hours sleep for 3 consecutive nights</p>
+                        <div class="text-center">
+                            <div class="text-sm text-slate-400">Best</div>
+                            <div id="memory-best" class="text-xl font-bold text-yellow-400">0</div>
                         </div>
-                    </div>
-
-                    <!-- Timeline Item 3 -->
-                    <div class="flex items-start space-x-4">
-                        <div class="flex-shrink-0 w-3 h-3 bg-purple-400 rounded-full mt-2"></div>
-                        <div class="flex-grow">
-                            <div class="flex justify-between items-center">
-                                <h3 class="font-semibold text-slate-200">Weekly Health Assessment Completed</h3>
-                                <span class="text-xs text-slate-400">2 days ago</span>
-                            </div>
-                            <p class="text-sm text-slate-400">Comprehensive health evaluation with improved scores</p>
-                        </div>
-                    </div>
-
-                    <!-- Timeline Item 4 -->
-                    <div class="flex items-start space-x-4">
-                        <div class="flex-shrink-0 w-3 h-3 bg-orange-400 rounded-full mt-2"></div>
-                        <div class="flex-grow">
-                            <div class="flex justify-between items-center">
-                                <h3 class="font-semibold text-slate-200">Started New Stress Management Program</h3>
-                                <span class="text-xs text-slate-400">1 week ago</span>
-                            </div>
-                            <p class="text-sm text-slate-400">Enrolled in 21-day mindfulness and stress reduction course</p>
+                        <div class="text-center">
+                            <div class="text-sm text-slate-400">Level</div>
+                            <div id="memory-level" class="text-xl font-bold text-blue-400">1</div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Recent Achievements Section -->
-            <div class="bg-gradient-to-br from-slate-800/50 to-slate-900/50 p-8 rounded-xl border border-slate-700 shadow-lg mb-8">
-                <h2 class="text-2xl font-bold text-slate-200 mb-6 flex items-center">
-                    <span class="text-3xl mr-3">🏆</span>
-                    Recent Achievements
-                </h2>
-
-                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <!-- Achievement 1 -->
-                    <div class="bg-gradient-to-br from-green-500/20 to-green-600/20 p-4 rounded-lg border border-green-500/30">
-                        <div class="text-2xl mb-2">🥇</div>
-                        <h3 class="font-semibold text-slate-200 mb-1">Fitness Champion</h3>
-                        <p class="text-xs text-slate-400">Completed 7 days of exercise</p>
-                        <span class="text-xs bg-green-500/30 text-green-400 px-2 py-1 rounded-full mt-2 inline-block">New</span>
+                <!-- Game Controls -->
+                <div class="flex justify-between items-center mb-4">
+                    <div class="flex items-center space-x-4">
+                        <div class="text-sm text-slate-300">
+                            <span id="memory-moves">0</span> moves | 
+                            <span id="memory-time">00:00</span>
+                        </div>
+                        <div id="memory-status" class="text-sm text-blue-400">Click START to begin</div>
                     </div>
-
-                    <!-- Achievement 2 -->
-                    <div class="bg-gradient-to-br from-blue-500/20 to-blue-600/20 p-4 rounded-lg border border-blue-500/30">
-                        <div class="text-2xl mb-2">💤</div>
-                        <h3 class="font-semibold text-slate-200 mb-1">Sleep Master</h3>
-                        <p class="text-xs text-slate-400">Achieved optimal sleep 3 nights</p>
-                        <span class="text-xs bg-blue-500/30 text-blue-400 px-2 py-1 rounded-full mt-2 inline-block">New</span>
+                    <div class="flex space-x-2">
+                        <button onclick="startMemoryGame()" id="memory-start-btn" class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg text-white text-sm transition-all">
+                            START GAME
+                        </button>
+                        <button onclick="resetMemoryGame()" class="bg-slate-600 hover:bg-slate-500 px-4 py-2 rounded-lg text-white text-sm transition-all">
+                            RESET
+                        </button>
                     </div>
+                </div>
 
-                    <!-- Achievement 3 -->
-                    <div class="bg-gradient-to-br from-purple-500/20 to-purple-600/20 p-4 rounded-lg border border-purple-500/30">
-                        <div class="text-2xl mb-2">🧘</div>
-                        <h3 class="font-semibold text-slate-200 mb-1">Mindfulness Novice</h3>
-                        <p class="text-xs text-slate-400">Completed first meditation session</p>
+                <!-- Game Board -->
+                <div id="memory-game-board" class="grid gap-3 justify-center mb-6">
+                    <!-- Game cards will be generated here -->
+                </div>
+
+                <!-- Health Tip Reward -->
+                <div id="memory-reward" class="hidden bg-gradient-to-r from-green-500/20 to-blue-500/20 border border-green-500/30 rounded-lg p-4">
+                    <div class="flex items-start space-x-3">
+                        <div class="text-2xl">💡</div>
+                        <div>
+                            <h4 class="font-semibold text-green-400 mb-1">Health Tip Unlocked!</h4>
+                            <p id="memory-tip-text" class="text-sm text-slate-300"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Game Stats -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4 text-center">
+                    <div class="bg-slate-700/50 rounded-lg p-3">
+                        <div class="text-sm text-slate-400">Games Played</div>
+                        <div id="memory-games-played" class="text-lg font-bold text-slate-200">0</div>
+                    </div>
+                    <div class="bg-slate-700/50 rounded-lg p-3">
+                        <div class="text-sm text-slate-400">Win Rate</div>
+                        <div id="memory-win-rate" class="text-lg font-bold text-slate-200">0%</div>
+                    </div>
+                    <div class="bg-slate-700/50 rounded-lg p-3">
+                        <div class="text-sm text-slate-400">Avg Time</div>
+                        <div id="memory-avg-time" class="text-lg font-bold text-slate-200">--:--</div>
+                    </div>
+                    <div class="bg-slate-700/50 rounded-lg p-3">
+                        <div class="text-sm text-slate-400">Streak</div>
+                        <div id="memory-streak" class="text-lg font-bold text-slate-200">0</div>
                     </div>
                 </div>
             </div>
@@ -30789,6 +30937,11 @@ The PTSD Corner has additional EMDR and trauma techniques. I'll be back soon.`
             };
             localStorage.setItem('gamificationProgress', JSON.stringify(freshGamificationData));
             
+            // Clear Progress Timeline and Recent Achievements
+            if (typeof clearTimelineAndAchievements === 'function') {
+                clearTimelineAndAchievements();
+            }
+            
             console.log('✅ Reset to new subscriber state! Refreshing...');
             location.reload();
         }
@@ -31041,6 +31194,14 @@ The PTSD Corner has additional EMDR and trauma techniques. I'll be back soon.`
                 console.error('🎮 Error in gamification tracking:', error);
             }
             
+            // Update Progress Timeline and Recent Achievements
+            if (typeof updateProgressTimeline === 'function') {
+                updateProgressTimeline();
+            }
+            if (typeof updateRecentAchievements === 'function') {
+                updateRecentAchievements();
+            }
+            
             // Success message with actual numbers
             showSuccessMessage(`🏃‍♂️ ${activityName.replace('_', ' ')} logged! Physical Health +${actualPhysicalBoost.toFixed(1)}, Energy +${actualEnergyBoost.toFixed(1)}`);
         }
@@ -31107,7 +31268,7 @@ The PTSD Corner has additional EMDR and trauma techniques. I'll be back soon.`
                     <div class="flex gap-3 mt-6">
                         <button onclick="closeQuickUpdateModal()" 
                             class="flex-1 bg-slate-700 hover:bg-slate-600 px-6 py-3 rounded-lg text-white">Cancel</button>
-                        <button onclick="logNutrition()" id="log-nutrition-btn"
+                        <button onclick="logDetailedActivity('nutrition'); closeActivityModal();" id="log-nutrition-btn"
                             class="flex-1 bg-orange-600 hover:bg-orange-700 px-6 py-3 rounded-lg text-white font-medium" disabled>
                             Select Activity First
                         </button>
@@ -31190,12 +31351,20 @@ The PTSD Corner has additional EMDR and trauma techniques. I'll be back soon.`
             // 🎮 Track gamification progress for nutrition activity
             trackGamificationProgress('diet', activityName.replace('_', ' '));
             
+            // Update Progress Timeline and Recent Achievements
+            if (typeof updateProgressTimeline === 'function') {
+                updateProgressTimeline();
+            }
+            if (typeof updateRecentAchievements === 'function') {
+                updateRecentAchievements();
+            }
+            
             // Success message with actual numbers
             showSuccessMessage(`🥗 ${activityName.replace('_', ' ')} logged! Physical Health +${actualPhysicalBoost.toFixed(1)}, Energy +${actualEnergyBoost.toFixed(1)}`);
         }
 
-        // Quick Sleep Update
-        function quickUpdateSleep() {
+        // Quick Sleep Update - WORKING VERSION
+        window.quickUpdateSleep = function() {
             const modal = document.createElement('div');
             modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
             modal.innerHTML = `
@@ -31271,10 +31440,19 @@ The PTSD Corner has additional EMDR and trauma techniques. I'll be back soon.`
             saveWeeklyActivity(weeklyData);
             
             // 🎮 Track gamification progress for sleep activity
-            trackGamificationProgress('sleep', `Sleep: ${hours}h, Quality: ${quality}/5`);
+            trackGamificationProgress('sleep', 'Sleep: ' + hours + 'h, Quality: ' + quality + '/5');
             
             closeQuickUpdateModal();
             updateDashboardWithNewActivity();
+            
+            // Update Progress Timeline and Recent Achievements
+            if (typeof updateProgressTimeline === 'function') {
+                updateProgressTimeline();
+            }
+            if (typeof updateRecentAchievements === 'function') {
+                updateRecentAchievements();
+            }
+            
             showSuccessMessage('😴 Sleep logged! Your sleep and energy scores are updating...');
         }
 
@@ -31366,6 +31544,15 @@ The PTSD Corner has additional EMDR and trauma techniques. I'll be back soon.`
             
             closeQuickUpdateModal();
             updateDashboardWithNewActivity();
+            
+            // Update Progress Timeline and Recent Achievements
+            if (typeof updateProgressTimeline === 'function') {
+                updateProgressTimeline();
+            }
+            if (typeof updateRecentAchievements === 'function') {
+                updateRecentAchievements();
+            }
+            
             showSuccessMessage('🧠 Mental wellness logged! Your mental health scores are updating...');
         }
 
@@ -32056,7 +32243,6 @@ window.logNutrition = function(food, nutrition) {
     nutritionLog.push(entry);
     localStorage.setItem('nutritionLog', JSON.stringify(nutritionLog));
     
-    alert(`✅ ${food} logged to your nutrition diary!`);
     console.log('🍎 Nutrition logged:', entry);
 };
 
@@ -34588,7 +34774,7 @@ window.quickUpdateExercise = function() {
             </div>
             <div class="flex gap-3 mt-6">
                 <button onclick="closeModalFixed()" class="flex-1 bg-slate-700 hover:bg-slate-600 px-6 py-3 rounded-lg text-white">Cancel</button>
-                <button onclick="logDetailedActivity('exercise'); alert('🏃‍♂️ Exercise logged successfully!'); closeModalFixed();" class="flex-1 bg-green-600 hover:bg-green-700 px-6 py-3 rounded-lg text-white font-medium">Log Exercise</button>
+                <button onclick="logDetailedActivity('exercise'); closeModalFixed();" class="flex-1 bg-green-600 hover:bg-green-700 px-6 py-3 rounded-lg text-white font-medium">Log Exercise</button>
             </div>
         </div>
     `;
@@ -34609,7 +34795,7 @@ window.quickUpdateNutrition = function() {
             <div class="space-y-4">
                 <div>
                     <label class="block text-slate-300 text-sm font-medium mb-2">Meal Type</label>
-                    <select id="nutrition-type" class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-3 text-white focus:border-blue-500 focus:outline-none">
+                    <select id="nutrition-activity" class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-3 text-white focus:border-blue-500 focus:outline-none">
                         <option value="">What did you eat?</option>
                         <option value="breakfast">Breakfast</option>
                         <option value="lunch">Lunch</option>
@@ -34642,15 +34828,15 @@ window.quickUpdateNutrition = function() {
             </div>
             <div class="flex gap-3 mt-6">
                 <button onclick="closeModalFixed()" class="flex-1 bg-slate-700 hover:bg-slate-600 px-6 py-3 rounded-lg text-white">Cancel</button>
-                <button onclick="logDetailedActivity('nutrition'); alert('🥗 Nutrition logged successfully!'); closeModalFixed();" class="flex-1 bg-yellow-600 hover:bg-yellow-700 px-6 py-3 rounded-lg text-white font-medium">Log Nutrition</button>
+                <button onclick="logDetailedActivity('nutrition'); closeModalFixed();" class="flex-1 bg-yellow-600 hover:bg-yellow-700 px-6 py-3 rounded-lg text-white font-medium">Log Nutrition</button>
             </div>
         </div>
     `;
     document.body.appendChild(modal);
 };
 
-window.quickUpdateSleep = function() {
-    console.log('😴 Sleep button clicked - DETAILED VERSION WITH OPTIONS');
+window.quickUpdateSleep_DISABLED_OLD = function() {
+    console.log('❌ DISABLED - Sleep button clicked - DETAILED VERSION WITH OPTIONS');
     const modal = document.createElement('div');
     modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
     modal.innerHTML = `
@@ -34699,7 +34885,7 @@ window.quickUpdateSleep = function() {
             </div>
             <div class="flex gap-3 mt-6">
                 <button onclick="closeModalFixed()" class="flex-1 bg-slate-700 hover:bg-slate-600 px-6 py-3 rounded-lg text-white">Cancel</button>
-                <button onclick="logDetailedActivity('sleep'); alert('😴 Sleep logged successfully!'); closeModalFixed();" class="flex-1 bg-purple-600 hover:bg-purple-700 px-6 py-3 rounded-lg text-white font-medium">Log Sleep</button>
+                <button onclick="logDetailedActivity('sleep'); closeModalFixed();" class="flex-1 bg-purple-600 hover:bg-purple-700 px-6 py-3 rounded-lg text-white font-medium">Log Sleep</button>
             </div>
         </div>
     `;
@@ -34755,7 +34941,7 @@ window.quickUpdateMental = function() {
             </div>
             <div class="flex gap-3 mt-6">
                 <button onclick="closeModalFixed()" class="flex-1 bg-slate-700 hover:bg-slate-600 px-6 py-3 rounded-lg text-white">Cancel</button>
-                <button onclick="logDetailedActivity('mental'); alert('🧠 Mental health logged successfully!'); closeModalFixed();" class="flex-1 bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-lg text-white font-medium">Log Mental</button>
+                <button onclick="logDetailedActivity('mental'); closeModalFixed();" class="flex-1 bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-lg text-white font-medium">Log Mental</button>
             </div>
         </div>
     `;
@@ -34777,8 +34963,8 @@ window.quickUpdateMedication = function() {
                 <div class="text-center">
                     <p class="text-slate-300 mb-4">Simple medication adherence tracking</p>
                     <div class="flex gap-4 justify-center">
-                        <button onclick="logActivity('medication', 'yes'); alert('💊 Medications taken - Great job staying on track!'); closeModalFixed();" class="bg-green-600 hover:bg-green-700 px-8 py-4 rounded-lg text-white font-bold text-lg">✅ YES</button>
-                        <button onclick="logActivity('medication', 'no'); alert('Medications missed - Try to set reminders for tomorrow!'); closeModalFixed();" class="bg-red-600 hover:bg-red-700 px-8 py-4 rounded-lg text-white font-bold text-lg">❌ NO</button>
+                        <button onclick="logActivity('medication', 'yes'); closeModalFixed();" class="bg-green-600 hover:bg-green-700 px-8 py-4 rounded-lg text-white font-bold text-lg">✅ YES</button>
+                        <button onclick="logActivity('medication', 'no'); closeModalFixed();" class="bg-red-600 hover:bg-red-700 px-8 py-4 rounded-lg text-white font-bold text-lg">❌ NO</button>
                     </div>
                 </div>
             </div>
@@ -34840,7 +35026,7 @@ window.quickUpdateSocial = function() {
             </div>
             <div class="flex gap-3 mt-6">
                 <button onclick="closeModalFixed()" class="flex-1 bg-slate-700 hover:bg-slate-600 px-6 py-3 rounded-lg text-white">Cancel</button>
-                <button onclick="logDetailedSocialActivity(); alert('👥 Social activity logged successfully!'); closeModalFixed();" class="flex-1 bg-cyan-600 hover:bg-cyan-700 px-6 py-3 rounded-lg text-white font-medium">Log Social</button>
+                <button onclick="logDetailedSocialActivity(); closeModalFixed();" class="flex-1 bg-cyan-600 hover:bg-cyan-700 px-6 py-3 rounded-lg text-white font-medium">Log Social</button>
             </div>
         </div>
     `;
@@ -34896,7 +35082,7 @@ window.quickUpdateMedical = function() {
             </div>
             <div class="flex gap-3 mt-6">
                 <button onclick="closeModalFixed()" class="flex-1 bg-slate-700 hover:bg-slate-600 px-6 py-3 rounded-lg text-white">Cancel</button>
-                <button onclick="logDetailedMedicalActivity(); alert('⚕️ Medical event logged successfully!'); closeModalFixed();" class="flex-1 bg-teal-600 hover:bg-teal-700 px-6 py-3 rounded-lg text-white font-medium">Log Medical</button>
+                <button onclick="logDetailedMedicalActivity(); closeModalFixed();" class="flex-1 bg-teal-600 hover:bg-teal-700 px-6 py-3 rounded-lg text-white font-medium">Log Medical</button>
             </div>
         </div>
     `;
@@ -35064,7 +35250,7 @@ window.logDetailedActivity = function(activityType) {
         };
     } else if (activityType === 'nutrition') {
         detailData = {
-            mealType: document.getElementById('nutrition-type')?.value || 'not specified',
+            activity: document.getElementById('nutrition-activity')?.value || 'not specified',
             quality: document.getElementById('nutrition-quality')?.value || 'not specified',
             portion: document.getElementById('nutrition-portion')?.value || 'not specified'
         };
@@ -36167,7 +36353,7 @@ window.quickUpdateNutrition = function() {
             
             <div class="flex gap-3 mt-6">
                 <button onclick="closeNutritionModal()" class="flex-1 bg-slate-700 hover:bg-slate-600 px-6 py-3 rounded-lg text-white">Cancel</button>
-                <button onclick="logNutritionActivity()" id="log-nutrition-btn" class="flex-1 bg-green-600 hover:bg-green-700 px-6 py-3 rounded-lg text-white font-medium" disabled>
+                <button onclick="logDetailedActivity('nutrition'); closeNutritionModal();" id="log-nutrition-btn" class="flex-1 bg-green-600 hover:bg-green-700 px-6 py-3 rounded-lg text-white font-medium" disabled>
                     Select Activity First
                 </button>
             </div>
@@ -36238,7 +36424,6 @@ window.logNutritionActivity = function() {
     localStorage.setItem('weeklyActivity', JSON.stringify(weeklyActivity));
     
     closeNutritionModal();
-    alert(`✅ ${activityName.replace('_', ' ')} logged!\nPhysical Health: +${actualPhysicalBoost.toFixed(1)}\nEnergy: +${actualEnergyBoost.toFixed(1)}`);
     
     // Force dashboard refresh
     setTimeout(() => {
@@ -36257,8 +36442,8 @@ window.closeNutritionModal = function() {
 };
 
 // Override sleep function - make it work properly
-window.quickUpdateSleep = function() {
-    console.log('😴 FIXED: Sleep button clicked');
+window.quickUpdateSleep_DISABLED_OLD2 = function() {
+    console.log('❌ DISABLED - Sleep button clicked');
     const modal = document.createElement('div');
     modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
     modal.innerHTML = `
@@ -36371,7 +36556,6 @@ window.logSleepActivity = function() {
     localStorage.setItem('weeklyActivity', JSON.stringify(weeklyActivity));
     
     closeSleepModal();
-    alert(`✅ ${hours} hours sleep logged!\nPhysical Health: +${actualPhysicalBoost.toFixed(1)}\nEnergy: +${actualEnergyBoost.toFixed(1)}`);
     
     // Force dashboard refresh
     setTimeout(() => {
@@ -36389,6 +36573,605 @@ window.closeSleepModal = function() {
     if (modal) modal.remove();
 };
 
+// ===== PROGRESS TIMELINE & ACHIEVEMENTS UPDATE FUNCTIONS =====
+
+// Function to update progress timeline with activity data
+window.updateProgressTimeline = function() {
+    console.log('📅 Updating Progress Timeline...');
+    const timelineContainer = document.getElementById('progress-timeline-content');
+    if (!timelineContainer) {
+        console.log('❌ Timeline container not found');
+        return;
+    }
+    
+    const weeklyActivity = JSON.parse(localStorage.getItem('weeklyActivity') || '{}');
+    console.log('📊 Weekly activity data:', weeklyActivity);
+    const activityEntries = [];
+    
+    // Collect all activity entries from the actual data structure
+    Object.keys(weeklyActivity).forEach(weekKey => {
+        const weekData = weeklyActivity[weekKey];
+        
+        // Exercise activities
+        if (weekData.exercise && weekData.exercise.activities) {
+            weekData.exercise.activities.forEach(activity => {
+                activityEntries.push({
+                    type: 'exercise',
+                    title: '🏃‍♂️ Exercise Completed',
+                    description: activity.name ? activity.name.replace('_', ' ') : 'Workout session completed',
+                    timestamp: activity.timestamp || Date.now(),
+                    date: activity.date || new Date().toLocaleDateString(),
+                    color: 'green'
+                });
+            });
+        }
+        
+        // Nutrition activities
+        if (weekData.nutrition && weekData.nutrition.activities) {
+            weekData.nutrition.activities.forEach(activity => {
+                activityEntries.push({
+                    type: 'nutrition',
+                    title: '🥗 Nutrition Logged',
+                    description: activity.name ? activity.name.replace('_', ' ') : 'Healthy nutrition choices',
+                    timestamp: activity.timestamp || Date.now(),
+                    date: activity.date || new Date().toLocaleDateString(),
+                    color: 'orange'
+                });
+            });
+        }
+        
+        // Sleep activities
+        if (weekData.sleep && weekData.sleep.activities) {
+            weekData.sleep.activities.forEach(activity => {
+                activityEntries.push({
+                    type: 'sleep',
+                    title: '😴 Sleep Tracked',
+                    description: activity.description || 'Sleep quality recorded',
+                    timestamp: activity.timestamp || Date.now(),
+                    date: activity.date || new Date().toLocaleDateString(),
+                    color: 'blue'
+                });
+            });
+        }
+        
+        // Mental wellness activities
+        if (weekData.mental && weekData.mental.activities) {
+            weekData.mental.activities.forEach(activity => {
+                activityEntries.push({
+                    type: 'mental',
+                    title: '🧠 Mental Wellness',
+                    description: activity.description || 'Mental health activity completed',
+                    timestamp: activity.timestamp || Date.now(),
+                    date: activity.date || new Date().toLocaleDateString(),
+                    color: 'purple'
+                });
+            });
+        }
+    });
+    
+    console.log('📈 Found ' + activityEntries.length + ' activity entries');
+    if (activityEntries.length === 0) {
+        console.log('⚠️ No activities found, showing empty state');
+        timelineContainer.innerHTML = '<div class="text-center py-8 text-slate-400">' +
+            '<div class="text-4xl mb-3">📊</div>' +
+            '<p class="text-lg">No activities logged yet</p>' +
+            '<p class="text-sm mt-2">Start logging your health activities to see your progress timeline</p>' +
+        '</div>';
+        return;
+    }
+    
+    // Sort entries by timestamp (most recent first) and take top 5
+    activityEntries.sort(function(a, b) { return (b.timestamp || 0) - (a.timestamp || 0); });
+    const recentEntries = activityEntries.slice(0, 5);
+    
+    const timelineHTML = recentEntries.map((entry, index) => {
+        const now = Date.now();
+        const timeDiff = now - (entry.timestamp || now);
+        const hoursAgo = Math.floor(timeDiff / (1000 * 60 * 60));
+        const timeAgo = hoursAgo < 1 ? 'Just now' : hoursAgo < 24 ? hoursAgo + 'h ago' : Math.floor(hoursAgo / 24) + 'd ago';
+        return '<div class="flex items-start space-x-4">' +
+            '<div class="flex-shrink-0 w-3 h-3 bg-' + entry.color + '-400 rounded-full mt-2"></div>' +
+            '<div class="flex-grow">' +
+                '<div class="flex justify-between items-center">' +
+                    '<h3 class="font-semibold text-slate-200">' + entry.title + '</h3>' +
+                    '<span class="text-xs text-slate-400">' + timeAgo + '</span>' +
+                '</div>' +
+                '<p class="text-sm text-slate-400">' + entry.description + '</p>' +
+            '</div>' +
+        '</div>';
+    }).join('');
+    
+    timelineContainer.innerHTML = timelineHTML;
+};
+
+// Function to update recent achievements
+window.updateRecentAchievements = function() {
+    const achievementsContainer = document.getElementById('recent-achievements-content');
+    if (!achievementsContainer) return;
+    
+    const weeklyActivity = JSON.parse(localStorage.getItem('weeklyActivity') || '{}');
+    const achievements = [];
+    
+    // Count activities
+    let exerciseCount = 0, nutritionCount = 0, sleepCount = 0, mentalCount = 0;
+    Object.keys(weeklyActivity).forEach(function(weekKey) {
+        const weekData = weeklyActivity[weekKey];
+        if (weekData.exercise && weekData.exercise.count) exerciseCount += weekData.exercise.count;
+        if (weekData.nutrition && weekData.nutrition.count) nutritionCount += weekData.nutrition.count;
+        if (weekData.sleep && weekData.sleep.count) sleepCount += weekData.sleep.count;
+        if (weekData.mental && weekData.mental.count) mentalCount += weekData.mental.count;
+    });
+    
+    // Generate achievements based on activity counts
+    if (exerciseCount >= 3) {
+        achievements.push({
+            emoji: '🏃‍♂️',
+            title: 'Fitness Enthusiast',
+            description: 'Completed ' + exerciseCount + ' exercise sessions',
+            color: 'green'
+        });
+    }
+    if (nutritionCount >= 3) {
+        achievements.push({
+            emoji: '🥗',
+            title: 'Nutrition Champion',
+            description: 'Logged ' + nutritionCount + ' healthy meals',
+            color: 'orange'
+        });
+    }
+    if (sleepCount >= 3) {
+        achievements.push({
+            emoji: '😴',
+            title: 'Sleep Optimizer',
+            description: 'Tracked sleep ' + sleepCount + ' times',
+            color: 'blue'
+        });
+    }
+    if (mentalCount >= 2) {
+        achievements.push({
+            emoji: '🧘',
+            title: 'Mindfulness Practitioner',
+            description: 'Completed ' + mentalCount + ' mental wellness activities',
+            color: 'purple'
+        });
+    }
+    
+    if (achievements.length === 0) {
+        achievementsContainer.innerHTML = '<div class="col-span-full text-center py-8 text-slate-400">' +
+            '<div class="text-4xl mb-3">🏆</div>' +
+            '<p class="text-lg">No achievements earned yet</p>' +
+            '<p class="text-sm mt-2">Complete health activities to unlock achievements</p>' +
+        '</div>';
+        return;
+    }
+    
+    const achievementsHTML = achievements.map(function(achievement) {
+        return '<div class="bg-gradient-to-br from-' + achievement.color + '-500/20 to-' + achievement.color + '-600/20 p-4 rounded-lg border border-' + achievement.color + '-500/30">' +
+            '<div class="text-2xl mb-2">' + achievement.emoji + '</div>' +
+            '<h3 class="font-semibold text-slate-200 mb-1">' + achievement.title + '</h3>' +
+            '<p class="text-xs text-slate-400">' + achievement.description + '</p>' +
+            '<span class="text-xs bg-' + achievement.color + '-500/30 text-' + achievement.color + '-400 px-2 py-1 rounded-full mt-2 inline-block">Active</span>' +
+        '</div>';
+    }).join('');
+    
+    achievementsContainer.innerHTML = achievementsHTML;
+};
+
+// Function to clear timeline and achievements (called during reset)
+window.clearTimelineAndAchievements = function() {
+    const timelineContainer = document.getElementById('progress-timeline-content');
+    const achievementsContainer = document.getElementById('recent-achievements-content');
+    
+    if (timelineContainer) {
+        timelineContainer.innerHTML = `
+            <div class="text-center py-8 text-slate-400">
+                <div class="text-4xl mb-3">📊</div>
+                <p class="text-lg">No activities logged yet</p>
+                <p class="text-sm mt-2">Start logging your health activities to see your progress timeline</p>
+            </div>
+        `;
+    }
+    
+    if (achievementsContainer) {
+        achievementsContainer.innerHTML = `
+            <div class="col-span-full text-center py-8 text-slate-400">
+                <div class="text-4xl mb-3">🏆</div>
+                <p class="text-lg">No achievements earned yet</p>
+                <p class="text-sm mt-2">Complete health activities to unlock achievements</p>
+            </div>
+        `;
+    }
+};
+
+// ============================================================================
+// MEMORY GAME FUNCTIONALITY - COMPLETE IMPLEMENTATION
+// ============================================================================
+
+// Memory Game State
+let memoryGameState = {
+    cards: [],
+    flippedCards: [],
+    matchedPairs: 0,
+    totalPairs: 0,
+    gameStarted: false,
+    gameCompleted: false,
+    startTime: null,
+    currentLevel: 1,
+    moves: 0,
+    canFlip: true
+};
+
+// Health icons for memory cards
+const healthIcons = [
+    '💊', '🏃‍♂️', '🥗', '💤', '🧠', '❤️', '🫁', '🦷',
+    '🥛', '🍎', '🥕', '🥬', '💪', '🧘‍♀️', '🚶‍♂️', '🏋️‍♂️',
+    '🩺', '🌡️', '💉', '🧬', '🫀', '👁️', '👂', '🦴'
+];
+
+// Health tips for rewards
+const healthTips = [
+    "Drink at least 8 glasses of water daily to stay hydrated and support all body functions.",
+    "Aim for 7-9 hours of quality sleep each night to boost immune system and mental clarity.",
+    "Take short breaks every hour to stretch and move, reducing stress on muscles and joints.",
+    "Practice deep breathing for 5 minutes daily to reduce stress and improve oxygen flow.",
+    "Eat colorful fruits and vegetables to get a variety of essential vitamins and antioxidants.",
+    "Regular exercise for 30 minutes daily can reduce the risk of chronic diseases by 50%.",
+    "Wash your hands frequently to prevent the spread of germs and infections.",
+    "Limit processed foods and sugar to maintain stable energy levels throughout the day.",
+    "Practice gratitude daily - it can improve mental health and overall life satisfaction.",
+    "Get regular health check-ups to catch potential issues early and maintain optimal health.",
+    "Spend time in nature to reduce stress hormones and boost vitamin D naturally.",
+    "Maintain good posture to prevent back pain and improve breathing efficiency.",
+    "Stay socially connected - strong relationships contribute to better mental and physical health.",
+    "Learn something new regularly to keep your brain active and improve cognitive function.",
+    "Practice mindful eating - chew slowly and pay attention to hunger and fullness cues."
+];
+
+// Load memory game statistics from localStorage
+function loadMemoryGameStats() {
+    const stats = JSON.parse(localStorage.getItem('memoryGameStats') || '{}');
+    return {
+        gamesPlayed: stats.gamesPlayed || 0,
+        gamesWon: stats.gamesWon || 0,
+        totalTime: stats.totalTime || 0,
+        bestTime: stats.bestTime || null,
+        currentStreak: stats.currentStreak || 0,
+        bestStreak: stats.bestStreak || 0,
+        currentLevel: stats.currentLevel || 1
+    };
+}
+
+// Save memory game statistics to localStorage
+function saveMemoryGameStats(stats) {
+    localStorage.setItem('memoryGameStats', JSON.stringify(stats));
+    updateMemoryGameDisplay();
+}
+
+// Update memory game statistics display
+function updateMemoryGameDisplay() {
+    const stats = loadMemoryGameStats();
+    
+    document.getElementById('memory-games-played').textContent = stats.gamesPlayed;
+    document.getElementById('memory-win-rate').textContent = 
+        stats.gamesPlayed > 0 ? Math.round((stats.gamesWon / stats.gamesPlayed) * 100) + '%' : '0%';
+    document.getElementById('memory-avg-time').textContent = 
+        stats.gamesWon > 0 ? formatTime(Math.round(stats.totalTime / stats.gamesWon)) : '--:--';
+    document.getElementById('memory-streak').textContent = stats.currentStreak;
+    
+    // Update level display
+    document.getElementById('memory-level').textContent = stats.currentLevel;
+    document.getElementById('memory-moves').textContent = memoryGameState.moves;
+}
+
+// Format time in MM:SS format
+function formatTime(seconds) {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return mins.toString().padStart(2, '0') + ':' + secs.toString().padStart(2, '0');
+}
+
+// Start memory game
+window.startMemoryGame = function() {
+    const stats = loadMemoryGameStats();
+    memoryGameState.currentLevel = stats.currentLevel;
+    
+    // Reset game state
+    memoryGameState.cards = [];
+    memoryGameState.flippedCards = [];
+    memoryGameState.matchedPairs = 0;
+    memoryGameState.gameStarted = true;
+    memoryGameState.gameCompleted = false;
+    memoryGameState.startTime = Date.now();
+    memoryGameState.moves = 0;
+    memoryGameState.canFlip = true;
+    
+    // Calculate grid size based on level
+    const gridSize = Math.min(3 + Math.floor(memoryGameState.currentLevel / 2), 6);
+    memoryGameState.totalPairs = Math.floor((gridSize * gridSize) / 2);
+    
+    // Hide reward section
+    document.getElementById('memory-reward').classList.add('hidden');
+    
+    // Generate cards
+    generateMemoryCards(gridSize);
+    
+    // Update UI
+    document.getElementById('memory-start-btn').textContent = 'GAME IN PROGRESS';
+    document.getElementById('memory-start-btn').disabled = true;
+    updateMemoryGameDisplay();
+    
+    console.log('🎮 Memory Game Started - Level ' + memoryGameState.currentLevel + ', Grid: ' + gridSize + 'x' + gridSize);
+};
+
+// Generate memory cards
+function generateMemoryCards(gridSize) {
+    const gameBoard = document.getElementById('memory-game-board');
+    const totalCards = gridSize * gridSize;
+    const pairs = Math.floor(totalCards / 2);
+    
+    // Select random health icons for this game
+    const selectedIcons = healthIcons.slice(0, pairs);
+    const cardIcons = [...selectedIcons, ...selectedIcons]; // Create pairs
+    
+    // Shuffle the cards
+    for (let i = cardIcons.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [cardIcons[i], cardIcons[j]] = [cardIcons[j], cardIcons[i]];
+    }
+    
+    // Set grid layout
+    gameBoard.style.gridTemplateColumns = `repeat(${gridSize}, 1fr)`;
+    gameBoard.className = `grid gap-3 justify-center mb-6 max-w-md mx-auto`;
+    
+    // Create card elements
+    gameBoard.innerHTML = '';
+    memoryGameState.cards = [];
+    
+    cardIcons.forEach((icon, index) => {
+        const card = document.createElement('div');
+        card.className = 'memory-card w-16 h-16 bg-slate-700 border border-slate-600 rounded-lg flex items-center justify-center text-2xl cursor-pointer transition-all duration-300 hover:bg-slate-600';
+        card.dataset.icon = icon;
+        card.dataset.index = index;
+        card.innerHTML = '<div class="card-back text-slate-500">❓</div>';
+        
+        card.addEventListener('click', () => flipMemoryCard(index));
+        gameBoard.appendChild(card);
+        
+        memoryGameState.cards.push({
+            element: card,
+            icon: icon,
+            isFlipped: false,
+            isMatched: false
+        });
+    });
+}
+
+// Flip memory card
+function flipMemoryCard(index) {
+    if (!memoryGameState.canFlip || !memoryGameState.gameStarted || memoryGameState.gameCompleted) return;
+    
+    const card = memoryGameState.cards[index];
+    if (card.isFlipped || card.isMatched) return;
+    
+    // Flip the card
+    card.isFlipped = true;
+    card.element.innerHTML = `<div class="card-front">${card.icon}</div>`;
+    card.element.classList.add('bg-blue-600', 'border-blue-400');
+    
+    memoryGameState.flippedCards.push(index);
+    
+    if (memoryGameState.flippedCards.length === 2) {
+        memoryGameState.moves++;
+        updateMemoryGameDisplay();
+        memoryGameState.canFlip = false;
+        
+        setTimeout(() => checkMemoryMatch(), 800);
+    }
+}
+
+// Check if flipped cards match
+function checkMemoryMatch() {
+    const [firstIndex, secondIndex] = memoryGameState.flippedCards;
+    const firstCard = memoryGameState.cards[firstIndex];
+    const secondCard = memoryGameState.cards[secondIndex];
+    
+    if (firstCard.icon === secondCard.icon) {
+        // Match found!
+        firstCard.isMatched = true;
+        secondCard.isMatched = true;
+        firstCard.element.classList.remove('bg-blue-600', 'border-blue-400');
+        secondCard.element.classList.remove('bg-blue-600', 'border-blue-400');
+        firstCard.element.classList.add('bg-green-600', 'border-green-400', 'opacity-75');
+        secondCard.element.classList.add('bg-green-600', 'border-green-400', 'opacity-75');
+        
+        memoryGameState.matchedPairs++;
+        
+        // Check if game is completed
+        if (memoryGameState.matchedPairs === memoryGameState.totalPairs) {
+            setTimeout(() => completeMemoryGame(), 500);
+        }
+    } else {
+        // No match - flip cards back
+        setTimeout(() => {
+            firstCard.isFlipped = false;
+            secondCard.isFlipped = false;
+            firstCard.element.innerHTML = '<div class="card-back text-slate-500">❓</div>';
+            secondCard.element.innerHTML = '<div class="card-back text-slate-500">❓</div>';
+            firstCard.element.classList.remove('bg-blue-600', 'border-blue-400');
+            secondCard.element.classList.remove('bg-blue-600', 'border-blue-400');
+        }, 300);
+    }
+    
+    memoryGameState.flippedCards = [];
+    memoryGameState.canFlip = true;
+}
+
+// Complete memory game
+function completeMemoryGame() {
+    memoryGameState.gameCompleted = true;
+    const endTime = Date.now();
+    const gameTime = Math.round((endTime - memoryGameState.startTime) / 1000);
+    
+    // Update statistics
+    const stats = loadMemoryGameStats();
+    stats.gamesPlayed++;
+    stats.gamesWon++;
+    stats.totalTime += gameTime;
+    stats.currentStreak++;
+    
+    if (stats.currentStreak > stats.bestStreak) {
+        stats.bestStreak = stats.currentStreak;
+    }
+    
+    if (!stats.bestTime || gameTime < stats.bestTime) {
+        stats.bestTime = gameTime;
+    }
+    
+    // Level progression logic
+    const maxMoves = memoryGameState.totalPairs + 2; // Allow some mistakes
+    if (memoryGameState.moves <= maxMoves && gameTime <= 120) { // Under 2 minutes
+        stats.currentLevel = Math.min(stats.currentLevel + 1, 10); // Max level 10
+    }
+    
+    saveMemoryGameStats(stats);
+    
+    // Show completion celebration
+    showMemoryGameCompletion(gameTime);
+    
+    // Update mental wellness score for playing the game
+    updateMentalWellnessFromGame();
+    
+    // Reset start button
+    document.getElementById('memory-start-btn').textContent = 'START NEW GAME';
+    document.getElementById('memory-start-btn').disabled = false;
+    
+    console.log('🎉 Memory Game Completed! Time: ' + gameTime + 's, Moves: ' + memoryGameState.moves);
+}
+
+// Show memory game completion with health tip
+function showMemoryGameCompletion(gameTime) {
+    const rewardDiv = document.getElementById('memory-reward');
+    const tipText = document.getElementById('memory-tip-text');
+    
+    // Select random health tip
+    const randomTip = healthTips[Math.floor(Math.random() * healthTips.length)];
+    tipText.textContent = randomTip;
+    
+    // Update reward message based on performance
+    const rewardTitle = rewardDiv.querySelector('h4');
+    if (gameTime <= 60) {
+        rewardTitle.textContent = '🌟 Excellent Performance - Health Tip Unlocked!';
+        rewardDiv.className = rewardDiv.className.replace('from-green-500/20 to-blue-500/20', 'from-yellow-500/20 to-orange-500/20');
+    } else if (gameTime <= 120) {
+        rewardTitle.textContent = '✨ Great Job - Health Tip Unlocked!';
+        rewardDiv.className = rewardDiv.className.replace('from-yellow-500/20 to-orange-500/20', 'from-green-500/20 to-blue-500/20');
+    } else {
+        rewardTitle.textContent = '💡 Well Done - Health Tip Unlocked!';
+    }
+    
+    rewardDiv.classList.remove('hidden');
+    
+    // Scroll into view
+    rewardDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+// Update mental wellness score from playing memory game
+function updateMentalWellnessFromGame() {
+    try {
+        // Get current week
+        const today = new Date();
+        const startOfWeek = new Date(today.getFullYear(), today.getMonth(), today.getDate() - today.getDay());
+        const weekKey = startOfWeek.getFullYear() + '-W' + Math.ceil((startOfWeek.getTime() - new Date(startOfWeek.getFullYear(), 0, 1).getTime()) / (7 * 24 * 60 * 60 * 1000));
+        
+        // Get existing data
+        const weeklyActivity = JSON.parse(localStorage.getItem('weeklyActivity') || '{}');
+        
+        if (!weeklyActivity[weekKey]) {
+            weeklyActivity[weekKey] = {};
+        }
+        
+        if (!weeklyActivity[weekKey].mental) {
+            weeklyActivity[weekKey].mental = { count: 0, activities: [] };
+        }
+        
+        // Add memory game activity
+        weeklyActivity[weekKey].mental.count++;
+        weeklyActivity[weekKey].mental.activities.push({
+            name: 'memory_game',
+            description: 'Completed memory game - Level ' + memoryGameState.currentLevel,
+            timestamp: Date.now(),
+            date: new Date().toLocaleDateString(),
+            level: memoryGameState.currentLevel,
+            moves: memoryGameState.moves
+        });
+        
+        // Save back to localStorage
+        localStorage.setItem('weeklyActivity', JSON.stringify(weeklyActivity));
+        
+        // Update dashboard scores
+        if (typeof updateDashboardScores === 'function') {
+            updateDashboardScores();
+        }
+        
+        console.log('✅ Mental wellness score updated from memory game');
+    } catch (error) {
+        console.error('❌ Error updating mental wellness from memory game:', error);
+    }
+}
+
+// Reset memory game
+window.resetMemoryGame = function() {
+    memoryGameState = {
+        cards: [],
+        flippedCards: [],
+        matchedPairs: 0,
+        totalPairs: 0,
+        gameStarted: false,
+        gameCompleted: false,
+        startTime: null,
+        currentLevel: 1,
+        moves: 0,
+        canFlip: true
+    };
+    
+    // Clear game board
+    document.getElementById('memory-game-board').innerHTML = '<div class="col-span-full text-center py-8 text-slate-400"><div class="text-4xl mb-3">🧠</div><p class="text-lg">Click START GAME to begin</p><p class="text-sm mt-2">Match pairs of health icons to unlock tips and improve your mental wellness score</p></div>';
+    
+    // Hide reward
+    document.getElementById('memory-reward').classList.add('hidden');
+    
+    // Reset button
+    document.getElementById('memory-start-btn').textContent = 'START GAME';
+    document.getElementById('memory-start-btn').disabled = false;
+    
+    // Update display
+    updateMemoryGameDisplay();
+    
+    console.log('🔄 Memory Game Reset');
+};
+
+// Initialize memory game display on page load
+function initializeMemoryGame() {
+    updateMemoryGameDisplay();
+    
+    // Set initial game board state
+    const gameBoard = document.getElementById('memory-game-board');
+    if (gameBoard && gameBoard.children.length === 0) {
+        gameBoard.innerHTML = '<div class="col-span-full text-center py-8 text-slate-400"><div class="text-4xl mb-3">🧠</div><p class="text-lg">Click START GAME to begin</p><p class="text-sm mt-2">Match pairs of health icons to unlock tips and improve your mental wellness score</p></div>';
+    }
+}
+
+// Initialize memory game when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(initializeMemoryGame, 500);
+});
+
+// Also initialize if already loaded
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeMemoryGame);
+} else {
+    initializeMemoryGame();
+}
 console.log('✅ MINIMAL FIXES APPLIED TO WORKING PLATFORM:');
 console.log('🛑 Stop Tests button removed');
 console.log('📅 Booking calendar fixed - coaches in booking section show calendar');
@@ -36397,6 +37180,8 @@ console.log('🔄 Reset dashboard function fixed - now clears all data properly'
 console.log('🥗 Nutrition logging fixed - now updates dashboard scores');
 console.log('😴 Sleep logging fixed - now updates dashboard scores');
 console.log('🔧 All existing dashboard functionality preserved and enhanced');
+console.log('🎮 Memory Game with progressive difficulty and health tip rewards');
+console.log('🧠 Memory Game replaced Timeline and Achievements - encourages user retention');
 </script>
 
 </body>
