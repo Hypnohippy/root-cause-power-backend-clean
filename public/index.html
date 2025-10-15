@@ -233,6 +233,12 @@
                     <button onclick="window.navigateToSection('journal')" class="nav-btn px-4 py-2 rounded-lg hover:bg-slate-700 transition-colors" data-section="journal">
                         <i class="fas fa-book mr-2"></i>Neural Journal
                     </button>
+                    <button onclick="window.navigateToSection('help')" class="nav-btn px-4 py-2 rounded-lg hover:bg-slate-700 transition-colors" data-section="help">
+                        <i class="fas fa-question-circle mr-2"></i>Help
+                    </button>
+                    <button onclick="window.navigateToSection('contact')" class="nav-btn px-4 py-2 rounded-lg hover:bg-slate-700 transition-colors" data-section="contact">
+                        <i class="fas fa-envelope mr-2"></i>Contact
+                    </button>
                     <button onclick="window.navigateToSection('pricing')" class="nav-btn px-4 py-2 rounded-lg hover:bg-slate-700 transition-colors" data-section="pricing">
                         <i class="fas fa-credit-card mr-2"></i>Pricing
                     </button>
@@ -243,7 +249,7 @@
                     <!-- Credits Display with Top-Up -->
                     <div class="data-flow bg-slate-700 px-4 py-2 rounded-lg flex items-center">
                         <span class="text-sm text-slate-300">Credits:</span>
-                        <span id="desktop-credits-remaining" class="ml-1 font-bold text-green-400">1000</span>
+                        <span id="desktop-credits-remaining" class="ml-1 font-bold text-green-400">8</span>
                         <button onclick="showCreditTopUpModal()" class="ml-3 bg-green-600 hover:bg-green-700 px-2 py-1 rounded text-xs text-white transition-colors" title="Top up credits">
                             <i class="fas fa-plus"></i>
                         </button>
@@ -300,13 +306,19 @@
                     <button onclick="closeMobileMenu(); window.navigateToSection('assessment')" class="w-full text-left nav-btn px-4 py-3 rounded-lg hover:bg-slate-700 transition-colors text-slate-300">
                         <i class="fas fa-clipboard-list mr-3"></i>Root Assessment
                     </button>
+                    <button onclick="closeMobileMenu(); window.navigateToSection('help')" class="w-full text-left nav-btn px-4 py-3 rounded-lg hover:bg-slate-700 transition-colors text-slate-300">
+                        <i class="fas fa-question-circle mr-3"></i>Help Manual
+                    </button>
+                    <button onclick="closeMobileMenu(); window.navigateToSection('contact')" class="w-full text-left nav-btn px-4 py-3 rounded-lg hover:bg-slate-700 transition-colors text-slate-300">
+                        <i class="fas fa-envelope mr-3"></i>Contact Support
+                    </button>
                     
                     <!-- Mobile Credits Display -->
                     <div class="mt-6 p-4 bg-slate-800 rounded-lg">
                         <div class="flex items-center justify-between">
                             <div>
                                 <span class="text-sm text-slate-300">Credits:</span>
-                                <span id="mobile-credits-remaining" class="ml-1 font-bold text-green-400">1000</span>
+                                <span id="mobile-credits-remaining" class="ml-1 font-bold text-green-400">8</span>
                             </div>
                             <button onclick="closeMobileMenu(); showCreditTopUpModal()" class="bg-green-600 hover:bg-green-700 px-3 py-1 rounded text-xs text-white transition-colors">
                                 <i class="fas fa-plus mr-1"></i>Top Up
@@ -1635,10 +1647,283 @@
                 </p>
             </div>
         </section>
+        
+        <!-- Help Manual Section -->
+        <section id="help-section" class="section-content">
+            <div class="mb-8">
+                <h2 class="text-3xl font-bold text-white mb-2">
+                    <i class="fas fa-question-circle text-neural mr-3"></i>Help Manual
+                </h2>
+                <p class="text-slate-400">Complete guide to using Root Cause Power platform</p>
+            </div>
+            
+            <!-- Quick Start Guide -->
+            <div class="intelligence-node rounded-lg p-6 mb-6">
+                <h3 class="text-xl font-bold text-white mb-4">
+                    <i class="fas fa-rocket text-green-400 mr-2"></i>Quick Start Guide
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-slate-800 rounded-lg p-4">
+                        <h4 class="text-lg font-semibold text-blue-400 mb-3">1. Complete Your Assessment</h4>
+                        <ul class="text-slate-300 space-y-2 text-sm">
+                            <li>• Navigate to <strong>Root Assessment</strong></li>
+                            <li>• Choose assessment categories</li>
+                            <li>• Answer questions honestly</li>
+                            <li>• Receive personalized healing guidance</li>
+                        </ul>
+                    </div>
+                    <div class="bg-slate-800 rounded-lg p-4">
+                        <h4 class="text-lg font-semibold text-green-400 mb-3">2. Chat with AI Coaches</h4>
+                        <ul class="text-slate-300 space-y-2 text-sm">
+                            <li>• Go to <strong>AI Coaches</strong> section</li>
+                            <li>• Choose your specialized coach</li>
+                            <li>• Start typing your questions</li>
+                            <li>• Get evidence-based guidance</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Platform Features -->
+            <div class="intelligence-node rounded-lg p-6 mb-6">
+                <h3 class="text-xl font-bold text-white mb-4">
+                    <i class="fas fa-tools text-purple-400 mr-2"></i>Platform Features Guide
+                </h3>
+                <div class="space-y-4">
+                    <div class="border-l-4 border-blue-400 pl-4">
+                        <h4 class="text-lg font-semibold text-blue-400">🧠 Intelligence Hub (Dashboard)</h4>
+                        <p class="text-slate-300 text-sm mt-2">Your central control panel showing health metrics, progress tracking, and quick access to all platform features.</p>
+                    </div>
+                    <div class="border-l-4 border-green-400 pl-4">
+                        <h4 class="text-lg font-semibold text-green-400">🤖 AI Coaches</h4>
+                        <p class="text-slate-300 text-sm mt-2">Specialized AI therapists for anxiety, depression, trauma, addiction, and general wellness. Each coach uses evidence-based approaches.</p>
+                    </div>
+                    <div class="border-l-4 border-yellow-400 pl-4">
+                        <h4 class="text-lg font-semibold text-yellow-400">🔬 Living Research</h4>
+                        <p class="text-slate-300 text-sm mt-2">Real-time access to latest medical research, clinical studies, and treatment innovations from PubMed and major journals.</p>
+                    </div>
+                    <div class="border-l-4 border-red-400 pl-4">
+                        <h4 class="text-lg font-semibant text-red-400">🛡️ PTSD Corner</h4>
+                        <p class="text-slate-300 text-sm mt-2">Specialized tools for trauma recovery including EMDR, grounding techniques, and crisis resources.</p>
+                    </div>
+                    <div class="border-l-4 border-purple-400 pl-4">
+                        <h4 class="text-lg font-semibold text-purple-400">📝 Neural Journal</h4>
+                        <p class="text-slate-300 text-sm mt-2">AI-enhanced journaling with pattern recognition, mood tracking, and personalized insights.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Troubleshooting -->
+            <div class="intelligence-node rounded-lg p-6 mb-6">
+                <h3 class="text-xl font-bold text-white mb-4">
+                    <i class="fas fa-wrench text-orange-400 mr-2"></i>Troubleshooting
+                </h3>
+                <div class="space-y-4">
+                    <div class="bg-slate-800 rounded-lg p-4">
+                        <h4 class="text-lg font-semibold text-red-400 mb-2">❌ Buttons Not Working?</h4>
+                        <ul class="text-slate-300 space-y-1 text-sm">
+                            <li>• Clear browser cache (Ctrl+Shift+Delete)</li>
+                            <li>• Disable ad blockers temporarily</li>
+                            <li>• Try a different browser (Chrome, Firefox, Safari)</li>
+                            <li>• Check internet connection</li>
+                        </ul>
+                    </div>
+                    <div class="bg-slate-800 rounded-lg p-4">
+                        <h4 class="text-lg font-semibold text-yellow-400 mb-2">⚠️ Assessment Not Saving?</h4>
+                        <ul class="text-slate-300 space-y-1 text-sm">
+                            <li>• Enable cookies in browser settings</li>
+                            <li>• Don't use incognito/private mode</li>
+                            <li>• Complete assessment in one session</li>
+                            <li>• Use "Recall Results" if data is lost</li>
+                        </ul>
+                    </div>
+                    <div class="bg-slate-800 rounded-lg p-4">
+                        <h4 class="text-lg font-semibold text-blue-400 mb-2">🤖 AI Coaches Not Responding?</h4>
+                        <ul class="text-slate-300 space-y-1 text-sm">
+                            <li>• Check your internet connection</li>
+                            <li>• Wait a few seconds and try again</li>
+                            <li>• Refresh the page if needed</li>
+                            <li>• Contact support if persistent</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- FAQ -->
+            <div class="intelligence-node rounded-lg p-6">
+                <h3 class="text-xl font-bold text-white mb-4">
+                    <i class="fas fa-question text-indigo-400 mr-2"></i>Frequently Asked Questions
+                </h3>
+                <div class="space-y-4">
+                    <div class="border-b border-slate-700 pb-4">
+                        <h4 class="text-lg font-semibold text-white mb-2">Is my health data private and secure?</h4>
+                        <p class="text-slate-300 text-sm">Yes, all your health information is encrypted and stored locally in your browser. We don't store personal health data on our servers.</p>
+                    </div>
+                    <div class="border-b border-slate-700 pb-4">
+                        <h4 class="text-lg font-semibold text-white mb-2">How accurate are the AI coaches?</h4>
+                        <p class="text-slate-300 text-sm">Our AI coaches are trained on peer-reviewed medical literature and evidence-based practices. However, they're tools for education and support, not replacements for professional medical care.</p>
+                    </div>
+                    <div class="border-b border-slate-700 pb-4">
+                        <h4 class="text-lg font-semibold text-white mb-2">Can I use this platform for crisis situations?</h4>
+                        <p class="text-slate-300 text-sm">No, this platform is not for medical emergencies. For crisis situations in the UK, please contact 999 (emergency) or 116 123 (Samaritans). International users should contact their local emergency services and crisis lines.</p>
+                    </div>
+                    <div>
+                        <h4 class="text-lg font-semibold text-white mb-2">How do I get more credits?</h4>
+                        <p class="text-slate-300 text-sm">New users start with 8 free credits (enough for 1 Coach David session + 1 complete assessment). To get more credits, you must first subscribe to a plan in the Pricing section. Subscribers can then purchase additional credit packages if needed.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Contact Support Section -->
+        <section id="contact-section" class="section-content">
+            <div class="mb-8">
+                <h2 class="text-3xl font-bold text-white mb-2">
+                    <i class="fas fa-envelope text-neural mr-3"></i>Contact Support
+                </h2>
+                <p class="text-slate-400">Get help, report issues, or provide feedback</p>
+            </div>
+            
+            <!-- Contact Form -->
+            <div class="intelligence-node rounded-lg p-6 mb-6">
+                <h3 class="text-xl font-bold text-white mb-4">
+                    <i class="fas fa-paper-plane text-blue-400 mr-2"></i>Send us a Message
+                </h3>
+                
+                <form id="contact-form" class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-slate-300 text-sm font-medium mb-2">Name *</label>
+                            <input type="text" name="name" required 
+                                   class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-3 text-white focus:border-neural focus:outline-none transition-colors"
+                                   placeholder="Your full name">
+                        </div>
+                        <div>
+                            <label class="block text-slate-300 text-sm font-medium mb-2">Email *</label>
+                            <input type="email" name="email" required 
+                                   class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-3 text-white focus:border-neural focus:outline-none transition-colors"
+                                   placeholder="your.email@example.com">
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-slate-300 text-sm font-medium mb-2">Subject *</label>
+                        <select name="subject" required 
+                                class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-3 text-white focus:border-neural focus:outline-none transition-colors">
+                            <option value="" disabled selected>Choose a topic...</option>
+                            <option value="Technical Issue">Technical Issue / Bug Report</option>
+                            <option value="Account Problem">Account / Billing Problem</option>
+                            <option value="Feature Request">Feature Request</option>
+                            <option value="General Question">General Question</option>
+                            <option value="Feedback">Feedback / Suggestion</option>
+                            <option value="Medical Concern">Medical Concern (Non-Emergency)</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-slate-300 text-sm font-medium mb-2">Message *</label>
+                        <textarea name="message" rows="6" required 
+                                  class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-3 text-white focus:border-neural focus:outline-none transition-colors resize-vertical"
+                                  placeholder="Please describe your question, issue, or feedback in detail..."></textarea>
+                    </div>
+                    
+                    <!-- System Info (Hidden) -->
+                    <input type="hidden" name="_subject" value="Root Cause Power - New Contact Form Message">
+                    <input type="hidden" name="_next" value="javascript:void(0)">
+                    <input type="hidden" name="_cc" value="">
+                    
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <input type="checkbox" id="privacy-consent" required 
+                                   class="w-4 h-4 text-neural bg-slate-800 border-slate-600 rounded focus:ring-neural focus:ring-2">
+                            <label for="privacy-consent" class="ml-2 text-sm text-slate-300">
+                                I agree to the <a href="#" onclick="showPrivacyModal()" class="text-neural hover:underline">Privacy Policy</a> and Terms of Service
+                            </label>
+                        </div>
+                        <button type="submit" 
+                                class="bg-gradient-to-r from-neural to-blue-600 hover:from-green-600 hover:to-neural px-8 py-3 rounded-lg text-white font-bold transition-all transform hover:scale-105">
+                            <i class="fas fa-paper-plane mr-2"></i>Send Message
+                        </button>
+                    </div>
+                </form>
+                
+                <!-- Success Message (Hidden) -->
+                <div id="contact-success" class="hidden bg-green-900/20 border border-green-500/30 rounded-lg p-6 mt-6">
+                    <div class="flex items-center">
+                        <i class="fas fa-check-circle text-green-500 text-2xl mr-4"></i>
+                        <div>
+                            <h4 class="text-green-400 font-bold text-lg mb-1">Message Sent Successfully!</h4>
+                            <p class="text-green-300 text-sm">
+                                Thank you for contacting us. We'll respond to your message within 24 hours.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Error Message (Hidden) -->
+                <div id="contact-error" class="hidden bg-red-900/20 border border-red-500/30 rounded-lg p-6 mt-6">
+                    <div class="flex items-center">
+                        <i class="fas fa-exclamation-triangle text-red-500 text-2xl mr-4"></i>
+                        <div>
+                            <h4 class="text-red-400 font-bold text-lg mb-1">Message Failed to Send</h4>
+                            <p class="text-red-300 text-sm">
+                                There was a problem sending your message. Please try again or contact us directly.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Alternative Contact Methods -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="intelligence-node rounded-lg p-6 text-center">
+                    <div class="text-4xl mb-4">📧</div>
+                    <h4 class="text-lg font-bold text-white mb-2">Email Support</h4>
+                    <p class="text-slate-400 text-sm mb-3">Direct email for detailed inquiries</p>
+                    <a href="/cdn-cgi/l/email-protection#30425f5f445351454355405f47554270575d51595c1e535f5d" class="text-neural hover:underline text-sm font-bold">
+                        <span class="__cf_email__" data-cfemail="ccbea3a3b8afadb9bfa9bca3bba9be8caba1ada5a0e2afa3a1">[email&#160;protected]</span>
+                    </a>
+                    <div class="mt-2">
+                        <button onclick="copyEmailToClipboard()" class="bg-slate-700 hover:bg-slate-600 px-3 py-1 rounded text-xs text-white transition-colors">
+                            <i class="fas fa-copy mr-1"></i>Copy Email
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="intelligence-node rounded-lg p-6 text-center">
+                    <div class="text-4xl mb-4">🚨</div>
+                    <h4 class="text-lg font-bold text-white mb-2">Emergency Resources (UK)</h4>
+                    <p class="text-slate-400 text-sm mb-3">For immediate mental health crises</p>
+                    <div class="text-sm space-y-1">
+                        <div class="text-red-400 font-bold">999 - Emergency Services</div>
+                        <div class="text-yellow-400">116 123 - Samaritans (24/7)</div>
+                        <div class="text-blue-400">Text SHOUT to 85258 - Crisis Text</div>
+                        <div class="text-green-400">111 - NHS Non-Emergency</div>
+                    </div>
+                    <div class="mt-4 p-3 bg-orange-900/20 border border-orange-500/30 rounded-lg">
+                        <p class="text-orange-300 text-xs">
+                            <i class="fas fa-globe mr-1"></i><strong>International Users:</strong> Please contact your country's emergency services and mental health crisis lines. These numbers are UK-specific.
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="intelligence-node rounded-lg p-6 text-center">
+                    <div class="text-4xl mb-4">⏰</div>
+                    <h4 class="text-lg font-bold text-white mb-2">Response Time</h4>
+                    <p class="text-slate-400 text-sm mb-3">We aim to respond quickly</p>
+                    <div class="text-sm space-y-1">
+                        <div class="text-green-400">Technical Issues: 4-8 hours</div>
+                        <div class="text-blue-400">General Questions: 12-24 hours</div>
+                        <div class="text-purple-400">Feature Requests: 2-3 days</div>
+                    </div>
+                </div>
+            </div>
+        </section>
     </main>
 
     <!-- JavaScript Core Functions -->
-    <script>
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
         // =============================================================================
         // LIVING NERVOUS SYSTEM CORE - NAVIGATION FUNCTION FIRST
         // =============================================================================
@@ -1970,7 +2255,23 @@
         // =============================================================================
         
         function getCurrentCredits() {
-            const userPlan = JSON.parse(localStorage.getItem('userPlan') || '{"credits": 1000, "plan": "free"}');
+            try {
+                const storedPlan = localStorage.getItem('userPlan');
+                // Handle corrupted localStorage data
+                if (!storedPlan || storedPlan === 'premium' || storedPlan === 'free') {
+                    console.log('🔧 Fixing corrupted userPlan data...');
+                    const defaultPlan = {"credits": 8, "plan": "free"};
+                    localStorage.setItem('userPlan', JSON.stringify(defaultPlan));
+                    return defaultPlan;
+                }
+                const userPlan = JSON.parse(storedPlan);
+                return userPlan;
+            } catch (error) {
+                console.log('🔧 JSON parsing error, resetting userPlan...', error);
+                const defaultPlan = {"credits": 8, "plan": "free"};
+                localStorage.setItem('userPlan', JSON.stringify(defaultPlan));
+                return defaultPlan;
+            }
             
             // VIP users have unlimited credits
             if (userPlan.plan === 'vip') {
@@ -1980,8 +2281,28 @@
             return userPlan.credits || 1000;
         }
         
+        // Helper function to get just the credits number
+        function getCreditsNumber() {
+            const userPlan = getCurrentCredits();
+            return userPlan.credits || 0;
+        }
+        
         function deductCredits(amount, feature) {
-            const userPlan = JSON.parse(localStorage.getItem('userPlan') || '{"credits": 1000, "plan": "free"}');
+            try {
+                const storedPlan = localStorage.getItem('userPlan');
+                if (!storedPlan || storedPlan === 'premium' || storedPlan === 'free') {
+                    const defaultPlan = {"credits": 8, "plan": "free"};
+                    localStorage.setItem('userPlan', JSON.stringify(defaultPlan));
+                    return defaultPlan;
+                }
+                const userPlan = JSON.parse(storedPlan);
+            } catch (error) {
+                console.log('🔧 JSON parsing error in deductCredits, resetting...', error);
+                const defaultPlan = {"credits": 8, "plan": "free"};
+                localStorage.setItem('userPlan', JSON.stringify(defaultPlan));
+                return defaultPlan;
+            }
+            const userPlan = getCurrentCredits();
             
             // VIP users have unlimited credits - don't deduct
             if (userPlan.plan === 'vip') {
@@ -2007,8 +2328,8 @@
         }
         
         function updateCreditsDisplay() {
-            const userPlan = JSON.parse(localStorage.getItem('userPlan') || '{"credits": 1000, "plan": "free"}');
-            const credits = getCurrentCredits();
+            const userPlan = getCurrentCredits();
+            const credits = getCreditsNumber();
             const creditsDisplays = document.querySelectorAll('#desktop-credits-remaining, #mobile-credits-remaining, #credits-remaining');
             
             creditsDisplays.forEach(element => {
@@ -3839,54 +4160,110 @@
         function showCreditBlockModal(title, message, feature) {
             console.log('🚫 Showing credit block modal for:', feature);
             
+            const userPlan = getCurrentCredits();
+            const isSubscriber = userPlan.plan !== 'free';
+            
             const modal = document.createElement('div');
             modal.className = 'fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4';
             modal.id = 'credit-block-modal';
-            modal.innerHTML = `
-                <div class="bg-slate-900 rounded-2xl w-full max-w-md border-2 border-red-500 shadow-2xl">
-                    <div class="bg-gradient-to-r from-red-600 to-pink-600 p-6 rounded-t-2xl">
-                        <div class="flex items-center">
-                            <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mr-4">
-                                🚫
-                            </div>
-                            <div>
-                                <h3 class="text-2xl font-bold text-white">${title}</h3>
-                                <p class="text-white/80">Insufficient Credits</p>
+            
+            if (isSubscriber) {
+                // Subscribers can buy credits
+                modal.innerHTML = `
+                    <div class="bg-slate-900 rounded-2xl w-full max-w-md border-2 border-blue-500 shadow-2xl">
+                        <div class="bg-gradient-to-r from-blue-600 to-indigo-600 p-6 rounded-t-2xl">
+                            <div class="flex items-center">
+                                <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mr-4">
+                                    💳
+                                </div>
+                                <div>
+                                    <h3 class="text-2xl font-bold text-white">Need More Credits?</h3>
+                                    <p class="text-white/80">Subscriber Credit Top-Up</p>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    
-                    <div class="p-6">
-                        <div class="text-center mb-6">
-                            <div class="text-4xl mb-4">💳</div>
-                            <p class="text-slate-300 mb-4">${message}</p>
-                            
-                            <div class="bg-slate-800 rounded-lg p-4 mb-6">
-                                <div class="text-yellow-400 font-bold mb-2">💡 Get More Credits</div>
-                                <div class="text-sm text-slate-400">
-                                    • Basic Plan: 75 credits/month (£25)<br>
-                                    • Premium Plan: 150 credits/month (£49)<br>
-                                    • VIP Elite: Unlimited credits (£82)
+                        
+                        <div class="p-6">
+                            <div class="text-center mb-6">
+                                <div class="text-4xl mb-4">🔋</div>
+                                <p class="text-slate-300 mb-4">${message}</p>
+                                
+                                <div class="bg-green-900/20 border border-green-500/30 rounded-lg p-4 mb-6">
+                                    <div class="text-green-400 font-bold mb-2">✅ Subscriber Benefits</div>
+                                    <div class="text-sm text-green-300">
+                                        • Buy additional credits anytime<br>
+                                        • Better value credit packages<br>
+                                        • Priority support included
+                                    </div>
                                 </div>
                             </div>
                             
-                            <div class="flex gap-3 justify-center">
-                                <button onclick="navigateToSection('pricing'); closeModal('credit-block-modal');" 
-                                    class="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 px-6 py-3 rounded-lg text-white font-bold transition-all">
-                                    <i class="fas fa-credit-card mr-2"></i>Upgrade Now
+                            <div class="flex gap-3">
+                                <button onclick="this.closest('.fixed').remove()" class="flex-1 bg-slate-600 hover:bg-slate-500 px-4 py-2 rounded-lg text-white transition-colors">
+                                    Cancel
                                 </button>
-                                
-                                <button onclick="closeModal('credit-block-modal')" 
-                                    class="bg-slate-700 hover:bg-slate-600 px-6 py-3 rounded-lg text-white transition-all">
-                                    <i class="fas fa-times mr-2"></i>Close
+                                <button onclick="this.closest('.fixed').remove(); showCreditTopUpModal()" class="flex-1 bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg text-white font-medium transition-colors">
+                                    💳 Buy Credits
                                 </button>
                             </div>
                         </div>
                     </div>
-                </div>
-            `;
+                `;
+            } else {
+                // Free users must subscribe first
+                modal.innerHTML = `
+                    <div class="bg-slate-900 rounded-2xl w-full max-w-md border-2 border-purple-500 shadow-2xl">
+                        <div class="bg-gradient-to-r from-purple-600 to-pink-600 p-6 rounded-t-2xl">
+                            <div class="flex items-center">
+                                <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mr-4">
+                                    🎆
+                                </div>
+                                <div>
+                                    <h3 class="text-2xl font-bold text-white">Upgrade to Continue</h3>
+                                    <p class="text-white/80">Subscription Required</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="p-6">
+                            <div class="text-center mb-6">
+                                <div class="text-4xl mb-4">🔓</div>
+                                <p class="text-slate-300 mb-4">${message}</p>
+                                
+                                <div class="bg-gradient-to-r from-purple-900/50 to-pink-900/50 rounded-lg p-4 mb-6 border border-purple-400">
+                                    <div class="text-purple-300 font-bold mb-2">🎉 You've Used Your Free Trial!</div>
+                                    <div class="text-sm text-purple-200">
+                                        • You got to try Coach David + 1 Assessment<br>
+                                        • Now upgrade to unlock unlimited access<br>
+                                        • Get monthly credits + premium features
+                                    </div>
+                                </div>
+                                
+                                <div class="bg-slate-800 rounded-lg p-4 mb-4">
+                                    <div class="text-yellow-400 font-bold mb-2">💡 Choose Your Plan</div>
+                                    <div class="text-sm text-slate-400">
+                                        • <strong class="text-blue-400">Basic:</strong> 75 credits/month (£25)<br>
+                                        • <strong class="text-purple-400">Premium:</strong> 150 credits/month (£49)<br>
+                                        • <strong class="text-gold-400">VIP:</strong> Unlimited credits (£99)
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="flex gap-3">
+                                <button onclick="this.closest('.fixed').remove()" class="flex-1 bg-slate-600 hover:bg-slate-500 px-4 py-2 rounded-lg text-white transition-colors">
+                                    Maybe Later
+                                </button>
+                                <button onclick="this.closest('.fixed').remove(); window.navigateToSection('pricing')" class="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 px-4 py-2 rounded-lg text-white font-medium transition-all">
+                                    🎆 Upgrade Now
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
             
             document.body.appendChild(modal);
+            console.log('✅ Credit block modal displayed');
         }
         
         function closeModal(modalId) {
@@ -3896,9 +4273,36 @@
             }
         }
         
+        // Clean localStorage and initialize credits on page load
+        function cleanCorruptedLocalStorage() {
+            console.log('🧹 Cleaning localStorage for corrupted data...');
+            
+            // Fix corrupted userPlan data
+            const userPlan = localStorage.getItem('userPlan');
+            if (!userPlan || userPlan === 'premium' || userPlan === 'free' || userPlan === '"premium"' || userPlan === '"free"') {
+                console.log('🔧 Found corrupted userPlan, resetting to default...');
+                localStorage.setItem('userPlan', JSON.stringify({"credits": 8, "plan": "free"}));
+            }
+            
+            // Check other potentially corrupted keys
+            const keysToCheck = ['personalizedHealingAdvice', 'journalEntries', 'assessmentData'];
+            keysToCheck.forEach(key => {
+                try {
+                    const value = localStorage.getItem(key);
+                    if (value && value !== 'null' && value !== 'undefined') {
+                        JSON.parse(value); // Test if it's valid JSON
+                    }
+                } catch (error) {
+                    console.log(`🔧 Removing corrupted localStorage key: ${key}`);
+                    localStorage.removeItem(key);
+                }
+            });
+        }
+        
         // Ensure user has credits on page load
         window.addEventListener('load', function() {
             console.log('💻 Page loaded - initializing credits and functions...');
+            cleanCorruptedLocalStorage();
             ensureTestCredits();
             
             // Test Coach David system
@@ -6895,7 +7299,7 @@
                     <div class="p-6 text-center">
                         <div class="text-6xl mb-4">💳</div>
                         <p class="text-slate-300 mb-2">You need <strong class="text-red-400">${cost} credits</strong> for ${feature}.</p>
-                        <p class="text-slate-400 mb-6">Current balance: <strong>${getCurrentCredits()} credits</strong></p>
+                        <p class="text-slate-400 mb-6">Current balance: <strong>${getCreditsNumber()} credits</strong></p>
                         <div class="flex gap-3">
                             <button onclick="this.closest('.fixed').remove()" class="flex-1 bg-slate-600 hover:bg-slate-500 px-4 py-2 rounded-lg text-white transition-colors">
                                 Cancel
@@ -9608,7 +10012,7 @@
         });
 
         function purchaseCreditsOLD(packageType, credits, price) {
-            const currentCredits = getCurrentCredits();
+            const currentCredits = getCreditsNumber();
             const isExistingUser = currentCredits > 0;
             
             // Prevent free users from accessing top-up
@@ -9749,7 +10153,7 @@
             await new Promise(resolve => setTimeout(resolve, 2000));
             
             // Payment successful
-            const currentCredits = getCurrentCredits();
+            const currentCredits = getCreditsNumber();
             const newTotal = currentCredits + credits;
             
             // Update credits in user plan properly
@@ -9816,7 +10220,7 @@
         
         // Add credit top-up option for existing users
         function showCreditTopUpModal() {
-            const currentCredits = getCurrentCredits();
+            const currentCredits = getCreditsNumber();
             
             const modal = document.createElement('div');
             modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
@@ -10467,13 +10871,29 @@
     <script>
         // Initialize user with test credits
         function ensureTestCredits() {
-            const userPlan = JSON.parse(localStorage.getItem('userPlan') || '{"credits": 1000, "plan": "free"}');
+            try {
+                const storedPlan = localStorage.getItem('userPlan');
+                // Handle corrupted localStorage data
+                if (!storedPlan || storedPlan === 'premium' || storedPlan === 'free') {
+                    console.log('🔧 Fixing corrupted userPlan data in ensureTestCredits...');
+                    const defaultPlan = {"credits": 0, "plan": "free"};
+                    localStorage.setItem('userPlan', JSON.stringify(defaultPlan));
+                    return;
+                }
+                const userPlan = JSON.parse(storedPlan);
+            } catch (error) {
+                console.log('🔧 JSON parsing error in ensureTestCredits, resetting...', error);
+                const defaultPlan = {"credits": 8, "plan": "free"};
+                localStorage.setItem('userPlan', JSON.stringify(defaultPlan));
+                return;
+            }
+            const userPlan = getCurrentCredits();
             
-            // Always ensure user has at least 1000 credits for testing
-            if (userPlan.credits < 100) {
-                userPlan.credits = 1000;
+            // Set credits to 8 - enough for 1 Coach David session (5) + 1 assessment (3) as a hook
+            if (userPlan.credits !== 8) {
+                userPlan.credits = 8;
                 localStorage.setItem('userPlan', JSON.stringify(userPlan));
-                console.log('🎉 Test credits granted: 1000 credits for testing!');
+                console.log('🎯 Initial credits set to 8 (5 for Coach David + 3 for Assessment)');
                 
                 if (typeof showNotification === 'function') {
                     showNotification('🎉 Test credits granted: 1000 credits for testing!', 'success');
@@ -10488,6 +10908,9 @@
         document.addEventListener('DOMContentLoaded', function() {
             console.log('⚖️ Legal compliance system initialized - footer links available');
             console.log('📧 GDPR email consent will be captured during subscription signup');
+            
+            // Clean corrupted localStorage first
+            cleanCorruptedLocalStorage();
             
             // Ensure user has test credits
             ensureTestCredits();
@@ -11067,6 +11490,124 @@
         window.bookVoiceCoachSession = bookVoiceCoachSession;
         window.requireLegalCompliance = checkLegalCompliance;
         window.acceptLegalTerms = acceptLegalTerms;
+        
+        // ===== FORMSPREE CONTACT FORM SYSTEM =====
+        // In-app contact form that stays within the platform
+        async function handleContactForm(event) {
+            event.preventDefault();
+            
+            const form = event.target;
+            const formData = new FormData(form);
+            const submitButton = form.querySelector('button[type="submit"]');
+            const successDiv = document.getElementById('contact-success');
+            const errorDiv = document.getElementById('contact-error');
+            
+            // Show loading state
+            const originalButtonText = submitButton.innerHTML;
+            submitButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Sending...';
+            submitButton.disabled = true;
+            
+            // Hide any previous messages
+            successDiv.classList.add('hidden');
+            errorDiv.classList.add('hidden');
+            
+            try {
+                // Add system information to help with support
+                const systemInfo = `\n\n--- System Information ---\nUser Agent: ${navigator.userAgent}\nTimestamp: ${new Date().toISOString()}\nURL: ${window.location.href}\nCredits: ${getCreditsNumber()}`;
+                formData.append('_system_info', systemInfo);
+                
+                // Your Formspree endpoint - using your actual endpoint
+                const FORMSPREE_ENDPOINT = 'https://formspree.io/f/xkgvgnkw'; // Your actual Formspree endpoint
+                
+                const response = await fetch(FORMSPREE_ENDPOINT, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    // Success - show success message and reset form
+                    successDiv.classList.remove('hidden');
+                    form.reset();
+                    
+                    // Log success
+                    console.log('✅ Contact form submitted successfully');
+                    
+                    // Scroll to success message
+                    successDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    
+                    // Show notification if available
+                    if (typeof showNotification === 'function') {
+                        showNotification('✅ Message sent successfully! We\'ll respond within 24 hours.', 'success');
+                    }
+                    
+                } else {
+                    throw new Error('Failed to send message');
+                }
+                
+            } catch (error) {
+                console.error('❌ Contact form error:', error);
+                
+                // Show error message
+                errorDiv.classList.remove('hidden');
+                errorDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                
+                // Show notification if available
+                if (typeof showNotification === 'function') {
+                    showNotification('❌ Failed to send message. Please try again or contact us directly.', 'error');
+                }
+            } finally {
+                // Restore button state
+                submitButton.innerHTML = originalButtonText;
+                submitButton.disabled = false;
+            }
+        }
+        
+        // Initialize contact form when DOM is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            const contactForm = document.getElementById('contact-form');
+            if (contactForm) {
+                contactForm.addEventListener('submit', handleContactForm);
+                console.log('✅ Contact form initialized');
+            }
+        });
+        
+        // Make contact form function globally available
+        window.handleContactForm = handleContactForm;
+        
+        // Copy email to clipboard function
+        async function copyEmailToClipboard() {
+            const email = 'rootcausepower@gmail.com';
+            try {
+                await navigator.clipboard.writeText(email);
+                if (typeof showNotification === 'function') {
+                    showNotification('✅ Email copied to clipboard!', 'success');
+                } else {
+                    alert('Email copied to clipboard: ' + email);
+                }
+                console.log('📧 Email copied to clipboard:', email);
+            } catch (error) {
+                console.error('Failed to copy email:', error);
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = email;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                
+                if (typeof showNotification === 'function') {
+                    showNotification('✅ Email copied to clipboard!', 'success');
+                } else {
+                    alert('Email copied to clipboard: ' + email);
+                }
+            }
+        }
+        
+        // Make copy email function globally available
+        window.copyEmailToClipboard = copyEmailToClipboard;
         
         // Test function to verify Coach David is working
         window.testCoachDavid = function() {
