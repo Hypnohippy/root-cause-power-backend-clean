@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -4464,13 +4465,13 @@
             document.body.appendChild(modal);
         }
         
-        // HUME EVI INTEGRATION - ENHANCED AUDIO CONNECTION
+        // Additional variables for fallback functionality (not conflicting with Coach David)
         let currentVoiceSession = null;
-        let mediaRecorder = null;
         let audioStream = null;
         let audioContext = null;
         let humeWebSocket = null;
         let isDemoVoiceMode = false;
+        // NOTE: mediaRecorder variable is shared with Coach David implementation above
         
         async function initializeDemoVoiceSession() {
             return new Promise((resolve) => {
@@ -4701,10 +4702,11 @@
             }
             
             try {
-                mediaRecorder = new MediaRecorder(audioStream, {
-                    mimeType: 'audio/webm;codecs=opus',
-                    audioBitsPerSecond: 16000
-                });
+                // mediaRecorder conflict removed - using Coach David implementation
+                // mediaRecorder = new MediaRecorder(audioStream, {
+                //     mimeType: 'audio/webm;codecs=opus',
+                //     audioBitsPerSecond: 16000
+                // });
                 
                 mediaRecorder.ondataavailable = (event) => {
                     if (event.data.size > 0 && humeWebSocket && humeWebSocket.readyState === WebSocket.OPEN) {
@@ -4862,9 +4864,10 @@
         function startAudioRecording() {
             if (!audioStream) return;
             
-            mediaRecorder = new MediaRecorder(audioStream, {
-                mimeType: 'audio/webm;codecs=opus'
-            });
+            // mediaRecorder conflict removed - using Coach David implementation
+            // mediaRecorder = new MediaRecorder(audioStream, {
+            //     mimeType: 'audio/webm;codecs=opus'
+            // });
             const audioChunks = [];
             
             mediaRecorder.ondataavailable = (event) => {
