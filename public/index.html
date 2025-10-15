@@ -5,7 +5,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
     <title>Root Cause Power - Living Healthcare Intelligence System</title>
     
     <!-- External Dependencies -->
@@ -31,38 +31,103 @@
     </script>
 
     <style>
-        /* Responsive Layout Fixes */
-        * {
+        /* SURGICAL RESPONSIVE FIXES - PRESERVE LAYOUT, FIX WIDTH ONLY */
+        
+        /* Essential box-sizing for all elements */
+        *, *::before, *::after {
             box-sizing: border-box;
         }
         
-        html, body {
+        /* Only constrain document-level overflow */
+        html {
             overflow-x: hidden;
-            max-width: 100vw;
-        }
-        
-        .container {
-            width: 100%;
-            max-width: 100vw;
-            padding-left: 1rem;
-            padding-right: 1rem;
-        }
-        
-        /* Ensure all grids are responsive */
-        .grid {
             width: 100%;
         }
         
-        /* Fix any potential wide elements */
-        img, video, iframe {
+        body {
+            overflow-x: hidden;
+            width: 100%;
+            margin: 0;
+        }
+        
+        /* Only target specific wide containers that cause overflow */
+        .max-w-7xl {
+            max-width: min(80rem, 100vw);
+        }
+        
+        .max-w-6xl {
+            max-width: min(72rem, 100vw);
+        }
+        
+        .max-w-5xl {
+            max-width: min(64rem, 100vw);
+        }
+        
+        .max-w-4xl {
+            max-width: min(56rem, 100vw);
+        }
+        
+        /* Responsive images and media */
+        img, video, iframe, canvas, svg {
             max-width: 100%;
             height: auto;
         }
         
-        /* Prevent text overflow */
+        /* Ensure main content stays within viewport */
+        main {
+            max-width: 100vw;
+            overflow-x: hidden;
+        }
+        
+        /* Mobile-specific padding adjustments */
+        @media (max-width: 640px) {
+            .px-8 {
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+            .px-6 {
+                padding-left: 0.75rem;
+                padding-right: 0.75rem;
+            }
+        }
+        
+        /* Prevent text overflow only where needed */
         .intelligence-node {
             word-wrap: break-word;
             overflow-wrap: break-word;
+        }
+        
+        /* Force mobile layout on small screens */
+        @media (max-width: 768px) {
+            * {
+                max-width: 100vw !important;
+            }
+            
+            .hidden {
+                display: none !important;
+            }
+            
+            .md\:grid-cols-2 {
+                grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
+            }
+            
+            .md\:grid-cols-3 {
+                grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
+            }
+            
+            .md\:grid-cols-4 {
+                grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
+            }
+            
+            .lg\:grid-cols-4 {
+                grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
+            }
+            
+            /* Force smaller padding on mobile */
+            main {
+                padding-left: 0.5rem !important;
+                padding-right: 0.5rem !important;
+            }
         }
         
         /* Living System Neural Network Styles */
@@ -272,7 +337,19 @@
 
 <body class="bg-slate-900 text-white min-h-screen">
 
-
+    <!-- SURGICAL WIDTH MONITORING (No Layout Interference) -->
+    <script>
+        // Gentle width monitoring without breaking layout
+        (function() {
+            console.log('🔍 Surgical width monitoring activated');
+            
+            // Only apply minimal document-level constraints
+            document.documentElement.style.overflowX = 'hidden';
+            document.body.style.overflowX = 'hidden';
+            
+            console.log('✅ Document overflow constraints applied');
+        })();
+    </script>
 
     <!-- Living Neural Network Header -->
     <div class="brain-activity h-2 w-full"></div>
@@ -410,7 +487,7 @@
     </nav>
 
     <!-- Main Content Container -->
-    <main id="main-content" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8" style="width: 100%; max-width: 100vw; overflow-x: hidden;">
+    <main id="main-content" class="w-full mx-auto px-2 sm:px-4 py-4" style="max-width: 100vw; overflow-x: hidden;">
         
         <!-- Intelligence Hub Dashboard -->
         <section id="dashboard-section" class="section-content active">
@@ -1960,8 +2037,8 @@
                     <div class="text-4xl mb-4">📧</div>
                     <h4 class="text-lg font-bold text-white mb-2">Email Support</h4>
                     <p class="text-slate-400 text-sm mb-3">Direct email for detailed inquiries</p>
-                    <a href="/cdn-cgi/l/email-protection#e2908d8d968183979187928d958790a2858f838b8ecc818d8f" class="text-neural hover:underline text-sm font-bold">
-                        <span class="__cf_email__" data-cfemail="16647979627577636573667961736456717b777f7a3875797b">[email&#160;protected]</span>
+                    <a href="/cdn-cgi/l/email-protection#2a5845455e494b5f594f5a455d4f586a4d474b434604494547" class="text-neural hover:underline text-sm font-bold">
+                        <span class="__cf_email__" data-cfemail="65170a0a110604101600150a120017250208040c094b060a08">[email&#160;protected]</span>
                     </a>
                     <div class="mt-2">
                         <button onclick="copyEmailToClipboard()" class="bg-slate-700 hover:bg-slate-600 px-3 py-1 rounded text-xs text-white transition-colors">
@@ -11687,6 +11764,73 @@
         
         // Make copy email function globally available
         window.copyEmailToClipboard = copyEmailToClipboard;
+        
+        // GENTLE WIDTH MONITORING - PRESERVE LAYOUT
+        function enforceResponsiveLayout() {
+            console.log('🌿 Gentle width monitoring (layout preserved)...');
+            
+            const viewportWidth = window.innerWidth;
+            const documentWidth = document.documentElement.scrollWidth;
+            
+            // Only fix document-level overflow - no element manipulation
+            if (documentWidth > viewportWidth) {
+                console.log('⚠️ Document overflow detected:', documentWidth + 'px vs ' + viewportWidth + 'px');
+                
+                // Only apply minimal document constraints
+                document.documentElement.style.overflowX = 'hidden';
+                document.body.style.overflowX = 'hidden';
+                
+                // Log specific wide elements for debugging (but don't change them)
+                const wideElements = document.querySelectorAll('*');
+                let wideCount = 0;
+                wideElements.forEach(element => {
+                    if (element.tagName === 'SCRIPT' || element.tagName === 'STYLE') return;
+                    const rect = element.getBoundingClientRect();
+                    if (rect.width > viewportWidth + 10) { // 10px tolerance
+                        console.log('🔍 Wide element found (not modified):', {
+                            tag: element.tagName,
+                            class: element.className,
+                            width: Math.round(rect.width)
+                        });
+                        wideCount++;
+                    }
+                });
+                
+                console.log(`📊 Found ${wideCount} wide elements (preserved layout)`);
+            } else {
+                console.log('✅ No document overflow detected');
+            }
+            
+            return {
+                viewportWidth,
+                documentWidth,
+                hasOverflow: documentWidth > viewportWidth
+            };
+        }
+        
+        // GENTLE WIDTH MONITORING - NO LAYOUT INTERFERENCE
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🌿 DOM loaded - gentle width monitoring active');
+            setTimeout(enforceResponsiveLayout, 100);
+        });
+        
+        window.addEventListener('resize', function() {
+            setTimeout(enforceResponsiveLayout, 100);
+        });
+        
+        // Make functions globally available for debugging
+        window.enforceResponsiveLayout = enforceResponsiveLayout;
+        window.debugLayout = function() {
+            console.log('🔍 Debug Mode - Layout Preserved');
+            const result = enforceResponsiveLayout();
+            console.log('📊 Debug Results:', result);
+            return result;
+        };
+        
+        // Gentle Vercel detection (no automatic fixes)
+        if (window.location.hostname.includes('vercel.app')) {
+            console.log('🌿 Vercel deployment detected - gentle monitoring active');
+        }
         
         // Test function to verify Coach David is working
         window.testCoachDavid = function() {
