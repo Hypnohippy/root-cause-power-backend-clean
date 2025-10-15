@@ -1,5 +1,6 @@
 
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1445,6 +1446,17 @@
             <div class="mb-8">
                 <h2 class="text-3xl font-bold text-white mb-2">Psychic Roots of Disease Assessment</h2>
                 <p class="text-slate-400">Discover the deeper emotional and spiritual patterns underlying your health challenges</p>
+                    <div class="bg-gradient-to-r from-purple-900/50 to-pink-900/50 rounded-lg p-4 mb-6 border border-purple-400">
+                        <div class="flex items-center justify-center text-center">
+                            <div>
+                                <h4 class="text-lg font-bold text-white mb-2">🔮 Complete Assessment Package</h4>
+                                <p class="text-purple-200 text-sm">
+                                    <strong>Just 3 credits</strong> unlocks ALL 6 psychic root categories!
+                                    <br><span class="text-purple-300">Start with any category - once unlocked, access everything!</span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
             </div>
             
             <!-- Assessment Progress -->
@@ -5504,27 +5516,41 @@
                 return;
             }
             
-            // CHECK CREDITS BEFORE STARTING ASSESSMENT (3 credits required)
-            const creditCost = 3;
+            // CHECK IF ASSESSMENT PACKAGE HAS BEEN PAID FOR (3 credits for ENTIRE assessment once)
+            const assessmentProgress = JSON.parse(localStorage.getItem('assessmentProgress') || '{}');
             const userPlan = JSON.parse(localStorage.getItem('userPlan') || '{"credits": 1000, "plan": "free"}');
+            const hasAssessmentAccess = assessmentProgress.paidForAssessment || false;
             
-            console.log(`💳 Assessment requires ${creditCost} credits, user has: ${userPlan.credits}`);
-            
-            if (userPlan.credits < creditCost) {
-                console.log('❌ Insufficient credits for assessment');
-                showCreditBlockModal('Assessment Locked', `You need ${creditCost} credits to start this assessment. You currently have ${userPlan.credits} credits.`, 'assessment');
-                return;
+            if (!hasAssessmentAccess && userPlan.plan !== "vip") {
+                // First time starting ANY assessment - charge 3 credits for ENTIRE assessment package
+                const creditCost = 3;
+                console.log(`💳 First assessment - requires ${creditCost} credits for ENTIRE assessment package, user has: ${userPlan.credits}`);
+                
+                if (userPlan.credits < creditCost) {
+                    console.log("❌ Insufficient credits for complete assessment");
+                    showCreditBlockModal("Complete Assessment Locked", `You need ${creditCost} credits to unlock the ENTIRE psychic root assessment (all 6 categories). You currently have ${userPlan.credits} credits.`, "assessment");
+                    return;
+                }
+                
+                // DEDUCT CREDITS ONCE for the entire assessment package
+                const success = deductCredits(creditCost, "Complete Psychic Root Assessment Package");
+                if (!success) {
+                    console.log("❌ Credit deduction failed");
+                    return;
+                }
+                
+                // Mark assessment as paid for - user can now access ALL categories
+                assessmentProgress.paidForAssessment = true;
+                assessmentProgress.purchaseDate = new Date().toISOString();
+                localStorage.setItem("assessmentProgress", JSON.stringify(assessmentProgress));
+                
+                console.log(`✅ Credits deducted successfully - user now has access to ALL assessment categories`);
+                showNotification("🔮 Assessment package unlocked! You now have access to all 6 psychic root categories.", "success");
+            } else if (hasAssessmentAccess) {
+                console.log("✅ User already has assessment access - no additional credits required");
+            } else if (userPlan.plan === "vip") {
+                console.log("👑 VIP user - unlimited access to all assessments");
             }
-            
-            // DEDUCT CREDITS IMMEDIATELY when starting assessment
-            const success = deductCredits(creditCost, `${category.charAt(0).toUpperCase() + category.slice(1)} Assessment`);
-            if (!success) {
-                console.log('❌ Credit deduction failed');
-                return;
-            }
-            
-            console.log(`✅ Credits deducted successfully for ${category} assessment`);
-            
             // Initialize assessment state
             window.currentAssessment = {
                 category: category,
@@ -5732,6 +5758,397 @@
             // Close modal and show results
             closeAssessmentModal();
             showAssessmentResults(category);
+            
+            // Check if user should see healing advice
+            setTimeout(() => {
+                checkAndShowHealingAdvice();
+                addViewHealingAdviceButton(); // Add button to revisit advice
+            }, 1500);
+        }
+        // ===== PERSONALIZED HEALING ADVICE SYSTEM =====
+        
+        function generatePersonalizedHealingAdvice(completedAssessments) {
+            console.log('🔮 Generating personalized psychic root healing advice...');
+            
+            const healingInsights = {};
+            
+            Object.keys(completedAssessments).forEach(category => {
+                if (completedAssessments[category] && completedAssessments[category].responses) {
+                    switch(category) {
+                        case 'emotional':
+                            healingInsights[category] = generateEmotionalHealingAdvice(completedAssessments[category].responses);
+                            break;
+                        case 'mental':
+                            healingInsights[category] = generateMentalHealingAdvice(completedAssessments[category].responses);
+                            break;
+                        case 'spiritual':
+                            healingInsights[category] = generateSpiritualHealingAdvice(completedAssessments[category].responses);
+                            break;
+                        case 'physical':
+                            healingInsights[category] = generatePhysicalHealingAdvice(completedAssessments[category].responses);
+                            break;
+                        case 'lifestyle':
+                            healingInsights[category] = generateLifestyleHealingAdvice(completedAssessments[category].responses);
+                            break;
+                        case 'energy':
+                            healingInsights[category] = generateEnergyHealingAdvice(completedAssessments[category].responses);
+                            break;
+                    }
+                }
+            });
+            
+            return healingInsights;
+        }
+
+        function generateEmotionalHealingAdvice(responses) {
+            const insights = [];
+            const avgScore = responses.reduce((sum, r) => sum + (parseInt(r) || 0), 0) / responses.length || 0;
+            
+            if (avgScore < 2) {
+                insights.push({
+                    title: "Deep Emotional Healing Required",
+                    description: "Your emotional patterns show significant suppressed energies and trauma responses affecting your physical health.",
+                    healing: "Practice daily heart-centered meditation. Place your hands on your heart and breathe into this space for 10 minutes each morning. Your heart chakra needs gentle opening.",
+                    rootCause: "Suppressed grief, anger, or fear is creating energetic blocks in your heart center, manifesting as physical tension or illness.",
+                    action: "Begin emotional release work through crying, screaming into pillows, or vigorous exercise. Your body is holding onto emotional pain."
+                });
+            } else if (avgScore < 3.5) {
+                insights.push({
+                    title: "Emotional Integration Needed",
+                    description: "You're processing emotions but may be avoiding deeper feelings that need acknowledgment.",
+                    healing: "Create a daily emotional check-in ritual. Ask your body: 'What am I feeling right now?' Honor whatever arises without judgment.",
+                    rootCause: "Partial emotional suppression is creating energetic stagnation, affecting your vitality and immune system.",
+                    action: "Journal about your feelings daily. Your emotions are messengers from your soul - listen to their wisdom."
+                });
+            } else {
+                insights.push({
+                    title: "Emotional Flow Activation",
+                    description: "Your emotional awareness is developing. Focus on maintaining this healthy flow.",
+                    healing: "Continue honoring your emotional cycles. You're learning to move energy through your system beautifully.",
+                    rootCause: "You're integrating emotional wisdom, which is healing old patterns and increasing your life force energy.",
+                    action: "Share your emotional insights with trusted friends. Your healing helps heal the collective emotional field."
+                });
+            }
+            return insights;
+        }
+
+        function generateMentalHealingAdvice(responses) {
+            const insights = [];
+            const avgScore = responses.reduce((sum, r) => sum + (parseInt(r) || 0), 0) / responses.length || 0;
+            
+            if (avgScore < 2) {
+                insights.push({
+                    title: "Mental Pattern Transformation",
+                    description: "Your thought patterns are creating significant dis-ease in your body through limiting beliefs and mental loops.",
+                    healing: "Practice the 'thought stopping' technique. When you notice negative thoughts, say 'STOP' aloud and replace with: 'I am healing and whole.'",
+                    rootCause: "Chronic negative thinking creates inflammation, stress hormones, and weakened immunity. Your thoughts are literally creating your reality.",
+                    action: "Write down your most frequent negative thoughts. Rewrite each one into a healing affirmation. Repeat these new thoughts 100 times daily."
+                });
+            } else if (avgScore < 3.5) {
+                insights.push({
+                    title: "Cognitive Repattering Active",
+                    description: "You're becoming aware of mental patterns but need to strengthen positive thought habits.",
+                    healing: "Create a morning mental hygiene routine: 5 minutes of gratitude, 5 minutes of positive affirmations about your health.",
+                    rootCause: "Old mental programming is loosening its grip, but you need consistent practice to install new neural pathways.",
+                    action: "Challenge one limiting belief per week. Ask: 'Is this thought serving my highest good?' Replace with empowering alternatives."
+                });
+            } else {
+                insights.push({
+                    title: "Mental Mastery Developing",
+                    description: "Your mind is becoming a tool for healing rather than a source of suffering.",
+                    healing: "Continue strengthening your mental discipline through meditation and conscious thought selection.",
+                    rootCause: "You're learning that thoughts are energy, and you have the power to choose thoughts that heal and energize your body.",
+                    action: "Teach others about the mind-body connection. Your mental clarity is a gift that can help heal others."
+                });
+            }
+            return insights;
+        }
+
+        function generateSpiritualHealingAdvice(responses) {
+            const insights = [];
+            const avgScore = responses.reduce((sum, r) => sum + (parseInt(r) || 0), 0) / responses.length || 0;
+            
+            if (avgScore < 2) {
+                insights.push({
+                    title: "Soul Reconnection Essential",
+                    description: "Spiritual disconnection is creating a deep emptiness that manifests as physical illness and emotional pain.",
+                    healing: "Spend 20 minutes daily in nature without distractions. Ask your higher self: 'What is my soul's purpose?' Listen for the answer.",
+                    rootCause: "When disconnected from your soul's purpose, life force energy diminishes, leading to depression, fatigue, and physical symptoms.",
+                    action: "Begin a daily spiritual practice: prayer, meditation, or sacred reading. Your soul is calling you back to wholeness."
+                });
+            } else if (avgScore < 3.5) {
+                insights.push({
+                    title: "Spiritual Awakening in Progress",
+                    description: "You're beginning to sense your deeper purpose but need stronger connection to your spiritual essence.",
+                    healing: "Create a sacred space in your home. Light a candle daily and ask for guidance from your higher self or divine source.",
+                    rootCause: "Partial spiritual awareness is awakening your true nature, but you need consistent practice to stabilize this connection.",
+                    action: "Read spiritual texts that resonate with you. Join a spiritual community or group that supports your growth."
+                });
+            } else {
+                insights.push({
+                    title: "Divine Alignment Strengthening",
+                    description: "Your spiritual connection is becoming a source of healing power and life purpose.",
+                    healing: "Trust the spiritual guidance you're receiving. Your intuition is becoming a powerful healing force.",
+                    rootCause: "Strong spiritual alignment creates coherence between your soul's purpose and your life choices, generating healing energy.",
+                    action: "Share your spiritual insights through service. Your spiritual light helps heal others and the planet."
+                });
+            }
+            return insights;
+        }
+
+        function generatePhysicalHealingAdvice(responses) {
+            const insights = [];
+            const avgScore = responses.reduce((sum, r) => sum + (parseInt(r) || 0), 0) / responses.length || 0;
+            
+            if (avgScore < 2) {
+                insights.push({
+                    title: "Body Wisdom Integration Urgent",
+                    description: "Your physical symptoms are urgent messages from your body about unresolved emotional and spiritual issues.",
+                    healing: "Practice daily body scanning meditation. Place your hands on areas of pain/tension and ask: 'What are you trying to tell me?'",
+                    rootCause: "Physical symptoms are your body's way of expressing suppressed emotions, spiritual disconnection, and energetic blocks.",
+                    action: "Create a healing dialogue with your body. Thank your symptoms for their messages, then ask what healing they need."
+                });
+            } else if (avgScore < 3.5) {
+                insights.push({
+                    title: "Physical-Emotional Integration",
+                    description: "You're learning to read your body's messages but need to strengthen the mind-body healing connection.",
+                    healing: "When you feel physical discomfort, immediately check: 'What emotion am I avoiding? What does my soul need right now?'",
+                    rootCause: "Your body is becoming more sensitive to emotional and spiritual energies as you awaken to deeper healing.",
+                    action: "Keep a symptom diary. Note physical sensations alongside emotions and life events to see the patterns."
+                });
+            } else {
+                insights.push({
+                    title: "Body Wisdom Mastery",
+                    description: "Your body has become a wise teacher and ally in your healing journey.",
+                    healing: "Continue listening to your body's wisdom. You're developing powerful mind-body healing abilities.",
+                    rootCause: "Your physical body is aligned with your emotional and spiritual healing, creating vitality and resilience.",
+                    action: "Teach others about body wisdom. Your understanding of psychosomatic healing can help others transform their health."
+                });
+            }
+            return insights;
+        }
+
+        function generateLifestyleHealingAdvice(responses) {
+            const insights = [];
+            const avgScore = responses.reduce((sum, r) => sum + (parseInt(r) || 0), 0) / responses.length || 0;
+            
+            if (avgScore < 2) {
+                insights.push({
+                    title: "Environmental Healing Critical",
+                    description: "Your environment and relationships are significantly impacting your energetic field and health.",
+                    healing: "Cleanse your living space energetically: burn sage or palo santo, play healing music, and remove items that carry negative energy.",
+                    rootCause: "Toxic environments and relationships create energetic drain, manifesting as fatigue, illness, and emotional disturbance.",
+                    action: "Identify the most draining relationships/environments in your life. Create boundaries or make changes to protect your energy field."
+                });
+            } else if (avgScore < 3.5) {
+                insights.push({
+                    title: "Lifestyle Alignment in Progress",
+                    description: "You're creating more supportive environments but need to strengthen protective boundaries.",
+                    healing: "Establish daily energy protection rituals: visualize white light around you, set intentions for positive interactions only.",
+                    rootCause: "As you heal, you become more sensitive to environmental energies. You need stronger boundaries to maintain your healing progress.",
+                    action: "Gradually surround yourself with people, places, and activities that support your highest good and healing journey."
+                });
+            } else {
+                insights.push({
+                    title: "Sacred Living Mastery",
+                    description: "Your lifestyle choices reflect your commitment to healing and spiritual growth.",
+                    healing: "Continue creating sacred space in all areas of your life. Your environment is becoming a healing sanctuary.",
+                    rootCause: "Aligned living choices create energetic coherence, supporting your body's natural healing abilities and spiritual evolution.",
+                    action: "Help others create healing environments. Your example shows others how lifestyle choices can support profound healing."
+                });
+            }
+            return insights;
+        }
+
+        function generateEnergyHealingAdvice(responses) {
+            const insights = [];
+            const avgScore = responses.reduce((sum, r) => sum + (parseInt(r) || 0), 0) / responses.length || 0;
+            
+            if (avgScore < 2) {
+                insights.push({
+                    title: "Energetic System Restoration Needed",
+                    description: "Your chakras and meridian system show significant blocks affecting your vitality and health.",
+                    healing: "Practice chakra breathing: Inhale light into each chakra (root to crown), exhale any darkness or heaviness. 10 minutes daily.",
+                    rootCause: "Energetic blocks from trauma, stress, and negative emotions are preventing life force from flowing freely through your system.",
+                    action: "Seek energy healing work: Reiki, acupuncture, or crystal healing. Your energetic body needs professional clearing and activation."
+                });
+            } else if (avgScore < 3.5) {
+                insights.push({
+                    title: "Energy Field Strengthening",
+                    description: "Your energetic awareness is growing, but you need to strengthen and stabilize your energy field.",
+                    healing: "Visualize roots growing from your tailbone into the earth, and light flowing from the crown of your head to the sky. Ground and expand daily.",
+                    rootCause: "Awakening sensitivity to energy requires learning to manage and direct your energetic field consciously.",
+                    action: "Learn basic energy protection techniques. Practice sensing the energy of places and people before entering their space."
+                });
+            } else {
+                insights.push({
+                    title: "Energy Mastery Developing",
+                    description: "You're becoming conscious of your role as an energetic being and healer.",
+                    healing: "Continue developing your energetic abilities. You're becoming a conduit for healing energy that benefits others.",
+                    rootCause: "Strong energetic awareness allows you to maintain balance, clear negative energy, and channel healing force.",
+                    action: "Consider training in energy healing modalities. Your gifts can help heal others and contribute to planetary healing."
+                });
+            }
+            return insights;
+        }
+
+        function showPersonalizedHealingAdviceModal(healingAdvice) {
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 p-4';
+            modal.innerHTML = `
+                <div class="bg-slate-900 rounded-2xl w-full max-w-6xl max-h-[90vh] overflow-y-auto border-2 border-purple-500">
+                    <div class="bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 p-6 rounded-t-2xl">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h3 class="text-3xl font-bold text-white">🔮 Your Personalized Psychic Root Healing</h3>
+                                <p class="text-white/80">Sacred wisdom for your unique healing journey</p>
+                            </div>
+                            <button onclick="this.closest('.fixed').remove()" class="text-white/60 hover:text-white text-2xl">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="p-6 space-y-8">
+                        ${Object.entries(healingAdvice).filter(([category, insights]) => insights.length > 0).map(([category, insights]) => `
+                            <div class="bg-slate-800/50 rounded-lg p-6 border border-slate-700">
+                                <h4 class="text-2xl font-bold text-white mb-4 flex items-center">
+                                    ${getCategoryIcon(category)} ${formatCategoryName(category)} Healing
+                                </h4>
+                                
+                                <div class="space-y-6">
+                                    ${insights.map(insight => `
+                                        <div class="bg-slate-700/30 rounded-lg p-4 border-l-4 border-purple-400">
+                                            <h5 class="text-lg font-semibold text-purple-300 mb-2">${insight.title}</h5>
+                                            <p class="text-slate-300 mb-3">${insight.description}</p>
+                                            
+                                            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-4">
+                                                <div class="bg-green-900/20 p-3 rounded border border-green-500/30">
+                                                    <h6 class="text-green-400 font-semibold mb-1">🌿 Healing Practice</h6>
+                                                    <p class="text-green-200 text-sm">${insight.healing}</p>
+                                                </div>
+                                                
+                                                <div class="bg-blue-900/20 p-3 rounded border border-blue-500/30">
+                                                    <h6 class="text-blue-400 font-semibold mb-1">🎯 Root Cause</h6>
+                                                    <p class="text-blue-200 text-sm">${insight.rootCause}</p>
+                                                </div>
+                                                
+                                                <div class="bg-yellow-900/20 p-3 rounded border border-yellow-500/30">
+                                                    <h6 class="text-yellow-400 font-semibold mb-1">⚡ Action Step</h6>
+                                                    <p class="text-yellow-200 text-sm">${insight.action}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        `).join('')}
+                        
+                        <div class="bg-gradient-to-r from-purple-900/50 to-pink-900/50 rounded-lg p-6 border border-purple-400">
+                            <h4 class="text-xl font-bold text-white mb-3">💜 Your Healing Journey Continues</h4>
+                            <p class="text-slate-300 mb-4">
+                                This personalized guidance is based on your unique energetic signature and soul path. 
+                                Return to this wisdom whenever you need guidance on your healing journey.
+                            </p>
+                            <div class="flex gap-4">
+                                <button onclick="this.closest('.fixed').remove(); window.navigateToSection('dashboard')" class="bg-indigo-600 hover:bg-indigo-700 px-4 py-2 rounded text-white font-bold transition-colors">
+                                    🏠 Return to Dashboard
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+        }
+
+        function getCategoryIcon(category) {
+            const icons = {
+                emotional: '💖',
+                mental: '🧠', 
+                spiritual: '✨',
+                physical: '🏃‍♀️',
+                lifestyle: '🌱',
+                energy: '⚡'
+            };
+            return icons[category] || '🔮';
+        }
+
+        function formatCategoryName(category) {
+            const names = {
+                emotional: 'Emotional Patterns',
+                mental: 'Mental Beliefs',
+                spiritual: 'Spiritual Alignment', 
+                physical: 'Physical Symptoms',
+                lifestyle: 'Lifestyle Factors',
+                energy: 'Energy Patterns'
+            };
+            return names[category] || category.charAt(0).toUpperCase() + category.slice(1);
+        }
+
+        // Function to check if user has completed enough assessments to show advice
+        function checkAndShowHealingAdvice() {
+            const completedCategories = Object.keys(assessmentData).filter(cat => assessmentData[cat].completed);
+            
+            if (completedCategories.length >= 1) { // Show advice after completing at least 1 category
+                console.log('🔮 Generating healing advice for completed categories:', completedCategories);
+                
+                const completedAssessments = {};
+                completedCategories.forEach(category => {
+                    completedAssessments[category] = assessmentData[category];
+                });
+                
+                const healingAdvice = generatePersonalizedHealingAdvice(completedAssessments);
+                
+                // Store the advice for later viewing
+                localStorage.setItem('personalizedHealingAdvice', JSON.stringify({
+                    advice: healingAdvice,
+                    generatedDate: new Date().toISOString(),
+                    completedCategories: completedCategories
+                }));
+                
+                // Show the personalized advice modal after a short delay
+                setTimeout(() => {
+                    showPersonalizedHealingAdviceModal(healingAdvice);
+                }, 2000);
+            }
+        }
+
+        // Add healing advice viewing functionality
+        function addViewHealingAdviceButton() {
+            const completedCount = Object.keys(assessmentData).filter(cat => assessmentData[cat].completed).length;
+            if (completedCount > 0) {
+                const storedAdvice = localStorage.getItem('personalizedHealingAdvice');
+                if (storedAdvice) {
+                    const assessmentSection = document.querySelector('#assessment-section');
+                    if (assessmentSection && !document.querySelector('#healing-advice-button')) {
+                        const buttonDiv = document.createElement('div');
+                        buttonDiv.id = 'healing-advice-button';
+                        buttonDiv.className = 'text-center mt-8 mb-8';
+                        buttonDiv.innerHTML = `
+                            <button onclick="viewStoredHealingAdvice()" class="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 px-8 py-4 rounded-lg text-white font-bold text-lg transition-all transform hover:scale-105 shadow-lg">
+                                🔮 View Your Personalized Healing Guidance
+                                <div class="text-sm mt-1 opacity-90">${completedCount} ${completedCount === 1 ? 'Category' : 'Categories'} Analyzed</div>
+                            </button>
+                        `;
+                        const gridElement = assessmentSection.querySelector('.grid');
+                        if (gridElement) {
+                            gridElement.parentNode.insertBefore(buttonDiv, gridElement.nextSibling);
+                        }
+                    }
+                }
+            }
+        }
+
+        function viewStoredHealingAdvice() {
+            const storedAdvice = localStorage.getItem('personalizedHealingAdvice');
+            if (storedAdvice) {
+                const adviceData = JSON.parse(storedAdvice);
+                showPersonalizedHealingAdviceModal(adviceData.advice);
+            } else {
+                showNotification('Complete at least one assessment category to receive personalized healing guidance.', 'info');
+            }
         }
         
         function closeAssessmentModal() {
