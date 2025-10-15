@@ -389,18 +389,32 @@
                     <button onclick="window.navigateToSection('journal')" class="nav-btn px-4 py-2 rounded-lg hover:bg-slate-700 transition-colors" data-section="journal">
                         <i class="fas fa-book mr-2"></i>Neural Journal
                     </button>
-                    <button onclick="window.navigateToSection('help')" class="nav-btn px-4 py-2 rounded-lg hover:bg-slate-700 transition-colors" data-section="help">
-                        <i class="fas fa-question-circle mr-2"></i>Help
-                    </button>
-                    <button onclick="window.navigateToSection('contact')" class="nav-btn px-4 py-2 rounded-lg hover:bg-slate-700 transition-colors" data-section="contact">
-                        <i class="fas fa-envelope mr-2"></i>Contact
-                    </button>
-                    <button onclick="window.navigateToSection('pricing')" class="nav-btn px-4 py-2 rounded-lg hover:bg-slate-700 transition-colors" data-section="pricing">
-                        <i class="fas fa-credit-card mr-2"></i>Pricing
-                    </button>
                     <button onclick="window.navigateToSection('assessment')" class="nav-btn px-4 py-2 rounded-lg hover:bg-slate-700 transition-colors" data-section="assessment">
                         <i class="fas fa-clipboard-list mr-2"></i>Root Assessment
                     </button>
+                    
+                    <!-- More Menu Dropdown -->
+                    <div class="relative" id="more-menu-dropdown">
+                        <button onclick="window.toggleMoreMenu()" class="nav-btn px-4 py-2 rounded-lg hover:bg-slate-700 transition-colors flex items-center">
+                            <i class="fas fa-ellipsis-h mr-2"></i>More
+                            <i class="fas fa-chevron-down ml-1 text-xs"></i>
+                        </button>
+                        
+                        <!-- Dropdown Menu -->
+                        <div id="more-dropdown" class="absolute right-0 top-full mt-2 w-48 bg-slate-800 rounded-lg shadow-xl border border-slate-700 z-50" style="display: none;">
+                            <div class="py-2">
+                                <button onclick="window.navigateToSection('help'); window.hideMoreMenu();" class="w-full text-left px-4 py-2 hover:bg-slate-700 transition-colors flex items-center text-white">
+                                    <i class="fas fa-question-circle mr-3 text-neural"></i>Help Manual
+                                </button>
+                                <button onclick="window.navigateToSection('contact'); window.hideMoreMenu();" class="w-full text-left px-4 py-2 hover:bg-slate-700 transition-colors flex items-center text-white">
+                                    <i class="fas fa-envelope mr-3 text-primary"></i>Contact Support
+                                </button>
+                                <button onclick="window.navigateToSection('pricing'); window.hideMoreMenu();" class="w-full text-left px-4 py-2 hover:bg-slate-700 transition-colors flex items-center text-white">
+                                    <i class="fas fa-credit-card mr-3 text-secondary"></i>Pricing Plans
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                     
                     <!-- Credits Display with Top-Up -->
                     <div class="data-flow bg-slate-700 px-4 py-2 rounded-lg flex items-center">
@@ -456,18 +470,23 @@
                     <button onclick="closeMobileMenu(); window.navigateToSection('journal')" class="w-full text-left nav-btn px-4 py-3 rounded-lg hover:bg-slate-700 transition-colors text-slate-300">
                         <i class="fas fa-book mr-3"></i>Neural Journal
                     </button>
-                    <button onclick="closeMobileMenu(); window.navigateToSection('pricing')" class="w-full text-left nav-btn px-4 py-3 rounded-lg hover:bg-slate-700 transition-colors text-slate-300">
-                        <i class="fas fa-credit-card mr-3"></i>Pricing
-                    </button>
                     <button onclick="closeMobileMenu(); window.navigateToSection('assessment')" class="w-full text-left nav-btn px-4 py-3 rounded-lg hover:bg-slate-700 transition-colors text-slate-300">
                         <i class="fas fa-clipboard-list mr-3"></i>Root Assessment
                     </button>
-                    <button onclick="closeMobileMenu(); window.navigateToSection('help')" class="w-full text-left nav-btn px-4 py-3 rounded-lg hover:bg-slate-700 transition-colors text-slate-300">
-                        <i class="fas fa-question-circle mr-3"></i>Help Manual
-                    </button>
-                    <button onclick="closeMobileMenu(); window.navigateToSection('contact')" class="w-full text-left nav-btn px-4 py-3 rounded-lg hover:bg-slate-700 transition-colors text-slate-300">
-                        <i class="fas fa-envelope mr-3"></i>Contact Support
-                    </button>
+                    
+                    <!-- Mobile More Section -->
+                    <div class="mt-4 pt-4 border-t border-slate-700">
+                        <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 px-4">More Options</h4>
+                        <button onclick="closeMobileMenu(); window.navigateToSection('help')" class="w-full text-left nav-btn px-4 py-3 rounded-lg hover:bg-slate-700 transition-colors text-slate-300">
+                            <i class="fas fa-question-circle mr-3 text-neural"></i>Help Manual
+                        </button>
+                        <button onclick="closeMobileMenu(); window.navigateToSection('contact')" class="w-full text-left nav-btn px-4 py-3 rounded-lg hover:bg-slate-700 transition-colors text-slate-300">
+                            <i class="fas fa-envelope mr-3 text-primary"></i>Contact Support
+                        </button>
+                        <button onclick="closeMobileMenu(); window.navigateToSection('pricing')" class="w-full text-left nav-btn px-4 py-3 rounded-lg hover:bg-slate-700 transition-colors text-slate-300">
+                            <i class="fas fa-credit-card mr-3 text-secondary"></i>Pricing Plans
+                        </button>
+                    </div>
                     
                     <!-- Mobile Credits Display -->
                     <div class="mt-6 p-4 bg-slate-800 rounded-lg">
@@ -2037,8 +2056,8 @@
                     <div class="text-4xl mb-4">📧</div>
                     <h4 class="text-lg font-bold text-white mb-2">Email Support</h4>
                     <p class="text-slate-400 text-sm mb-3">Direct email for detailed inquiries</p>
-                    <a href="/cdn-cgi/l/email-protection#2a5845455e494b5f594f5a455d4f586a4d474b434604494547" class="text-neural hover:underline text-sm font-bold">
-                        <span class="__cf_email__" data-cfemail="65170a0a110604101600150a120017250208040c094b060a08">[email&#160;protected]</span>
+                    <a href="/cdn-cgi/l/email-protection#acdec3c3d8cfcdd9dfc9dcc3dbc9deeccbc1cdc5c082cfc3c1" class="text-neural hover:underline text-sm font-bold">
+                        <span class="__cf_email__" data-cfemail="a4d6cbcbd0c7c5d1d7c1d4cbd3c1d6e4c3c9c5cdc88ac7cbc9">[email&#160;protected]</span>
                     </a>
                     <div class="mt-2">
                         <button onclick="copyEmailToClipboard()" class="bg-slate-700 hover:bg-slate-600 px-3 py-1 rounded text-xs text-white transition-colors">
@@ -2163,10 +2182,39 @@
             }
         }
         
+        // More dropdown menu functions
+        function toggleMoreMenu() {
+            const dropdown = document.getElementById('more-dropdown');
+            if (dropdown) {
+                const isVisible = dropdown.style.display !== 'none';
+                dropdown.style.display = isVisible ? 'none' : 'block';
+                console.log('🗺 More menu', isVisible ? 'closed' : 'opened');
+            }
+        }
+        
+        function hideMoreMenu() {
+            const dropdown = document.getElementById('more-dropdown');
+            if (dropdown) {
+                dropdown.style.display = 'none';
+                console.log('🗺 More menu closed');
+            }
+        }
+        
+        // Close More menu when clicking outside
+        document.addEventListener('click', function(event) {
+            const moreMenu = document.getElementById('more-menu-dropdown');
+            const dropdown = document.getElementById('more-dropdown');
+            if (moreMenu && dropdown && !moreMenu.contains(event.target)) {
+                dropdown.style.display = 'none';
+            }
+        });
+        
         // IMMEDIATELY make functions globally accessible
         window.navigateToSection = navigateToSection;
         window.showMobileMenu = showMobileMenu;
         window.closeMobileMenu = closeMobileMenu;
+        window.toggleMoreMenu = toggleMoreMenu;
+        window.hideMoreMenu = hideMoreMenu;
         window.nav = navigateToSection; // Shortcut
         
         console.log('🎯 NAVIGATION FUNCTIONS REGISTERED:', {
