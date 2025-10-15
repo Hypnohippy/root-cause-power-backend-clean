@@ -31,6 +31,40 @@
     </script>
 
     <style>
+        /* Responsive Layout Fixes */
+        * {
+            box-sizing: border-box;
+        }
+        
+        html, body {
+            overflow-x: hidden;
+            max-width: 100vw;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 100vw;
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
+        
+        /* Ensure all grids are responsive */
+        .grid {
+            width: 100%;
+        }
+        
+        /* Fix any potential wide elements */
+        img, video, iframe {
+            max-width: 100%;
+            height: auto;
+        }
+        
+        /* Prevent text overflow */
+        .intelligence-node {
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+        
         /* Living System Neural Network Styles */
         .neural-pulse {
             animation: neural-pulse 2s infinite;
@@ -164,10 +198,55 @@
         
         .section-content {
             display: none;
+            width: 100%;
+            max-width: 100%;
+            padding: 1rem;
         }
         
         .section-content.active {
             display: block;
+        }
+        
+        /* Mobile-first responsive breakpoints */
+        @media (max-width: 640px) {
+            .container {
+                padding-left: 0.5rem;
+                padding-right: 0.5rem;
+            }
+            
+            .section-content {
+                padding: 0.5rem;
+            }
+            
+            .intelligence-node {
+                padding: 1rem !important;
+            }
+            
+            /* Make grids single column on mobile */
+            .grid.grid-cols-2 {
+                grid-template-columns: repeat(1, minmax(0, 1fr));
+            }
+            
+            .grid.grid-cols-3 {
+                grid-template-columns: repeat(1, minmax(0, 1fr));
+            }
+            
+            .grid.grid-cols-4 {
+                grid-template-columns: repeat(1, minmax(0, 1fr));
+            }
+            
+            /* Ensure buttons are properly sized */
+            button {
+                font-size: 0.875rem;
+                padding: 0.5rem 1rem;
+            }
+        }
+        
+        /* Tablet responsive */
+        @media (min-width: 641px) and (max-width: 1024px) {
+            .grid.grid-cols-4 {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
         }
         
         .nav-btn.active {
@@ -331,7 +410,7 @@
     </nav>
 
     <!-- Main Content Container -->
-    <main id="main-content" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <main id="main-content" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8" style="width: 100%; max-width: 100vw; overflow-x: hidden;">
         
         <!-- Intelligence Hub Dashboard -->
         <section id="dashboard-section" class="section-content active">
@@ -1881,8 +1960,8 @@
                     <div class="text-4xl mb-4">📧</div>
                     <h4 class="text-lg font-bold text-white mb-2">Email Support</h4>
                     <p class="text-slate-400 text-sm mb-3">Direct email for detailed inquiries</p>
-                    <a href="/cdn-cgi/l/email-protection#30425f5f445351454355405f47554270575d51595c1e535f5d" class="text-neural hover:underline text-sm font-bold">
-                        <span class="__cf_email__" data-cfemail="ccbea3a3b8afadb9bfa9bca3bba9be8caba1ada5a0e2afa3a1">[email&#160;protected]</span>
+                    <a href="/cdn-cgi/l/email-protection#e2908d8d968183979187928d958790a2858f838b8ecc818d8f" class="text-neural hover:underline text-sm font-bold">
+                        <span class="__cf_email__" data-cfemail="16647979627577636573667961736456717b777f7a3875797b">[email&#160;protected]</span>
                     </a>
                     <div class="mt-2">
                         <button onclick="copyEmailToClipboard()" class="bg-slate-700 hover:bg-slate-600 px-3 py-1 rounded text-xs text-white transition-colors">
@@ -2278,7 +2357,7 @@
                 return 999999; // Show as unlimited
             }
             
-            return userPlan.credits || 1000;
+            return userPlan.credits || 8;
         }
         
         // Helper function to get just the credits number
@@ -2310,7 +2389,7 @@
                 return 999999; // Return unlimited
             }
             
-            const currentCredits = userPlan.credits || 1000;
+            const currentCredits = userPlan.credits || 8;
             
             if (currentCredits < amount) {
                 showInsufficientCreditsModal(feature, amount);
@@ -2355,7 +2434,7 @@
             // Legal documents now available via footer links - no blocking required
             
             // ENFORCE CREDIT LIMITS - No more demo mode
-            const userPlan = JSON.parse(localStorage.getItem('userPlan') || '{"credits": 1000, "plan": "free"}');
+            const userPlan = JSON.parse(localStorage.getItem('userPlan') || '{"credits": 8, "plan": "free"}');
             console.log(`💳 Current credits: ${userPlan.credits}, required: ${creditCost}`);
             
             if (userPlan.credits < creditCost) {
@@ -2385,7 +2464,7 @@
             // Legal documents now available via footer links - no blocking required
             
             // ENFORCE CREDIT LIMITS - No more demo mode
-            const userPlan = JSON.parse(localStorage.getItem('userPlan') || '{"credits": 1000, "plan": "free"}');
+            const userPlan = JSON.parse(localStorage.getItem('userPlan') || '{"credits": 8, "plan": "free"}');
             console.log(`💳 Current credits: ${userPlan.credits}, required: ${creditCost}`);
             
             if (userPlan.credits < creditCost) {
@@ -4315,7 +4394,7 @@
         
         // Enhanced credit checking for all features
         function checkCreditsBeforeAction(actionName, creditCost, contextData = {}) {
-            const userPlan = JSON.parse(localStorage.getItem('userPlan') || '{"credits": 1000, "plan": "free"}');
+            const userPlan = JSON.parse(localStorage.getItem('userPlan') || '{"credits": 8, "plan": "free"}');
             
             console.log(`💰 Checking credits for ${actionName}: needs ${creditCost}, has ${userPlan.credits}`);
             
@@ -5922,7 +6001,7 @@
             
             // CHECK IF ASSESSMENT PACKAGE HAS BEEN PAID FOR (3 credits for ENTIRE assessment once)
             const assessmentProgress = JSON.parse(localStorage.getItem('assessmentProgress') || '{}');
-            const userPlan = JSON.parse(localStorage.getItem('userPlan') || '{"credits": 1000, "plan": "free"}');
+            const userPlan = JSON.parse(localStorage.getItem('userPlan') || '{"credits": 8, "plan": "free"}');
             const hasAssessmentAccess = assessmentProgress.paidForAssessment || false;
             
             if (!hasAssessmentAccess && userPlan.plan !== "vip") {
@@ -9885,7 +9964,7 @@
             console.log(`🛒 Starting credit purchase: ${packageType}, ${credits} credits, £${price}`);
             
             // Check if user is a subscriber (credit top-ups are for subscribers only)
-            const userPlan = JSON.parse(localStorage.getItem('userPlan') || '{"credits": 1000, "plan": "free"}');
+            const userPlan = JSON.parse(localStorage.getItem('userPlan') || '{"credits": 8, "plan": "free"}');
             
             if (userPlan.plan === 'free') {
                 // Free users must subscribe first
@@ -10157,7 +10236,7 @@
             const newTotal = currentCredits + credits;
             
             // Update credits in user plan properly
-            const userPlan = JSON.parse(localStorage.getItem('userPlan') || '{"credits": 1000, "plan": "free"}');
+            const userPlan = JSON.parse(localStorage.getItem('userPlan') || '{"credits": 8, "plan": "free"}');
             userPlan.credits = (userPlan.credits || 0) + credits;
             if (packageType === 'vip') {
                 userPlan.plan = 'vip';
@@ -10314,7 +10393,7 @@
             console.log('💳 Attempting to purchase credit pack:', { packType, credits, priceGBP });
             
             // BLOCK FREE USERS FROM BUYING CREDITS - FORCE SUBSCRIPTION FIRST
-            const userPlan = JSON.parse(localStorage.getItem('userPlan') || '{"credits": 1000, "plan": "free"}');
+            const userPlan = JSON.parse(localStorage.getItem('userPlan') || '{"credits": 8, "plan": "free"}');
             
             if (userPlan.plan === 'free') {
                 console.log('❌ BLOCKED: Free users cannot buy credits - subscription required');
@@ -10896,7 +10975,7 @@
                 console.log('🎯 Initial credits set to 8 (5 for Coach David + 3 for Assessment)');
                 
                 if (typeof showNotification === 'function') {
-                    showNotification('🎉 Test credits granted: 1000 credits for testing!', 'success');
+                    showNotification('🎉 Starter credits granted: 8 credits (Coach David + Assessment)!', 'success');
                 }
             }
             
