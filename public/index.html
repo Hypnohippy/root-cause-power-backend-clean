@@ -12157,144 +12157,138 @@
         };
     </script>
 
-    <script> // MOBILE-COMPATIBLE COACH DAVID X BUTTON FIX
+    <script>
+        // TEMPORARY CREDIT RESET FOR TESTING
+    document.addEventListener('DOMContentLoaded', function() {
+        // Auto-reset credits to 50 for testing
+        setTimeout(() => {
+            const userPlan = {
+                plan: 'free',
+                monthlyCredits: 50,
+                purchasedCredits: 0,
+                lastReset: new Date().getFullYear() + '-' + (new Date().getMonth() + 1)
+            };
+            localStorage.setItem('userPlan', JSON.stringify(userPlan));
+            
+            // Update UI
+            document.getElementById('desktop-credits-remaining').textContent = '50';
+            document.getElementById('mobile-credits-remaining').textContent = '50';
+            
+            console.log('✅ Credits reset to 50 for testing');
+        }, 2000); // Wait 2 seconds after page loads
+    });
+    </script>
+
+    <script>
+    // MOBILE X BUTTON AGGRESSIVE FIX
     document.addEventListener('DOMContentLoaded', function() {
         
-        // Override Coach David close function
+        // Bulletproof close function
         window.closeCoachDavidWidget = function() {
-            console.log('🔥 Closing Coach David...');
+            console.log('🔥 Force closing Coach David...');
             
-            try {
-                if (typeof endCoachDavidSession === 'function') {
-                    endCoachDavidSession();
-                }
-            } catch (error) {
-                console.log('Cleanup function failed, forcing close');
-            }
-            
-            // Remove all Coach David modals
-            const modalSelectors = [
-                '#voice-chat-modal',
-                '#coach-chat-modal', 
-                '[id*="david"]',
-                '[id*="voice"]',
-                '.fixed.inset-0'
-            ];
-            
-            modalSelectors.forEach(selector => {
-                document.querySelectorAll(selector).forEach(el => el.remove());
+            // Nuclear option - remove everything
+            document.querySelectorAll(`
+                #voice-chat-modal,
+                [id*="modal"], 
+                [id*="david"],
+                [id*="David"],
+                [id*="voice"],
+                [id*="chat"],
+                .fixed.inset-0,
+                [style*="position: fixed"],
+                [style*="z-index: 5"]
+            `).forEach(el => {
+                el.remove();
+                console.log('Removed:', el.tagName, el.className);
             });
-            
-            console.log('✅ Coach David closed');
         };
         
-        // MOBILE TOUCH EVENT HANDLERS
-        function handleCloseClick(event) {
-            event.preventDefault();
-            event.stopPropagation();
-            console.log('📱 Mobile close triggered');
-            window.closeCoachDavidWidget();
-        }
-        
-        // Listen for both click AND touch events
-        document.addEventListener('click', function(event) {
-            const target = event.target;
-            
-            // Check if it's a close button (multiple ways)
-            const isCloseButton = 
-                target.matches('[onclick*="closeCoachDavidWidget"]') ||
-                target.closest('[onclick*="closeCoachDavidWidget"]') ||
-                target.matches('.fa-times') ||
-                target.closest('.fa-times') ||
-                target.matches('[class*="close"]') ||
-                (target.textContent && target.textContent.includes('×'));
-            
-            if (isCloseButton) {
-                console.log('🎯 Close button clicked:', target);
-                handleCloseClick(event);
-            }
-        });
-        
-        // MOBILE: Add touchstart event (more responsive on mobile)
-        document.addEventListener('touchstart', function(event) {
-            const target = event.target;
-            
-            const isCloseButton = 
-                target.matches('[onclick*="closeCoachDavidWidget"]') ||
-                target.closest('[onclick*="closeCoachDavidWidget"]') ||
-                target.matches('.fa-times') ||
-                target.closest('.fa-times');
-            
-            if (isCloseButton) {
-                console.log('📱 Touch close button:', target);
-                handleCloseClick(event);
-            }
-        });
-        
-        // MOBILE: Also listen to touchend for better compatibility
-        document.addEventListener('touchend', function(event) {
-            const target = event.target;
-            
-            const isCloseButton = 
-                target.matches('[onclick*="closeCoachDavidWidget"]') ||
-                target.closest('[onclick*="closeCoachDavidWidget"]') ||
-                target.matches('.fa-times') ||
-                target.closest('.fa-times');
-            
-            if (isCloseButton) {
-                console.log('📱 Touch end close button:', target);
-                handleCloseClick(event);
-            }
-        });
-        
-        // Emergency mobile close: tap and hold top-right corner
-        let touchTimer;
+        // Capture ALL touches/clicks in top-right area
         document.addEventListener('touchstart', function(event) {
             const touch = event.touches[0];
-            if (touch.clientX > window.innerWidth - 80 && touch.clientY < 80) {
-                touchTimer = setTimeout(() => {
-                    console.log('📱 Emergency corner close');
-                    window.closeCoachDavidWidget();
-                }, 1000); // Hold for 1 second
+            const x = touch.clientX;
+            const y = touch.clientY;
+            
+            // If touch is in top-right 100x100px area, force close
+            if (x > window.innerWidth - 100 && y < 100) {
+                console.log('📱 Top-right area touched - force closing');
+                event.preventDefault();
+                event.stopPropagation();
+                window.closeCoachDavidWidget();
+                return false;
             }
+        }, true); // Use capture phase
+        
+        // Also capture regular clicks in that area
+        document.addEventListener('click', function(event) {
+            if (event.clientX > window.innerWidth - 100 && event.clientY < 100) {
+                console.log('🖱️ Top-right area clicked - force closing');
+                event.preventDefault();
+                event.stopPropagation();
+                window.closeCoachDavidWidget();
+                return false;
+            }
+        }, true);
+        
+        // Create a floating close button that overlays everything
+        function createFloatingCloseButton() {
+            const btn = document.createElement('div');
+            btn.innerHTML = '✕';
+            btn.style.cssText = `
+                position: fixed !important;
+                top: 15px !important;
+                right: 15px !important;
+                width: 40px !important;
+                height: 40px !important;
+                background: rgba(239, 68, 68, 0.9) !important;
+                color: white !important;
+                border: 2px solid white !important;
+                border-radius: 50% !important;
+                display: none !important;
+                align-items: center !important;
+                justify-content: center !important;
+                font-size: 20px !important;
+                font-weight: bold !important;
+                z-index: 999999 !important;
+                cursor: pointer !important;
+                user-select: none !important;
+                -webkit-user-select: none !important;
+                -webkit-touch-callout: none !important;
+            `;
+            
+            // Both touch and click
+            btn.addEventListener('touchstart', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('📱 Floating button touched');
+                window.closeCoachDavidWidget();
+                btn.style.display = 'none';
+            });
+            
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('🖱️ Floating button clicked');
+                window.closeCoachDavidWidget();
+                btn.style.display = 'none';
+            });
+            
+            document.body.appendChild(btn);
+            return btn;
+        }
+        
+        const floatingBtn = createFloatingCloseButton();
+        
+        // Show floating button when modals appear
+        const observer = new MutationObserver(function() {
+            const hasModal = document.querySelectorAll('.fixed.inset-0, [id*="modal"], [style*="position: fixed"]').length > 0;
+            floatingBtn.style.display = hasModal ? 'flex' : 'none';
         });
         
-        document.addEventListener('touchend', function() {
-            if (touchTimer) {
-                clearTimeout(touchTimer);
-            }
-        });
+        observer.observe(document.body, { childList: true, subtree: true });
         
-        console.log('📱 Mobile Coach David X button fixed');  
-    };
-    </script>
-    
-    <!-- Legal Compliance Styles -->
-    <style>
-        .legal-overlay {
-            backdrop-filter: blur(5px);
-        }
-
-        .legal-overlay input[type="checkbox"] {
-            accent-color: #10b981;
-        }
-
-        .legal-overlay .overflow-y-auto::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        .legal-overlay .overflow-y-auto::-webkit-scrollbar-track {
-            background: rgba(51, 65, 85, 0.3);
-            border-radius: 4px;
-        }
-
-        .legal-overlay .overflow-y-auto::-webkit-scrollbar-thumb {
-            background: rgba(99, 102, 241, 0.6);
-            border-radius: 4px;
-        }
-
-        .legal-overlay .overflow-y-auto::-webkit-scrollbar-thumb:hover {
-            background: rgba(99, 102, 241, 0.8);
+        console.log('📱 Mobile Coach David fix active');
         }
     </style>
 
