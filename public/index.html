@@ -400,7 +400,7 @@
         // ========================================================================
         
         const SeamlessSync = {
-            apiUrl: 'https://roothealth.app/api/sync-credits',
+            apiUrl: 'https://root-cause-power-backend-clean-6pe5.vercel.app/api/sync-credits'
             
             // Check if user has synced email stored
             getSyncEmail() {
@@ -427,6 +427,7 @@
                     
                     console.log(`🔄 Syncing ${userPlan.credits} credits to server for ${syncEmail}...`);
                     
+                    // API RE-ENABLED with fixed ES modules
                     const response = await fetch(this.apiUrl, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -3424,6 +3425,8 @@
                 
                 Format as JSON array with keys: title, authors, journal, date, pmid, summary, significance, clinicalRelevance`;
                 
+                // GROQ API - with error handling to prevent UI breaks
+                try {
                 const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
                     method: 'POST',
                     headers: {
@@ -3460,6 +3463,11 @@
                 
                 // Fallback to enhanced static data if parsing fails
                 return getEnhancedResearchData(topic);
+                
+                } catch (apiError) {
+                    console.error('🚨 Groq API error:', apiError);
+                    return getEnhancedResearchData(topic);
+                }
                 
             } catch (error) {
                 console.error('🚨 Research fetch error:', error);
@@ -3884,13 +3892,13 @@
         // API Configuration for external nutrition data
         const NUTRITION_APIS = {
             USDA: {
-                endpoint: 'https://api.nal.usda.gov/fdc/v1/foods/search',
+                endpoint: 'https://api.nal.usda.gov/fdc/v1/foods/search'
                 key: 'DEMO_KEY', // Replace with real API key in production
                 enabled: true,
                 timeout: 3000
             },
             NUTRITIONIX: {
-                endpoint: 'https://trackapi.nutritionix.com/v2/search/instant',
+                endpoint: 'https://trackapi.nutritionix.com/v2/search/instant'
                 appId: 'DEMO_APP_ID', // Replace with real credentials
                 appKey: 'DEMO_APP_KEY',
                 enabled: false, // Enable when you have real API keys
@@ -5406,7 +5414,7 @@
                 console.log('🎭 MOBILE TRIAL: Using demo mode instead of real Hume API');
                 
                 if (statusEl) statusEl.textContent = '🎁 Demo Mode - Coach David Trial';
-                if (substatusEl) substatusEl.textContent = 'Free trial session - speak naturally';
+                if (substatusEl) substatusEl.textContent = 'Tap to activate voice, then speak naturally';
                 
                 if (startBtn) startBtn.classList.add('hidden');
                 if (endBtn) endBtn.classList.remove('hidden');
@@ -5415,8 +5423,45 @@
                     startCallTimer();
                 }
                 
-                // Start demo voice recognition instead of Hume
-                startDemoAudioRecording();
+                // Mobile audio activation - require user interaction
+                const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+                if (isMobile) {
+                    // Add a mobile activation button
+                    const mobileActivator = document.createElement('button');
+                    mobileActivator.innerHTML = '🎤 Tap to Activate Voice';
+                    mobileActivator.className = 'bg-green-600 hover:bg-green-700 px-6 py-3 rounded-lg text-white font-bold mb-4';
+                    mobileActivator.onclick = () => {
+                        console.log('📱 Mobile voice activated by user touch');
+                        
+                        // Initialize audio context on user interaction
+                        if (window.AudioContext || window.webkitAudioContext) {
+                            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                            if (audioContext.state === 'suspended') {
+                                audioContext.resume();
+                            }
+                        }
+                        
+                        // Test speech synthesis with user interaction
+                        speechSynthesis.cancel();
+                        const testUtterance = new SpeechSynthesisUtterance('Voice activated! I can hear you now.');
+                        testUtterance.volume = 1.0;
+                        speechSynthesis.speak(testUtterance);
+                        
+                        // Remove button and start demo
+                        mobileActivator.remove();
+                        if (substatusEl) substatusEl.textContent = 'Voice ready - speak to Coach David';
+                        startDemoAudioRecording();
+                    };
+                    
+                    // Add button to the modal
+                    const voiceControls = document.getElementById('voice-controls');
+                    if (voiceControls) {
+                        voiceControls.appendChild(mobileActivator);
+                    }
+                } else {
+                    // Desktop - start immediately
+                    startDemoAudioRecording();
+                }
                 return;
             }
             
@@ -5432,6 +5477,8 @@
                 const HUME_SECRET_KEY = 'mRDCEm0XyDchucUKs7aGR6mTSgAHFWrhaDrM5hvh5idWrGB4x41jbZozD9Y8LB3b';
                 
                 console.log('🔑 Getting Hume access token...');
+                // HUME API - with error handling to prevent UI breaks
+                try {
                 const tokenResponse = await fetch('https://api.hume.ai/oauth2-cc/token', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -5563,12 +5610,17 @@
                     endCoachDavidSession();
                 };
                 
-            } catch (error) {
-                console.error('❌ Voice session error:', error);
-                if (statusEl) statusEl.textContent = '❌ Connection Failed';
-                if (substatusEl) substatusEl.textContent = 'Please check your microphone access';
-                endCoachDavidSession();
-            }
+                } catch (humeError) {
+                    console.error('🚨 Hume API error:', humeError);
+                    if (statusEl) statusEl.textContent = '❌ API Connection Failed';
+                    if (substatusEl) substatusEl.textContent = 'Using demo mode instead';
+                    // Fall back to demo mode for mobile trial
+                    if (window.isDemoVoiceMode) {
+                        startDemoAudioRecording();
+                    } else {
+                        endCoachDavidSession();
+                    }
+                }
         };
         
         // Start recording audio
@@ -5913,24 +5965,84 @@
                 // Cancel any ongoing speech
                 speechSynthesis.cancel();
                 
+                // Mobile-optimized speech settings
                 const utterance = new SpeechSynthesisUtterance(text);
-                utterance.rate = 0.85;
+                utterance.rate = 0.9;    // Slightly faster for mobile
                 utterance.pitch = 1.0;
-                utterance.volume = 0.8;
+                utterance.volume = 1.0;  // Full volume for mobile
                 
-                // Try to use a good voice
-                const voices = speechSynthesis.getVoices();
-                const preferredVoice = voices.find(voice => 
-                    voice.name.includes('David') || 
-                    voice.name.includes('Google') || 
-                    voice.name.includes('Enhanced')
-                ) || voices[0];
+                // Mobile-specific voice handling
+                const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
                 
-                if (preferredVoice) {
-                    utterance.voice = preferredVoice;
+                if (isMobile) {
+                    // Wait for voices to load on mobile
+                    const speakWhenReady = () => {
+                        const voices = speechSynthesis.getVoices();
+                        if (voices.length === 0) {
+                            // Voices not loaded yet, try again
+                            setTimeout(speakWhenReady, 100);
+                            return;
+                        }
+                        
+                        // Mobile voice preferences
+                        const mobileVoice = voices.find(voice => 
+                            voice.name.includes('Google') ||
+                            voice.name.includes('Enhanced') ||
+                            (voice.lang.startsWith('en') && voice.localService)
+                        ) || voices[0];
+                        
+                        if (mobileVoice) {
+                            utterance.voice = mobileVoice;
+                            console.log('📱 Using mobile voice:', mobileVoice.name);
+                        }
+                        
+                        // Mobile-specific events
+                        utterance.onstart = () => {
+                            updateVoiceStatus('🔊 Coach David speaking...');
+                        };
+                        
+                        utterance.onend = () => {
+                            updateVoiceStatus('🎤 Your turn - speak now');
+                            // Auto-restart listening on mobile after speech
+                            setTimeout(() => {
+                                if (window.demoRecognition && isDemoVoiceMode) {
+                                    try {
+                                        window.demoRecognition.start();
+                                    } catch (error) {
+                                        console.log('Recognition restart failed:', error);
+                                    }
+                                }
+                            }, 500);
+                        };
+                        
+                        utterance.onerror = (event) => {
+                            console.error('❌ Mobile speech error:', event.error);
+                            updateVoiceStatus('❌ Audio error - please check volume');
+                        };
+                        
+                        speechSynthesis.speak(utterance);
+                    };
+                    
+                    speakWhenReady();
+                    
+                } else {
+                    // Desktop version
+                    const voices = speechSynthesis.getVoices();
+                    const preferredVoice = voices.find(voice => 
+                        voice.name.includes('David') || 
+                        voice.name.includes('Google') || 
+                        voice.name.includes('Enhanced')
+                    ) || voices[0];
+                    
+                    if (preferredVoice) {
+                        utterance.voice = preferredVoice;
+                    }
+                    
+                    speechSynthesis.speak(utterance);
                 }
-                
-                speechSynthesis.speak(utterance);
+            } else {
+                console.warn('⚠️ Speech synthesis not available');
+                updateVoiceStatus('💬 Text mode only (no audio support)');
             }
         }
         
