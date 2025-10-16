@@ -12158,6 +12158,95 @@
     </script>
 
     <script>
+      // COACH DAVID NUCLEAR CLOSE FIX
+    document.addEventListener('DOMContentLoaded', function() {
+        
+        // Create floating emergency close button
+        const emergencyBtn = document.createElement('button');
+        emergencyBtn.id = 'emergency-close-btn';
+        emergencyBtn.innerHTML = '✕ CLOSE DAVID';
+        emergencyBtn.style.cssText = `
+            position: fixed !important;
+            top: 20px !important;
+            right: 20px !important;
+            z-index: 99999 !important;
+            background: #ef4444 !important;
+            color: white !important;
+            border: 2px solid white !important;
+            padding: 8px 16px !important;
+            border-radius: 8px !important;
+            font-weight: bold !important;
+            font-size: 14px !important;
+            cursor: pointer !important;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5) !important;
+            display: none !important;
+        `;
+        
+        emergencyBtn.onclick = function() {
+            // Nuclear close everything
+            const modalPatterns = [
+                '[style*="position: fixed"]',
+                '.fixed',
+                '[style*="z-index"]',
+                '.z-50', '.z-40',
+                '[class*="modal"]', '[id*="modal"]',
+                '[class*="david"]', '[id*="david"]',
+                '[class*="coach"]', '[id*="coach"]',
+                '.inset-0',
+                '[style*="background: rgba"]'
+            ];
+            
+            modalPatterns.forEach(pattern => {
+                document.querySelectorAll(pattern).forEach(el => {
+                    const style = window.getComputedStyle(el);
+                    const zIndex = parseInt(style.zIndex) || 0;
+                    
+                    if (zIndex > 10 || 
+                        style.position === 'fixed' || 
+                        el.classList.contains('fixed') ||
+                        style.backgroundColor.includes('rgba')) {
+                        el.remove();
+                    }
+                });
+            });
+            
+            emergencyBtn.style.display = 'none';
+            console.log('🔥 Nuclear close complete');
+        };
+        
+        document.body.appendChild(emergencyBtn);
+        
+        // Show button when modals appear
+        const observer = new MutationObserver(function() {
+            const modals = document.querySelectorAll('.fixed, [style*="position: fixed"], [style*="z-index"]');
+            emergencyBtn.style.display = modals.length > 0 ? 'block' : 'none';
+        });
+        
+        observer.observe(document.body, { childList: true, subtree: true });
+        
+        // ESC key nuclear close
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                emergencyBtn.onclick();
+            }
+        });
+        
+        // Triple-click nuclear close
+        let clickCount = 0;
+        document.addEventListener('click', function(e) {
+            clickCount++;
+            if (clickCount === 3) {
+                emergencyBtn.onclick();
+                clickCount = 0;
+            }
+            setTimeout(() => clickCount = 0, 1000);
+        });
+        
+        console.log('🚀 Coach David Nuclear Close Active');
+    });
+    </script>
+
+    <!-- Legal Compliance Styles -->   
      // UI BUG FIXES - Coach David Modal & Mobile Menu
     document.addEventListener('DOMContentLoaded', function() {
         
