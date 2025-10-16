@@ -2056,8 +2056,8 @@
                     <div class="text-4xl mb-4">📧</div>
                     <h4 class="text-lg font-bold text-white mb-2">Email Support</h4>
                     <p class="text-slate-400 text-sm mb-3">Direct email for detailed inquiries</p>
-                    <a href="/cdn-cgi/l/email-protection#acdec3c3d8cfcdd9dfc9dcc3dbc9deeccbc1cdc5c082cfc3c1" class="text-neural hover:underline text-sm font-bold">
-                        <span class="__cf_email__" data-cfemail="a4d6cbcbd0c7c5d1d7c1d4cbd3c1d6e4c3c9c5cdc88ac7cbc9">[email&#160;protected]</span>
+                    <a href="/cdn-cgi/l/email-protection#fd8f9292899e9c888e988d928a988fbd9a909c9491d39e9290" class="text-neural hover:underline text-sm font-bold">
+                        <span class="__cf_email__" data-cfemail="4b3924243f282a3e382e3b243c2e390b2c262a222765282426">[email&#160;protected]</span>
                     </a>
                     <div class="mt-2">
                         <button onclick="copyEmailToClipboard()" class="bg-slate-700 hover:bg-slate-600 px-3 py-1 rounded text-xs text-white transition-colors">
@@ -2485,55 +2485,127 @@
             return userPlan.credits || 8;
         }
         
-        // Helper function to get just the credits number
+        // Helper function to get just the credits number with monthly limits enforced
         function getCreditsNumber() {
             const userPlan = getCurrentCredits();
-            return userPlan.credits || 0;
+            
+            // Check if monthly reset is needed
+            checkAndResetMonthlyCredits(userPlan);
+            
+            // VIP users have unlimited credits
+            if (userPlan.plan === 'vip') {
+                return 999999; // Unlimited
+            }
+            
+            // Get total available credits (monthly + purchased)
+            const monthlyCredits = userPlan.monthlyCredits || 0;
+            const purchasedCredits = userPlan.purchasedCredits || 0;
+            const totalCredits = monthlyCredits + purchasedCredits;
+            
+            console.log(`💳 Credits breakdown - Monthly: ${monthlyCredits}, Purchased: ${purchasedCredits}, Total: ${totalCredits}`);
+            
+            return totalCredits;
+        }
+        
+        // Check if monthly credits need to be reset
+        function checkAndResetMonthlyCredits(userPlan) {
+            const now = new Date();
+            const currentMonth = now.getFullYear() + '-' + (now.getMonth() + 1);
+            
+            // If no lastReset or different month, reset monthly credits
+            if (!userPlan.lastReset || userPlan.lastReset !== currentMonth) {
+                console.log(`🗓️ Monthly reset triggered for ${userPlan.plan} plan`);
+                
+                // Set monthly credits based on plan
+                const monthlyLimits = {
+                    'free': 8,
+                    'basic': 50, 
+                    'premium': 150,
+                    'vip': 999999
+                };
+                
+                userPlan.monthlyCredits = monthlyLimits[userPlan.plan] || 8;
+                userPlan.lastReset = currentMonth;
+                
+                // Keep purchased credits intact - they don't reset
+                userPlan.purchasedCredits = userPlan.purchasedCredits || 0;
+                
+                // Update localStorage
+                localStorage.setItem('userPlan', JSON.stringify(userPlan));
+                
+                console.log(`✅ Monthly credits reset to ${userPlan.monthlyCredits} for ${userPlan.plan} plan`);
+            }
         }
         
         function deductCredits(amount, feature) {
-            try {
-                const storedPlan = localStorage.getItem('userPlan');
-                if (!storedPlan || storedPlan === 'premium' || storedPlan === 'free') {
-                    const defaultPlan = {"credits": 8, "plan": "free"};
-                    localStorage.setItem('userPlan', JSON.stringify(defaultPlan));
-                    return defaultPlan;
-                }
-                const userPlan = JSON.parse(storedPlan);
-            } catch (error) {
-                console.log('🔧 JSON parsing error in deductCredits, resetting...', error);
-                const defaultPlan = {"credits": 8, "plan": "free"};
-                localStorage.setItem('userPlan', JSON.stringify(defaultPlan));
-                return defaultPlan;
-            }
+            console.log(`💳 Attempting to deduct ${amount} credits for ${feature}`);
+            
+            // Get current user plan with monthly reset check
             const userPlan = getCurrentCredits();
+            checkAndResetMonthlyCredits(userPlan);
             
             // VIP users have unlimited credits - don't deduct
             if (userPlan.plan === 'vip') {
                 console.log('👑 VIP user - unlimited credits, no deduction needed');
-                return 999999; // Return unlimited
+                return 999999;
             }
             
-            const currentCredits = userPlan.credits || 8;
+            // Get current credit breakdown
+            const monthlyCredits = userPlan.monthlyCredits || 0;
+            const purchasedCredits = userPlan.purchasedCredits || 0;
+            const totalCredits = monthlyCredits + purchasedCredits;
             
-            if (currentCredits < amount) {
-                showInsufficientCreditsModal(feature, amount);
+            console.log(`📊 Credit breakdown - Monthly: ${monthlyCredits}, Purchased: ${purchasedCredits}, Total: ${totalCredits}`);
+            console.log(`💰 Attempting to deduct ${amount} credits`);
+            
+            // Check if sufficient credits available
+            if (totalCredits < amount) {
+                console.log(`❌ Insufficient credits: ${totalCredits} < ${amount}`);
+                
+                // Show appropriate modal based on user plan
+                if (userPlan.plan === 'free') {
+                    showSubscriptionRequiredModal(feature, amount);
+                } else {
+                    showCreditTopUpModal(); // Subscribers can buy more credits
+                }
                 return false;
             }
             
-            const newCredits = currentCredits - amount;
-            userPlan.credits = newCredits;
-            localStorage.setItem('userPlan', JSON.stringify(userPlan));
+            // Deduct credits (purchased credits get consumed first)
+            let remainingToDeduct = amount;
             
+            if (purchasedCredits > 0) {
+                const deductFromPurchased = Math.min(remainingToDeduct, purchasedCredits);
+                userPlan.purchasedCredits -= deductFromPurchased;
+                remainingToDeduct -= deductFromPurchased;
+                console.log(`💵 Deducted ${deductFromPurchased} from purchased credits. Remaining purchased: ${userPlan.purchasedCredits}`);
+            }
+            
+            if (remainingToDeduct > 0) {
+                userPlan.monthlyCredits -= remainingToDeduct;
+                console.log(`📅 Deducted ${remainingToDeduct} from monthly credits. Remaining monthly: ${userPlan.monthlyCredits}`);
+            }
+            
+            // Save updated plan
+            try {
+                localStorage.setItem('userPlan', JSON.stringify(userPlan));
+                const newTotal = (userPlan.monthlyCredits || 0) + (userPlan.purchasedCredits || 0);
+                console.log(`✅ Successfully deducted ${amount} credits. New total: ${newTotal}`);
+            } catch (error) {
+                console.error('❌ Failed to save updated credits:', error);
+                return false;
+            }
+            
+            // Update UI display
             updateCreditsDisplay();
-            console.log(`💳 ${feature}: Deducted ${amount} credits. Balance: ${newCredits}`);
             
-            return newCredits;
+            const newTotal = (userPlan.monthlyCredits || 0) + (userPlan.purchasedCredits || 0);
+            return newTotal;
         }
         
         function updateCreditsDisplay() {
             const userPlan = getCurrentCredits();
-            const credits = getCreditsNumber();
+            const totalCredits = getCreditsNumber();
             const creditsDisplays = document.querySelectorAll('#desktop-credits-remaining, #mobile-credits-remaining, #credits-remaining');
             
             creditsDisplays.forEach(element => {
@@ -2543,14 +2615,21 @@
                         element.style.color = '#a855f7'; // Purple for VIP
                         element.title = 'VIP - Unlimited Credits';
                     } else {
-                        element.textContent = credits;
-                        element.style.color = credits < 10 ? '#ef4444' : credits < 25 ? '#f59e0b' : '#10b981';
-                        element.title = credits + ' credits remaining';
+                        element.textContent = totalCredits;
+                        element.style.color = totalCredits < 5 ? '#ef4444' : totalCredits < 15 ? '#f59e0b' : '#10b981';
+                        
+                        // Enhanced tooltip showing breakdown
+                        const monthly = userPlan.monthlyCredits || 0;
+                        const purchased = userPlan.purchasedCredits || 0;
+                        const planLimits = { 'free': 8, 'basic': 50, 'premium': 150, 'vip': '∞' };
+                        const planLimit = planLimits[userPlan.plan] || 8;
+                        
+                        element.title = `${userPlan.plan.toUpperCase()} Plan (${planLimit}/month)\nMonthly: ${monthly}\nPurchased: ${purchased}\nTotal: ${totalCredits}`;
                     }
                 }
             });
             
-            console.log(`🎨 Updated credits display: ${credits}`);
+            console.log(`🎨 Updated credits display - Monthly: ${userPlan.monthlyCredits || 0}, Purchased: ${userPlan.purchasedCredits || 0}, Total: ${totalCredits}`);
         }
         
         function bookCoachSession(coachName, creditCost) {
@@ -4481,11 +4560,27 @@
         function cleanCorruptedLocalStorage() {
             console.log('🧹 Cleaning localStorage for corrupted data...');
             
-            // Fix corrupted userPlan data
+            // Fix corrupted userPlan data (but preserve valid credits)
             const userPlan = localStorage.getItem('userPlan');
             if (!userPlan || userPlan === 'premium' || userPlan === 'free' || userPlan === '"premium"' || userPlan === '"free"') {
-                console.log('🔧 Found corrupted userPlan, resetting to default...');
-                localStorage.setItem('userPlan', JSON.stringify({"credits": 8, "plan": "free"}));
+                console.log('🔧 Found corrupted userPlan format, but preserving any existing credits...');
+                
+                // Try to extract existing credits if possible
+                let existingCredits = 8; // Default for new users
+                try {
+                    const existingPlan = JSON.parse(localStorage.getItem('userPlan') || '{}');
+                    if (existingPlan && typeof existingPlan.credits === 'number' && existingPlan.credits >= 0) {
+                        existingCredits = existingPlan.credits;
+                        console.log('💾 Preserved existing credits:', existingCredits);
+                    }
+                } catch (e) {
+                    console.log('⚠️ Could not preserve credits, using default 8');
+                }
+                
+                localStorage.setItem('userPlan', JSON.stringify({"credits": existingCredits, "plan": "free"}));
+            } else {
+                // UserPlan exists and is valid - don't touch it!
+                console.log('✅ UserPlan is valid, preserving existing data');
             }
             
             // Check other potentially corrupted keys
@@ -7491,6 +7586,69 @@
         
         // Navigation function already registered globally at top of script
         
+        // Free users must subscribe when credits are depleted
+        function showSubscriptionRequiredModal(feature, cost) {
+            console.log('🚫 FREE USER LOCKOUT: Showing subscription required modal');
+            
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 p-4';
+            modal.innerHTML = `
+                <div class="bg-slate-900 rounded-2xl w-full max-w-lg border border-red-500 shadow-2xl">
+                    <div class="bg-gradient-to-r from-red-600 to-orange-600 p-6 rounded-t-2xl">
+                        <h3 class="text-2xl font-bold text-white flex items-center">
+                            <i class="fas fa-lock mr-3"></i>Credits Depleted - Subscription Required
+                        </h3>
+                        <p class="text-white/80">Free plan limit reached</p>
+                    </div>
+                    <div class="p-6 text-center">
+                        <div class="text-6xl mb-4">🚫</div>
+                        <h4 class="text-xl font-bold text-white mb-3">Your 8 Monthly Credits Are Used Up!</h4>
+                        <p class="text-slate-300 mb-4">Free users get 8 credits per month. To continue using Root Cause Power, you need to upgrade to a subscription plan.</p>
+                        
+                        <div class="bg-slate-800 rounded-lg p-4 mb-6">
+                            <h5 class="text-white font-bold mb-2">What You Get With A Subscription:</h5>
+                            <div class="text-sm text-slate-300 text-left space-y-1">
+                                <div>• <strong class="text-green-400">Basic:</strong> 50 credits/month</div>
+                                <div>• <strong class="text-blue-400">Premium:</strong> 150 credits/month</div>
+                                <div>• <strong class="text-purple-400">VIP:</strong> Unlimited credits</div>
+                                <div>• <strong class="text-yellow-400">Plus:</strong> Credit top-up options when needed</div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex flex-col gap-3">
+                            <button onclick="this.closest('.fixed').remove(); window.navigateToSection('pricing');" class="w-full bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 px-6 py-4 rounded-lg text-white font-bold text-lg transition-all">
+                                🚀 Choose Subscription Plan
+                            </button>
+                            <button onclick="this.closest('.fixed').remove()" class="w-full bg-slate-600 hover:bg-slate-500 px-4 py-2 rounded-lg text-white transition-colors">
+                                Maybe Later
+                            </button>
+                        </div>
+                        
+                        <div class="mt-4 text-xs text-slate-500">
+                            Free credits reset monthly. Next reset: ${getNextResetDate()}
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            document.body.style.overflow = 'hidden';
+            
+            // Auto-remove on outside click
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    modal.remove();
+                    document.body.style.overflow = 'auto';
+                }
+            });
+        }
+        
+        function getNextResetDate() {
+            const now = new Date();
+            const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+            return nextMonth.toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
+        }
+        
         function showInsufficientCreditsModal(feature, cost) {
             const modal = document.createElement('div');
             modal.className = 'fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 p-4';
@@ -10356,20 +10514,29 @@
             // Simulate Stripe payment processing time
             await new Promise(resolve => setTimeout(resolve, 2000));
             
-            // Payment successful
-            const currentCredits = getCreditsNumber();
-            const newTotal = currentCredits + credits;
+            // Payment successful - Add to purchased credits
+            const userPlan = getCurrentCredits();
             
-            // Update credits in user plan properly
-            const userPlan = JSON.parse(localStorage.getItem('userPlan') || '{"credits": 8, "plan": "free"}');
-            userPlan.credits = (userPlan.credits || 0) + credits;
+            // Add to purchased credits (not monthly credits)
+            userPlan.purchasedCredits = (userPlan.purchasedCredits || 0) + credits;
+            
+            // Handle plan upgrades for subscription purchases
             if (packageType === 'vip') {
                 userPlan.plan = 'vip';
+                userPlan.monthlyCredits = 999999; // Unlimited monthly
+            } else if (packageType === 'premium') {
+                userPlan.plan = 'premium';
+                userPlan.monthlyCredits = 150;
+            } else if (packageType === 'basic') {
+                userPlan.plan = 'basic';
+                userPlan.monthlyCredits = 50;
             }
+            
             localStorage.setItem('userPlan', JSON.stringify(userPlan));
             updateCreditsDisplay();
             
-            console.log(`💳 Added ${credits} credits. New total:`, userPlan.credits);
+            const newTotal = getCreditsNumber();
+            console.log(`💳 Added ${credits} purchased credits. Monthly: ${userPlan.monthlyCredits}, Purchased: ${userPlan.purchasedCredits}, Total: ${newTotal}`);
             
             // Store purchase history with Stripe details
             const purchaseHistory = JSON.parse(localStorage.getItem('purchaseHistory') || '[]');
@@ -10518,11 +10685,11 @@
             console.log('💳 Attempting to purchase credit pack:', { packType, credits, priceGBP });
             
             // BLOCK FREE USERS FROM BUYING CREDITS - FORCE SUBSCRIPTION FIRST
-            const userPlan = JSON.parse(localStorage.getItem('userPlan') || '{"credits": 8, "plan": "free"}');
+            const userPlan = getCurrentCredits();
             
             if (userPlan.plan === 'free') {
                 console.log('❌ BLOCKED: Free users cannot buy credits - subscription required');
-                showSubscriberRequiredModal();
+                showSubscriptionRequiredModal('credit_purchase', credits);
                 return; // COMPLETELY BLOCK - no way to bypass
             }
             
@@ -11093,15 +11260,38 @@
             }
             const userPlan = getCurrentCredits();
             
-            // Set credits to 8 - enough for 1 Coach David session (5) + 1 assessment (3) as a hook
-            if (userPlan.credits !== 8) {
-                userPlan.credits = 8;
+            // Initialize new credit system with monthly/purchased separation
+            if (typeof userPlan.monthlyCredits === 'undefined') {
+                console.log('🎯 NEW USER: Initializing credit system');
+                
+                // Set up monthly credits based on plan
+                const monthlyLimits = {
+                    'free': 8,
+                    'basic': 50,
+                    'premium': 150,
+                    'vip': 999999
+                };
+                
+                userPlan.monthlyCredits = monthlyLimits[userPlan.plan] || 8;
+                userPlan.purchasedCredits = 0;
+                userPlan.lastReset = new Date().getFullYear() + '-' + (new Date().getMonth() + 1);
+                
+                // Migrate old credits to monthly if they exist
+                if (userPlan.credits && userPlan.credits !== 8) {
+                    console.log(`🔄 Migrating existing credits: ${userPlan.credits}`);
+                    userPlan.monthlyCredits = Math.max(userPlan.monthlyCredits, userPlan.credits);
+                }
+                
+                delete userPlan.credits; // Remove old system
                 localStorage.setItem('userPlan', JSON.stringify(userPlan));
-                console.log('🎯 Initial credits set to 8 (5 for Coach David + 3 for Assessment)');
+                
+                console.log(`✅ Initialized ${userPlan.plan} plan with ${userPlan.monthlyCredits} monthly credits`);
                 
                 if (typeof showNotification === 'function') {
-                    showNotification('🎉 Starter credits granted: 8 credits (Coach David + Assessment)!', 'success');
+                    showNotification(`🎉 Welcome! ${userPlan.monthlyCredits} monthly credits activated!`, 'success');
                 }
+            } else {
+                console.log(`💾 EXISTING USER: Credits preserved - Monthly: ${userPlan.monthlyCredits}, Purchased: ${userPlan.purchasedCredits || 0}`);
             }
             
             // Update the display
