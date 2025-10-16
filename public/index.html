@@ -2056,8 +2056,8 @@
                     <div class="text-4xl mb-4">📧</div>
                     <h4 class="text-lg font-bold text-white mb-2">Email Support</h4>
                     <p class="text-slate-400 text-sm mb-3">Direct email for detailed inquiries</p>
-                    <a href="/cdn-cgi/l/email-protection#15677a7a617674606670657a627067557278747c793b767a78" class="text-neural hover:underline text-sm font-bold">
-                        <span class="__cf_email__" data-cfemail="8cfee3e3f8efedf9ffe9fce3fbe9feccebe1ede5e0a2efe3e1">[email&#160;protected]</span>
+                    <a href="/cdn-cgi/l/email-protection#acdec3c3d8cfcdd9dfc9dcc3dbc9deeccbc1cdc5c082cfc3c1" class="text-neural hover:underline text-sm font-bold">
+                        <span class="__cf_email__" data-cfemail="a4d6cbcbd0c7c5d1d7c1d4cbd3c1d6e4c3c9c5cdc88ac7cbc9">[email&#160;protected]</span>
                     </a>
                     <div class="mt-2">
                         <button onclick="copyEmailToClipboard()" class="bg-slate-700 hover:bg-slate-600 px-3 py-1 rounded text-xs text-white transition-colors">
@@ -2234,8 +2234,8 @@
                 websocketUrl: 'wss://api.hume.ai/v0/evi/chat'
             },
             GROQ: {
-                // API key moved to backend for security
-                baseUrl: '/api/groq-chat', // Backend proxy endpoint
+                apiKey: 'gsk_YQNHgL2Oae1Fxfh5lGKlWGdyb3FYeRo8Kb0xzjQOKWe4s5hm2oBY4',
+                baseUrl: 'https://api.groq.com/openai/v1/chat/completions',
                 model: 'llama-3.3-70b-versatile'
             },
             STRIPE: {
@@ -2485,127 +2485,55 @@
             return userPlan.credits || 8;
         }
         
-        // Helper function to get just the credits number with monthly limits enforced
+        // Helper function to get just the credits number
         function getCreditsNumber() {
             const userPlan = getCurrentCredits();
-            
-            // Check if monthly reset is needed
-            checkAndResetMonthlyCredits(userPlan);
-            
-            // VIP users have unlimited credits
-            if (userPlan.plan === 'vip') {
-                return 999999; // Unlimited
-            }
-            
-            // Get total available credits (monthly + purchased)
-            const monthlyCredits = userPlan.monthlyCredits || 0;
-            const purchasedCredits = userPlan.purchasedCredits || 0;
-            const totalCredits = monthlyCredits + purchasedCredits;
-            
-            console.log(`💳 Credits breakdown - Monthly: ${monthlyCredits}, Purchased: ${purchasedCredits}, Total: ${totalCredits}`);
-            
-            return totalCredits;
-        }
-        
-        // Check if monthly credits need to be reset
-        function checkAndResetMonthlyCredits(userPlan) {
-            const now = new Date();
-            const currentMonth = now.getFullYear() + '-' + (now.getMonth() + 1);
-            
-            // If no lastReset or different month, reset monthly credits
-            if (!userPlan.lastReset || userPlan.lastReset !== currentMonth) {
-                console.log(`🗓️ Monthly reset triggered for ${userPlan.plan} plan`);
-                
-                // Set monthly credits based on plan
-                const monthlyLimits = {
-                    'free': 8,
-                    'basic': 50, 
-                    'premium': 150,
-                    'vip': 999999
-                };
-                
-                userPlan.monthlyCredits = monthlyLimits[userPlan.plan] || 8;
-                userPlan.lastReset = currentMonth;
-                
-                // Keep purchased credits intact - they don't reset
-                userPlan.purchasedCredits = userPlan.purchasedCredits || 0;
-                
-                // Update localStorage
-                localStorage.setItem('userPlan', JSON.stringify(userPlan));
-                
-                console.log(`✅ Monthly credits reset to ${userPlan.monthlyCredits} for ${userPlan.plan} plan`);
-            }
+            return userPlan.credits || 0;
         }
         
         function deductCredits(amount, feature) {
-            console.log(`💳 Attempting to deduct ${amount} credits for ${feature}`);
-            
-            // Get current user plan with monthly reset check
+            try {
+                const storedPlan = localStorage.getItem('userPlan');
+                if (!storedPlan || storedPlan === 'premium' || storedPlan === 'free') {
+                    const defaultPlan = {"credits": 8, "plan": "free"};
+                    localStorage.setItem('userPlan', JSON.stringify(defaultPlan));
+                    return defaultPlan;
+                }
+                const userPlan = JSON.parse(storedPlan);
+            } catch (error) {
+                console.log('🔧 JSON parsing error in deductCredits, resetting...', error);
+                const defaultPlan = {"credits": 8, "plan": "free"};
+                localStorage.setItem('userPlan', JSON.stringify(defaultPlan));
+                return defaultPlan;
+            }
             const userPlan = getCurrentCredits();
-            checkAndResetMonthlyCredits(userPlan);
             
             // VIP users have unlimited credits - don't deduct
             if (userPlan.plan === 'vip') {
                 console.log('👑 VIP user - unlimited credits, no deduction needed');
-                return 999999;
+                return 999999; // Return unlimited
             }
             
-            // Get current credit breakdown
-            const monthlyCredits = userPlan.monthlyCredits || 0;
-            const purchasedCredits = userPlan.purchasedCredits || 0;
-            const totalCredits = monthlyCredits + purchasedCredits;
+            const currentCredits = userPlan.credits || 8;
             
-            console.log(`📊 Credit breakdown - Monthly: ${monthlyCredits}, Purchased: ${purchasedCredits}, Total: ${totalCredits}`);
-            console.log(`💰 Attempting to deduct ${amount} credits`);
-            
-            // Check if sufficient credits available
-            if (totalCredits < amount) {
-                console.log(`❌ Insufficient credits: ${totalCredits} < ${amount}`);
-                
-                // Show appropriate modal based on user plan
-                if (userPlan.plan === 'free') {
-                    showSubscriptionRequiredModal(feature, amount);
-                } else {
-                    showCreditTopUpModal(); // Subscribers can buy more credits
-                }
+            if (currentCredits < amount) {
+                showInsufficientCreditsModal(feature, amount);
                 return false;
             }
             
-            // Deduct credits (purchased credits get consumed first)
-            let remainingToDeduct = amount;
+            const newCredits = currentCredits - amount;
+            userPlan.credits = newCredits;
+            localStorage.setItem('userPlan', JSON.stringify(userPlan));
             
-            if (purchasedCredits > 0) {
-                const deductFromPurchased = Math.min(remainingToDeduct, purchasedCredits);
-                userPlan.purchasedCredits -= deductFromPurchased;
-                remainingToDeduct -= deductFromPurchased;
-                console.log(`💵 Deducted ${deductFromPurchased} from purchased credits. Remaining purchased: ${userPlan.purchasedCredits}`);
-            }
-            
-            if (remainingToDeduct > 0) {
-                userPlan.monthlyCredits -= remainingToDeduct;
-                console.log(`📅 Deducted ${remainingToDeduct} from monthly credits. Remaining monthly: ${userPlan.monthlyCredits}`);
-            }
-            
-            // Save updated plan
-            try {
-                localStorage.setItem('userPlan', JSON.stringify(userPlan));
-                const newTotal = (userPlan.monthlyCredits || 0) + (userPlan.purchasedCredits || 0);
-                console.log(`✅ Successfully deducted ${amount} credits. New total: ${newTotal}`);
-            } catch (error) {
-                console.error('❌ Failed to save updated credits:', error);
-                return false;
-            }
-            
-            // Update UI display
             updateCreditsDisplay();
+            console.log(`💳 ${feature}: Deducted ${amount} credits. Balance: ${newCredits}`);
             
-            const newTotal = (userPlan.monthlyCredits || 0) + (userPlan.purchasedCredits || 0);
-            return newTotal;
+            return newCredits;
         }
         
         function updateCreditsDisplay() {
             const userPlan = getCurrentCredits();
-            const totalCredits = getCreditsNumber();
+            const credits = getCreditsNumber();
             const creditsDisplays = document.querySelectorAll('#desktop-credits-remaining, #mobile-credits-remaining, #credits-remaining');
             
             creditsDisplays.forEach(element => {
@@ -2615,21 +2543,14 @@
                         element.style.color = '#a855f7'; // Purple for VIP
                         element.title = 'VIP - Unlimited Credits';
                     } else {
-                        element.textContent = totalCredits;
-                        element.style.color = totalCredits < 5 ? '#ef4444' : totalCredits < 15 ? '#f59e0b' : '#10b981';
-                        
-                        // Enhanced tooltip showing breakdown
-                        const monthly = userPlan.monthlyCredits || 0;
-                        const purchased = userPlan.purchasedCredits || 0;
-                        const planLimits = { 'free': 8, 'basic': 50, 'premium': 150, 'vip': '∞' };
-                        const planLimit = planLimits[userPlan.plan] || 8;
-                        
-                        element.title = `${userPlan.plan.toUpperCase()} Plan (${planLimit}/month)\nMonthly: ${monthly}\nPurchased: ${purchased}\nTotal: ${totalCredits}`;
+                        element.textContent = credits;
+                        element.style.color = credits < 10 ? '#ef4444' : credits < 25 ? '#f59e0b' : '#10b981';
+                        element.title = credits + ' credits remaining';
                     }
                 }
             });
             
-            console.log(`🎨 Updated credits display - Monthly: ${userPlan.monthlyCredits || 0}, Purchased: ${userPlan.purchasedCredits || 0}, Total: ${totalCredits}`);
+            console.log(`🎨 Updated credits display: ${credits}`);
         }
         
         function bookCoachSession(coachName, creditCost) {
@@ -2745,9 +2666,10 @@
                 
                 Format as JSON array with keys: title, authors, journal, date, pmid, summary, significance, clinicalRelevance`;
                 
-                const response = await fetch('/api/groq-chat', {
+                const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
                     method: 'POST',
                     headers: {
+                        'Authorization': `Bearer ${API_CONFIG.GROQ.apiKey}`,
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
@@ -4353,7 +4275,8 @@
                 const response = await fetch(API_CONFIG.GROQ.baseUrl, {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${API_CONFIG.GROQ.apiKey}`
                     },
                     body: JSON.stringify({
                         model: API_CONFIG.GROQ.model,
@@ -4558,27 +4481,11 @@
         function cleanCorruptedLocalStorage() {
             console.log('🧹 Cleaning localStorage for corrupted data...');
             
-            // Fix corrupted userPlan data (but preserve valid credits)
+            // Fix corrupted userPlan data
             const userPlan = localStorage.getItem('userPlan');
             if (!userPlan || userPlan === 'premium' || userPlan === 'free' || userPlan === '"premium"' || userPlan === '"free"') {
-                console.log('🔧 Found corrupted userPlan format, but preserving any existing credits...');
-                
-                // Try to extract existing credits if possible
-                let existingCredits = 8; // Default for new users
-                try {
-                    const existingPlan = JSON.parse(localStorage.getItem('userPlan') || '{}');
-                    if (existingPlan && typeof existingPlan.credits === 'number' && existingPlan.credits >= 0) {
-                        existingCredits = existingPlan.credits;
-                        console.log('💾 Preserved existing credits:', existingCredits);
-                    }
-                } catch (e) {
-                    console.log('⚠️ Could not preserve credits, using default 8');
-                }
-                
-                localStorage.setItem('userPlan', JSON.stringify({"credits": existingCredits, "plan": "free"}));
-            } else {
-                // UserPlan exists and is valid - don't touch it!
-                console.log('✅ UserPlan is valid, preserving existing data');
+                console.log('🔧 Found corrupted userPlan, resetting to default...');
+                localStorage.setItem('userPlan', JSON.stringify({"credits": 8, "plan": "free"}));
             }
             
             // Check other potentially corrupted keys
@@ -4737,11 +4644,19 @@
             try {
                 const CONFIG_ID = 'f4a87ae9-eafb-4133-b772-33a1b9d0eb03';
                 
-                // Get Hume access token via secure backend
-                console.log('🔑 Getting Hume access token via backend...');
-                const tokenResponse = await fetch('/api/hume-token', {
+                // Get Hume access token directly (WORKING FROM 2MB FILE)
+                const HUME_API_KEY = 'si8yIRYvcFUMUIsiM3RzlNQhAp09a6gUkce6Tjt7R34XTHAo';
+                const HUME_SECRET_KEY = 'mRDCEm0XyDchucUKs7aGR6mTSgAHFWrhaDrM5hvh5idWrGB4x41jbZozD9Y8LB3b';
+                
+                console.log('🔑 Getting Hume access token...');
+                const tokenResponse = await fetch('https://api.hume.ai/oauth2-cc/token', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' }
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams({
+                        'grant_type': 'client_credentials',
+                        'client_id': HUME_API_KEY,
+                        'client_secret': HUME_SECRET_KEY
+                    })
                 });
                 
                 if (!tokenResponse.ok) {
@@ -4751,67 +4666,16 @@
                 const tokenData = await tokenResponse.json();
                 console.log('✅ Got Hume access token!');
                 
-                // Get microphone access with mobile compatibility
+                // Get microphone access
                 console.log('🎤 Requesting microphone access...');
-                
-                // Mobile-compatible microphone settings
-                const audioConstraints = {
+                microphoneStream = await navigator.mediaDevices.getUserMedia({
                     audio: {
-                        sampleRate: { ideal: 48000, min: 16000 },
+                        sampleRate: 48000,
                         channelCount: 1,
                         echoCancellation: true,
-                        noiseSuppression: true,
-                        autoGainControl: true,
-                        // Mobile-specific constraints
-                        googEchoCancellation: true,
-                        googAutoGainControl: true,
-                        googNoiseSuppression: true,
-                        googHighpassFilter: true,
-                        googAudioMirroring: false
+                        noiseSuppression: true
                     }
-                };
-                
-                // Check if on mobile and apply mobile-specific fixes
-                const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-                if (isMobile) {
-                    console.log('📱 Mobile device detected - applying compatibility fixes');
-                    
-                    // Request user gesture for mobile browsers
-                    const gestureButton = document.createElement('button');
-                    gestureButton.textContent = 'Tap to Enable Voice';
-                    gestureButton.className = 'bg-purple-600 text-white px-4 py-2 rounded-lg';
-                    
-                    const statusEl = document.getElementById('conversation-status');
-                    if (statusEl) {
-                        statusEl.textContent = 'Mobile Setup Required';
-                        const substatusEl = document.getElementById('conversation-substatus');
-                        if (substatusEl) {
-                            substatusEl.innerHTML = '';
-                            substatusEl.appendChild(gestureButton);
-                        }
-                    }
-                    
-                    // Wait for user gesture
-                    await new Promise(resolve => {
-                        gestureButton.onclick = () => {
-                            gestureButton.remove();
-                            resolve();
-                        };
-                    });
-                    
-                    // Force mobile browser to request permissions
-                    await new Promise(resolve => setTimeout(resolve, 100));
-                }
-                
-                try {
-                    microphoneStream = await navigator.mediaDevices.getUserMedia(audioConstraints);
-                } catch (error) {
-                    // Fallback to basic constraints for older mobile browsers
-                    console.log('⚠️ Falling back to basic audio constraints');
-                    microphoneStream = await navigator.mediaDevices.getUserMedia({ 
-                        audio: true 
-                    });
-                }
+                });
                 
                 console.log('✅ Microphone access granted!');
                 
@@ -5502,45 +5366,15 @@
                     throw new Error('Microphone access not supported in this browser');
                 }
                 
-                // Mobile-compatible microphone request
-                const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-                let audioConstraints = {
+                // Request microphone permission first
+                const stream = await navigator.mediaDevices.getUserMedia({ 
                     audio: {
                         echoCancellation: true,
                         noiseSuppression: true,
                         autoGainControl: true,
-                        sampleRate: { ideal: 16000, min: 8000 }
-                    }
-                };
-                
-                // Mobile browser compatibility
-                if (isMobile) {
-                    console.log('📱 Mobile voice session - applying compatibility fixes');
-                    
-                    // Simpler constraints for mobile
-                    audioConstraints = {
-                        audio: {
-                            echoCancellation: true,
-                            noiseSuppression: true
-                        }
-                    };
-                    
-                    // Request user interaction first for iOS Safari
-                    if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
-                        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                        if (audioContext.state === 'suspended') {
-                            await audioContext.resume();
-                        }
-                    }
-                }
-                
-                let stream;
-                try {
-                    stream = await navigator.mediaDevices.getUserMedia(audioConstraints);
-                } catch (error) {
-                    console.log('⚠️ Fallback to basic audio for mobile compatibility');
-                    stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                }
+                        sampleRate: 16000
+                    } 
+                });
                 
                 audioStream = stream;
                 console.log('✅ Microphone access granted');
@@ -7656,69 +7490,6 @@
         // Navigation function already defined at top of script
         
         // Navigation function already registered globally at top of script
-        
-        // Free users must subscribe when credits are depleted
-        function showSubscriptionRequiredModal(feature, cost) {
-            console.log('🚫 FREE USER LOCKOUT: Showing subscription required modal');
-            
-            const modal = document.createElement('div');
-            modal.className = 'fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 p-4';
-            modal.innerHTML = `
-                <div class="bg-slate-900 rounded-2xl w-full max-w-lg border border-red-500 shadow-2xl">
-                    <div class="bg-gradient-to-r from-red-600 to-orange-600 p-6 rounded-t-2xl">
-                        <h3 class="text-2xl font-bold text-white flex items-center">
-                            <i class="fas fa-lock mr-3"></i>Credits Depleted - Subscription Required
-                        </h3>
-                        <p class="text-white/80">Free plan limit reached</p>
-                    </div>
-                    <div class="p-6 text-center">
-                        <div class="text-6xl mb-4">🚫</div>
-                        <h4 class="text-xl font-bold text-white mb-3">Your 8 Monthly Credits Are Used Up!</h4>
-                        <p class="text-slate-300 mb-4">Free users get 8 credits per month. To continue using Root Cause Power, you need to upgrade to a subscription plan.</p>
-                        
-                        <div class="bg-slate-800 rounded-lg p-4 mb-6">
-                            <h5 class="text-white font-bold mb-2">What You Get With A Subscription:</h5>
-                            <div class="text-sm text-slate-300 text-left space-y-1">
-                                <div>• <strong class="text-green-400">Basic:</strong> 50 credits/month</div>
-                                <div>• <strong class="text-blue-400">Premium:</strong> 150 credits/month</div>
-                                <div>• <strong class="text-purple-400">VIP:</strong> Unlimited credits</div>
-                                <div>• <strong class="text-yellow-400">Plus:</strong> Credit top-up options when needed</div>
-                            </div>
-                        </div>
-                        
-                        <div class="flex flex-col gap-3">
-                            <button onclick="this.closest('.fixed').remove(); window.navigateToSection('pricing');" class="w-full bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 px-6 py-4 rounded-lg text-white font-bold text-lg transition-all">
-                                🚀 Choose Subscription Plan
-                            </button>
-                            <button onclick="this.closest('.fixed').remove()" class="w-full bg-slate-600 hover:bg-slate-500 px-4 py-2 rounded-lg text-white transition-colors">
-                                Maybe Later
-                            </button>
-                        </div>
-                        
-                        <div class="mt-4 text-xs text-slate-500">
-                            Free credits reset monthly. Next reset: ${getNextResetDate()}
-                        </div>
-                    </div>
-                </div>
-            `;
-            
-            document.body.appendChild(modal);
-            document.body.style.overflow = 'hidden';
-            
-            // Auto-remove on outside click
-            modal.addEventListener('click', function(e) {
-                if (e.target === modal) {
-                    modal.remove();
-                    document.body.style.overflow = 'auto';
-                }
-            });
-        }
-        
-        function getNextResetDate() {
-            const now = new Date();
-            const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-            return nextMonth.toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
-        }
         
         function showInsufficientCreditsModal(feature, cost) {
             const modal = document.createElement('div');
@@ -10585,29 +10356,20 @@
             // Simulate Stripe payment processing time
             await new Promise(resolve => setTimeout(resolve, 2000));
             
-            // Payment successful - Add to purchased credits
-            const userPlan = getCurrentCredits();
+            // Payment successful
+            const currentCredits = getCreditsNumber();
+            const newTotal = currentCredits + credits;
             
-            // Add to purchased credits (not monthly credits)
-            userPlan.purchasedCredits = (userPlan.purchasedCredits || 0) + credits;
-            
-            // Handle plan upgrades for subscription purchases
+            // Update credits in user plan properly
+            const userPlan = JSON.parse(localStorage.getItem('userPlan') || '{"credits": 8, "plan": "free"}');
+            userPlan.credits = (userPlan.credits || 0) + credits;
             if (packageType === 'vip') {
                 userPlan.plan = 'vip';
-                userPlan.monthlyCredits = 999999; // Unlimited monthly
-            } else if (packageType === 'premium') {
-                userPlan.plan = 'premium';
-                userPlan.monthlyCredits = 150;
-            } else if (packageType === 'basic') {
-                userPlan.plan = 'basic';
-                userPlan.monthlyCredits = 50;
             }
-            
             localStorage.setItem('userPlan', JSON.stringify(userPlan));
             updateCreditsDisplay();
             
-            const newTotal = getCreditsNumber();
-            console.log(`💳 Added ${credits} purchased credits. Monthly: ${userPlan.monthlyCredits}, Purchased: ${userPlan.purchasedCredits}, Total: ${newTotal}`);
+            console.log(`💳 Added ${credits} credits. New total:`, userPlan.credits);
             
             // Store purchase history with Stripe details
             const purchaseHistory = JSON.parse(localStorage.getItem('purchaseHistory') || '[]');
@@ -10756,11 +10518,11 @@
             console.log('💳 Attempting to purchase credit pack:', { packType, credits, priceGBP });
             
             // BLOCK FREE USERS FROM BUYING CREDITS - FORCE SUBSCRIPTION FIRST
-            const userPlan = getCurrentCredits();
+            const userPlan = JSON.parse(localStorage.getItem('userPlan') || '{"credits": 8, "plan": "free"}');
             
             if (userPlan.plan === 'free') {
                 console.log('❌ BLOCKED: Free users cannot buy credits - subscription required');
-                showSubscriptionRequiredModal('credit_purchase', credits);
+                showSubscriberRequiredModal();
                 return; // COMPLETELY BLOCK - no way to bypass
             }
             
@@ -11331,38 +11093,15 @@
             }
             const userPlan = getCurrentCredits();
             
-            // Initialize new credit system with monthly/purchased separation
-            if (typeof userPlan.monthlyCredits === 'undefined') {
-                console.log('🎯 NEW USER: Initializing credit system');
-                
-                // Set up monthly credits based on plan
-                const monthlyLimits = {
-                    'free': 8,
-                    'basic': 50,
-                    'premium': 150,
-                    'vip': 999999
-                };
-                
-                userPlan.monthlyCredits = monthlyLimits[userPlan.plan] || 8;
-                userPlan.purchasedCredits = 0;
-                userPlan.lastReset = new Date().getFullYear() + '-' + (new Date().getMonth() + 1);
-                
-                // Migrate old credits to monthly if they exist
-                if (userPlan.credits && userPlan.credits !== 8) {
-                    console.log(`🔄 Migrating existing credits: ${userPlan.credits}`);
-                    userPlan.monthlyCredits = Math.max(userPlan.monthlyCredits, userPlan.credits);
-                }
-                
-                delete userPlan.credits; // Remove old system
+            // Set credits to 8 - enough for 1 Coach David session (5) + 1 assessment (3) as a hook
+            if (userPlan.credits !== 8) {
+                userPlan.credits = 8;
                 localStorage.setItem('userPlan', JSON.stringify(userPlan));
-                
-                console.log(`✅ Initialized ${userPlan.plan} plan with ${userPlan.monthlyCredits} monthly credits`);
+                console.log('🎯 Initial credits set to 8 (5 for Coach David + 3 for Assessment)');
                 
                 if (typeof showNotification === 'function') {
-                    showNotification(`🎉 Welcome! ${userPlan.monthlyCredits} monthly credits activated!`, 'success');
+                    showNotification('🎉 Starter credits granted: 8 credits (Coach David + Assessment)!', 'success');
                 }
-            } else {
-                console.log(`💾 EXISTING USER: Credits preserved - Monthly: ${userPlan.monthlyCredits}, Purchased: ${userPlan.purchasedCredits || 0}`);
             }
             
             // Update the display
@@ -12044,7 +11783,7 @@
         
         // Copy email to clipboard function
         async function copyEmailToClipboard() {
-            const email = 'david@fuelgeist.co.uk';
+            const email = 'rootcausepower@gmail.com';
             try {
                 await navigator.clipboard.writeText(email);
                 if (typeof showNotification === 'function') {
@@ -12156,143 +11895,7 @@
             }
         };
     </script>
-
-    <script>
-        // TEMPORARY CREDIT RESET FOR TESTING
-    document.addEventListener('DOMContentLoaded', function() {
-        // Auto-reset credits to 50 for testing
-        setTimeout(() => {
-            const userPlan = {
-                plan: 'free',
-                monthlyCredits: 50,
-                purchasedCredits: 0,
-                lastReset: new Date().getFullYear() + '-' + (new Date().getMonth() + 1)
-            };
-            localStorage.setItem('userPlan', JSON.stringify(userPlan));
-            
-            // Update UI
-            document.getElementById('desktop-credits-remaining').textContent = '50';
-            document.getElementById('mobile-credits-remaining').textContent = '50';
-            
-            console.log('✅ Credits reset to 50 for testing');
-        }, 2000); // Wait 2 seconds after page loads
-    });
-    </script>
-
-    <script>
-    // MOBILE X BUTTON AGGRESSIVE FIX
-    document.addEventListener('DOMContentLoaded', function() {
-        
-        // Bulletproof close function
-        window.closeCoachDavidWidget = function() {
-            console.log('🔥 Force closing Coach David...');
-            
-            // Nuclear option - remove everything
-            document.querySelectorAll(`
-                #voice-chat-modal,
-                [id*="modal"], 
-                [id*="david"],
-                [id*="David"],
-                [id*="voice"],
-                [id*="chat"],
-                .fixed.inset-0,
-                [style*="position: fixed"],
-                [style*="z-index: 5"]
-            `).forEach(el => {
-                el.remove();
-                console.log('Removed:', el.tagName, el.className);
-            });
-        };
-        
-        // Capture ALL touches/clicks in top-right area
-        document.addEventListener('touchstart', function(event) {
-            const touch = event.touches[0];
-            const x = touch.clientX;
-            const y = touch.clientY;
-            
-            // If touch is in top-right 100x100px area, force close
-            if (x > window.innerWidth - 100 && y < 100) {
-                console.log('📱 Top-right area touched - force closing');
-                event.preventDefault();
-                event.stopPropagation();
-                window.closeCoachDavidWidget();
-                return false;
-            }
-        }, true); // Use capture phase
-        
-        // Also capture regular clicks in that area
-        document.addEventListener('click', function(event) {
-            if (event.clientX > window.innerWidth - 100 && event.clientY < 100) {
-                console.log('🖱️ Top-right area clicked - force closing');
-                event.preventDefault();
-                event.stopPropagation();
-                window.closeCoachDavidWidget();
-                return false;
-            }
-        }, true);
-        
-        // Create a floating close button that overlays everything
-        function createFloatingCloseButton() {
-            const btn = document.createElement('div');
-            btn.innerHTML = '✕';
-            btn.style.cssText = `
-                position: fixed !important;
-                top: 15px !important;
-                right: 15px !important;
-                width: 40px !important;
-                height: 40px !important;
-                background: rgba(239, 68, 68, 0.9) !important;
-                color: white !important;
-                border: 2px solid white !important;
-                border-radius: 50% !important;
-                display: none !important;
-                align-items: center !important;
-                justify-content: center !important;
-                font-size: 20px !important;
-                font-weight: bold !important;
-                z-index: 999999 !important;
-                cursor: pointer !important;
-                user-select: none !important;
-                -webkit-user-select: none !important;
-                -webkit-touch-callout: none !important;
-            `;
-            
-            // Both touch and click
-            btn.addEventListener('touchstart', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                console.log('📱 Floating button touched');
-                window.closeCoachDavidWidget();
-                btn.style.display = 'none';
-            });
-            
-            btn.addEventListener('click', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                console.log('🖱️ Floating button clicked');
-                window.closeCoachDavidWidget();
-                btn.style.display = 'none';
-            });
-            
-            document.body.appendChild(btn);
-            return btn;
-        }
-        
-        const floatingBtn = createFloatingCloseButton();
-        
-        // Show floating button when modals appear
-        const observer = new MutationObserver(function() {
-            const hasModal = document.querySelectorAll('.fixed.inset-0, [id*="modal"], [style*="position: fixed"]').length > 0;
-            floatingBtn.style.display = hasModal ? 'flex' : 'none';
-        });
-        
-        observer.observe(document.body, { childList: true, subtree: true });
-        
-        console.log('📱 Mobile Coach David fix active');
-        }
-    </style>
-
-</body>
+    
     <!-- Legal Compliance Styles -->
     <style>
         .legal-overlay {
