@@ -12157,92 +12157,115 @@
         };
     </script>
 
-    <script>
-     // COACH DAVID NUCLEAR CLOSE FIX    ← DELETE FROM THIS LINE
+    <script> // MOBILE-COMPATIBLE COACH DAVID X BUTTON FIX
     document.addEventListener('DOMContentLoaded', function() {
         
-        // Create floating emergency close button
-        const emergencyBtn = document.createElement('button');
-        emergencyBtn.id = 'emergency-close-btn';
-        emergencyBtn.innerHTML = '✕ CLOSE DAVID';
-        emergencyBtn.style.cssText = `
-            position: fixed !important;
-            top: 20px !important;
-            right: 20px !important;
-            z-index: 99999 !important;
-            background: #ef4444 !important;
-            color: white !important;
-            border: 2px solid white !important;
-            padding: 8px 16px !important;
-            border-radius: 8px !important;
-            font-weight: bold !important;
-            font-size: 14px !important;
-            cursor: pointer !important;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.5) !important;
-            display: none !important;
-        `;
-        
-        emergencyBtn.onclick = function() {
-            // Nuclear close everything
-            const modalPatterns = [
-                '[style*="position: fixed"]',
-                '.fixed',
-                '[style*="z-index"]',
-                '.z-50', '.z-40',
-                '[class*="modal"]', '[id*="modal"]',
-                '[class*="david"]', '[id*="david"]',
-                '[class*="coach"]', '[id*="coach"]',
-                '.inset-0',
-                '[style*="background: rgba"]'
+        // Override Coach David close function
+        window.closeCoachDavidWidget = function() {
+            console.log('🔥 Closing Coach David...');
+            
+            try {
+                if (typeof endCoachDavidSession === 'function') {
+                    endCoachDavidSession();
+                }
+            } catch (error) {
+                console.log('Cleanup function failed, forcing close');
+            }
+            
+            // Remove all Coach David modals
+            const modalSelectors = [
+                '#voice-chat-modal',
+                '#coach-chat-modal', 
+                '[id*="david"]',
+                '[id*="voice"]',
+                '.fixed.inset-0'
             ];
             
-            modalPatterns.forEach(pattern => {
-                document.querySelectorAll(pattern).forEach(el => {
-                    const style = window.getComputedStyle(el);
-                    const zIndex = parseInt(style.zIndex) || 0;
-                    
-                    if (zIndex > 10 || 
-                        style.position === 'fixed' || 
-                        el.classList.contains('fixed') ||
-                        style.backgroundColor.includes('rgba')) {
-                        el.remove();
-                    }
-                });
+            modalSelectors.forEach(selector => {
+                document.querySelectorAll(selector).forEach(el => el.remove());
             });
             
-            emergencyBtn.style.display = 'none';
-            console.log('🔥 Nuclear close complete');
+            console.log('✅ Coach David closed');
         };
         
-        document.body.appendChild(emergencyBtn);
+        // MOBILE TOUCH EVENT HANDLERS
+        function handleCloseClick(event) {
+            event.preventDefault();
+            event.stopPropagation();
+            console.log('📱 Mobile close triggered');
+            window.closeCoachDavidWidget();
+        }
         
-        // Show button when modals appear
-        const observer = new MutationObserver(function() {
-            const modals = document.querySelectorAll('.fixed, [style*="position: fixed"], [style*="z-index"]');
-            emergencyBtn.style.display = modals.length > 0 ? 'block' : 'none';
-        });
-        
-        observer.observe(document.body, { childList: true, subtree: true });
-        
-        // ESC key nuclear close
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                emergencyBtn.onclick();
+        // Listen for both click AND touch events
+        document.addEventListener('click', function(event) {
+            const target = event.target;
+            
+            // Check if it's a close button (multiple ways)
+            const isCloseButton = 
+                target.matches('[onclick*="closeCoachDavidWidget"]') ||
+                target.closest('[onclick*="closeCoachDavidWidget"]') ||
+                target.matches('.fa-times') ||
+                target.closest('.fa-times') ||
+                target.matches('[class*="close"]') ||
+                (target.textContent && target.textContent.includes('×'));
+            
+            if (isCloseButton) {
+                console.log('🎯 Close button clicked:', target);
+                handleCloseClick(event);
             }
         });
         
-        // Triple-click nuclear close
-        let clickCount = 0;
-        document.addEventListener('click', function(e) {
-            clickCount++;
-            if (clickCount === 3) {
-                emergencyBtn.onclick();
-                clickCount = 0;
+        // MOBILE: Add touchstart event (more responsive on mobile)
+        document.addEventListener('touchstart', function(event) {
+            const target = event.target;
+            
+            const isCloseButton = 
+                target.matches('[onclick*="closeCoachDavidWidget"]') ||
+                target.closest('[onclick*="closeCoachDavidWidget"]') ||
+                target.matches('.fa-times') ||
+                target.closest('.fa-times');
+            
+            if (isCloseButton) {
+                console.log('📱 Touch close button:', target);
+                handleCloseClick(event);
             }
-            setTimeout(() => clickCount = 0, 1000);
         });
         
-        console.log('🚀 Coach David Nuclear Close Active');    
+        // MOBILE: Also listen to touchend for better compatibility
+        document.addEventListener('touchend', function(event) {
+            const target = event.target;
+            
+            const isCloseButton = 
+                target.matches('[onclick*="closeCoachDavidWidget"]') ||
+                target.closest('[onclick*="closeCoachDavidWidget"]') ||
+                target.matches('.fa-times') ||
+                target.closest('.fa-times');
+            
+            if (isCloseButton) {
+                console.log('📱 Touch end close button:', target);
+                handleCloseClick(event);
+            }
+        });
+        
+        // Emergency mobile close: tap and hold top-right corner
+        let touchTimer;
+        document.addEventListener('touchstart', function(event) {
+            const touch = event.touches[0];
+            if (touch.clientX > window.innerWidth - 80 && touch.clientY < 80) {
+                touchTimer = setTimeout(() => {
+                    console.log('📱 Emergency corner close');
+                    window.closeCoachDavidWidget();
+                }, 1000); // Hold for 1 second
+            }
+        });
+        
+        document.addEventListener('touchend', function() {
+            if (touchTimer) {
+                clearTimeout(touchTimer);
+            }
+        });
+        
+        console.log('📱 Mobile Coach David X button fixed');  
     };
     </script>
     
