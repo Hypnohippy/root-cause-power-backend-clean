@@ -454,15 +454,31 @@
                     const syncEmail = email || this.getSyncEmail();
                     if (!syncEmail) return null;
                     
-                    console.log(`🔍 Checking server for credits: ${syncEmail}...`);
+                    console.log(`💾 Checking offline storage for credits: ${syncEmail}...`);
                     
-                    const response = await fetch(`${this.apiUrl}?email=${encodeURIComponent(syncEmail)}`);
+                    // Check offline sync data first
+                    const offlineData = localStorage.getItem(`syncData_${syncEmail}`);
+                    if (offlineData) {
+                        const syncData = JSON.parse(offlineData);
+                        console.log(`✅ Offline credits found for ${syncEmail}:`, syncData);
+                        return {
+                            success: true,
+                            credits: syncData.credits,
+                            plan: syncData.plan
+                        };
+                    }
+                    
+                    // API disabled - return default
+                    console.log('🚫 API disabled - using default credits');
+                    return { success: true, credits: 8, plan: 'free' };
+                    
+                    /*const response = await fetch(`${this.apiUrl}?email=${encodeURIComponent(syncEmail)}`);
                     
                     if (response.ok) {
                         const result = await response.json();
                         console.log(`💾 Found server credits: ${result.credits} for ${syncEmail}`);
                         return result;
-                    }
+                    }*/
                 } catch (error) {
                     console.log(`⚠️ Server check failed (offline?): ${error.message}`);
                 }
