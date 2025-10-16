@@ -5310,6 +5310,11 @@
                                     <i class="fas fa-microphone mr-2"></i>Start Voice Session
                                 </button>
                                 
+                                <button id="restart-voice-btn" onclick="restartVoiceRecognition()" style="display:none;"
+                                    class="bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-lg text-white font-bold transition-all">
+                                    <i class="fas fa-microphone mr-2"></i>Restart Voice
+                                </button>
+                                
                                 <button id="end-conversation-btn" onclick="endCoachDavidSession()" 
                                     class="hidden bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 px-8 py-3 rounded-lg text-white font-bold transition-all">
                                     <i class="fas fa-phone-slash mr-2"></i>End Session
@@ -5847,14 +5852,39 @@
             
             console.log('🎭 Starting demo voice recognition...');
             
+            // First request microphone permission explicitly for mobile
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                navigator.mediaDevices.getUserMedia({ audio: true })
+                    .then(function(stream) {
+                        console.log('📱 Microphone permission granted');
+                        // Stop the stream as we only needed permission
+                        stream.getTracks().forEach(track => track.stop());
+                        // Now start speech recognition
+                        initializeSpeechRecognition();
+                    })
+                    .catch(function(error) {
+                        console.error('❌ Microphone permission denied:', error);
+                        updateVoiceStatus('🎤 Please allow microphone access to use voice chat');
+                        // Try speech recognition anyway in case it works without explicit permission
+                        initializeSpeechRecognition();
+                    });
+            } else {
+                // Fallback for older browsers
+                initializeSpeechRecognition();
+            }
+        }
+        
+        function initializeSpeechRecognition() {
             // Use Web Speech API for voice recognition
             if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
                 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
                 const recognition = new SpeechRecognition();
                 
-                recognition.continuous = true;
+                // Mobile-friendly settings
+                recognition.continuous = false;  // Changed to false for better mobile support
                 recognition.interimResults = true;
                 recognition.lang = 'en-US';
+                recognition.maxAlternatives = 1;  // Optimize for mobile performance
                 
                 let isListening = false;
                 let speechTimeout;
@@ -5891,22 +5921,108 @@
                 
                 recognition.onerror = (event) => {
                     console.warn('⚠️ Speech recognition error:', event.error);
-                    updateVoiceStatus('🎤 Voice recognition error - please try again');
-                };
-                
-                recognition.onend = () => {
-                    if (isListening && isDemoVoiceMode) {
-                        // Restart recognition to keep listening
-                        setTimeout(() => recognition.start(), 100);
+                    if (event.error === 'not-allowed') {
+                        updateVoiceStatus('🎤 Microphone access denied. Please allow microphone in your browser settings.');
+                        showTextInputFallback();
+                    } else if (event.error === 'no-speech') {
+                        updateVoiceStatus('🎤 No speech detected. Try speaking louder or closer to microphone.');
+                    } else {
+                        updateVoiceStatus('🎤 Voice recognition error - please try again');
+                        showVoiceRestartOption();
+                        // Show text fallback after repeated errors
+                        setTimeout(() => showTextInputFallback(), 2000);
                     }
                 };
                 
-                recognition.start();
-                window.demoRecognition = recognition;
+                recognition.onend = () => {
+                    console.log('🎤 Speech recognition ended');
+                    if (isListening && isDemoVoiceMode) {
+                        // Restart recognition to keep listening (mobile-friendly delay)
+                        setTimeout(() => {
+                            try {
+                                recognition.start();
+                                console.log('🔄 Restarting speech recognition...');
+                            } catch (error) {
+                                console.warn('⚠️ Failed to restart recognition:', error);
+                                updateVoiceStatus('🎤 Voice stopped - use restart button');
+                                showVoiceRestartOption();
+                            }
+                        }, 500);  // Increased delay for mobile stability
+                    }
+                };
+                
+                try {
+                    recognition.start();
+                    window.demoRecognition = recognition;
+                    updateVoiceStatus('🎤 Listening - speak now!');
+                } catch (error) {
+                    console.error('❌ Failed to start speech recognition:', error);
+                    updateVoiceStatus('🎤 Please tap restart button below');
+                    showVoiceRestartOption();
+                }
                 
             } else {
                 console.warn('⚠️ Speech recognition not supported - voice input unavailable');
                 updateVoiceStatus('🎤 Voice recognition not supported in this browser');
+                // Show fallback option for unsupported browsers
+                showTextInputFallback();
+            }
+        }
+        
+        function showTextInputFallback() {
+            const voiceControls = document.querySelector('#voice-controls');
+            if (voiceControls) {
+                voiceControls.innerHTML = `
+                    <div class="bg-slate-800 rounded-lg p-4 mb-4">
+                        <p class="text-slate-300 mb-3">🎤 Voice not available? Type your message:</p>
+                        <div class="flex gap-2">
+                            <input type="text" id="text-input-fallback" placeholder="Type your message to Coach David..." 
+                                   class="flex-1 bg-slate-700 text-white px-3 py-2 rounded-lg border border-slate-600"
+                                   onkeypress="if(event.key==='Enter') sendTextMessage()">
+                            <button onclick="sendTextMessage()" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg text-white font-semibold">
+                                Send
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+        
+        function sendTextMessage() {
+            const input = document.getElementById('text-input-fallback');
+            const message = input?.value?.trim();
+            if (message) {
+                processDemoVoiceInput(message);
+                input.value = '';
+            }
+        }
+        
+        function restartVoiceRecognition() {
+            console.log('🔄 Manually restarting voice recognition...');
+            
+            // Stop any existing recognition
+            if (window.demoRecognition) {
+                try {
+                    window.demoRecognition.stop();
+                } catch (error) {
+                    console.log('Previous recognition already stopped');
+                }
+            }
+            
+            // Hide restart button temporarily
+            const restartBtn = document.getElementById('restart-voice-btn');
+            if (restartBtn) restartBtn.style.display = 'none';
+            
+            // Start new recognition
+            setTimeout(() => {
+                startDemoAudioRecording();
+            }, 500);
+        }
+        
+        function showVoiceRestartOption() {
+            const restartBtn = document.getElementById('restart-voice-btn');
+            if (restartBtn) {
+                restartBtn.style.display = 'inline-block';
             }
         }
         
@@ -5928,12 +6044,12 @@
                     const response = await generateIntelligentCoachResponse(messages, systemPrompt);
                     addToVoiceConversation('David', response);
                     speakText(response);
-                    updateVoiceStatus('🎤 Listening - you can speak now');
+                    updateVoiceStatus('🎤 Ready for next message');
                 } catch (error) {
                     const fallbackResponse = "I understand what you're going through. Could you tell me more about how you're feeling right now?";
                     addToVoiceConversation('David', fallbackResponse);
                     speakText(fallbackResponse);
-                    updateVoiceStatus('🎤 Listening - you can speak now');
+                    updateVoiceStatus('🎤 Ready for next message');
                 }
             }, 1000);
         }
