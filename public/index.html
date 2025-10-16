@@ -12156,7 +12156,134 @@
             }
         };
     </script>
+
+    <script>
+     // UI BUG FIXES - Coach David Modal & Mobile Menu
+    document.addEventListener('DOMContentLoaded', function() {
+        
+        // FIX 1: Coach David Modal Close Button
+        document.addEventListener('click', function(event) {
+            if (event.target.matches('.modal-close, .close-modal, [onclick*="closeModal"], [onclick*="hideModal"]') ||
+                event.target.closest('.modal-close, .close-modal')) {
+                
+                event.preventDefault();
+                event.stopPropagation();
+                
+                // Find and remove ALL modals
+                const modals = document.querySelectorAll('.fixed.inset-0, [style*="position: fixed"], .modal');
+                modals.forEach(modal => {
+                    modal.style.display = 'none';
+                    modal.remove();
+                });
+                
+                console.log('✅ Modal closed');
+            }
+        });
+        
+        // ESC key to close modals
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                const modals = document.querySelectorAll('.fixed.inset-0, [style*="position: fixed"]');
+                modals.forEach(modal => {
+                    modal.remove();
+                });
+            }
+        });
+        
+        // FIX 2: Mobile Menu - Fresh Event Listeners
+        function resetMobileMenu() {
+            const menuBtn = document.getElementById('mobile-menu-btn');
+            const menuClose = document.getElementById('mobile-menu-close');
+            const mobileMenu = document.getElementById('mobile-menu');
+            
+            // Remove old listeners by cloning elements
+            if (menuBtn) {
+                const newMenuBtn = menuBtn.cloneNode(true);
+                menuBtn.parentNode.replaceChild(newMenuBtn, menuBtn);
+                
+                newMenuBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    if (mobileMenu) {
+                        mobileMenu.style.display = 'block';
+                    }
+                });
+            }
+            
+            if (menuClose) {
+                const newMenuClose = menuClose.cloneNode(true);
+                menuClose.parentNode.replaceChild(newMenuClose, menuClose);
+                
+                newMenuClose.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    if (mobileMenu) {
+                        mobileMenu.style.display = 'none';
+                    }
+                });
+            }
+        }
+        
+        // Initialize mobile menu fix
+        resetMobileMenu();
+        
+        // Reset mobile menu every time it's used
+        setInterval(resetMobileMenu, 5000); // Reset every 5 seconds as backup
+        
+        // EMERGENCY CLOSE - Double-tap top-right corner
+        let tapCount = 0;
+        document.addEventListener('click', function(e) {
+            if (e.clientX > window.innerWidth - 50 && e.clientY < 50) {
+                tapCount++;
+                if (tapCount === 2) {
+                    // Force close everything
+                    document.querySelectorAll('.fixed, [style*="fixed"]').forEach(el => el.remove());
+                    tapCount = 0;
+                    console.log('🔥 Emergency close activated');
+                }
+                setTimeout(() => tapCount = 0, 1000);
+            }
+        });
+    });
+
+    // Global functions for manual fixes
+    window.forceCloseModals = function() {
+        document.querySelectorAll('.fixed.inset-0, [style*="position: fixed"]').forEach(el => el.remove());
+    };
+
+    window.resetMobileMenuNow = function() {
+        location.reload(); // Nuclear option
+    };
+    </script>
     
+    <!-- Legal Compliance Styles -->
+    <style>
+        .legal-overlay {
+            backdrop-filter: blur(5px);
+        }
+
+        .legal-overlay input[type="checkbox"] {
+            accent-color: #10b981;
+        }
+
+        .legal-overlay .overflow-y-auto::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .legal-overlay .overflow-y-auto::-webkit-scrollbar-track {
+            background: rgba(51, 65, 85, 0.3);
+            border-radius: 4px;
+        }
+
+        .legal-overlay .overflow-y-auto::-webkit-scrollbar-thumb {
+            background: rgba(99, 102, 241, 0.6);
+            border-radius: 4px;
+        }
+
+        .legal-overlay .overflow-y-auto::-webkit-scrollbar-thumb:hover {
+            background: rgba(99, 102, 241, 0.8);
+        }
+    </style>
+
+</body>
     <!-- Legal Compliance Styles -->
     <style>
         .legal-overlay {
