@@ -1,6 +1,7 @@
 
 
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -28,6 +29,344 @@
                 }
             }
         }
+    </script>
+    
+    <!-- COACH DAVID X BUTTON FIX: Function moved to page load for IMMEDIATE availability -->
+    <script>
+        // Coach David X button function - AVAILABLE INSTANTLY
+        window.closeCoachDavidWidget = function() {
+            console.log('🎯 Coach David X Button CLICKED - closing modal');
+            const modal = document.getElementById('voice-chat-modal');
+            if (modal) {
+                // End session if function exists
+                if (typeof endCoachDavidSession === 'function') {
+                    endCoachDavidSession();
+                }
+                modal.remove();
+                console.log('✅ Coach David modal CLOSED successfully');
+            } else {
+                console.log('⚠️ Voice chat modal not found');
+            }
+        };
+        
+        console.log('🎯 COACH DAVID X BUTTON FIX: Function loaded at page start - WORKS IMMEDIATELY!');
+        
+        // NEW: Coach David confirmation modal (shows BEFORE deducting credits)
+        window.showCoachDavidConfirmationModal = function(creditCost) {
+            console.log('💵 Showing Coach David confirmation modal - NO CREDITS DEDUCTED YET');
+            
+            const modal = document.createElement('div');
+            modal.id = 'coach-david-confirmation-modal';
+            modal.className = 'fixed inset-0 bg-black bg-opacity-95 flex items-center justify-center z-50 p-4';
+            modal.innerHTML = `
+                <div class="bg-slate-900 rounded-2xl w-full max-w-md border border-purple-500 shadow-2xl">
+                    <div class="brain-activity p-6 rounded-t-2xl">
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-center">
+                                <div class="neural-pulse w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mr-4">
+                                    🎙️
+                                </div>
+                                <div>
+                                    <h3 class="text-xl font-bold text-white">Coach David</h3>
+                                    <p class="text-white/80 text-sm">Voice Therapy Session</p>
+                                </div>
+                            </div>
+                            <button onclick="closeCoachDavidConfirmation()" class="text-white/80 hover:text-white text-2xl">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="p-6 text-center">
+                        <div class="text-4xl mb-4">🧠</div>
+                        <h4 class="text-lg font-bold text-white mb-2">Start Voice Therapy?</h4>
+                        <p class="text-slate-300 mb-4">Connect with Coach David for an AI-powered voice therapy session using advanced emotional intelligence.</p>
+                        
+                        <div class="bg-slate-800 rounded-lg p-3 mb-6">
+                            <div class="text-purple-300 font-semibold">Cost: ${creditCost} credits</div>
+                            <div class="text-slate-400 text-sm">Professional voice therapy session</div>
+                        </div>
+                        
+                        <div class="flex gap-3">
+                            <button onclick="closeCoachDavidConfirmation()" class="flex-1 bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-lg text-white transition-colors">
+                                Cancel
+                            </button>
+                            <button onclick="confirmCoachDavidSession(${creditCost})" class="flex-1 bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-lg text-white font-semibold transition-colors">
+                                Connect (${creditCost} credits)
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            console.log('✅ Coach David confirmation modal shown - X button works, no credits charged yet!');
+        };
+        
+        // Close confirmation modal (FREE - no credits charged)
+        window.closeCoachDavidConfirmation = function() {
+            console.log('🎯 Closing Coach David confirmation - NO CREDITS CHARGED!');
+            const modal = document.getElementById('coach-david-confirmation-modal');
+            if (modal) {
+                modal.remove();
+                console.log('✅ Coach David confirmation closed safely - credits preserved!');
+            }
+        };
+        
+        // Confirm and start session (DEDUCTS CREDITS)
+        window.confirmCoachDavidSession = function(creditCost) {
+            console.log('💳 User confirmed - NOW deducting credits and starting session...');
+            
+            // Close confirmation modal first
+            closeCoachDavidConfirmation();
+            
+            // NOW deduct credits and start session
+            const success = deductCredits(creditCost, 'Voice Coach David Session');
+            if (!success) {
+                console.log('❌ Credit deduction failed');
+                return;
+            }
+            
+            console.log('✅ Credits deducted - launching Coach David session...');
+            
+            // Launch the actual Coach David interface
+            if (typeof window.launchCoachDavidWidget === 'function') {
+                window.launchCoachDavidWidget();
+            } else {
+                console.error('❌ launchCoachDavidWidget function not found!');
+                showVoiceChatInterface('david');
+            }
+        };
+        
+        // ========================================================================
+        // ULTRA-SEAMLESS CROSS-DEVICE SYNC SYSTEM
+        // ========================================================================
+        
+        const SeamlessSync = {
+            apiUrl: 'https://roothealth.app/api/sync-credits',
+            
+            // Check if user has synced email stored
+            getSyncEmail() {
+                return localStorage.getItem('syncEmail') || null;
+            },
+            
+            // Store sync email (only when user provides it)
+            setSyncEmail(email) {
+                if (email && email.includes('@')) {
+                    localStorage.setItem('syncEmail', email);
+                    console.log(`🔄 Sync email stored: ${email}`);
+                    return true;
+                }
+                return false;
+            },
+            
+            // Sync credits to server (invisible to user)
+            async syncCreditsToServer(email = null) {
+                try {
+                    const syncEmail = email || this.getSyncEmail();
+                    if (!syncEmail) return false;
+                    
+                    const userPlan = JSON.parse(localStorage.getItem('userPlan') || '{"credits": 8, "plan": "free"}');
+                    
+                    console.log(`🔄 Syncing ${userPlan.credits} credits to server for ${syncEmail}...`);
+                    
+                    const response = await fetch(this.apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            email: syncEmail,
+                            credits: userPlan.credits,
+                            plan: userPlan.plan
+                        })
+                    });
+                    
+                    if (response.ok) {
+                        const result = await response.json();
+                        console.log(`✅ Credits synced successfully: ${result.message}`);
+                        return true;
+                    }
+                } catch (error) {
+                    console.log(`⚠️ Sync failed (offline?): ${error.message}`);
+                }
+                return false;
+            },
+            
+            // Get credits from server (invisible to user)
+            async getCreditsFromServer(email = null) {
+                try {
+                    const syncEmail = email || this.getSyncEmail();
+                    if (!syncEmail) return null;
+                    
+                    console.log(`🔍 Checking server for credits: ${syncEmail}...`);
+                    
+                    const response = await fetch(`${this.apiUrl}?email=${encodeURIComponent(syncEmail)}`);
+                    
+                    if (response.ok) {
+                        const result = await response.json();
+                        console.log(`💾 Found server credits: ${result.credits} for ${syncEmail}`);
+                        return result;
+                    }
+                } catch (error) {
+                    console.log(`⚠️ Server check failed (offline?): ${error.message}`);
+                }
+                return null;
+            },
+            
+            // Ultra-seamless auto-sync (runs in background)
+            async autoSync() {
+                const syncEmail = this.getSyncEmail();
+                if (!syncEmail) return; // No email = no sync
+                
+                console.log(`🤖 Auto-sync running for ${syncEmail}...`);
+                
+                // Try to get latest credits from server
+                const serverData = await this.getCreditsFromServer();
+                if (serverData) {
+                    const localPlan = JSON.parse(localStorage.getItem('userPlan') || '{"credits": 8, "plan": "free"}');
+                    
+                    // Use higher credit count (local vs server)
+                    if (serverData.credits > localPlan.credits) {
+                        localPlan.credits = serverData.credits;
+                        localPlan.plan = serverData.plan;
+                        localStorage.setItem('userPlan', JSON.stringify(localPlan));
+                        updateCreditsDisplay();
+                        console.log(`⬆️ Credits updated from server: ${serverData.credits}`);
+                    } else if (localPlan.credits > serverData.credits) {
+                        // Local has more, sync to server
+                        await this.syncCreditsToServer();
+                    }
+                }
+            },
+            
+            // Show sync prompt (only when needed)
+            showSyncPrompt(reason = 'general') {
+                const messages = {
+                    'credits_low': 'Running low on credits? Sync with your other devices to check for more!',
+                    'purchase': 'Credits purchased! Enter your email to sync across all devices.',
+                    'manual': 'Sync your credits across all your devices.'
+                };
+                
+                const modal = document.createElement('div');
+                modal.className = 'fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4';
+                modal.innerHTML = `
+                    <div class="bg-slate-900 rounded-2xl w-full max-w-md border border-blue-500 shadow-2xl">
+                        <div class="bg-gradient-to-r from-blue-600 to-cyan-600 p-6 rounded-t-2xl">
+                            <div class="flex items-center">
+                                <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mr-4">
+                                    🔄
+                                </div>
+                                <div>
+                                    <h3 class="text-xl font-bold text-white">Sync Credits</h3>
+                                    <p class="text-white/80 text-sm">Cross-device sync</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="p-6">
+                            <p class="text-slate-300 mb-4">${messages[reason]}</p>
+                            
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-slate-300 mb-2">Email Address</label>
+                                <input type="email" id="sync-email-input" 
+                                       class="w-full px-3 py-2 bg-slate-800 border border-slate-600 rounded-lg text-white focus:border-blue-500 focus:outline-none"
+                                       placeholder="your@email.com"
+                                       value="${this.getSyncEmail() || ''}">
+                            </div>
+                            
+                            <div class="text-xs text-slate-400 mb-6">
+                                🔒 Your email is only used for syncing credits across devices. No spam, ever.
+                            </div>
+                            
+                            <div class="flex gap-3">
+                                <button onclick="this.closest('.fixed').remove()" 
+                                        class="flex-1 bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-lg text-white transition-colors">
+                                    Skip
+                                </button>
+                                <button onclick="SeamlessSync.performSync(document.getElementById('sync-email-input').value); this.closest('.fixed').remove()" 
+                                        class="flex-1 bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg text-white font-semibold transition-colors">
+                                    Sync Credits
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                document.body.appendChild(modal);
+                
+                // Focus email input
+                setTimeout(() => {
+                    const input = document.getElementById('sync-email-input');
+                    if (input) input.focus();
+                }, 100);
+            },
+            
+            // Perform sync with user-provided email
+            async performSync(email) {
+                if (!email || !email.includes('@')) {
+                    alert('Please enter a valid email address.');
+                    return;
+                }
+                
+                console.log(`🔄 User initiated sync for: ${email}`);
+                
+                // Store email for future auto-sync
+                this.setSyncEmail(email);
+                
+                // Get server credits
+                const serverData = await this.getCreditsFromServer(email);
+                const localPlan = JSON.parse(localStorage.getItem('userPlan') || '{"credits": 8, "plan": "free"}');
+                
+                if (serverData && serverData.credits > localPlan.credits) {
+                    // Server has more credits
+                    localPlan.credits = serverData.credits;
+                    localPlan.plan = serverData.plan;
+                    localStorage.setItem('userPlan', JSON.stringify(localPlan));
+                    updateCreditsDisplay();
+                    
+                    showNotification(`🎉 Found ${serverData.credits} credits on your account!`, 'success');
+                } else {
+                    // Local has same or more, sync to server
+                    await this.syncCreditsToServer(email);
+                    showNotification(`✅ Credits synced across devices!`, 'success');
+                }
+            }
+        };
+        
+        // Add sync button to navigation (subtle)
+        window.addSyncButton = function() {
+            const syncEmail = SeamlessSync.getSyncEmail();
+            if (syncEmail) {
+                // User already synced - add subtle sync indicator
+                const creditsElements = document.querySelectorAll('[id*="credits-remaining"]');
+                creditsElements.forEach(el => {
+                    if (el && !el.title.includes('synced')) {
+                        el.title = el.title + ' (synced across devices)';
+                        el.style.borderBottom = '2px solid #3b82f6';
+                    }
+                });
+            }
+        };
+        
+        // Initialize seamless sync system
+        window.addEventListener('load', () => {
+            console.log('🔄 Seamless Sync System: Initializing...');
+            
+            // Auto-sync in background (invisible)
+            setTimeout(() => {
+                SeamlessSync.autoSync();
+            }, 2000);
+            
+            // Add sync indicators
+            setTimeout(() => {
+                addSyncButton();
+            }, 3000);
+            
+            console.log('✅ Seamless Sync System: Ready!');
+        });
+        
+        // Expose sync functions globally
+        window.SeamlessSync = SeamlessSync;
+
     </script>
 
     <style>
@@ -419,10 +758,11 @@
                     <!-- Credits Display with Top-Up -->
                     <div class="data-flow bg-slate-700 px-4 py-2 rounded-lg flex items-center">
                         <span class="text-sm text-slate-300">Credits:</span>
-                        <span id="desktop-credits-remaining" class="ml-1 font-bold text-green-400">8</span>
+                        <span id="desktop-credits-remaining" class="ml-1 font-bold text-green-400">Loading...</span>
                         <button onclick="showCreditTopUpModal()" class="ml-3 bg-green-600 hover:bg-green-700 px-2 py-1 rounded text-xs text-white transition-colors" title="Top up credits">
                             <i class="fas fa-plus"></i>
                         </button>
+
                     </div>
                 </div>
                 
@@ -493,7 +833,7 @@
                         <div class="flex items-center justify-between">
                             <div>
                                 <span class="text-sm text-slate-300">Credits:</span>
-                                <span id="mobile-credits-remaining" class="ml-1 font-bold text-green-400">8</span>
+                                <span id="mobile-credits-remaining" class="ml-1 font-bold text-green-400">Loading...</span>
                             </div>
                             <button onclick="closeMobileMenu(); showCreditTopUpModal()" class="bg-green-600 hover:bg-green-700 px-3 py-1 rounded text-xs text-white transition-colors">
                                 <i class="fas fa-plus mr-1"></i>Top Up
@@ -2594,34 +2934,48 @@
             
             if (userPlan.credits < creditCost) {
                 console.log(`❌ Insufficient credits (${userPlan.credits}/${creditCost}) - BLOCKING ACCESS`);
-                showCreditBlockModal(
-                    `Voice Coach ${coachName} Session Locked`,
-                    `You need ${creditCost} credits for voice therapy with Coach ${coachName}. You currently have ${userPlan.credits} credits.`,
-                    'voice_coach_session'
-                );
-                return; // BLOCK ACCESS - no more demo mode
-            }
-            
-            // Deduct credits before starting session
-            const success = deductCredits(creditCost, `Voice Coach ${coachName} Session`);
-            if (!success) {
-                console.log('❌ Credit deduction failed');
-                return;
-            }
-            
-            console.log(`✅ Credits deducted - starting voice session with Coach ${coachName}`);
-            
-            // Special handling for Coach David to ensure it works
-            if (coachName === 'david') {
-                console.log('🎤 Launching Coach David widget directly...');
-                if (typeof window.launchCoachDavidWidget === 'function') {
-                    window.launchCoachDavidWidget();
+                
+                // SEAMLESS SYNC: Check for more credits before blocking
+                if (typeof SeamlessSync !== 'undefined' && SeamlessSync.getSyncEmail()) {
+                    console.log('🔄 Checking synced devices for more credits...');
+                    SeamlessSync.autoSync().then(() => {
+                        const updatedPlan = JSON.parse(localStorage.getItem('userPlan') || '{"credits": 8, "plan": "free"}');
+                        if (updatedPlan.credits >= creditCost) {
+                            console.log('✅ Found synced credits! Retrying...');
+                            bookVoiceCoachSession(coachName, creditCost); // Retry
+                            return;
+                        }
+                        // Still not enough - show standard modal
+                        showCreditBlockModal(
+                            `Voice Coach ${coachName} Session Locked`,
+                            `You need ${creditCost} credits for voice therapy with Coach ${coachName}. You currently have ${userPlan.credits} credits.`,
+                            'voice_coach_session'
+                        );
+                    });
                 } else {
-                    console.error('❌ launchCoachDavidWidget function not found!');
-                    // Fallback to showVoiceChatInterface
-                    showVoiceChatInterface(coachName);
+                    // No sync email - show modal with sync option
+                    showCreditBlockModal(
+                        `Voice Coach ${coachName} Session Locked`,
+                        `You need ${creditCost} credits for voice therapy with Coach ${coachName}. You currently have ${userPlan.credits} credits.`,
+                        'voice_coach_session'
+                    );
                 }
+                return; // BLOCK ACCESS - no credits
+            }
+            
+            // FIXED: Show confirmation modal BEFORE deducting credits
+            // Credits will be deducted when user clicks "Connect" inside the modal
+            if (coachName === 'david') {
+                console.log('🎙️ Showing Coach David confirmation modal (credits not deducted yet)...');
+                showCoachDavidConfirmationModal(creditCost);
             } else {
+                // For other coaches, deduct credits and start session (original behavior)
+                const success = deductCredits(creditCost, `Voice Coach ${coachName} Session`);
+                if (!success) {
+                    console.log('❌ Credit deduction failed');
+                    return;
+                }
+                console.log(`✅ Credits deducted - starting voice session with Coach ${coachName}`);
                 startVoiceCoachSession(coachName);
             }
         }
@@ -4994,14 +5348,8 @@
         
 
         
-        // Close Coach David widget
-        window.closeCoachDavidWidget = function() {
-            const modal = document.getElementById('voice-chat-modal');
-            if (modal) {
-                endCoachDavidSession();
-                modal.remove();
-            }
-        };
+        // Close Coach David widget - MOVED TO PAGE LOAD FOR X BUTTON FIX
+        // Original function moved to line 24 for immediate availability
         
         console.log('✅ Working Coach David system loaded!');
         
@@ -11093,15 +11441,26 @@
             }
             const userPlan = getCurrentCredits();
             
-            // Set credits to 8 - enough for 1 Coach David session (5) + 1 assessment (3) as a hook
-            if (userPlan.credits !== 8) {
+            // PRODUCTION MODE: Only set 8 credits if user has NEVER had credits before (first time user)
+            if (typeof userPlan.credits === 'undefined' || userPlan.credits === null) {
+                // First time user - give them starter credits
                 userPlan.credits = 8;
                 localStorage.setItem('userPlan', JSON.stringify(userPlan));
-                console.log('🎯 Initial credits set to 8 (5 for Coach David + 3 for Assessment)');
+                console.log('🎯 NEW USER: Initial credits set to 8 (5 for Coach David + 3 for Assessment)');
                 
                 if (typeof showNotification === 'function') {
-                    showNotification('🎉 Starter credits granted: 8 credits (Coach David + Assessment)!', 'success');
+                    showNotification('🎉 Welcome! Starter credits: 8 credits available!', 'success');
                 }
+            } else {
+                // Existing user - keep their current credits, no reset!
+                console.log(`💾 EXISTING USER: Preserving current credits: ${userPlan.credits}`);
+            }
+            
+            // Check for synced credits in background (seamless)
+            if (typeof SeamlessSync !== 'undefined') {
+                setTimeout(() => {
+                    SeamlessSync.autoSync();
+                }, 1000);
             }
             
             // Update the display
