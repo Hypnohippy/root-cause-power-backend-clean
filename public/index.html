@@ -125,9 +125,20 @@
                 
                 const userPlan = JSON.parse(localStorage.getItem('userPlan') || '{"credits": 8, "plan": "free"}');
                 if (userPlan.plan === 'free') {
-                    closeCoachDavidConfirmation();
-                    showMobileVoiceUpgradeModal();
-                    return;
+                    // Check if they've used their FREE mobile trial
+                    const mobileTrialUsed = localStorage.getItem('mobileCoachDavidTrialUsed');
+                    
+                    if (mobileTrialUsed === 'true') {
+                        // Already used free trial - show upgrade
+                        closeCoachDavidConfirmation();
+                        showMobileVoiceUpgradeModal('trial_used');
+                        return;
+                    } else {
+                        // First time - offer FREE TRIAL!
+                        closeCoachDavidConfirmation();
+                        showMobileVoiceTrialModal(creditCost);
+                        return;
+                    }
                 }
             }
             
@@ -152,8 +163,146 @@
             }
         };
         
+        // Mobile voice therapy FREE TRIAL modal (HOOK!)
+        window.showMobileVoiceTrialModal = function(creditCost) {
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4';
+            modal.innerHTML = `
+                <div class="bg-slate-900 rounded-2xl w-full max-w-md border border-green-500 shadow-2xl">
+                    <div class="bg-gradient-to-r from-green-600 to-emerald-600 p-6 rounded-t-2xl">
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mr-4">
+                                🎁
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-bold text-white">FREE Mobile Trial!</h3>
+                                <p class="text-white/80 text-sm">Try Coach David on Mobile</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="p-6">
+                        <div class="text-center mb-6">
+                            <div class="text-4xl mb-4">🎙️✨</div>
+                            <h4 class="text-lg font-bold text-white mb-2">Experience Voice Therapy!</h4>
+                            <p class="text-slate-300 mb-4">Try Coach David on mobile <strong>FREE</strong> - your first session is on us!</p>
+                            
+                            <div class="bg-green-900/30 border border-green-500/50 rounded-lg p-4 mb-4">
+                                <div class="text-green-300 font-bold mb-2">🎁 FREE TRIAL INCLUDES:</div>
+                                <div class="text-green-200 text-sm">
+                                    ✅ Full Coach David voice session<br>
+                                    ✅ Advanced AI emotional intelligence<br>
+                                    ✅ Mobile-optimized experience<br>
+                                    ✅ No payment required
+                                </div>
+                            </div>
+                            
+                            <div class="bg-slate-800 rounded-lg p-3 mb-4">
+                                <div class="text-slate-400 text-xs">
+                                    After your free trial, subscribe for unlimited mobile voice therapy!
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex gap-3">
+                            <button onclick="this.closest('.fixed').remove()" 
+                                    class="flex-1 bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-lg text-white transition-colors">
+                                Maybe Later
+                            </button>
+                            <button onclick="startMobileTrialSession(${creditCost}); this.closest('.fixed').remove()" 
+                                    class="flex-1 bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg text-white font-bold transition-colors">
+                                🎁 Try FREE Now!
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+        };
+        
+        // Start mobile trial session (FREE HOOK)
+        window.startMobileTrialSession = function(creditCost) {
+            console.log('🎁 Starting FREE mobile Coach David trial...');
+            
+            // Mark trial as used (one time only!)
+            localStorage.setItem('mobileCoachDavidTrialUsed', 'true');
+            
+            // Deduct credits normally (they still pay credits, just get mobile access)
+            const success = deductCredits(creditCost, 'Voice Coach David Mobile Trial');
+            if (!success) {
+                console.log('❌ Credit deduction failed');
+                return;
+            }
+            
+            console.log('✅ FREE TRIAL: Credits deducted - launching Coach David mobile session...');
+            
+            // Launch Coach David (same as desktop)
+            if (typeof window.launchCoachDavidWidget === 'function') {
+                window.launchCoachDavidWidget();
+            } else {
+                console.error('❌ launchCoachDavidWidget function not found!');
+                showVoiceChatInterface('david');
+            }
+            
+            // Show trial completion message after 30 seconds
+            setTimeout(() => {
+                showTrialCompletionModal();
+            }, 30000); // 30 seconds into session
+        };
+        
+        // Trial completion hook modal
+        window.showTrialCompletionModal = function() {
+            // Only show if modal doesn't already exist
+            if (document.getElementById('trial-completion-modal')) return;
+            
+            const modal = document.createElement('div');
+            modal.id = 'trial-completion-modal';
+            modal.className = 'fixed top-4 right-4 bg-slate-900 border border-green-500 rounded-lg p-4 z-50 w-80 shadow-2xl';
+            modal.innerHTML = `
+                <div class="flex items-start">
+                    <div class="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
+                        🎉
+                    </div>
+                    <div class="flex-1">
+                        <h4 class="text-sm font-bold text-white mb-1">Enjoying Coach David?</h4>
+                        <p class="text-xs text-slate-300 mb-3">This was your free mobile trial! Subscribe for unlimited mobile voice therapy.</p>
+                        <div class="flex gap-2">
+                            <button onclick="this.closest('#trial-completion-modal').remove()" 
+                                    class="text-xs px-2 py-1 bg-slate-700 hover:bg-slate-600 rounded text-white transition-colors">
+                                Later
+                            </button>
+                            <button onclick="this.closest('#trial-completion-modal').remove(); window.navigateToSection('pricing')" 
+                                    class="text-xs px-2 py-1 bg-green-600 hover:bg-green-700 rounded text-white font-semibold transition-colors">
+                                Subscribe Now!
+                            </button>
+                        </div>
+                    </div>
+                    <button onclick="this.closest('#trial-completion-modal').remove()" 
+                            class="text-slate-400 hover:text-white ml-2">
+                        ×
+                    </button>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            
+            // Auto-remove after 15 seconds if no action
+            setTimeout(() => {
+                const existingModal = document.getElementById('trial-completion-modal');
+                if (existingModal) existingModal.remove();
+            }, 15000);
+        };
+        
         // Mobile voice therapy upgrade modal
-        window.showMobileVoiceUpgradeModal = function() {
+        window.showMobileVoiceUpgradeModal = function(reason = 'general') {
+            const trialUsed = reason === 'trial_used';
+            const title = trialUsed ? 'Loved Your Free Trial?' : 'Mobile Voice Therapy';
+            const message = trialUsed ? 
+                'Your free mobile trial is complete! Subscribe for unlimited mobile voice therapy with Coach David.' :
+                'Mobile voice therapy requires a subscription for the best microphone and audio experience.';
+            const icon = trialUsed ? '🎆' : '🎙️';
+            
             const modal = document.createElement('div');
             modal.className = 'fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4';
             modal.innerHTML = `
@@ -164,17 +313,17 @@
                                 📱
                             </div>
                             <div>
-                                <h3 class="text-xl font-bold text-white">Mobile Voice Therapy</h3>
-                                <p class="text-white/80 text-sm">Premium Feature</p>
+                                <h3 class="text-xl font-bold text-white">${title}</h3>
+                                <p class="text-white/80 text-sm">${trialUsed ? 'Continue the Experience' : 'Premium Feature'}</p>
                             </div>
                         </div>
                     </div>
                     
                     <div class="p-6">
                         <div class="text-center mb-6">
-                            <div class="text-4xl mb-4">🎙️</div>
-                            <h4 class="text-lg font-bold text-white mb-2">Voice Therapy on Mobile?</h4>
-                            <p class="text-slate-300 mb-4">Mobile voice therapy requires a subscription for the best microphone and audio experience.</p>
+                            <div class="text-4xl mb-4">${icon}</div>
+                            <h4 class="text-lg font-bold text-white mb-2">${trialUsed ? 'Ready to Subscribe?' : 'Voice Therapy on Mobile?'}</h4>
+                            <p class="text-slate-300 mb-4">${message}</p>
                             
                             <div class="bg-slate-800 rounded-lg p-4 mb-4">
                                 <div class="text-slate-300 text-sm">
@@ -505,6 +654,63 @@
         
         // Expose sync functions globally
         window.SeamlessSync = SeamlessSync;
+        
+        // Assessment upgrade modal for free users
+        window.showAssessmentUpgradeModal = function() {
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4';
+            modal.innerHTML = `
+                <div class="bg-slate-900 rounded-2xl w-full max-w-md border border-purple-500 shadow-2xl">
+                    <div class="bg-gradient-to-r from-purple-600 to-pink-600 p-6 rounded-t-2xl">
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mr-4">
+                                📋
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-bold text-white">More Assessments</h3>
+                                <p class="text-white/80 text-sm">Premium Feature</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="p-6">
+                        <div class="text-center mb-6">
+                            <div class="text-4xl mb-4">🔍</div>
+                            <h4 class="text-lg font-bold text-white mb-2">Assessment Limit Reached!</h4>
+                            <p class="text-slate-300 mb-4">You've used your <strong>1 free assessment</strong>! Unlock unlimited access to all psychic root categories with Premium.</p>
+                            
+                            <div class="bg-slate-800 rounded-lg p-4 mb-4">
+                                <div class="text-slate-300 text-sm">
+                                    ✅ All 6 assessment categories<br>
+                                    ✅ Unlimited retakes & tracking<br>
+                                    ✅ Cross-device synchronization<br>
+                                    ✅ Unlimited Coach David access<br>
+                                    ✅ Complete psychic root analysis<br>
+                                    ✅ Personalized healing guidance
+                                </div>
+                            </div>
+                            
+                            <div class="text-xs text-slate-400 mb-6">
+                                🔒 <strong>Strategic Limitation:</strong> Free users get 1 assessment to experience our platform, then upgrade for unlimited access.
+                            </div>
+                        </div>
+                        
+                        <div class="flex gap-3">
+                            <button onclick="this.closest('.fixed').remove()" 
+                                    class="flex-1 bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-lg text-white transition-colors">
+                                Stay with 1
+                            </button>
+                            <button onclick="this.closest('.fixed').remove(); window.navigateToSection('pricing')" 
+                                    class="flex-1 bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-lg text-white font-semibold transition-colors">
+                                Upgrade for More
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+        };
 
     </script>
 
@@ -1793,34 +1999,38 @@
                             <div class="text-3xl font-bold text-gray-400 mb-2">£0</div>
                             <div class="text-slate-400 mb-6">per month</div>
                             <div class="bg-gray-500/20 rounded-lg p-3 mb-6">
-                                <div class="text-gray-400 font-bold">Limited access</div>
-                                <div class="text-slate-400 text-sm">Basic features only</div>
+                                <div class="text-gray-400 font-bold">Strategic Restrictions</div>
+                                <div class="text-slate-400 text-sm">Limited to motivate upgrade</div>
                             </div>
                             
                             <div class="text-left space-y-2 mb-6">
                                 <div class="flex items-center text-slate-300">
                                     <i class="fas fa-check text-green-500 mr-3"></i>
-                                    1 Coach Session monthly
+                                    8 Credits Total (Single Device)
                                 </div>
                                 <div class="flex items-center text-slate-300">
                                     <i class="fas fa-check text-green-500 mr-3"></i>
-                                    1 Assessment monthly
+                                    1 Assessment Only
+                                </div>
+                                <div class="flex items-center text-slate-300">
+                                    <i class="fas fa-check text-green-500 mr-3"></i>
+                                    1 Coach David Mobile Trial
                                 </div>
                                 <div class="flex items-center text-red-400">
                                     <i class="fas fa-times text-red-500 mr-3"></i>
-                                    No voice therapy
+                                    No cross-device sync
                                 </div>
                                 <div class="flex items-center text-red-400">
                                     <i class="fas fa-times text-red-500 mr-3"></i>
-                                    No PTSD tools
+                                    No unlimited assessments
                                 </div>
                                 <div class="flex items-center text-red-400">
                                     <i class="fas fa-times text-red-500 mr-3"></i>
-                                    No knowledge library
+                                    No unlimited Coach David
                                 </div>
                                 <div class="flex items-center text-red-400">
                                     <i class="fas fa-times text-red-500 mr-3"></i>
-                                    No support
+                                    No priority support
                                 </div>
                             </div>
                             
@@ -1889,23 +2099,23 @@
                             <div class="text-left space-y-3 mb-6">
                                 <div class="flex items-center text-slate-300">
                                     <i class="fas fa-check text-green-500 mr-3"></i>
-                                    100 AI Coach Sessions
+                                    <strong>Cross-Device Sync</strong> (vs Free: Single Device)
                                 </div>
                                 <div class="flex items-center text-slate-300">
                                     <i class="fas fa-check text-green-500 mr-3"></i>
-                                    12+ hours voice therapy
+                                    <strong>Unlimited Assessments</strong> (vs Free: 1 Only)
                                 </div>
                                 <div class="flex items-center text-slate-300">
                                     <i class="fas fa-check text-green-500 mr-3"></i>
-                                    50+ detailed assessments
+                                    <strong>Unlimited Coach David</strong> (vs Free: 1 Trial)
                                 </div>
                                 <div class="flex items-center text-slate-300">
                                     <i class="fas fa-check text-green-500 mr-3"></i>
-                                    Priority support
+                                    150 Credits + 12+ hours voice therapy
                                 </div>
                                 <div class="flex items-center text-slate-300">
                                     <i class="fas fa-check text-green-500 mr-3"></i>
-                                    Better credit top-up rates
+                                    Priority support & advanced analytics
                                 </div>
                             </div>
                             
@@ -6611,9 +6821,20 @@
                 return;
             }
             
+            const userPlan = JSON.parse(localStorage.getItem('userPlan') || '{"credits": 8, "plan": "free"}');
+            
+            // NEW: Free users can only do ONE assessment total
+            if (userPlan.plan === 'free') {
+                const completedAssessments = Object.values(assessmentData).filter(data => data.completed).length;
+                if (completedAssessments >= 1) {
+                    console.log('🚫 FREE USER: Already completed 1 assessment - blocking further assessments');
+                    showAssessmentUpgradeModal();
+                    return;
+                }
+            }
+            
             // CHECK IF ASSESSMENT PACKAGE HAS BEEN PAID FOR (3 credits for ENTIRE assessment once)
             const assessmentProgress = JSON.parse(localStorage.getItem('assessmentProgress') || '{}');
-            const userPlan = JSON.parse(localStorage.getItem('userPlan') || '{"credits": 8, "plan": "free"}');
             const hasAssessmentAccess = assessmentProgress.paidForAssessment || false;
             
             if (!hasAssessmentAccess && userPlan.plan !== "vip") {
@@ -12425,4 +12646,3 @@
 
 </body>
 </html>
-
