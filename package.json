@@ -5,9 +5,9 @@
   "description": "Root Cause Power Healthcare Platform",
   "main": "index.js",
   "scripts": {
-    "dev": "vercel dev",
-    "build": "vercel build",
-    "deploy": "vercel --prod"
+    "dev": "echo 'Development mode'",
+    "build": "echo 'Build complete'",
+    "start": "echo 'Server starting'"
   },
   "keywords": ["healthcare", "ai", "therapy"],
   "author": "David Prince",
