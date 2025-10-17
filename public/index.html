@@ -5432,27 +5432,142 @@
                     const mobileActivator = document.createElement('button');
                     mobileActivator.innerHTML = '🎤 Tap to Activate Voice';
                     mobileActivator.className = 'bg-green-600 hover:bg-green-700 px-6 py-3 rounded-lg text-white font-bold mb-4';
-                    mobileActivator.onclick = () => {
+                    mobileActivator.onclick = async () => {
                         console.log('📱 Mobile voice activated by user touch');
+                        if (substatusEl) substatusEl.textContent = 'Initializing audio...';
                         
-                        // Initialize audio context on user interaction
-                        if (window.AudioContext || window.webkitAudioContext) {
-                            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                            if (audioContext.state === 'suspended') {
-                                audioContext.resume();
+                        // STEP 1: Initialize and store AudioContext globally for mobile
+                        try {
+                            if (!window.mobileAudioContext) {
+                                window.mobileAudioContext = new (window.AudioContext || window.webkitAudioContext)();
+                                console.log('🔊 Created AudioContext, state:', window.mobileAudioContext.state);
                             }
+                            
+                            if (window.mobileAudioContext.state === 'suspended') {
+                                await window.mobileAudioContext.resume();
+                                console.log('✅ AudioContext resumed successfully');
+                            }
+                            console.log('✅ AudioContext ready, state:', window.mobileAudioContext.state);
+                        } catch (error) {
+                            console.error('❌ AudioContext error:', error);
                         }
                         
-                        // Test speech synthesis with user interaction
-                        speechSynthesis.cancel();
-                        const testUtterance = new SpeechSynthesisUtterance('Voice activated! I can hear you now.');
-                        testUtterance.volume = 1.0;
-                        speechSynthesis.speak(testUtterance);
+                        // STEP 2: Request microphone permission explicitly
+                        try {
+                            console.log('🎤 Requesting microphone permission...');
+                            const stream = await navigator.mediaDevices.getUserMedia({ 
+                                audio: {
+                                    echoCancellation: true,
+                                    noiseSuppression: true,
+                                    autoGainControl: true
+                                } 
+                            });
+                            console.log('✅ Microphone permission GRANTED');
+                            console.log('📊 Audio tracks:', stream.getAudioTracks().length);
+                            
+                            // Store stream globally for mobile
+                            window.mobileMicStream = stream;
+                            
+                            if (substatusEl) substatusEl.textContent = 'Microphone ready!';
+                        } catch (error) {
+                            console.error('❌ Microphone DENIED:', error.name, error.message);
+                            if (substatusEl) substatusEl.textContent = '❌ Microphone access required!';
+                            alert('Please allow microphone access to use voice chat with Coach David');
+                            return;
+                        }
                         
-                        // Remove button and start demo
+                        // STEP 3: Initialize and test speech synthesis properly
+                        console.log('🔊 Initializing speech synthesis...');
+                        console.log('Speech synthesis available?', 'speechSynthesis' in window);
+                        
+                        if ('speechSynthesis' in window) {
+                            // Cancel any pending speech
+                            speechSynthesis.cancel();
+                            
+                            // Wait for voices to load (critical on mobile)
+                            const waitForVoices = () => {
+                                return new Promise((resolve) => {
+                                    let voices = speechSynthesis.getVoices();
+                                    if (voices.length > 0) {
+                                        console.log('✅ Voices loaded:', voices.length, 'voices available');
+                                        console.log('First voice:', voices[0].name, '- Language:', voices[0].lang);
+                                        resolve(voices);
+                                    } else {
+                                        console.log('⏳ Waiting for voices to load...');
+                                        speechSynthesis.onvoiceschanged = () => {
+                                            voices = speechSynthesis.getVoices();
+                                            console.log('✅ Voices loaded after wait:', voices.length, 'voices');
+                                            resolve(voices);
+                                        };
+                                        // Timeout fallback
+                                        setTimeout(() => {
+                                            voices = speechSynthesis.getVoices();
+                                            if (voices.length === 0) {
+                                                console.warn('⚠️ No voices loaded after timeout');
+                                            }
+                                            resolve(voices);
+                                        }, 1000);
+                                    }
+                                });
+                            };
+                            
+                            const voices = await waitForVoices();
+                            
+                            // Test speech output
+                            if (voices.length > 0) {
+                                console.log('🔊 Testing audio output...');
+                                const testUtterance = new SpeechSynthesisUtterance('Voice activated! I can hear you now.');
+                                testUtterance.volume = 1.0;
+                                testUtterance.rate = 0.95;
+                                testUtterance.pitch = 1.0;
+                                
+                                // Select best voice for mobile
+                                const mobileVoice = voices.find(v => 
+                                    v.lang.startsWith('en') && (v.localService || v.name.includes('Google') || v.name.includes('Enhanced'))
+                                ) || voices[0];
+                                
+                                if (mobileVoice) {
+                                    testUtterance.voice = mobileVoice;
+                                    console.log('🎤 Selected voice:', mobileVoice.name);
+                                }
+                                
+                                testUtterance.onstart = () => {
+                                    console.log('✅ Speech started playing');
+                                    if (substatusEl) substatusEl.textContent = '🔊 Testing audio...';
+                                };
+                                
+                                testUtterance.onend = () => {
+                                    console.log('✅ Speech test completed successfully');
+                                    if (substatusEl) substatusEl.textContent = '✅ Audio ready!';
+                                };
+                                
+                                testUtterance.onerror = (event) => {
+                                    console.error('❌ Speech synthesis error:', event.error);
+                                    if (substatusEl) substatusEl.textContent = '⚠️ Audio issue detected';
+                                };
+                                
+                                speechSynthesis.speak(testUtterance);
+                                
+                                // Wait for test to complete
+                                await new Promise(resolve => setTimeout(resolve, 2000));
+                            } else {
+                                console.warn('⚠️ No voices available for testing');
+                            }
+                        } else {
+                            console.error('❌ Speech synthesis NOT available on this device');
+                            if (substatusEl) substatusEl.textContent = '⚠️ Voice output not supported';
+                        }
+                        
+                        // STEP 4: Remove activation button and start voice session
+                        console.log('✅ All checks passed - starting voice session');
                         mobileActivator.remove();
-                        if (substatusEl) substatusEl.textContent = 'Voice ready - speak to Coach David';
-                        startDemoAudioRecording();
+                        if (substatusEl) substatusEl.textContent = 'Starting voice recognition...';
+                        
+                        // Start demo with slight delay to ensure everything is ready
+                        setTimeout(() => {
+                            console.log('🎬 Starting demo audio recording...');
+                            startDemoAudioRecording();
+                        }, 500);
                     };
                     
                     // Add button to the modal
@@ -5968,6 +6083,18 @@
         
         function speakText(text) {
             if ('speechSynthesis' in window) {
+                console.log('🔊 speakText called with:', text.substring(0, 50) + '...');
+                
+                // Resume AudioContext if suspended (mobile requirement)
+                if (window.mobileAudioContext && window.mobileAudioContext.state === 'suspended') {
+                    console.log('🔊 Resuming suspended AudioContext...');
+                    window.mobileAudioContext.resume().then(() => {
+                        console.log('✅ AudioContext resumed for speech');
+                    }).catch(err => {
+                        console.error('❌ Failed to resume AudioContext:', err);
+                    });
+                }
+                
                 // Cancel any ongoing speech
                 speechSynthesis.cancel();
                 
@@ -5979,13 +6106,17 @@
                 
                 // Mobile-specific voice handling
                 const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+                console.log('📱 Is mobile device?', isMobile);
                 
                 if (isMobile) {
                     // Wait for voices to load on mobile
                     const speakWhenReady = () => {
                         const voices = speechSynthesis.getVoices();
+                        console.log('🎤 Available voices:', voices.length);
+                        
                         if (voices.length === 0) {
                             // Voices not loaded yet, try again
+                            console.log('⏳ Voices not loaded, retrying...');
                             setTimeout(speakWhenReady, 100);
                             return;
                         }
@@ -5999,30 +6130,36 @@
                         
                         if (mobileVoice) {
                             utterance.voice = mobileVoice;
-                            console.log('📱 Using mobile voice:', mobileVoice.name);
+                            console.log('✅ Using mobile voice:', mobileVoice.name, '- Lang:', mobileVoice.lang);
+                        } else {
+                            console.warn('⚠️ No suitable voice found, using default');
                         }
                         
-                        // Mobile-specific events
+                        // Mobile-specific events with detailed logging
                         utterance.onstart = () => {
+                            console.log('✅ Speech STARTED playing');
                             updateVoiceStatus('🔊 Coach David speaking...');
                         };
                         
                         utterance.onend = () => {
+                            console.log('✅ Speech ENDED successfully');
                             updateVoiceStatus('🎤 Your turn - speak now');
                             // Auto-restart listening on mobile after speech
                             setTimeout(() => {
                                 if (window.demoRecognition && isDemoVoiceMode) {
                                     try {
+                                        console.log('🔄 Restarting recognition after speech...');
                                         window.demoRecognition.start();
+                                        console.log('✅ Recognition restarted successfully');
                                     } catch (error) {
-                                        console.log('Recognition restart failed:', error);
+                                        console.error('❌ Recognition restart failed:', error.message);
                                     }
                                 }
                             }, 500);
                         };
                         
                         utterance.onerror = (event) => {
-                            console.error('❌ Mobile speech error:', event.error);
+                            console.error('❌ Mobile speech error:', event.error, '- Message:', event.message);
                             updateVoiceStatus('❌ Audio error - please check volume');
                         };
                         
@@ -6084,10 +6221,24 @@
         }
         
         function initializeSpeechRecognition() {
+            console.log('🎯 Initializing speech recognition...');
+            console.log('Speech Recognition available?', 'webkitSpeechRecognition' in window || 'SpeechRecognition' in window);
+            console.log('Mobile mic stream available?', !!window.mobileMicStream);
+            console.log('Mobile audio context state?', window.mobileAudioContext?.state);
+            
+            // Ensure AudioContext is running
+            if (window.mobileAudioContext && window.mobileAudioContext.state === 'suspended') {
+                console.log('🔊 Resuming AudioContext before recognition...');
+                window.mobileAudioContext.resume().catch(err => {
+                    console.error('❌ Failed to resume AudioContext:', err);
+                });
+            }
+            
             // Use Web Speech API for voice recognition
             if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
                 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
                 const recognition = new SpeechRecognition();
+                console.log('✅ Speech recognition object created');
                 
                 // Mobile-friendly settings
                 recognition.continuous = false;  // Changed to false for better mobile support
@@ -6095,20 +6246,41 @@
                 recognition.lang = 'en-US';
                 recognition.maxAlternatives = 1;  // Optimize for mobile performance
                 
+                console.log('⚙️ Recognition settings:', {
+                    continuous: recognition.continuous,
+                    interimResults: recognition.interimResults,
+                    lang: recognition.lang,
+                    maxAlternatives: recognition.maxAlternatives
+                });
+                
                 let isListening = false;
                 let speechTimeout;
                 
                 recognition.onstart = () => {
-                    console.log('🎤 Voice recognition started');
+                    console.log('✅ Voice recognition STARTED - microphone is now listening');
                     isListening = true;
+                    updateVoiceStatus('🎤 Listening - speak now!');
+                    console.log('🔊 AudioContext state during recognition:', window.mobileAudioContext?.state);
+                };
+                
+                recognition.onsoundstart = () => {
+                    console.log('🔊 Sound detected by microphone');
+                };
+                
+                recognition.onspeechstart = () => {
+                    console.log('🗣️ Speech detected - user is speaking');
                 };
                 
                 recognition.onresult = (event) => {
+                    console.log('📝 Recognition result received, results:', event.results.length);
                     let finalTranscript = '';
                     let interimTranscript = '';
                     
                     for (let i = event.resultIndex; i < event.results.length; i++) {
                         const transcript = event.results[i][0].transcript;
+                        const confidence = event.results[i][0].confidence;
+                        console.log(`Result ${i}: "${transcript}" (final: ${event.results[i].isFinal}, confidence: ${confidence})`);
+                        
                         if (event.results[i].isFinal) {
                             finalTranscript += transcript;
                         } else {
@@ -6118,25 +6290,63 @@
                     
                     // Show what user is saying
                     if (interimTranscript) {
+                        console.log('⏳ Interim transcript:', interimTranscript);
                         updateVoiceStatus(`🎤 Listening: "${interimTranscript}..."`);
                     }
                     
                     // Process final speech
                     if (finalTranscript.trim()) {
+                        console.log('✅ Final transcript:', finalTranscript);
                         clearTimeout(speechTimeout);
+                        updateVoiceStatus('💬 Processing your message...');
                         processDemoVoiceInput(finalTranscript.trim());
                     }
                 };
                 
+                recognition.onspeechend = () => {
+                    console.log('🔇 Speech ended - user stopped speaking');
+                };
+                
                 recognition.onerror = (event) => {
-                    console.warn('⚠️ Speech recognition error:', event.error);
-                    if (event.error === 'not-allowed') {
-                        updateVoiceStatus('🎤 Microphone access denied. Please allow microphone in your browser settings.');
+                    console.error('❌ Speech recognition ERROR:', event.error);
+                    console.error('Error details:', event);
+                    console.log('🔊 AudioContext state during error:', window.mobileAudioContext?.state);
+                    console.log('🎤 Mic stream active?', window.mobileMicStream?.active);
+                    
+                    if (event.error === 'not-allowed' || event.error === 'permission-denied') {
+                        console.error('❌ MICROPHONE PERMISSION DENIED');
+                        updateVoiceStatus('❌ Microphone access denied. Please allow microphone in your browser settings.');
+                        alert('Microphone permission is required. Please enable it in your browser settings and refresh the page.');
                         showTextInputFallback();
                     } else if (event.error === 'no-speech') {
-                        updateVoiceStatus('🎤 No speech detected. Try speaking louder or closer to microphone.');
+                        console.warn('⚠️ NO SPEECH DETECTED');
+                        updateVoiceStatus('🎤 No speech detected. Speak louder or closer to microphone.');
+                        // Auto-restart on no-speech
+                        setTimeout(() => {
+                            if (isDemoVoiceMode) {
+                                console.log('🔄 Auto-restarting after no-speech...');
+                                try {
+                                    recognition.start();
+                                } catch (e) {
+                                    console.error('❌ Restart failed:', e);
+                                }
+                            }
+                        }, 1000);
+                    } else if (event.error === 'audio-capture') {
+                        console.error('❌ AUDIO CAPTURE FAILED - Microphone not working');
+                        updateVoiceStatus('❌ Microphone error. Check if another app is using it.');
+                        alert('Cannot access microphone. Please check:\n1. Microphone is not being used by another app\n2. Browser has microphone permission\n3. Microphone is working in device settings');
+                        showTextInputFallback();
+                    } else if (event.error === 'network') {
+                        console.error('❌ NETWORK ERROR - Speech recognition service unavailable');
+                        updateVoiceStatus('❌ Network error. Check internet connection.');
+                        showTextInputFallback();
+                    } else if (event.error === 'aborted') {
+                        console.warn('⚠️ Recognition aborted');
+                        updateVoiceStatus('🎤 Recognition stopped');
                     } else {
-                        updateVoiceStatus('🎤 Voice recognition error - please try again');
+                        console.error('❌ UNKNOWN ERROR:', event.error);
+                        updateVoiceStatus('🎤 Voice error - please try again');
                         showVoiceRestartOption();
                         // Show text fallback after repeated errors
                         setTimeout(() => showTextInputFallback(), 2000);
@@ -6144,19 +6354,36 @@
                 };
                 
                 recognition.onend = () => {
-                    console.log('🎤 Speech recognition ended');
+                    console.log('🎤 Speech recognition ENDED');
+                    console.log('🔊 AudioContext state:', window.mobileAudioContext?.state);
+                    console.log('🚦 isListening:', isListening, '| isDemoVoiceMode:', isDemoVoiceMode);
+                    
                     if (isListening && isDemoVoiceMode) {
                         // Restart recognition to keep listening (mobile-friendly delay)
+                        console.log('🔄 Will restart recognition in 500ms...');
                         setTimeout(() => {
                             try {
+                                // Ensure audio context is still running
+                                if (window.mobileAudioContext && window.mobileAudioContext.state === 'suspended') {
+                                    console.log('🔊 Resuming AudioContext before restart...');
+                                    window.mobileAudioContext.resume();
+                                }
+                                
+                                console.log('🔄 Attempting to restart recognition...');
                                 recognition.start();
-                                console.log('🔄 Restarting speech recognition...');
+                                console.log('✅ Recognition restarted successfully');
                             } catch (error) {
-                                console.warn('⚠️ Failed to restart recognition:', error);
-                                updateVoiceStatus('🎤 Voice stopped - use restart button');
-                                showVoiceRestartOption();
+                                console.error('❌ Failed to restart recognition:', error.name, error.message);
+                                if (error.name === 'InvalidStateError') {
+                                    console.log('💡 Recognition already started, ignoring error');
+                                } else {
+                                    updateVoiceStatus('🎤 Voice stopped - use restart button below');
+                                    showVoiceRestartOption();
+                                }
                             }
                         }, 500);  // Increased delay for mobile stability
+                    } else {
+                        console.log('⏹️ Not restarting (isListening=false or demo mode ended)');
                     }
                 };
                 
