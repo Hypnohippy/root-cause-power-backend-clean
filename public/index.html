@@ -3,6 +3,7 @@
 
 
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -401,7 +402,7 @@
         // ========================================================================
         
         const SeamlessSync = {
-            apiUrl: 'https://root-cause-power-backend-clean-6pe5.vercel.app/api/sync-credits'
+            apiUrl: 'https://root-cause-power-backend-clean-6pe5.vercel.app/api/sync-credits',
             
             // Check if user has synced email stored
             getSyncEmail() {
@@ -3893,13 +3894,13 @@
         // API Configuration for external nutrition data
         const NUTRITION_APIS = {
             USDA: {
-                endpoint: 'https://api.nal.usda.gov/fdc/v1/foods/search'
+                endpoint: 'https://api.nal.usda.gov/fdc/v1/foods/search',
                 key: 'DEMO_KEY', // Replace with real API key in production
                 enabled: true,
                 timeout: 3000
             },
             NUTRITIONIX: {
-                endpoint: 'https://trackapi.nutritionix.com/v2/search/instant'
+                endpoint: 'https://trackapi.nutritionix.com/v2/search/instant',
                 appId: 'DEMO_APP_ID', // Replace with real credentials
                 appKey: 'DEMO_APP_KEY',
                 enabled: false, // Enable when you have real API keys
@@ -5622,6 +5623,10 @@
                         endCoachDavidSession();
                     }
                 }
+            } catch (outerError) {
+                console.error('❌ Outer connection error:', outerError);
+                endCoachDavidSession();
+            }
         };
         
         // Start recording audio
@@ -7076,7 +7081,7 @@
                 { q: "Describe your relationship with anger and healthy boundaries", type: "text", placeholder: "How do you handle anger and set boundaries?" },
                 { q: "Do you feel your emotions are validated and heard by those close to you?", type: "scale", scale: ["Never", "Rarely", "Sometimes", "Often", "Always"] },
                 { q: "What emotional trauma or loss most significantly impacts your health?", type: "text", placeholder: "Share what feels safe to explore..." },
-                { q: "How connected do you feel to your authentic emotional self?", type: "scale", scale: ["Completely disconnected", "Mostly disconnected", "Somewhat connected", "Mostly connected", "Fully connected"] }
+                { q: "How connected do you feel to your authentic emotional self?", type: "scale", scale: ["Completely disconnected", "Mostly disconnected", "Somewhat connected", "Mostly connected", "Fully connected"] },
             ],
             mental: [
                 { q: "How often do you experience racing or repetitive thoughts?", type: "scale", scale: ["Never", "Rarely", "Sometimes", "Often", "Constantly"] },
@@ -7088,7 +7093,7 @@
                 { q: "Do you believe you have the power to heal and change your health?", type: "scale", scale: ["Not at all", "Slightly", "Moderately", "Mostly", "Completely"] },
                 { q: "How often do you practice mindfulness or mental awareness?", type: "scale", scale: ["Never", "Rarely", "Weekly", "Daily", "Multiple times daily"] },
                 { q: "What childhood messages about health and self-worth still influence you?", type: "text", placeholder: "Family beliefs, cultural messages, early programming..." },
-                { q: "Rate your mental clarity and cognitive function", type: "scale", scale: ["Very Poor", "Poor", "Average", "Good", "Excellent"] }
+                { q: "Rate your mental clarity and cognitive function", type: "scale", scale: ["Very Poor", "Poor", "Average", "Good", "Excellent"] },
             ],
             spiritual: [
                 { q: "How connected do you feel to your life's purpose and meaning?", type: "scale", scale: ["Completely disconnected", "Mostly disconnected", "Somewhat connected", "Mostly connected", "Fully connected"] },
@@ -7098,7 +7103,7 @@
                 { q: "Do you believe your illness serves a higher purpose or lesson?", type: "scale", scale: ["Not at all", "Slightly", "Moderately", "Mostly", "Completely"] },
                 { q: "Rate your sense of forgiveness toward yourself and others", type: "scale", scale: ["Very Poor", "Poor", "Average", "Good", "Excellent"] },
                 { q: "How often do you feel grateful despite health challenges?", type: "scale", scale: ["Never", "Rarely", "Sometimes", "Often", "Always"] },
-                { q: "What spiritual wound or separation most affects your wellbeing?", type: "text", placeholder: "Loss of faith, spiritual trauma, disconnection from source..." }
+                { q: "What spiritual wound or separation most affects your wellbeing?", type: "text", placeholder: "Loss of faith, spiritual trauma, disconnection from source..." },
             ],
             physical: [
                 { q: "What are your most persistent or concerning physical symptoms?", type: "text", placeholder: "List primary symptoms affecting your quality of life..." },
@@ -7108,7 +7113,7 @@
                 { q: "How often do you experience pain or discomfort?", type: "scale", scale: ["Never", "Rarely", "Sometimes", "Often", "Constantly"] },
                 { q: "What does your body most need for healing right now?", type: "text", placeholder: "Rest, movement, nutrition, touch, etc." },
                 { q: "Do you feel your body is trying to communicate something important?", type: "text", placeholder: "What message might your symptoms carry?" },
-                { q: "Rate your sleep quality and restorative rest", type: "scale", scale: ["Very Poor", "Poor", "Average", "Good", "Excellent"] }
+                { q: "Rate your sleep quality and restorative rest", type: "scale", scale: ["Very Poor", "Poor", "Average", "Good", "Excellent"] },
             ],
             lifestyle: [
                 { q: "How supportive is your living environment for healing?", type: "scale", scale: ["Very unsupportive", "Unsupportive", "Neutral", "Supportive", "Very supportive"] },
@@ -7117,7 +7122,7 @@
                 { q: "How aligned is your current life with your authentic self?", type: "scale", scale: ["Not at all", "Slightly", "Moderately", "Mostly", "Completely"] },
                 { q: "Rate the quality of your nutrition and eating habits", type: "scale", scale: ["Very Poor", "Poor", "Average", "Good", "Excellent"] },
                 { q: "How much time do you spend in nature or natural settings?", type: "scale", scale: ["Never", "Rarely", "Weekly", "Daily", "Most of my time"] },
-                { q: "What lifestyle changes would most support your healing?", type: "text", placeholder: "Changes in work, relationships, habits, environment..." }
+                { q: "What lifestyle changes would most support your healing?", type: "text", placeholder: "Changes in work, relationships, habits, environment..." },
             ],
             energy: [
                 { q: "How sensitive are you to other people's emotions and energy?", type: "scale", scale: ["Not at all", "Slightly", "Moderately", "Very", "Extremely"] },
@@ -7127,11 +7132,12 @@
                 { q: "Do you notice energy blocks or stuck areas in your body?", type: "text", placeholder: "Where do you feel stuck or blocked energy?" },
                 { q: "What practices help you feel most energetically balanced?", type: "text", placeholder: "Meditation, yoga, crystals, Reiki, etc." },
                 { q: "How connected do you feel to your personal power and vitality?", type: "scale", scale: ["Completely disconnected", "Mostly disconnected", "Somewhat connected", "Mostly connected", "Fully connected"] },
-                { q: "Rate your overall energetic wellbeing and flow", type: "scale", scale: ["Very Poor", "Poor", "Average", "Good", "Excellent"] }
+                { q: "Rate your overall energetic wellbeing and flow", type: "scale", scale: ["Very Poor", "Poor", "Average", "Good", "Excellent"] },
             ]
         };
 
         function startAssessmentCategory(category) {
+            window.startAssessmentCategory = startAssessmentCategory; // Make immediately global
             console.log(`📋 Starting assessment: ${category}`);
             
             // Legal documents now available via footer links - no blocking required
@@ -12712,22 +12718,7 @@
                 }
             }
         }
-        
-        // Make functions globally available
-        window.showLegalDocument = showLegalDocument;
-        window.closeLegalModal = closeLegalModal;
-        window.showEmailPreferences = showEmailPreferences;
-        window.updateEmailConsent = updateEmailConsent;
-        window.acknowledgeLegalDocument = acknowledgeLegalDocument;
-        window.toggleAcknowledgeButton = toggleAcknowledgeButton;
-        window.checkAllDocumentsAcknowledged = checkAllDocumentsAcknowledged;
-        window.getLegalComplianceStatus = getLegalComplianceStatus;
-        window.updateLegalComplianceIndicators = updateLegalComplianceIndicators;
-        window.showComplianceSummary = showComplianceSummary;
-        window.recallLastAssessmentResults = recallLastAssessmentResults;
-        window.showRestorationSummaryModal = showRestorationSummaryModal;
-        window.updateAllAssessmentCards = updateAllAssessmentCards;
-        window.updateDashboardScores = updateDashboardScores;
+        // Functions will be assigned to window at end of script
         window.createDemoAssessmentData = createDemoAssessmentData;
         window.ensureTestCredits = ensureTestCredits;
         window.bookVoiceCoachSession = bookVoiceCoachSession;
@@ -12933,6 +12924,28 @@
                 return false;
             }
         };
+        
+        // FIX: Make button functions globally accessible
+        console.log('🔗 FIXING BUTTONS: Assigning functions to window...');
+        console.log('startAssessmentCategory exists?', typeof startAssessmentCategory);
+        window.startAssessmentCategory = startAssessmentCategory;
+        window.start54321Grounding = start54321Grounding;
+        window.startEmdrSimulation = startEmdrSimulation;
+        window.startBoxBreathing = startBoxBreathing;
+        window.startMindfulnessEx = startMindfulnessEx;
+        window.startButterflyHug = startButterflyHug;
+        window.refreshResearchDatabase = refreshResearchDatabase;
+        window.loadResearchCategory = loadResearchCategory;
+        window.bookCoachSession = bookCoachSession;
+        window.bookVoiceCoachSession = bookVoiceCoachSession;
+        window.openNutritionCalculator = openNutritionCalculator;
+        window.showCreditTopUpModal = showCreditTopUpModal;
+        window.cleanCorruptedLocalStorage = cleanCorruptedLocalStorage;
+        window.ensureTestCredits = ensureTestCredits;
+        window.updateLegalComplianceIndicators = updateLegalComplianceIndicators;
+        window.recallLastAssessmentResults = recallLastAssessmentResults;
+        console.log('✅ BUTTONS FIXED: All functions assigned to window!');
+        console.log('Test:', typeof window.startAssessmentCategory);
     </script>
     
     <!-- Legal Compliance Styles -->
