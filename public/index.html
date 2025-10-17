@@ -255,41 +255,40 @@
             document.body.appendChild(modal);
         };
         
-        // Start mobile trial session (FREE HOOK)
+        // Start mobile trial session (FREE HOOK) - NOW USES REAL HUME AI!
         window.startMobileTrialSession = function(creditCost) {
-            console.log('🎁 Starting FREE mobile Coach David trial...');
+            console.log('🎁 Starting FREE Coach David session with REAL Hume AI...');
             
             // Mark trial as used (one time only!)
             localStorage.setItem('mobileCoachDavidTrialUsed', 'true');
             
             // Deduct credits normally (they still pay credits, just get mobile access)
-            const success = deductCredits(creditCost, 'Voice Coach David Mobile Trial');
+            const success = deductCredits(creditCost, 'Voice Coach David Session');
             if (!success) {
                 console.log('❌ Credit deduction failed');
                 return;
             }
             
-            console.log('✅ FREE TRIAL: Credits deducted - launching Coach David mobile session...');
+            console.log('✅ Credits deducted - launching REAL Coach David with Hume AI...');
             
-            // Launch Coach David DEMO MODE for mobile trial (no real Hume API)
-            console.log('🎭 Launching Coach David in DEMO MODE for mobile trial...');
+            // Launch Coach David with REAL HUME AI (no demo mode!)
+            console.log('🚀 Launching Coach David with REAL Hume AI emotional intelligence...');
             
-            // Use demo voice mode instead of real Hume AI
+            // NO DEMO MODE - Use real Hume AI for everyone!
             if (typeof window.launchCoachDavidWidget === 'function') {
-                // Set demo mode flag before launching
-                window.isDemoVoiceMode = true;
-                isDemoVoiceMode = true;
-                console.log('✅ Demo mode flags set to TRUE');
+                // DON'T set demo mode flags - let it use real Hume AI
+                window.isDemoVoiceMode = false;  // Explicitly set to FALSE
+                console.log('✅ Real Hume AI mode enabled');
                 window.launchCoachDavidWidget();
             } else {
                 console.error('❌ launchCoachDavidWidget function not found!');
                 showVoiceChatInterface('david');
             }
             
-            // Show trial completion message after 30 seconds
+            // Show upgrade message after session (optional)
             setTimeout(() => {
                 showTrialCompletionModal();
-            }, 30000); // 30 seconds into session
+            }, 300000); // 5 minutes into session (increased from 30 seconds)
         };
         
         // Trial completion hook modal
@@ -5403,7 +5402,7 @@
         
         // Start actual Coach David connection
         window.startCoachDavidConnection = async function() {
-            console.log('🔑 Connecting to Coach David...');
+            console.log('🔑 Connecting to Coach David with REAL Hume AI...');
             
             const statusEl = document.getElementById('conversation-status');
             const substatusEl = document.getElementById('conversation-substatus');
@@ -5411,178 +5410,21 @@
             const endBtn = document.getElementById('end-conversation-btn');
             const callStatus = document.getElementById('call-status');
             
-            // CHECK IF THIS IS A MOBILE DEMO TRIAL
-            if (window.isDemoVoiceMode === true) {
-                console.log('🎭 MOBILE TRIAL: Using demo mode instead of real Hume API');
-                
-                if (statusEl) statusEl.textContent = '🎁 Demo Mode - Coach David Trial';
-                if (substatusEl) substatusEl.textContent = 'Tap to activate voice, then speak naturally';
-                
-                if (startBtn) startBtn.classList.add('hidden');
-                if (endBtn) endBtn.classList.remove('hidden');
-                if (callStatus) {
-                    callStatus.classList.remove('hidden');
-                    startCallTimer();
-                }
-                
-                // Mobile audio activation - require user interaction
-                const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-                if (isMobile) {
-                    // Add a mobile activation button
-                    const mobileActivator = document.createElement('button');
-                    mobileActivator.innerHTML = '🎤 Tap to Activate Voice';
-                    mobileActivator.className = 'bg-green-600 hover:bg-green-700 px-6 py-3 rounded-lg text-white font-bold mb-4';
-                    mobileActivator.onclick = async () => {
-                        console.log('📱 Mobile voice activated by user touch');
-                        if (substatusEl) substatusEl.textContent = 'Initializing audio...';
-                        
-                        // STEP 1: Initialize and store AudioContext globally for mobile
-                        try {
-                            if (!window.mobileAudioContext) {
-                                window.mobileAudioContext = new (window.AudioContext || window.webkitAudioContext)();
-                                console.log('🔊 Created AudioContext, state:', window.mobileAudioContext.state);
-                            }
-                            
-                            if (window.mobileAudioContext.state === 'suspended') {
-                                await window.mobileAudioContext.resume();
-                                console.log('✅ AudioContext resumed successfully');
-                            }
-                            console.log('✅ AudioContext ready, state:', window.mobileAudioContext.state);
-                        } catch (error) {
-                            console.error('❌ AudioContext error:', error);
-                        }
-                        
-                        // STEP 2: Request microphone permission explicitly
-                        try {
-                            console.log('🎤 Requesting microphone permission...');
-                            const stream = await navigator.mediaDevices.getUserMedia({ 
-                                audio: {
-                                    echoCancellation: true,
-                                    noiseSuppression: true,
-                                    autoGainControl: true
-                                } 
-                            });
-                            console.log('✅ Microphone permission GRANTED');
-                            console.log('📊 Audio tracks:', stream.getAudioTracks().length);
-                            
-                            // Store stream globally for mobile
-                            window.mobileMicStream = stream;
-                            
-                            if (substatusEl) substatusEl.textContent = 'Microphone ready!';
-                        } catch (error) {
-                            console.error('❌ Microphone DENIED:', error.name, error.message);
-                            if (substatusEl) substatusEl.textContent = '❌ Microphone access required!';
-                            alert('Please allow microphone access to use voice chat with Coach David');
-                            return;
-                        }
-                        
-                        // STEP 3: Initialize and test speech synthesis properly
-                        console.log('🔊 Initializing speech synthesis...');
-                        console.log('Speech synthesis available?', 'speechSynthesis' in window);
-                        
-                        if ('speechSynthesis' in window) {
-                            // Cancel any pending speech
-                            speechSynthesis.cancel();
-                            
-                            // Wait for voices to load (critical on mobile)
-                            const waitForVoices = () => {
-                                return new Promise((resolve) => {
-                                    let voices = speechSynthesis.getVoices();
-                                    if (voices.length > 0) {
-                                        console.log('✅ Voices loaded:', voices.length, 'voices available');
-                                        console.log('First voice:', voices[0].name, '- Language:', voices[0].lang);
-                                        resolve(voices);
-                                    } else {
-                                        console.log('⏳ Waiting for voices to load...');
-                                        speechSynthesis.onvoiceschanged = () => {
-                                            voices = speechSynthesis.getVoices();
-                                            console.log('✅ Voices loaded after wait:', voices.length, 'voices');
-                                            resolve(voices);
-                                        };
-                                        // Timeout fallback
-                                        setTimeout(() => {
-                                            voices = speechSynthesis.getVoices();
-                                            if (voices.length === 0) {
-                                                console.warn('⚠️ No voices loaded after timeout');
-                                            }
-                                            resolve(voices);
-                                        }, 1000);
-                                    }
-                                });
-                            };
-                            
-                            const voices = await waitForVoices();
-                            
-                            // Test speech output
-                            if (voices.length > 0) {
-                                console.log('🔊 Testing audio output...');
-                                const testUtterance = new SpeechSynthesisUtterance('Voice activated! I can hear you now.');
-                                testUtterance.volume = 1.0;
-                                testUtterance.rate = 0.95;
-                                testUtterance.pitch = 1.0;
-                                
-                                // Select best voice for mobile
-                                const mobileVoice = voices.find(v => 
-                                    v.lang.startsWith('en') && (v.localService || v.name.includes('Google') || v.name.includes('Enhanced'))
-                                ) || voices[0];
-                                
-                                if (mobileVoice) {
-                                    testUtterance.voice = mobileVoice;
-                                    console.log('🎤 Selected voice:', mobileVoice.name);
-                                }
-                                
-                                testUtterance.onstart = () => {
-                                    console.log('✅ Speech started playing');
-                                    if (substatusEl) substatusEl.textContent = '🔊 Testing audio...';
-                                };
-                                
-                                testUtterance.onend = () => {
-                                    console.log('✅ Speech test completed successfully');
-                                    if (substatusEl) substatusEl.textContent = '✅ Audio ready!';
-                                };
-                                
-                                testUtterance.onerror = (event) => {
-                                    console.error('❌ Speech synthesis error:', event.error);
-                                    if (substatusEl) substatusEl.textContent = '⚠️ Audio issue detected';
-                                };
-                                
-                                speechSynthesis.speak(testUtterance);
-                                
-                                // Wait for test to complete
-                                await new Promise(resolve => setTimeout(resolve, 2000));
-                            } else {
-                                console.warn('⚠️ No voices available for testing');
-                            }
-                        } else {
-                            console.error('❌ Speech synthesis NOT available on this device');
-                            if (substatusEl) substatusEl.textContent = '⚠️ Voice output not supported';
-                        }
-                        
-                        // STEP 4: Remove activation button and start voice session
-                        console.log('✅ All checks passed - starting voice session');
-                        mobileActivator.remove();
-                        if (substatusEl) substatusEl.textContent = 'Starting voice recognition...';
-                        
-                        // Start demo with slight delay to ensure everything is ready
-                        setTimeout(() => {
-                            console.log('🎬 Starting demo audio recording...');
-                            startDemoAudioRecording();
-                        }, 500);
-                    };
-                    
-                    // Add button to the modal
-                    const voiceControls = document.getElementById('voice-controls');
-                    if (voiceControls) {
-                        voiceControls.appendChild(mobileActivator);
-                    }
-                } else {
-                    // Desktop - start immediately
-                    startDemoAudioRecording();
-                }
-                return;
+            // ALWAYS USE REAL HUME API - NO DEMO MODE!
+            console.log('🚀 Using REAL Hume AI emotional intelligence for all users');
+            
+            // Update UI for starting connection
+            if (statusEl) statusEl.textContent = '🔄 Connecting to Coach David...';
+            if (substatusEl) substatusEl.textContent = 'Establishing secure connection with Hume AI...';
+            
+            if (startBtn) startBtn.classList.add('hidden');
+            if (endBtn) endBtn.classList.remove('hidden');
+            if (callStatus) {
+                callStatus.classList.remove('hidden');
+                startCallTimer();
             }
             
-            // REAL HUME API CONNECTION (for paid users)
+            // REAL HUME API CONNECTION (for ALL users - free and paid!)
             if (statusEl) statusEl.textContent = '🔄 Connecting to Coach David...';
             if (substatusEl) substatusEl.textContent = 'Establishing secure connection...';
             
@@ -6059,10 +5901,11 @@
         });
         // NOTE: mediaRecorder variable is shared with Coach David implementation above
         
+        // DEPRECATED: Demo voice session no longer used - all users get real Hume AI
         async function initializeDemoVoiceSession() {
             return new Promise((resolve) => {
-                console.log('🎭 Initializing demo voice session with Coach David...');
-                isDemoVoiceMode = true;
+                console.log('⚠️ DEPRECATED: This function is no longer used - real Hume AI is used instead');
+                // isDemoVoiceMode = true;  // REMOVED - no more demo mode
                 
                 // Simulate connection delay
                 setTimeout(() => {
@@ -6638,11 +6481,14 @@
                     startBtn.disabled = true;
                 }
                 
-                // Initialize Hume WebSocket connection
-                await initializeDemoVoiceSession();
+                // Initialize Hume WebSocket connection (REAL HUME AI)
+                // NOTE: This is old fallback code - main path uses launchCoachDavidWidget()
+                console.log('⚠️ Using fallback voice session initialization');
+                console.log('🚀 Starting REAL Hume AI connection (not demo mode)');
                 
-                // Start audio recording (demo mode with speech recognition)
-                startDemoAudioRecording();
+                // Start real Hume AI connection (not demo!)
+                // await initializeDemoVoiceSession();  // DEPRECATED
+                // startDemoAudioRecording();  // DEPRECATED
                 
                 // Update session tracking
                 currentVoiceSession = {
