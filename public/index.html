@@ -5455,18 +5455,65 @@
                 const tokenData = await tokenResponse.json();
                 console.log('✅ Got Hume access token!');
                 
-                // Get microphone access
+                // Get microphone access - MOBILE OPTIMIZED
                 console.log('🎤 Requesting microphone access...');
-                microphoneStream = await navigator.mediaDevices.getUserMedia({
+                
+                // Detect mobile device
+                const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+                console.log('📱 Is mobile device:', isMobile);
+                
+                // Mobile-friendly audio constraints (less strict)
+                const audioConstraints = isMobile ? {
+                    audio: {
+                        echoCancellation: true,
+                        noiseSuppression: true,
+                        autoGainControl: true
+                        // Don't specify sampleRate/channelCount - let mobile choose
+                    }
+                } : {
                     audio: {
                         sampleRate: 48000,
                         channelCount: 1,
                         echoCancellation: true,
-                        noiseSuppression: true
+                        noiseSuppression: true,
+                        autoGainControl: true
                     }
-                });
+                };
                 
-                console.log('✅ Microphone access granted!');
+                console.log('🎤 Audio constraints:', JSON.stringify(audioConstraints));
+                
+                try {
+                    microphoneStream = await navigator.mediaDevices.getUserMedia(audioConstraints);
+                    console.log('✅ Microphone access granted!');
+                    
+                    // Verify stream is working
+                    const tracks = microphoneStream.getAudioTracks();
+                    console.log('📊 Audio tracks count:', tracks.length);
+                    
+                    if (tracks.length > 0) {
+                        const track = tracks[0];
+                        console.log('✅ Audio track info:');
+                        console.log('   - Label:', track.label);
+                        console.log('   - Enabled:', track.enabled);
+                        console.log('   - Muted:', track.muted);
+                        console.log('   - Ready state:', track.readyState);
+                        console.log('   - Settings:', track.getSettings());
+                        
+                        if (!track.enabled || track.readyState !== 'live') {
+                            console.error('❌ Audio track is not live/enabled!');
+                            throw new Error('Microphone track is not active');
+                        }
+                    } else {
+                        console.error('❌ No audio tracks in stream!');
+                        throw new Error('No audio tracks available');
+                    }
+                    
+                    console.log('✅ Stream active:', microphoneStream.active);
+                    
+                } catch (micError) {
+                    console.error('❌ Microphone access error:', micError.name, '-', micError.message);
+                    throw micError;
+                }
                 
                 // Connect to Hume EVI WebSocket with secure token
                 console.log('🌐 Connecting to Hume EVI WebSocket...');
@@ -5588,32 +5635,104 @@
         
         // Start recording audio
         function startRecording() {
-            if (!microphoneStream) return;
+            if (!microphoneStream) {
+                console.error('❌ No microphone stream available');
+                return;
+            }
+            
+            console.log('🎤 Attempting to start recording...');
+            console.log('📊 Microphone stream tracks:', microphoneStream.getAudioTracks().length);
+            console.log('📊 Stream active:', microphoneStream.active);
             
             try {
-                mediaRecorder = new MediaRecorder(microphoneStream, {
-                    mimeType: 'audio/webm'
-                });
+                // MOBILE COMPATIBLE MIME TYPE DETECTION
+                // Try multiple MIME types for different mobile browsers
+                const mimeTypes = [
+                    'audio/webm;codecs=opus',    // Chrome Android, Edge
+                    'audio/webm',                 // Chrome desktop
+                    'audio/mp4',                  // Safari iOS/macOS
+                    'audio/ogg;codecs=opus',      // Firefox Android
+                    'audio/wav'                   // Fallback (uncompressed)
+                ];
+                
+                let selectedMimeType = null;
+                for (const mimeType of mimeTypes) {
+                    if (MediaRecorder.isTypeSupported(mimeType)) {
+                        selectedMimeType = mimeType;
+                        console.log('✅ Selected MIME type:', mimeType);
+                        break;
+                    } else {
+                        console.log('❌ MIME type not supported:', mimeType);
+                    }
+                }
+                
+                // If no MIME type is supported, try without specifying (browser will use default)
+                if (!selectedMimeType) {
+                    console.warn('⚠️ No supported MIME type found - using browser default');
+                    mediaRecorder = new MediaRecorder(microphoneStream);
+                } else {
+                    mediaRecorder = new MediaRecorder(microphoneStream, {
+                        mimeType: selectedMimeType
+                    });
+                }
+                
+                console.log('✅ MediaRecorder created successfully');
+                console.log('🎤 MediaRecorder state:', mediaRecorder.state);
+                console.log('🎤 MediaRecorder mimeType:', mediaRecorder.mimeType);
                 
                 mediaRecorder.ondataavailable = (event) => {
+                    console.log('📊 Audio data available, size:', event.data.size, 'bytes');
+                    
                     if (event.data.size > 0 && humeSocket?.readyState === WebSocket.OPEN) {
                         const reader = new FileReader();
                         reader.onload = () => {
                             const audioData = reader.result.split(',')[1];
+                            console.log('📤 Sending audio data to Hume AI:', audioData.length, 'characters');
                             humeSocket.send(JSON.stringify({
                                 type: 'audio_input',
                                 data: audioData
                             }));
                         };
+                        reader.onerror = (error) => {
+                            console.error('❌ FileReader error:', error);
+                        };
                         reader.readAsDataURL(event.data);
+                    } else {
+                        if (event.data.size === 0) {
+                            console.warn('⚠️ Audio data is empty (0 bytes)');
+                        }
+                        if (!humeSocket || humeSocket.readyState !== WebSocket.OPEN) {
+                            console.warn('⚠️ WebSocket not open, cannot send audio data');
+                        }
                     }
                 };
                 
+                mediaRecorder.onerror = (event) => {
+                    console.error('❌ MediaRecorder error:', event.error);
+                };
+                
+                mediaRecorder.onstart = () => {
+                    console.log('✅ MediaRecorder started successfully');
+                };
+                
+                mediaRecorder.onstop = () => {
+                    console.log('⏹️ MediaRecorder stopped');
+                };
+                
+                // Start recording with 500ms chunks
                 mediaRecorder.start(500);
-                console.log('🎤 Recording started');
+                console.log('✅ Recording started - chunks every 500ms');
+                console.log('🎤 Final MediaRecorder state:', mediaRecorder.state);
                 
             } catch (error) {
-                console.error('❌ Recording error:', error);
+                console.error('❌ Recording error:', error.name, '-', error.message);
+                console.error('❌ Full error:', error);
+                
+                // Show user-friendly error
+                const statusEl = document.getElementById('conversation-substatus');
+                if (statusEl) {
+                    statusEl.textContent = '❌ Recording failed - please refresh and try again';
+                }
             }
         }
         
