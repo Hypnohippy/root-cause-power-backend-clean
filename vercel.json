@@ -4,13 +4,6 @@
     { "source": "/js/(.*)", "destination": "/public/js/$1" },
     { "source": "/audio/(.*)", "destination": "/public/audio/$1" },
     { "source": "/icons/(.*)", "destination": "/public/icons/$1" },
-    { "source": "/legal/(.*)", "destination": "/public/legal/$1" },
-    { "source": "/(.*)", "destination": "/$1" }
-  ],
-  "functions": {
-    "api/**/*.js": {
-      "runtime": "nodejs18.x",
-      "maxDuration": 30
-    }
-  }
+    { "source": "/legal/(.*)", "destination": "/public/legal/$1" }
+  ]
 }
