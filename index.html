@@ -5,6 +5,7 @@
 
 
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -3199,7 +3200,6 @@
                 websocketUrl: 'wss://api.hume.ai/v0/evi/chat'
             },
             // GROQ config removed - using secure backend at /api/groq-chat
-            },
             STRIPE: {
                 publishableKey: 'pk_live_51S5lj2C5Ez9YOIaylK1qkQ8m0000000000000000000000000000000000000000000000000000000000000',
                 checkoutUrls: {
@@ -5232,6 +5232,19 @@
             
             if (!message) return;
             
+            // Update conversation history
+            if (!conversationHistory[coachName]) {
+                conversationHistory[coachName] = [{
+                    role: 'system',
+                    content: getCoachSystemPrompt(coachName)
+                }];
+            }
+            
+            conversationHistory[coachName].push({
+                role: 'user',
+                content: message
+            });
+            
             // Add user message
             const userMessageDiv = document.createElement('div');
             userMessageDiv.className = 'user-message p-4 rounded-lg mb-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white max-w-[80%] ml-auto';
@@ -5253,37 +5266,30 @@
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
             
             try {
-                const systemPrompt = getCoachSystemPrompt(coachName);
-                
-                const response = await fetch(API_CONFIG.GROQ.baseUrl, {
+                // 🔒 SECURE: Call backend API instead of Groq directly
+                const response = await fetch('/api/groq-chat', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${API_CONFIG.GROQ.apiKey}`
+                        'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        model: API_CONFIG.GROQ.model,
-                        messages: [
-                            {
-                                role: 'system',
-                                content: systemPrompt
-                            },
-                            {
-                                role: 'user',
-                                content: message
-                            }
-                        ],
-                        max_tokens: 1000,
-                        temperature: 0.7,
-                        top_p: 0.9
+                        messages: conversationHistory[coachName],
+                        coachName: coachName
                     })
                 });
                 
                 if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.error || `HTTP ${response.status}`);
                 }
                 
                 const data = await response.json();
+                
+                // Add assistant response to history
+                conversationHistory[coachName].push({
+                    role: 'assistant',
+                    content: data.response
+                });
                 
                 // Remove typing indicator
                 document.getElementById('typing-indicator')?.remove();
@@ -5291,36 +5297,25 @@
                 // Add AI response
                 const aiMessageDiv = document.createElement('div');
                 aiMessageDiv.className = 'ai-message p-4 rounded-lg mb-4 bg-gradient-to-r from-slate-700 to-slate-600 text-white max-w-[80%]';
-                aiMessageDiv.textContent = data.choices[0].message.content;
+                aiMessageDiv.textContent = data.response;
                 messagesContainer.appendChild(aiMessageDiv);
                 
             } catch (error) {
                 console.error('🚨 COACH API ERROR:', error);
-                console.error('API Details:', {
-                    url: API_CONFIG.GROQ.baseUrl,
-                    model: API_CONFIG.GROQ.model,
-                    hasApiKey: !!API_CONFIG.GROQ.apiKey,
-                    apiKeyPrefix: API_CONFIG.GROQ.apiKey ? API_CONFIG.GROQ.apiKey.substring(0, 10) + '...' : 'MISSING'
-                });
                 
                 document.getElementById('typing-indicator')?.remove();
                 
                 const errorDiv = document.createElement('div');
                 errorDiv.className = 'ai-message p-4 rounded-lg mb-4 bg-red-900/50 border border-red-500 text-red-300 max-w-[80%]';
-                
-                if (error.message.includes('401') || error.message.includes('Authorization')) {
-                    errorDiv.innerHTML = '🚨 <strong>API Key Issue</strong><br>The coach AI service is not properly authenticated. Please contact support.';
-                } else if (error.message.includes('429')) {
-                    errorDiv.innerHTML = '🔄 <strong>Too Many Requests</strong><br>Please wait 30 seconds and try again.';
-                } else if (error.message.includes('fetch')) {
-                    errorDiv.innerHTML = '🌐 <strong>Connection Error</strong><br>Please check your internet connection and try again.';
-                } else {
-                    errorDiv.innerHTML = `🚨 <strong>AI Service Error</strong><br>Error: ${error.message}<br><small>Check console for details</small>`;
-                }
-                
+                errorDiv.innerHTML = `
+                    <div class="font-bold mb-2">🚨 API Key Issue</div>
+                    <div class="text-sm">The coach AI service is not properly authenticated. Please check your API configuration.</div>
+                    <div class="text-xs mt-2 opacity-75">Error: ${error.message}</div>
+                `;
                 messagesContainer.appendChild(errorDiv);
             }
             
+            // Scroll to bottom
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
         }
         
