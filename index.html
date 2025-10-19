@@ -8,7 +8,6 @@
 
 
 
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5775,6 +5774,17 @@
         };
         
         window.startCoachDavidConnection = async function() {
+            // Mobile timeout: reset button after 15 seconds if connection fails
+            const timeout = setTimeout(() => {
+                const btn = document.getElementById('start-conversation-btn');
+                if (btn && btn.innerHTML.includes('Connecting')) {
+                    btn.classList.remove('hidden');
+                    btn.innerHTML = '<i class="fas fa-microphone mr-2"></i>Start Voice Session';
+                    btn.disabled = false;
+                    alert('Connection timeout. Please check your internet and try again.');
+                }
+            }, 15000);
+            
             console.log('🔑 Connecting to Coach David with REAL Hume AI...');
             
             // ✅ MOBILE AUDIO UNLOCK: Multiple attempts for iOS/Android
@@ -5964,6 +5974,7 @@
                 humeSocket = new WebSocket(socketUrl);
                 
                 humeSocket.onopen = () => {
+                    clearTimeout(timeout);
                     console.log('✅ Connected to Coach David!');
                     
                     // Send session settings for proper audio format
