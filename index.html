@@ -5784,19 +5784,23 @@
         window.startCoachDavidConnection = async function() {
             console.log('🔑 Connecting to Coach David with REAL Hume AI...');
             
-            // ✅ AUDIO UNLOCK: Play immediately from user click (non-blocking)
-            try {
-                const unlockAudio = new Audio('data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=');
-                unlockAudio.volume = 0.01;
-                unlockAudio.play().catch(e => console.log('⚠️ Audio unlock:', e.message));
-                console.log('✅ Audio unlock triggered');
-            } catch (e) {
-                console.log('⚠️ Audio unlock error:', e.message);
+            // ✅ MOBILE FIX: Create persistent audio element from user click
+            if (!window.globalAudioElement) {
+                window.globalAudioElement = new Audio();
+                window.globalAudioElement.setAttribute('playsinline', '');
+                window.globalAudioElement.setAttribute('webkit-playsinline', '');
+                window.globalAudioElement.volume = 0.01;
+                window.globalAudioElement.src = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=';
+                window.globalAudioElement.play().then(() => {
+                    console.log('✅ Global audio element unlocked - all future audio will play');
+                }).catch(e => {
+                    console.log('⚠️ Audio unlock failed:', e.message);
+                });
             }
             
-            // Resume AudioContext (non-blocking)
+            // Resume AudioContext
             try {
-                resumeAudioContext().catch(e => console.log('⚠️ AudioContext:', e.message));
+                resumeAudioContext();
             } catch (e) {
                 console.log('⚠️ AudioContext error:', e.message);
             }
