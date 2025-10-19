@@ -6020,7 +6020,7 @@
         // HUME AI OFFICIAL AUDIO PROCESSING - Exact pattern from docs
         function playCoachAudioDirect(audioData) {
             try {
-                // Convert base64 to blob - Hume's official method
+                // Convert base64 to blob
                 const audioBytes = atob(audioData);
                 const audioArray = new Uint8Array(audioBytes.length);
                 
@@ -6029,10 +6029,17 @@
                 }
                 
                 const blob = new Blob([audioArray], { type: 'audio/wav' });
-                audioQueue.push(blob); // Store as Blob, not base64
+                audioQueue.push(blob);
                 
-                // Start playing if queue length >= 1 (Hume's pattern)
-                if (audioQueue.length >= 1) playAudio();
+                console.log(`📥 Audio queued (${audioQueue.length} total, playing: ${isPlayingAudio})`);
+                
+                // ALWAYS try to start playback if not playing
+                if (!isPlayingAudio) {
+                    console.log('🎬 Starting playback');
+                    playAudio();
+                } else {
+                    console.log('⏸️ Already playing, queued for later');
+                }
                 
             } catch (error) {
                 console.error('❌ Audio processing error:', error);
@@ -6041,12 +6048,18 @@
         
         // HUME AI OFFICIAL PLAY AUDIO FUNCTION - Exact pattern from docs
         function playAudio() {
-            // HUME'S EXACT PATTERN: Check queue and playing state
-            if (!audioQueue.length || isPlayingAudio) return;
+            // Check queue and playing state
+            if (!audioQueue.length || isPlayingAudio) {
+                console.log('🔇 playAudio: queue empty or already playing');
+                return;
+            }
             
+            console.log(`🎵 playAudio: Starting playback (${audioQueue.length} in queue)`);
             isPlayingAudio = true;
-            const audioBlob = audioQueue.shift(); // Get pre-processed blob
+            const audioBlob = audioQueue.shift();
+            
             if (!audioBlob) {
+                console.log('⚠️ No audio blob');
                 isPlayingAudio = false;
                 return;
             }
@@ -6054,44 +6067,23 @@
             const audioUrl = URL.createObjectURL(audioBlob);
             currentAudio = new Audio(audioUrl);
             
-            // Mobile optimizations - ENHANCED
+            // Enhanced mobile support
             currentAudio.volume = 1.0;
             currentAudio.preload = 'auto';
-            currentAudio.load();
+            currentAudio.autoplay = false; // Explicit control
             
-            currentAudio.oncanplaythrough = () => {
-                console.log('✅ Buffered - playing');
-                currentAudio.play().then(() => {
-                    console.log('🔊 Playing');
-                }).catch(error => {
-                    console.error('❌ Play failed:', error.message);
-                    URL.revokeObjectURL(audioUrl);
-                    currentAudio = null;
-                    isPlayingAudio = false;
-                    if (audioQueue.length) playAudio();
-                });
-            };
-            
-            setTimeout(() => {
-                if (currentAudio && currentAudio.paused && currentAudio.readyState >= 2) {
-                    console.log('⚡ Fallback play');
-                    currentAudio.play().catch(e => {
-                        URL.revokeObjectURL(audioUrl);
-                        currentAudio = null;
-                        isPlayingAudio = false;
-                        if (audioQueue.length) playAudio();
-                    });
-                }
-            }, 2000);
-            
-            // HUME'S ONENDED HANDLER - Play next segment
+            // Event handlers BEFORE loading
             currentAudio.onended = () => {
-                console.log('✅ Audio segment ended');
+                console.log('✅ Audio ended - playing next');
                 URL.revokeObjectURL(audioUrl);
                 currentAudio = null;
                 isPlayingAudio = false;
-                // Play next if queue has audio - Hume's exact pattern
-                if (audioQueue.length) playAudio();
+                if (audioQueue.length > 0) {
+                    console.log(`🔄 ${audioQueue.length} segments remaining`);
+                    playAudio();
+                } else {
+                    console.log('🏁 Queue empty');
+                }
             };
             
             currentAudio.onerror = (error) => {
@@ -6099,8 +6091,32 @@
                 URL.revokeObjectURL(audioUrl);
                 currentAudio = null;
                 isPlayingAudio = false;
-                if (audioQueue.length) playAudio();
+                if (audioQueue.length > 0) playAudio();
             };
+            
+            // Try to play immediately
+            const playPromise = currentAudio.play();
+            
+            if (playPromise !== undefined) {
+                playPromise.then(() => {
+                    console.log('🔊 Playing audio successfully');
+                }).catch(error => {
+                    console.error('❌ Immediate play failed:', error.message);
+                    // Try with load event
+                    currentAudio.addEventListener('canplaythrough', () => {
+                        console.log('🔄 Retrying after canplaythrough');
+                        currentAudio.play().catch(e => {
+                            console.error('❌ Retry failed:', e.message);
+                            URL.revokeObjectURL(audioUrl);
+                            currentAudio = null;
+                            isPlayingAudio = false;
+                            if (audioQueue.length > 0) playAudio();
+                        });
+                    }, { once: true });
+                    
+                    currentAudio.load();
+                });
+            }
         }
         
 
@@ -13749,3 +13765,4 @@
 
 </body>
 </html>
+
