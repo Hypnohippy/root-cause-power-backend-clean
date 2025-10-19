@@ -5774,20 +5774,6 @@
         };
         
         window.startCoachDavidConnection = async function() {
-            // Mobile timeout fix
-            let connectionTimeout;
-            const resetButton = () => {
-                const btn = document.getElementById('start-conversation-btn');
-                if (btn) {
-                    btn.classList.remove('hidden');
-                    btn.disabled = false;
-                }
-            };
-            connectionTimeout = setTimeout(() => {
-                alert('Connection timeout. Please try again.');
-                resetButton();
-            }, 20000);
-
             console.log('🔑 Connecting to Coach David with REAL Hume AI...');
             
             // ✅ MOBILE AUDIO UNLOCK: Multiple attempts for iOS/Android
@@ -5977,7 +5963,6 @@
                 humeSocket = new WebSocket(socketUrl);
                 
                 humeSocket.onopen = () => {
-                    if (connectionTimeout) clearTimeout(connectionTimeout);
                     console.log('✅ Connected to Coach David!');
                     
                     // Send session settings for proper audio format
