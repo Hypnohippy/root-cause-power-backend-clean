@@ -5781,35 +5781,28 @@
             if (isMobile) {
                 console.log('📱 Mobile device detected - aggressive audio unlock...');
                 
-                // Attempt 1: Silent audio
+                // Attempt 1: Silent audio (non-blocking)
                 try {
                     const silentAudio = new Audio('data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=');
-                    silentAudio.volume = 0.5; // Higher volume for mobile
-                    await silentAudio.play();
-                    console.log('✅ Mobile audio unlocked (attempt 1)');
+                    silentAudio.volume = 0.5;
+                    silentAudio.play().then(() => {
+                        console.log('✅ Mobile audio unlocked');
+                    }).catch(e => {
+                        console.log('⚠️ Audio unlock failed:', e.message);
+                    });
                 } catch (e) {
-                    console.log('⚠️ Audio unlock attempt 1 failed:', e.message);
+                    console.log('⚠️ Audio unlock error:', e.message);
                 }
                 
-                // Attempt 2: Resume AudioContext
+                // Attempt 2: Resume AudioContext (non-blocking)
                 try {
-                    await resumeAudioContext();
-                    console.log('✅ AudioContext resumed for mobile');
+                    resumeAudioContext().then(() => {
+                        console.log('✅ AudioContext resumed');
+                    }).catch(e => {
+                        console.log('⚠️ AudioContext resume failed:', e.message);
+                    });
                 } catch (e) {
-                    console.log('⚠️ AudioContext resume failed:', e.message);
-                }
-                
-                // Attempt 3: Create and play test audio element
-                try {
-                    const testAudio = document.createElement('audio');
-                    testAudio.src = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=';
-                    testAudio.volume = 0.5;
-                    document.body.appendChild(testAudio);
-                    await testAudio.play();
-                    testAudio.remove();
-                    console.log('✅ Mobile audio fully unlocked (attempt 3)');
-                } catch (e) {
-                    console.log('⚠️ Audio unlock attempt 3 failed:', e.message);
+                    console.log('⚠️ AudioContext error:', e.message);
                 }
             } else {
                 // Desktop audio unlock (original)
@@ -6427,10 +6420,7 @@
             
             if (statusEl) statusEl.textContent = 'Ready to start your therapeutic session';
             if (substatusEl) substatusEl.textContent = 'Click below to begin voice therapy with Coach David';
-            if (startBtn) {
-                startBtn.classList.remove('hidden');
-                startBtn.innerHTML = '<i class="fas fa-microphone mr-2"></i>Start Voice Session';
-            }
+            if (startBtn) startBtn.classList.remove('hidden');
             if (endBtn) endBtn.classList.add('hidden');
             if (callStatus) callStatus.classList.add('hidden');
             
