@@ -5276,8 +5276,9 @@
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        messages: conversationHistory[coachName],
-                        coachName: coachName
+                        message: message,
+                        coach: coachName,
+                        conversationHistory: conversationHistory[coachName]
                     })
                 });
                 
