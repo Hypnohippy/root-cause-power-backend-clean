@@ -5590,6 +5590,14 @@
                         }
                         audioQueue.length = 0;
                         isPlayingAudio = false;
+                        
+                        // Mobile fix: Resume playback after user finishes speaking
+                        setTimeout(() => {
+                            if (!isPlayingAudio && audioQueue.length > 0) {
+                                console.log('🔄 Resuming audio after interruption');
+                                playAudio();
+                            }
+                        }, 500);
                     }
                 }
             }, 30); // Check every 30ms for near-instant response
