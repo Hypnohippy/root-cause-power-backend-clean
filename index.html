@@ -5774,17 +5774,6 @@
         };
         
         window.startCoachDavidConnection = async function() {
-            // Mobile timeout: reset button after 15 seconds if connection fails
-            const timeout = setTimeout(() => {
-                const btn = document.getElementById('start-conversation-btn');
-                if (btn && btn.innerHTML.includes('Connecting')) {
-                    btn.classList.remove('hidden');
-                    btn.innerHTML = '<i class="fas fa-microphone mr-2"></i>Start Voice Session';
-                    btn.disabled = false;
-                    alert('Connection timeout. Please check your internet and try again.');
-                }
-            }, 15000);
-            
             console.log('🔑 Connecting to Coach David with REAL Hume AI...');
             
             // ✅ MOBILE AUDIO UNLOCK: Multiple attempts for iOS/Android
@@ -5860,6 +5849,20 @@
             
             try {
                 const CONFIG_ID = 'f4a87ae9-eafb-4133-b772-33a1b9d0eb03';
+                
+                // Mobile connection timeout
+                let connectionTimeout = setTimeout(() => {
+                    console.error('⏰ Mobile connection timeout after 20 seconds');
+                    const btn = document.getElementById('start-conversation-btn');
+                    if (btn) {
+                        btn.classList.remove('hidden');
+                        btn.innerHTML = '<i class="fas fa-microphone mr-2"></i>Start Voice Session';
+                        btn.disabled = false;
+                    }
+                    if (statusEl) statusEl.textContent = 'Connection failed';
+                    if (substatusEl) substatusEl.textContent = 'Please try again';
+                    alert('Mobile connection timeout. Please try again or switch to WiFi.');
+                }, 20000);
                 
                 // Get Hume access token directly (WORKING FROM 2MB FILE)
                 const HUME_API_KEY = 'si8yIRYvcFUMUIsiM3RzlNQhAp09a6gUkce6Tjt7R34XTHAo';
@@ -5974,7 +5977,7 @@
                 humeSocket = new WebSocket(socketUrl);
                 
                 humeSocket.onopen = () => {
-                    clearTimeout(timeout);
+                    if (connectionTimeout) clearTimeout(connectionTimeout);
                     console.log('✅ Connected to Coach David!');
                     
                     // Send session settings for proper audio format
