@@ -40,7 +40,14 @@
     <script>
         // Coach David X button function - AVAILABLE INSTANTLY
         window.closeCoachDavidWidget = function() {
-            console.log('🎯 Coach David X Button CLICKED - closing modal');
+            console.log('🎯 Coach David X Button CLICKED - immediate close for mobile');
+            
+            // IMMEDIATE UI CLOSE for mobile responsiveness
+            const modal = document.getElementById('voice-chat-modal');
+            if (modal) {
+                modal.style.display = 'none'; // Hide immediately
+                console.log('✅ Modal hidden immediately for mobile');
+            }
             
             // Reset demo mode flags
             window.isDemoVoiceMode = false;
@@ -57,7 +64,7 @@
                 }
             }
             
-            const modal = document.getElementById('voice-chat-modal');
+            const modalAgain = document.getElementById('voice-chat-modal');
             if (modal) {
                 // End session if function exists
                 if (typeof endCoachDavidSession === 'function') {
@@ -5597,6 +5604,42 @@
             }
         }
 
+
+        // MOBILE FIX: Add touch event handlers ONLY for touch devices
+        function enableMobileTouchSupport() {
+            // Only add touch handlers on actual touch devices
+            const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+            
+            if (!isTouchDevice) {
+                console.log('💻 Desktop detected - using standard click events');
+                return; // Don't interfere with desktop clicks
+            }
+            
+            console.log('📱 Touch device detected - enabling mobile touch support');
+            
+            // Handle all onclick buttons on mobile ONLY
+            document.addEventListener('touchstart', function(e) {
+                const target = e.target.closest('[onclick]');
+                if (target) {
+                    e.preventDefault(); // Prevent ghost clicks on mobile
+                    const onclickAttr = target.getAttribute('onclick');
+                    if (onclickAttr) {
+                        console.log('📱 Mobile touch triggered:', onclickAttr);
+                        try {
+                            eval(onclickAttr);
+                        } catch (err) {
+                            console.error('❌ Touch handler error:', err);
+                        }
+                    }
+                }
+            }, { passive: false });
+            
+            console.log('✅ Mobile touch support enabled');
+        }
+        
+        // Enable on page load (will auto-detect device type)
+        document.addEventListener('DOMContentLoaded', enableMobileTouchSupport);
+
         window.launchCoachDavidWidget = async function() {
             console.log('📞 Starting Coach David voice connection...');
             
@@ -5644,7 +5687,8 @@
                             </div>
                             
                             <div class="flex gap-4 justify-center">
-                                <button id="start-conversation-btn" onclick="startCoachDavidConnection()" 
+                                <button id="start-conversation-btn" 
+                                    onclick="handleStartVoiceSession();" 
                                     class="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 px-8 py-3 rounded-lg text-white font-bold transition-all">
                                     <i class="fas fa-microphone mr-2"></i>Start Voice Session
                                 </button>
@@ -5717,17 +5761,65 @@
         };
         
         // Start actual Coach David connection
+
+        // Helper function to handle button UI feedback without inline escaping issues
+        window.handleStartVoiceSession = function() {
+            const btn = document.getElementById('start-conversation-btn');
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Connecting...';
+            }
+            startCoachDavidConnection();
+        };
+        
         window.startCoachDavidConnection = async function() {
             console.log('🔑 Connecting to Coach David with REAL Hume AI...');
             
-            // ✅ AUDIO UNLOCK: Play silent audio to enable browser audio playback without user clicking mic button
-            try {
-                const silentAudio = new Audio('data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=');
-                silentAudio.volume = 0.01;
-                await silentAudio.play();
-                console.log('✅ Audio automatically unlocked - no mic button click needed!');
-            } catch (e) {
-                console.log('ℹ️ Audio unlock:', e.message);
+            // ✅ MOBILE AUDIO UNLOCK: Multiple attempts for iOS/Android
+            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+            if (isMobile) {
+                console.log('📱 Mobile device detected - aggressive audio unlock...');
+                
+                // Attempt 1: Silent audio
+                try {
+                    const silentAudio = new Audio('data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=');
+                    silentAudio.volume = 0.5; // Higher volume for mobile
+                    await silentAudio.play();
+                    console.log('✅ Mobile audio unlocked (attempt 1)');
+                } catch (e) {
+                    console.log('⚠️ Audio unlock attempt 1 failed:', e.message);
+                }
+                
+                // Attempt 2: Resume AudioContext
+                try {
+                    await resumeAudioContext();
+                    console.log('✅ AudioContext resumed for mobile');
+                } catch (e) {
+                    console.log('⚠️ AudioContext resume failed:', e.message);
+                }
+                
+                // Attempt 3: Create and play test audio element
+                try {
+                    const testAudio = document.createElement('audio');
+                    testAudio.src = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=';
+                    testAudio.volume = 0.5;
+                    document.body.appendChild(testAudio);
+                    await testAudio.play();
+                    testAudio.remove();
+                    console.log('✅ Mobile audio fully unlocked (attempt 3)');
+                } catch (e) {
+                    console.log('⚠️ Audio unlock attempt 3 failed:', e.message);
+                }
+            } else {
+                // Desktop audio unlock (original)
+                try {
+                    const silentAudio = new Audio('data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=');
+                    silentAudio.volume = 0.01;
+                    await silentAudio.play();
+                    console.log('✅ Audio automatically unlocked - no mic button click needed!');
+                } catch (e) {
+                    console.log('ℹ️ Audio unlock:', e.message);
+                }
             }
             
             const statusEl = document.getElementById('conversation-status');
@@ -5764,22 +5856,36 @@
                 console.log('🔑 Getting Hume access token...');
                 // HUME API - with error handling to prevent UI breaks
                 try {
-                const tokenResponse = await fetch('https://api.hume.ai/oauth2-cc/token', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: new URLSearchParams({
-                        'grant_type': 'client_credentials',
-                        'client_id': HUME_API_KEY,
-                        'client_secret': HUME_SECRET_KEY
-                    })
-                });
+                // Mobile: Add timeout for slow networks
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
                 
-                if (!tokenResponse.ok) {
-                    throw new Error(`Authentication failed: ${tokenResponse.status}`);
+                try {
+                    const tokenResponse = await fetch('https://api.hume.ai/oauth2-cc/token', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: new URLSearchParams({
+                            'grant_type': 'client_credentials',
+                            'client_id': HUME_API_KEY,
+                            'client_secret': HUME_SECRET_KEY
+                        }),
+                        signal: controller.signal
+                    });
+                    clearTimeout(timeoutId);
+                    
+                    if (!tokenResponse.ok) {
+                        throw new Error(`Authentication failed: ${tokenResponse.status}`);
+                    }
+                
+                    const tokenData = await tokenResponse.json();
+                    console.log('✅ Got Hume access token!');
+                } catch (fetchError) {
+                    clearTimeout(timeoutId);
+                    if (fetchError.name === 'AbortError') {
+                        throw new Error('Connection timeout - please check your internet connection');
+                    }
+                    throw fetchError;
                 }
-                
-                const tokenData = await tokenResponse.json();
-                console.log('✅ Got Hume access token!');
                 
                 // Resume audio context for mobile
                 await resumeAudioContext();
@@ -6147,10 +6253,18 @@
             const audioUrl = URL.createObjectURL(audioBlob);
             currentAudio = new Audio(audioUrl);
             
-            // Enhanced mobile support
+            // MOBILE-OPTIMIZED audio playback
+            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
             currentAudio.volume = 1.0;
             currentAudio.preload = 'auto';
-            currentAudio.autoplay = false; // Explicit control
+            currentAudio.autoplay = isMobile; // Enable autoplay on mobile
+            
+            // Critical for iOS
+            if (isMobile) {
+                currentAudio.setAttribute('playsinline', 'true');
+                currentAudio.setAttribute('webkit-playsinline', 'true');
+                console.log('📱 Mobile audio attributes set');
+            }
             
             // Event handlers BEFORE loading
             currentAudio.onended = () => {
