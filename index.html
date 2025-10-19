@@ -5775,13 +5775,11 @@
         
         window.startCoachDavidConnection = async function() {
             console.log('🔑 Connecting to Coach David with REAL Hume AI...');
-            if (substatusEl) substatusEl.textContent = 'Step 1: Starting connection...';
             
             // ✅ MOBILE AUDIO UNLOCK: Multiple attempts for iOS/Android
             const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
             if (isMobile) {
                 console.log('📱 Mobile device detected - aggressive audio unlock...');
-                if (substatusEl) substatusEl.textContent = 'Step 2: Unlocking mobile audio...';
                 
                 // Attempt 1: Silent audio
                 try {
@@ -5852,30 +5850,11 @@
             try {
                 const CONFIG_ID = 'f4a87ae9-eafb-4133-b772-33a1b9d0eb03';
                 
-                // Mobile connection timeout
-                let connectionTimeout = setTimeout(() => {
-                    console.error('⏰ Mobile connection timeout after 20 seconds');
-                    const currentStep = substatusEl ? substatusEl.textContent : 'Unknown step';
-                    console.error('⏰ Failed at:', currentStep);
-                    
-                    const btn = document.getElementById('start-conversation-btn');
-                    if (btn) {
-                        btn.classList.remove('hidden');
-                        btn.innerHTML = '<i class="fas fa-microphone mr-2"></i>Start Voice Session';
-                        btn.disabled = false;
-                    }
-                    if (statusEl) statusEl.textContent = 'Connection timeout';
-                    if (substatusEl) substatusEl.textContent = 'Failed at: ' + currentStep;
-                    
-                    alert('⏰ CONNECTION TIMEOUT\n\nFailed at: ' + currentStep + '\n\nThis means mobile browser is blocking that step.\n\nTry desktop instead.');
-                }, 20000);
-                
                 // Get Hume access token directly (WORKING FROM 2MB FILE)
                 const HUME_API_KEY = 'si8yIRYvcFUMUIsiM3RzlNQhAp09a6gUkce6Tjt7R34XTHAo';
                 const HUME_SECRET_KEY = 'mRDCEm0XyDchucUKs7aGR6mTSgAHFWrhaDrM5hvh5idWrGB4x41jbZozD9Y8LB3b';
                 
                 console.log('🔑 Getting Hume access token...');
-                if (substatusEl) substatusEl.textContent = 'Step 3: Getting access token...';
                 // HUME API - with error handling to prevent UI breaks
                 try {
                 // Mobile: Add timeout for slow networks
@@ -5902,7 +5881,6 @@
                 
                     tokenData = await tokenResponse.json();
                     console.log('✅ Got Hume access token!');
-                if (substatusEl) substatusEl.textContent = 'Step 4: Token received, requesting microphone...';
                 } catch (fetchError) {
                     clearTimeout(timeoutId);
                     if (fetchError.name === 'AbortError') {
@@ -5920,7 +5898,6 @@
                 await resumeAudioContext();
                 // Get microphone access - MOBILE OPTIMIZED
                 console.log('🎤 Requesting microphone access...');
-                if (substatusEl) substatusEl.textContent = 'Step 5: Requesting microphone permission...';
                 
                 // Detect mobile device
                 const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
@@ -5949,7 +5926,6 @@
                 try {
                     microphoneStream = await navigator.mediaDevices.getUserMedia(audioConstraints);
                     console.log('✅ Microphone access granted!');
-                    if (substatusEl) substatusEl.textContent = 'Step 6: Microphone OK, connecting WebSocket...';
                     
                     // Verify stream is working
                     const tracks = microphoneStream.getAudioTracks();
@@ -5982,13 +5958,11 @@
                 
                 // Connect to Hume EVI WebSocket with secure token
                 console.log('🌐 Connecting to Hume EVI WebSocket...');
-                if (substatusEl) substatusEl.textContent = 'Step 7: Opening WebSocket connection...';
                 const socketUrl = `wss://api.hume.ai/v0/evi/chat?access_token=${tokenData.access_token}&config_id=${CONFIG_ID}&verbose_transcription=true`;
                 
                 humeSocket = new WebSocket(socketUrl);
                 
                 humeSocket.onopen = () => {
-                    if (connectionTimeout) clearTimeout(connectionTimeout);
                     console.log('✅ Connected to Coach David!');
                     
                     // Send session settings for proper audio format
@@ -6456,7 +6430,6 @@
             if (startBtn) {
                 startBtn.classList.remove('hidden');
                 startBtn.innerHTML = '<i class="fas fa-microphone mr-2"></i>Start Voice Session';
-                startBtn.disabled = false;
             }
             if (endBtn) endBtn.classList.add('hidden');
             if (callStatus) callStatus.classList.add('hidden');
@@ -6574,12 +6547,12 @@
                 }
             }, 1000);
             
-            // 🧪 TESTING MODE: Auto-reset free trial on every page load - DISABLED FOR PRODUCTION
-            // localStorage.removeItem('coachDavidFirstUse');
-            // localStorage.removeItem('coachDavidTrialCredits');
-            // localStorage.removeItem('coachDavidTrialStartTime');
-            // localStorage.removeItem('coachDavidTrialCompleted');
-            // console.log('🔄 FREE TRIAL AUTO-RESET FOR TESTING - Unlimited Coach David access');
+            // 🧪 TESTING MODE: Auto-reset free trial on every page load
+            localStorage.removeItem('coachDavidFirstUse');
+            localStorage.removeItem('coachDavidTrialCredits');
+            localStorage.removeItem('coachDavidTrialStartTime');
+            localStorage.removeItem('coachDavidTrialCompleted');
+            console.log('🔄 FREE TRIAL AUTO-RESET FOR TESTING - Unlimited Coach David access');
         });
         // NOTE: mediaRecorder variable is shared with Coach David implementation above
         
