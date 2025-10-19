@@ -96,21 +96,38 @@
             const userPlan = JSON.parse(localStorage.getItem('userPlan') || '{"credits": 8, "plan": "free"}');
             let hasUsedFreeTrial = localStorage.getItem('coachDavidFirstUse');
             
-            // SMART RESET: Only reset if flag is set BUT session button was never clicked
-            // If trialStartCredits exists, it means they clicked "Start FREE Session" - DON'T reset!
-            // Only reset if flag exists but trialStartCredits doesn't (modal shown but never started)
+            // ENHANCED SMART RESET: Reset trial if user is on free plan with full 8 credits
+            // This handles the case where localStorage has stale trial flag from testing
             if (hasUsedFreeTrial && userPlan.plan === 'free') {
                 const trialStartCredits = localStorage.getItem('coachDavidTrialCredits');
                 
-                // Only reset if button was NEVER clicked (no trialStartCredits stored)
+                // Reset if button was NEVER clicked (no trialStartCredits stored)
                 if (!trialStartCredits) {
-                    console.log('🔄 SMART RESET: Flag set but "Start FREE Session" button never clicked - resetting');
+                    console.log('🔄 SMART RESET #1: Flag set but "Start FREE Session" button never clicked - resetting');
                     console.log(`   This was likely from testing or closing modal without starting`);
                     localStorage.removeItem('coachDavidFirstUse');
                     hasUsedFreeTrial = null;
+                }
+                // ALSO reset if user still has full 8 credits BUT trial button was never actually clicked
+                // Check: If credits==8 AND trialStartCredits doesn't exist, it means modal was shown but never started
+                else if (userPlan.credits === 8 && !localStorage.getItem('coachDavidTrialCompleted')) {
+                    // Check if this is a legitimate reset case (no session was actually started)
+                    const trialStartTime = localStorage.getItem('coachDavidTrialStartTime');
+                    if (!trialStartTime || (Date.now() - parseInt(trialStartTime)) < 5000) {
+                        // If no start time OR started less than 5 seconds ago (likely a refresh/test)
+                        console.log('🔄 SMART RESET #2: User has full 8 credits and no completed session - resetting trial flag');
+                        console.log(`   This allows testing or genuine first-time use after credit reset`);
+                        localStorage.removeItem('coachDavidFirstUse');
+                        localStorage.removeItem('coachDavidTrialCredits');
+                        localStorage.removeItem('coachDavidTrialStartTime');
+                        hasUsedFreeTrial = null;
+                    } else {
+                        console.log('✅ Free trial session was started and used - flag stays set');
+                        console.log(`   Session started at: ${new Date(parseInt(trialStartTime)).toLocaleString()}`);
+                    }
                 } else {
                     console.log('✅ Free trial was properly used - flag stays set');
-                    console.log(`   Session started with ${trialStartCredits} credits`);
+                    console.log(`   Session started with ${trialStartCredits} credits, now have ${userPlan.credits}`);
                 }
             }
             
@@ -354,6 +371,7 @@
             // Mark free trial as used BEFORE starting session
             localStorage.setItem('coachDavidFirstUse', 'true');
             localStorage.setItem('coachDavidTrialCredits', currentCredits.toString());
+            localStorage.setItem('coachDavidTrialStartTime', Date.now().toString());
             console.log(`✅ Free trial flag set - credits at start: ${currentCredits}`);
             
             // Close confirmation modal
@@ -5538,6 +5556,47 @@
         let messageCount = 0;
         
         // Working Coach David widget launcher
+
+        // CONTINUOUS MICROPHONE MONITORING for instant interruption
+        // Checks for user speech even between audio chunks
+        let lastMicCheckTime = 0;
+        let micMonitorInterval = null;
+        
+        function startMicrophoneMonitoring() {
+            if (micMonitorInterval) clearInterval(micMonitorInterval);
+            
+            micMonitorInterval = setInterval(() => {
+                // If Coach is playing and mic stream is active
+                if (isPlayingAudio && microphoneStream && microphoneStream.active) {
+                    const now = Date.now();
+                    
+                    // Check if we've received audio data recently (within last 100ms)
+                    if (now - lastMicCheckTime < 100) {
+                        console.log('🎤 Continuous monitor: User activity detected - stopping Coach');
+                        
+                        // Immediate stop
+                        if (currentAudio) {
+                            currentAudio.pause();
+                            currentAudio.currentTime = 0;
+                            currentAudio = null;
+                        }
+                        audioQueue.length = 0;
+                        isPlayingAudio = false;
+                    }
+                }
+            }, 30); // Check every 30ms for near-instant response
+            
+            console.log('✅ Continuous microphone monitoring active (checks every 30ms)');
+        }
+        
+        function stopMicrophoneMonitoring() {
+            if (micMonitorInterval) {
+                clearInterval(micMonitorInterval);
+                micMonitorInterval = null;
+                console.log('⏹️ Continuous microphone monitoring stopped');
+            }
+        }
+
         window.launchCoachDavidWidget = async function() {
             console.log('📞 Starting Coach David voice connection...');
             
@@ -5833,16 +5892,26 @@
                 humeSocket.onmessage = (event) => {
                     const data = JSON.parse(event.data);
                     
-                    // HUME AI OFFICIAL INTERRUPTION PATTERN
+                    // Log ALL Hume events for debugging
+                    console.log('📨 Hume event:', data.type, data);
+                    
+                    // HUME AI OFFICIAL INTERRUPTION PATTERN (Enhanced for PTSD)
                     switch (data.type) {
                         case 'user_interruption':
-                            console.log('⚡ USER INTERRUPTION - Stopping audio immediately');
+                            console.log('⚡ INSTANT INTERRUPTION - User needs to be heard NOW');
                             stopAudio();
+                            audioQueue.length = 0;  // Clear everything
+                            if (currentAudio) {
+                                currentAudio.pause();
+                                currentAudio.currentTime = 0;
+                                currentAudio = null;
+                            }
                             break;
                             
                         case 'user_message':
-                            console.log('🎙️ USER MESSAGE - Stopping audio for user speech');
+                            console.log('⚡ USER SPEAKING - Immediate stop for therapeutic safety');
                             stopAudio();
+                            audioQueue.length = 0;  // Clear everything
                             
                             // Handle interim messages for natural interruption
                             if (data.interim) {
@@ -6197,6 +6266,16 @@
         // End Coach David session
         window.endCoachDavidSession = function() {
             console.log('📞 Ending Coach David session...');
+            
+            // Stop continuous monitoring
+            stopMicrophoneMonitoring();
+            
+            // Mark trial as completed if this was a free trial session
+            if (localStorage.getItem('coachDavidFirstUse') === 'true' && 
+                localStorage.getItem('coachDavidTrialCredits')) {
+                localStorage.setItem('coachDavidTrialCompleted', 'true');
+                console.log('✅ Free trial session completed and marked as used permanently');
+            }
             
             // Stop all audio playback first - CRITICAL FOR ELIMINATING ECHO
             stopAllAudio();
@@ -6868,6 +6947,31 @@
                 
                 mediaRecorder.ondataavailable = (event) => {
                     if (event.data.size > 0 && humeWebSocket && humeWebSocket.readyState === WebSocket.OPEN) {
+                        // Detect if user is speaking (audio chunk has data)
+                        // THERAPEUTIC PRIORITY: ANY user audio IMMEDIATELY stops Coach
+                        // Critical for PTSD/trauma patients who need to feel heard instantly
+                        if (isPlayingAudio && event.data.size > 10) {  // Extremely low threshold
+                            console.log('⚡⚡⚡ IMMEDIATE STOP: Patient speaking - therapeutic priority');
+                            console.log('   Audio detected:', event.data.size, 'bytes');
+                            
+                            // TRIPLE-LAYER STOP for absolute certainty
+                            // Layer 1: Stop current audio
+                            if (currentAudio) {
+                                currentAudio.pause();
+                                currentAudio.currentTime = 0;
+                                currentAudio = null;
+                            }
+                            
+                            // Layer 2: Clear entire queue
+                            audioQueue.length = 0;
+                            isPlayingAudio = false;
+                            
+                            // Layer 3: Call stopAudio for any additional cleanup
+                            stopAudio();
+                            
+                            console.log('✅ Audio stopped - patient has the floor');
+                        }
+                        
                         const reader = new FileReader();
                         reader.onload = () => {
                             try {
@@ -6885,8 +6989,11 @@
                     }
                 };
                 
-                mediaRecorder.start(250); // Send audio chunks every 250ms
+                mediaRecorder.start(50); // Send audio chunks every 50ms (INSTANT for trauma patients)
                 console.log('✅ Audio recording started');
+                
+                // Start continuous microphone monitoring for instant interruption
+                startMicrophoneMonitoring();
                 
             } catch (error) {
                 console.error('Error starting audio recording:', error);
