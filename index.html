@@ -6284,6 +6284,9 @@
             };
             
             // Try to play immediately
+            // Mobile: Set volume before play
+            currentAudio.volume = 1.0;
+            
             const playPromise = currentAudio.play();
             
             if (playPromise !== undefined) {
@@ -6291,6 +6294,8 @@
                     console.log('🔊 Playing audio successfully');
                 }).catch(error => {
                     console.error('❌ Immediate play failed:', error.message);
+                    console.error('   This means mobile browser blocked autoplay');
+                    console.error('   User must interact with page again');
                     // Try with load event
                     currentAudio.addEventListener('canplaythrough', () => {
                         console.log('🔄 Retrying after canplaythrough');
