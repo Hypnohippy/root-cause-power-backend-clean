@@ -6423,6 +6423,13 @@
                     location.reload();
                 }
             }, 1000);
+            
+            // 🧪 TESTING MODE: Auto-reset free trial on every page load
+            localStorage.removeItem('coachDavidFirstUse');
+            localStorage.removeItem('coachDavidTrialCredits');
+            localStorage.removeItem('coachDavidTrialStartTime');
+            localStorage.removeItem('coachDavidTrialCompleted');
+            console.log('🔄 FREE TRIAL AUTO-RESET FOR TESTING - Unlimited Coach David access');
         });
         // NOTE: mediaRecorder variable is shared with Coach David implementation above
         
