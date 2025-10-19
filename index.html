@@ -5586,7 +5586,7 @@
                         if (currentAudio) {
                             currentAudio.pause();
                             currentAudio.currentTime = 0;
-                            currentAudio = null;
+                            // Don't destroy - keep unlocked element alive
                         }
                         audioQueue.length = 0;
                         isPlayingAudio = false;
@@ -6306,7 +6306,7 @@
                         currentAudio.play().catch(e => {
                             console.error('❌ Retry failed:', e.message);
                             URL.revokeObjectURL(audioUrl);
-                            currentAudio = null;
+                            // Don't destroy - keep unlocked element alive
                             isPlayingAudio = false;
                             if (audioQueue.length > 0) playAudio();
                         });
