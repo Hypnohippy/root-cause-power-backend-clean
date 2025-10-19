@@ -5776,34 +5776,27 @@
         window.startCoachDavidConnection = async function() {
             console.log('🔑 Connecting to Coach David with REAL Hume AI...');
             
-            // ✅ MOBILE AUDIO UNLOCK: Multiple attempts for iOS/Android
+            // ✅ MOBILE & DESKTOP AUDIO UNLOCK: Play immediately from user click
+            try {
+                const unlockAudio = new Audio('data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=');
+                unlockAudio.volume = 0.01;
+                await unlockAudio.play();
+                console.log('✅ Audio unlocked from user click - Coach David will play automatically');
+            } catch (e) {
+                console.log('⚠️ Audio unlock:', e.message);
+            }
+            
+            // Resume AudioContext
+            try {
+                await resumeAudioContext();
+                console.log('✅ AudioContext resumed');
+            } catch (e) {
+                console.log('⚠️ AudioContext:', e.message);
+            }
+            
             const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
             if (isMobile) {
-                console.log('📱 Mobile device detected - aggressive audio unlock...');
-                
-                // Attempt 1: Silent audio (non-blocking)
-                try {
-                    const silentAudio = new Audio('data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=');
-                    silentAudio.volume = 0.5;
-                    silentAudio.play().then(() => {
-                        console.log('✅ Mobile audio unlocked');
-                    }).catch(e => {
-                        console.log('⚠️ Audio unlock failed:', e.message);
-                    });
-                } catch (e) {
-                    console.log('⚠️ Audio unlock error:', e.message);
-                }
-                
-                // Attempt 2: Resume AudioContext (non-blocking)
-                try {
-                    resumeAudioContext().then(() => {
-                        console.log('✅ AudioContext resumed');
-                    }).catch(e => {
-                        console.log('⚠️ AudioContext resume failed:', e.message);
-                    });
-                } catch (e) {
-                    console.log('⚠️ AudioContext error:', e.message);
-                }
+                console.log('📱 Mobile device detected');
             } else {
                 // Desktop audio unlock (original)
                 try {
@@ -6420,7 +6413,11 @@
             
             if (statusEl) statusEl.textContent = 'Ready to start your therapeutic session';
             if (substatusEl) substatusEl.textContent = 'Click below to begin voice therapy with Coach David';
-            if (startBtn) startBtn.classList.remove('hidden');
+            if (startBtn) {
+                startBtn.classList.remove('hidden');
+                startBtn.innerHTML = '<i class="fas fa-microphone mr-2"></i>Start Voice Session';
+                startBtn.disabled = false;
+            }
             if (endBtn) endBtn.classList.add('hidden');
             if (callStatus) callStatus.classList.add('hidden');
             
