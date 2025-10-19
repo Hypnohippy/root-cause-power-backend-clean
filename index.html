@@ -3219,9 +3219,6 @@
             }
         };
         
-        // Conversation history storage for all coaches
-        const conversationHistory = {};
-        
         // Credit System
         const CREDIT_COSTS = {
             'coach_session': 2,
@@ -5235,19 +5232,6 @@
             
             if (!message) return;
             
-            // Update conversation history
-            if (!conversationHistory[coachName]) {
-                conversationHistory[coachName] = [{
-                    role: 'system',
-                    content: getCoachSystemPrompt(coachName)
-                }];
-            }
-            
-            conversationHistory[coachName].push({
-                role: 'user',
-                content: message
-            });
-            
             // Add user message
             const userMessageDiv = document.createElement('div');
             userMessageDiv.className = 'user-message p-4 rounded-lg mb-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white max-w-[80%] ml-auto';
@@ -5269,31 +5253,37 @@
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
             
             try {
-                // 🔒 SECURE: Call backend API instead of Groq directly
-                const response = await fetch('/api/groq-chat', {
+                const systemPrompt = getCoachSystemPrompt(coachName);
+                
+                const response = await fetch(API_CONFIG.GROQ.baseUrl, {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${API_CONFIG.GROQ.apiKey}`
                     },
                     body: JSON.stringify({
-                        message: message,
-                        coach: coachName,
-                        conversationHistory: conversationHistory[coachName]
+                        model: API_CONFIG.GROQ.model,
+                        messages: [
+                            {
+                                role: 'system',
+                                content: systemPrompt
+                            },
+                            {
+                                role: 'user',
+                                content: message
+                            }
+                        ],
+                        max_tokens: 1000,
+                        temperature: 0.7,
+                        top_p: 0.9
                     })
                 });
                 
                 if (!response.ok) {
-                    const errorData = await response.json().catch(() => ({}));
-                    throw new Error(errorData.error || `HTTP ${response.status}`);
+                    throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 
                 const data = await response.json();
-                
-                // Add assistant response to history
-                conversationHistory[coachName].push({
-                    role: 'assistant',
-                    content: data.response
-                });
                 
                 // Remove typing indicator
                 document.getElementById('typing-indicator')?.remove();
@@ -5301,25 +5291,36 @@
                 // Add AI response
                 const aiMessageDiv = document.createElement('div');
                 aiMessageDiv.className = 'ai-message p-4 rounded-lg mb-4 bg-gradient-to-r from-slate-700 to-slate-600 text-white max-w-[80%]';
-                aiMessageDiv.textContent = data.response;
+                aiMessageDiv.textContent = data.choices[0].message.content;
                 messagesContainer.appendChild(aiMessageDiv);
                 
             } catch (error) {
                 console.error('🚨 COACH API ERROR:', error);
+                console.error('API Details:', {
+                    url: API_CONFIG.GROQ.baseUrl,
+                    model: API_CONFIG.GROQ.model,
+                    hasApiKey: !!API_CONFIG.GROQ.apiKey,
+                    apiKeyPrefix: API_CONFIG.GROQ.apiKey ? API_CONFIG.GROQ.apiKey.substring(0, 10) + '...' : 'MISSING'
+                });
                 
                 document.getElementById('typing-indicator')?.remove();
                 
                 const errorDiv = document.createElement('div');
                 errorDiv.className = 'ai-message p-4 rounded-lg mb-4 bg-red-900/50 border border-red-500 text-red-300 max-w-[80%]';
-                errorDiv.innerHTML = `
-                    <div class="font-bold mb-2">🚨 API Key Issue</div>
-                    <div class="text-sm">The coach AI service is not properly authenticated. Please check your API configuration.</div>
-                    <div class="text-xs mt-2 opacity-75">Error: ${error.message}</div>
-                `;
+                
+                if (error.message.includes('401') || error.message.includes('Authorization')) {
+                    errorDiv.innerHTML = '🚨 <strong>API Key Issue</strong><br>The coach AI service is not properly authenticated. Please contact support.';
+                } else if (error.message.includes('429')) {
+                    errorDiv.innerHTML = '🔄 <strong>Too Many Requests</strong><br>Please wait 30 seconds and try again.';
+                } else if (error.message.includes('fetch')) {
+                    errorDiv.innerHTML = '🌐 <strong>Connection Error</strong><br>Please check your internet connection and try again.';
+                } else {
+                    errorDiv.innerHTML = `🚨 <strong>AI Service Error</strong><br>Error: ${error.message}<br><small>Check console for details</small>`;
+                }
+                
                 messagesContainer.appendChild(errorDiv);
             }
             
-            // Scroll to bottom
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
         }
         
@@ -5526,6 +5527,8 @@
         let humeSocket = null;
         let microphoneStream = null;
         let audioQueue = [];
+        let userIsSpeaking = false;  // Track if user is currently speaking
+        let wasInterrupted = false;  // Track if audio was interrupted
         let currentAudio = null;
         let isPlayingAudio = false;
         let lastAudioTime = 0;
@@ -5615,47 +5618,6 @@
             document.body.appendChild(modal);
         };
         
-        // Resume AudioContext for mobile devices (prevents audio blocking)
-        window.resumeAudioContext = async function() {
-            if (typeof window.AudioContext !== 'undefined' || typeof window.webkitAudioContext !== 'undefined') {
-                const AudioContext = window.AudioContext || window.webkitAudioContext;
-                if (!window.audioContext) {
-                    window.audioContext = new AudioContext();
-                }
-                
-                if (window.audioContext.state === 'suspended') {
-                    console.log('🔊 Resuming AudioContext for mobile...');
-                    await window.audioContext.resume();
-                    console.log('✅ AudioContext resumed:', window.audioContext.state);
-                }
-            }
-        };
-        
-        // Resume AudioContext for mobile devices (prevents audio blocking)
-        window.resumeAudioContext = async function() {
-            if (typeof window.AudioContext !== 'undefined' || typeof window.webkitAudioContext !== 'undefined') {
-                const AudioContext = window.AudioContext || window.webkitAudioContext;
-                if (!window.audioContext) {
-                    window.audioContext = new AudioContext();
-                }
-                
-                if (window.audioContext.state === 'suspended') {
-                    console.log('🔊 Resuming AudioContext for mobile...');
-                    await window.audioContext.resume();
-                    console.log('✅ AudioContext resumed:', window.audioContext.state);
-                }
-            }
-        };
-        
-        window.resumeAudioContext = async function() {
-            const Ctx = window.AudioContext || window.webkitAudioContext;
-            if (Ctx && (!window.audioContext || window.audioContext.state === 'suspended')) {
-                window.audioContext = window.audioContext || new Ctx();
-                await window.audioContext.resume();
-                console.log('✅ AudioContext:', window.audioContext.state);
-            }
-        };
-        
         // Start actual Coach David connection
         window.startCoachDavidConnection = async function() {
             console.log('🔑 Connecting to Coach David with REAL Hume AI...');
@@ -5711,13 +5673,6 @@
                 const tokenData = await tokenResponse.json();
                 console.log('✅ Got Hume access token!');
                 
-                // Resume audio context for mobile
-                await resumeAudioContext();
-                
-                // Resume audio context for mobile
-                await resumeAudioContext();
-                
-                await resumeAudioContext();
                 // Get microphone access - MOBILE OPTIMIZED
                 console.log('🎤 Requesting microphone access...');
                 
@@ -5825,23 +5780,62 @@
                     // HUME AI OFFICIAL INTERRUPTION PATTERN
                     switch (data.type) {
                         case 'user_interruption':
-                            console.log('⚡ USER INTERRUPTION - Stopping audio immediately');
-                            stopAudio();
+                            console.log('⚡ USER INTERRUPTION DETECTED');
+                            
+                            // Stop current audio but keep queue
+                            if (isPlayingAudio) {
+                                if (currentAudio) {
+                                    currentAudio.pause();
+                                    currentAudio.currentTime = 0;
+                                    currentAudio = null;
+                                }
+                                isPlayingAudio = false;
+                                wasInterrupted = true;
+                            }
+                            
+                            userIsSpeaking = true;
                             break;
                             
                         case 'user_message':
-                            console.log('🎙️ USER MESSAGE - Stopping audio for user speech');
-                            stopAudio();
-                            
-                            // Handle interim messages for natural interruption
+                            // Handle interim messages (user still speaking)
                             if (data.interim) {
                                 console.log('🔄 Interim message - user still speaking');
-                                // Don't process interim messages further
-                                return;
+                                
+                                // First interruption - stop current audio
+                                if (!userIsSpeaking && isPlayingAudio) {
+                                    console.log('⚡ USER INTERRUPTION - Stopping current audio');
+                                    // Only stop current audio, don't clear queue
+                                    if (currentAudio) {
+                                        currentAudio.pause();
+                                        currentAudio.currentTime = 0;
+                                        currentAudio = null;
+                                    }
+                                    isPlayingAudio = false;
+                                    wasInterrupted = true;
+                                }
+                                
+                                userIsSpeaking = true;
+                                return; // Don't process interim messages further
                             }
                             
-                            // Process final user message
+                            // Final message - user stopped speaking
+                            console.log('🎙️ USER MESSAGE - Final message, user stopped speaking');
+                            userIsSpeaking = false;
                             lastUserSpeechTime = Date.now();
+                            
+                            // Resume audio playback if there's queued audio
+                            if (wasInterrupted && audioQueue.length > 0) {
+                                console.log('🔄 RESUMING AUDIO - Queue has ' + audioQueue.length + ' segments');
+                                wasInterrupted = false;
+                                // Small delay to ensure user has fully stopped
+                                setTimeout(() => {
+                                    if (!userIsSpeaking && audioQueue.length > 0) {
+                                        playAudio();
+                                    }
+                                }, 100);
+                            } else {
+                                wasInterrupted = false;
+                            }
                             break;
                             
                         case 'audio_output':
@@ -5959,14 +5953,8 @@
                     if (event.data.size > 0 && humeSocket?.readyState === WebSocket.OPEN) {
                         const reader = new FileReader();
                         reader.onload = () => {
-                            const arrayBuffer = reader.result;
-                            const bytes = new Uint8Array(arrayBuffer);
-                            let binary = '';
-                            for (let i = 0; i < bytes.byteLength; i++) {
-                                binary += String.fromCharCode(bytes[i]);
-                            }
-                            const audioData = btoa(binary);
-                            console.log('📤 Sending audio:', audioData.length, 'chars');
+                            const audioData = reader.result.split(',')[1];
+                            console.log('📤 Sending audio data to Hume AI:', audioData.length, 'characters');
                             humeSocket.send(JSON.stringify({
                                 type: 'audio_input',
                                 data: audioData
@@ -5975,7 +5963,7 @@
                         reader.onerror = (error) => {
                             console.error('❌ FileReader error:', error);
                         };
-                        reader.readAsArrayBuffer(event.data);
+                        reader.readAsDataURL(event.data);
                     } else {
                         if (event.data.size === 0) {
                             console.warn('⚠️ Audio data is empty (0 bytes)');
@@ -6020,7 +6008,7 @@
         // HUME AI OFFICIAL AUDIO PROCESSING - Exact pattern from docs
         function playCoachAudioDirect(audioData) {
             try {
-                // Convert base64 to blob
+                // Convert base64 to blob - Hume's official method
                 const audioBytes = atob(audioData);
                 const audioArray = new Uint8Array(audioBytes.length);
                 
@@ -6029,17 +6017,10 @@
                 }
                 
                 const blob = new Blob([audioArray], { type: 'audio/wav' });
-                audioQueue.push(blob);
+                audioQueue.push(blob); // Store as Blob, not base64
                 
-                console.log(`📥 Audio queued (${audioQueue.length} total, playing: ${isPlayingAudio})`);
-                
-                // ALWAYS try to start playback if not playing
-                if (!isPlayingAudio) {
-                    console.log('🎬 Starting playback');
-                    playAudio();
-                } else {
-                    console.log('⏸️ Already playing, queued for later');
-                }
+                // Start playing if queue length >= 1 (Hume's pattern)
+                if (audioQueue.length >= 1) playAudio();
                 
             } catch (error) {
                 console.error('❌ Audio processing error:', error);
@@ -6048,18 +6029,20 @@
         
         // HUME AI OFFICIAL PLAY AUDIO FUNCTION - Exact pattern from docs
         function playAudio() {
-            // Check queue and playing state
-            if (!audioQueue.length || isPlayingAudio) {
-                console.log('🔇 playAudio: queue empty or already playing');
+            // HUME'S EXACT PATTERN: Check queue and playing state
+            console.log('🔊 playAudio called - Queue:', audioQueue.length, 'isPlaying:', isPlayingAudio, 'userSpeaking:', userIsSpeaking);
+            
+            // Don't play if user is speaking
+            if (userIsSpeaking) {
+                console.log('⏸️ Not playing - user is speaking');
                 return;
             }
             
-            console.log(`🎵 playAudio: Starting playback (${audioQueue.length} in queue)`);
-            isPlayingAudio = true;
-            const audioBlob = audioQueue.shift();
+            if (!audioQueue.length || isPlayingAudio) return;
             
+            isPlayingAudio = true;
+            const audioBlob = audioQueue.shift(); // Get pre-processed blob
             if (!audioBlob) {
-                console.log('⚠️ No audio blob');
                 isPlayingAudio = false;
                 return;
             }
@@ -6067,23 +6050,30 @@
             const audioUrl = URL.createObjectURL(audioBlob);
             currentAudio = new Audio(audioUrl);
             
-            // Enhanced mobile support
-            currentAudio.volume = 1.0;
-            currentAudio.preload = 'auto';
-            currentAudio.autoplay = false; // Explicit control
+            // Mobile optimizations
+            currentAudio.volume = 1.0;  // Max volume for mobile speakers
+            currentAudio.load();  // iOS requires load() before play
             
-            // Event handlers BEFORE loading
-            currentAudio.onended = () => {
-                console.log('✅ Audio ended - playing next');
+            // HUME'S EXACT EVENT HANDLERS - Simple and effective
+            currentAudio.play().then(() => {
+                console.log('🔊 Playing audio segment');
+            }).catch(error => {
+                console.error('❌ Audio playback failed:', error.name, '-', error.message);
+                console.error('❌ Audio playback error:', error);
                 URL.revokeObjectURL(audioUrl);
                 currentAudio = null;
                 isPlayingAudio = false;
-                if (audioQueue.length > 0) {
-                    console.log(`🔄 ${audioQueue.length} segments remaining`);
-                    playAudio();
-                } else {
-                    console.log('🏁 Queue empty');
-                }
+                if (audioQueue.length) playAudio(); // Try next
+            });
+            
+            // HUME'S ONENDED HANDLER - Play next segment
+            currentAudio.onended = () => {
+                console.log('✅ Audio segment ended');
+                URL.revokeObjectURL(audioUrl);
+                currentAudio = null;
+                isPlayingAudio = false;
+                // Play next if queue has audio - Hume's exact pattern
+                if (audioQueue.length) playAudio();
             };
             
             currentAudio.onerror = (error) => {
@@ -6091,32 +6081,8 @@
                 URL.revokeObjectURL(audioUrl);
                 currentAudio = null;
                 isPlayingAudio = false;
-                if (audioQueue.length > 0) playAudio();
+                if (audioQueue.length) playAudio();
             };
-            
-            // Try to play immediately
-            const playPromise = currentAudio.play();
-            
-            if (playPromise !== undefined) {
-                playPromise.then(() => {
-                    console.log('🔊 Playing audio successfully');
-                }).catch(error => {
-                    console.error('❌ Immediate play failed:', error.message);
-                    // Try with load event
-                    currentAudio.addEventListener('canplaythrough', () => {
-                        console.log('🔄 Retrying after canplaythrough');
-                        currentAudio.play().catch(e => {
-                            console.error('❌ Retry failed:', e.message);
-                            URL.revokeObjectURL(audioUrl);
-                            currentAudio = null;
-                            isPlayingAudio = false;
-                            if (audioQueue.length > 0) playAudio();
-                        });
-                    }, { once: true });
-                    
-                    currentAudio.load();
-                });
-            }
         }
         
 
@@ -13765,4 +13731,3 @@
 
 </body>
 </html>
-
