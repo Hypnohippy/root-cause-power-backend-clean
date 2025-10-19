@@ -6,6 +6,7 @@
 
 
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5659,6 +5660,16 @@
         // Start actual Coach David connection
         window.startCoachDavidConnection = async function() {
             console.log('🔑 Connecting to Coach David with REAL Hume AI...');
+            
+            // ✅ AUDIO UNLOCK: Play silent audio to enable browser audio playback without user clicking mic button
+            try {
+                const silentAudio = new Audio('data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=');
+                silentAudio.volume = 0.01;
+                await silentAudio.play();
+                console.log('✅ Audio automatically unlocked - no mic button click needed!');
+            } catch (e) {
+                console.log('ℹ️ Audio unlock:', e.message);
+            }
             
             const statusEl = document.getElementById('conversation-status');
             const substatusEl = document.getElementById('conversation-substatus');
