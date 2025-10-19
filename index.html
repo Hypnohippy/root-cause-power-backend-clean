@@ -5776,22 +5776,21 @@
         window.startCoachDavidConnection = async function() {
             console.log('🔑 Connecting to Coach David with REAL Hume AI...');
             
-            // ✅ MOBILE & DESKTOP AUDIO UNLOCK: Play immediately from user click
+            // ✅ AUDIO UNLOCK: Play immediately from user click (non-blocking)
             try {
                 const unlockAudio = new Audio('data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=');
                 unlockAudio.volume = 0.01;
-                await unlockAudio.play();
-                console.log('✅ Audio unlocked from user click - Coach David will play automatically');
+                unlockAudio.play().catch(e => console.log('⚠️ Audio unlock:', e.message));
+                console.log('✅ Audio unlock triggered');
             } catch (e) {
-                console.log('⚠️ Audio unlock:', e.message);
+                console.log('⚠️ Audio unlock error:', e.message);
             }
             
-            // Resume AudioContext
+            // Resume AudioContext (non-blocking)
             try {
-                await resumeAudioContext();
-                console.log('✅ AudioContext resumed');
+                resumeAudioContext().catch(e => console.log('⚠️ AudioContext:', e.message));
             } catch (e) {
-                console.log('⚠️ AudioContext:', e.message);
+                console.log('⚠️ AudioContext error:', e.message);
             }
             
             const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
