@@ -6009,7 +6009,7 @@
                             if (currentAudio) {
                                 currentAudio.pause();
                                 currentAudio.currentTime = 0;
-                                currentAudio = null;
+                                // currentAudio = null  // REMOVED - keep element alive;
                             }
                             break;
                             
@@ -6269,7 +6269,7 @@
             currentAudio.onended = () => {
                 console.log('✅ Audio ended - playing next');
                 URL.revokeObjectURL(audioUrl);
-                currentAudio = null;
+                // currentAudio = null  // REMOVED - keep element alive;
                 isPlayingAudio = false;
                 if (audioQueue.length > 0) {
                     console.log(`🔄 ${audioQueue.length} segments remaining`);
@@ -6282,7 +6282,7 @@
             currentAudio.onerror = (error) => {
                 console.error('❌ Audio error:', error);
                 URL.revokeObjectURL(audioUrl);
-                currentAudio = null;
+                // currentAudio = null  // REMOVED - keep element alive;
                 isPlayingAudio = false;
                 if (audioQueue.length > 0) playAudio();
             };
@@ -6327,7 +6327,7 @@
             if (currentAudio) {
                 currentAudio.pause();
                 currentAudio.currentTime = 0;  // Reset to beginning
-                currentAudio = null;
+                // currentAudio = null  // REMOVED - keep element alive;
             }
             
             // Set playing state to false
@@ -6347,7 +6347,7 @@
             if (currentAudio) {
                 currentAudio.pause();
                 currentAudio.currentTime = 0;
-                currentAudio = null;
+                // currentAudio = null  // REMOVED - keep element alive;
             }
             
             // Clear entire queue
@@ -7092,7 +7092,7 @@
                             if (currentAudio) {
                                 currentAudio.pause();
                                 currentAudio.currentTime = 0;
-                                currentAudio = null;
+                                // currentAudio = null  // REMOVED - keep element alive;
                             }
                             
                             // Layer 2: Clear entire queue
