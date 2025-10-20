@@ -6722,6 +6722,9 @@
         }
         
         function initializeSpeechRecognition() {
+            console.log('⚠️ Speech recognition DISABLED - using Hume AI instead');
+            return; // Exit immediately - Hume handles all voice
+            
             console.log('🎯 Initializing speech recognition...');
             console.log('Speech Recognition available?', 'webkitSpeechRecognition' in window || 'SpeechRecognition' in window);
             console.log('Mobile mic stream available?', !!window.mobileMicStream);
