@@ -10,8 +10,6 @@
 
 
 
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -480,18 +478,7 @@
             // Mark free trial as used - PERMANENT, NO RESETS
             localStorage.setItem('coachDavidFirstUse', 'true');
             localStorage.setItem('coachDavidTrialStartTime', startTime.toString());
-            localStorage.setItem('coachDavidTrialCompleted', 'true');
-            
-            // Verify flag saved successfully
-            setTimeout(() => {
-                const verify = localStorage.getItem('coachDavidFirstUse');
-                if (verify === 'true') {
-                    console.log('✅ Trial flag verified and saved');
-                } else {
-                    console.error('⚠️ Flag not saved - retrying');
-                    localStorage.setItem('coachDavidFirstUse', 'true');
-                }
-            }, 100);
+            localStorage.setItem('coachDavidTrialCompleted', 'true'); // PERMANENT marker
             
             console.log('🔒 FREE TRIAL PERMANENTLY MARKED AS USED');
             console.log(`   Timestamp: ${new Date(startTime).toLocaleString()}`);
@@ -11740,9 +11727,18 @@
                 console.log('✅ Added referral to checkout: ' + referralCode);
             }
             
-            // Open Stripe in same tab - allows browser back button
-            console.log('🚀 Redirecting to Stripe checkout...');
-            window.location.href = stripeUrl;
+            paymentWindow = window.open(stripeUrl, 'stripe-checkout', 'width=800,height=700,scrollbars=yes,resizable=yes');
+            
+            if (paymentWindow) {
+                // Update to step 3 - monitoring
+                setTimeout(() => {
+                    updatePaymentProgress(3, 'Complete your payment in the Stripe window');
+                    startPaymentMonitoring(planName);
+                }, 1000);
+            } else {
+                // Popup blocked
+                updatePaymentProgress(1, 'Popup blocked - please allow popups and try again');
+            }
         }
 
         // Open in new tab alternative
