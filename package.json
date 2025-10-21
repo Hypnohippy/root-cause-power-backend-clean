@@ -14,7 +14,8 @@
   "license": "MIT",
   "dependencies": {
     "cors": "^2.8.5",
-    "groq-sdk": "^0.8.0"
+    "groq-sdk": "^0.8.0",
+    "stripe": "^14.0.0"
   },
   "engines": {
     "node": ">=18.0.0"
