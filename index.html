@@ -1,13 +1,4 @@
 
-
-
-
-
-
-
-
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -36,6 +27,32 @@
             }
         }
     </script>
+        // ========================================================================
+        // REFERRAL TRACKING SYSTEM - Captures and passes referral codes to Stripe
+        // ========================================================================
+        (function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const referralCode = urlParams.get('ref');
+            
+            if (referralCode) {
+                localStorage.setItem('referralCode', referralCode);
+                console.log('✅ Referral code captured: ' + referralCode);
+                
+                setTimeout(function() {
+                    const notification = document.createElement('div');
+                    notification.className = 'fixed top-20 left-1/2 transform -translate-x-1/2 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-bounce';
+                    notification.innerHTML = '<div class="flex items-center gap-2"><span>🎁</span><div class="text-sm"><strong>Referred by a community member!</strong><div class="text-xs opacity-90">They\'ll earn commission when you subscribe</div></div></div>';
+                    document.body.appendChild(notification);
+                    setTimeout(function() { notification.remove(); }, 5000);
+                }, 1000);
+                
+                const cleanUrl = window.location.origin + window.location.pathname;
+                window.history.replaceState({}, document.title, cleanUrl);
+            }
+        })();
+        console.log('✅ Referral tracking system initialized');
+        // ========================================================================
+        
     
     <!-- COACH DAVID X BUTTON FIX: Function moved to page load for IMMEDIATE availability -->
     <script>
@@ -11589,6 +11606,14 @@
             updatePaymentProgress(2, 'Opening Stripe Checkout...');
             
             // Open Stripe in new tab
+            // Add referral code to Stripe URL if exists
+            const referralCode = localStorage.getItem('referralCode');
+            if (referralCode) {
+                const separator = stripeUrl.includes('?') ? '&' : '?';
+                stripeUrl = stripeUrl + separator + 'client_reference_id=' + referralCode;
+                console.log('✅ Added referral to checkout: ' + referralCode);
+            }
+            
             paymentWindow = window.open(stripeUrl, 'stripe-checkout', 'width=800,height=700,scrollbars=yes,resizable=yes');
             
             if (paymentWindow) {
