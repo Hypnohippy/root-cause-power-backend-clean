@@ -176,7 +176,7 @@
             modal.id = 'coach-david-confirmation-modal';
             modal.className = 'fixed inset-0 bg-black bg-opacity-95 flex items-center justify-center z-50 p-4';
             modal.innerHTML = `
-                <div class="bg-slate-900 rounded-2xl w-full max-w-md border border-green-500 shadow-2xl">
+                <div class="bg-slate-900 rounded-2xl w-full max-w-md border border-green-500 shadow-2xl max-h-[90vh] overflow-y-auto">
                     <div class="bg-gradient-to-r from-green-600 to-emerald-600 p-6 rounded-t-2xl">
                         <div class="flex justify-between items-center">
                             <div class="flex items-center">
@@ -235,7 +235,7 @@
             modal.id = 'coach-david-confirmation-modal';
             modal.className = 'fixed inset-0 bg-black bg-opacity-95 flex items-center justify-center z-50 p-4';
             modal.innerHTML = `
-                <div class="bg-slate-900 rounded-2xl w-full max-w-md border border-purple-500 shadow-2xl">
+                <div class="bg-slate-900 rounded-2xl w-full max-w-md border border-purple-500 shadow-2xl max-h-[90vh] overflow-y-auto">
                     <div class="bg-gradient-to-r from-purple-600 to-indigo-600 p-6 rounded-t-2xl">
                         <div class="flex justify-between items-center">
                             <div class="flex items-center">
@@ -303,7 +303,7 @@
             modal.id = 'coach-david-confirmation-modal';
             modal.className = 'fixed inset-0 bg-black bg-opacity-95 flex items-center justify-center z-50 p-4';
             modal.innerHTML = `
-                <div class="bg-slate-900 rounded-2xl w-full max-w-md border border-purple-500 shadow-2xl">
+                <div class="bg-slate-900 rounded-2xl w-full max-w-md border border-purple-500 shadow-2xl max-h-[90vh] overflow-y-auto">
                     <div class="brain-activity p-6 rounded-t-2xl">
                         <div class="flex justify-between items-center">
                             <div class="flex items-center">
@@ -595,7 +595,7 @@
             const modal = document.createElement('div');
             modal.className = 'fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4';
             modal.innerHTML = `
-                <div class="bg-slate-900 rounded-2xl w-full max-w-md border border-green-500 shadow-2xl">
+                <div class="bg-slate-900 rounded-2xl w-full max-w-md border border-green-500 shadow-2xl max-h-[90vh] overflow-y-auto">
                     <div class="bg-gradient-to-r from-green-600 to-emerald-600 p-6 rounded-t-2xl">
                         <div class="flex items-center">
                             <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mr-4">
@@ -975,7 +975,7 @@
                 const modal = document.createElement('div');
                 modal.className = 'fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4';
                 modal.innerHTML = `
-                    <div class="bg-slate-900 rounded-2xl w-full max-w-md border border-purple-500 shadow-2xl">
+                    <div class="bg-slate-900 rounded-2xl w-full max-w-md border border-purple-500 shadow-2xl max-h-[90vh] overflow-y-auto">
                         <div class="bg-gradient-to-r from-purple-600 to-pink-600 p-6 rounded-t-2xl">
                             <div class="flex items-center">
                                 <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mr-4">
@@ -1097,7 +1097,7 @@
             const modal = document.createElement('div');
             modal.className = 'fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4';
             modal.innerHTML = `
-                <div class="bg-slate-900 rounded-2xl w-full max-w-md border border-purple-500 shadow-2xl">
+                <div class="bg-slate-900 rounded-2xl w-full max-w-md border border-purple-500 shadow-2xl max-h-[90vh] overflow-y-auto">
                     <div class="bg-gradient-to-r from-purple-600 to-pink-600 p-6 rounded-t-2xl">
                         <div class="flex items-center">
                             <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mr-4">
@@ -6383,19 +6383,33 @@
             }
             
             const audioUrl = URL.createObjectURL(audioBlob);
-            currentAudio = new Audio(audioUrl);
             
-            // MOBILE-OPTIMIZED audio playback
+            // MOBILE FIX: Reuse unlocked audio element (iOS blocks new Audio())
             const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+            
+            if (isMobile && window.globalAudioElement) {
+                // Reuse the unlocked element from "Start Voice Session" click
+                console.log('📱 MOBILE: Reusing unlocked audio element');
+                currentAudio = window.globalAudioElement;
+                currentAudio.pause(); // Stop any current playback
+                currentAudio.src = audioUrl; // Change source
+                currentAudio.load(); // Load new audio
+            } else {
+                // Desktop or fallback
+                console.log('💻 DESKTOP: Creating new Audio element');
+                currentAudio = new Audio(audioUrl);
+            }
+            
+            // Configure audio
             currentAudio.volume = 1.0;
             currentAudio.preload = 'auto';
-            currentAudio.autoplay = isMobile; // Enable autoplay on mobile
+            currentAudio.autoplay = isMobile;
             
             // Critical for iOS
             if (isMobile) {
                 currentAudio.setAttribute('playsinline', 'true');
                 currentAudio.setAttribute('webkit-playsinline', 'true');
-                console.log('📱 Mobile audio attributes set');
+                console.log('📱 Mobile playsinline attributes set');
             }
             
             // Event handlers BEFORE loading
