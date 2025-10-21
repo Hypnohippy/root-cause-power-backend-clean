@@ -9,6 +9,7 @@
 
 
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -131,39 +132,12 @@
             const userPlan = JSON.parse(localStorage.getItem('userPlan') || '{"credits": 8, "plan": "free"}');
             let hasUsedFreeTrial = localStorage.getItem('coachDavidFirstUse');
             
-            // ENHANCED SMART RESET: Reset trial if user is on free plan with full 8 credits
-            // This handles the case where localStorage has stale trial flag from testing
-            if (hasUsedFreeTrial && userPlan.plan === 'free') {
-                const trialStartCredits = localStorage.getItem('coachDavidTrialCredits');
-                
-                // Reset if button was NEVER clicked (no trialStartCredits stored)
-                if (!trialStartCredits) {
-                    console.log('🔄 SMART RESET #1: Flag set but "Start FREE Session" button never clicked - resetting');
-                    console.log(`   This was likely from testing or closing modal without starting`);
-                    localStorage.removeItem('coachDavidFirstUse');
-                    hasUsedFreeTrial = null;
-                }
-                // ALSO reset if user still has full 8 credits BUT trial button was never actually clicked
-                // Check: If credits==8 AND trialStartCredits doesn't exist, it means modal was shown but never started
-                else if (userPlan.credits === 8 && !localStorage.getItem('coachDavidTrialCompleted')) {
-                    // Check if this is a legitimate reset case (no session was actually started)
-                    const trialStartTime = localStorage.getItem('coachDavidTrialStartTime');
-                    if (!trialStartTime || (Date.now() - parseInt(trialStartTime)) < 5000) {
-                        // If no start time OR started less than 5 seconds ago (likely a refresh/test)
-                        console.log('🔄 SMART RESET #2: User has full 8 credits and no completed session - resetting trial flag');
-                        console.log(`   This allows testing or genuine first-time use after credit reset`);
-                        localStorage.removeItem('coachDavidFirstUse');
-                        localStorage.removeItem('coachDavidTrialCredits');
-                        localStorage.removeItem('coachDavidTrialStartTime');
-                        hasUsedFreeTrial = null;
-                    } else {
-                        console.log('✅ Free trial session was started and used - flag stays set');
-                        console.log(`   Session started at: ${new Date(parseInt(trialStartTime)).toLocaleString()}`);
-                    }
-                } else {
-                    console.log('✅ Free trial was properly used - flag stays set');
-                    console.log(`   Session started with ${trialStartCredits} credits, now have ${userPlan.credits}`);
-                }
+            // ZERO TOLERANCE: Once free trial flag is set, it NEVER resets
+            // NO exceptions, NO edge cases, NO smart resets
+            if (hasUsedFreeTrial) {
+                console.log('🔒 FREE TRIAL ALREADY USED - PERMANENTLY LOCKED');
+                console.log('   No resets allowed under any circumstances');
+                // Flag stays set - that's it!
             }
             
             console.log('📊 User status:', {
@@ -183,20 +157,20 @@
             if (isFreeUser && isFirstTime) {
                 // SCENARIO 1: FREE TRIAL - First time user gets one FREE session
                 console.log('🎁 FREE TRIAL: First-time free user - showing FREE modal');
-                showFreeTrialModal();
+                window.showFreeTrialModal();
             } else if (isFreeUser && !isFirstTime) {
                 // SCENARIO 2: UPGRADE REQUIRED - Free user who already used their free session
                 console.log('⭐ UPGRADE REQUIRED: Free user already used their free trial');
-                showUpgradeRequiredModal();
+                window.showUpgradeRequiredModal();
             } else {
                 // SCENARIO 3: PAID USER - Normal credit deduction
                 console.log('💳 PAID USER: Showing credit confirmation modal');
-                showPaidUserModal(creditCost);
+                window.showPaidUserModal(creditCost);
             }
         };
         
         // SCENARIO 1: FREE TRIAL modal (green, exciting, first-time only)
-        function showFreeTrialModal() {
+        window.showFreeTrialModal = function() {
             const modal = document.createElement('div');
             modal.id = 'coach-david-confirmation-modal';
             modal.className = 'fixed inset-0 bg-black bg-opacity-95 flex items-center justify-center z-50 p-4';
@@ -255,7 +229,7 @@
         }
         
         // SCENARIO 2: UPGRADE REQUIRED modal (for free users who already used their trial)
-        function showUpgradeRequiredModal() {
+        window.showUpgradeRequiredModal = function() {
             const modal = document.createElement('div');
             modal.id = 'coach-david-confirmation-modal';
             modal.className = 'fixed inset-0 bg-black bg-opacity-95 flex items-center justify-center z-50 p-4';
@@ -303,8 +277,15 @@
                             <button onclick="closeCoachDavidConfirmation()" class="flex-1 bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-lg text-white transition-colors">
                                 Not Now
                             </button>
-                            <button onclick="window.location.href='#pricing'; closeCoachDavidConfirmation();" class="flex-1 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 px-4 py-2 rounded-lg text-white font-bold transition-colors">
+                            <button onclick="window.navigateToUpgrade();" class="flex-1 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 px-4 py-2 rounded-lg text-white font-bold transition-colors">
                                 ⭐ Upgrade Now
+                            </button>
+                        </div>
+                        
+                        <!-- TESTING ONLY: Reset button -->
+                        <div class="mt-3 pt-3 border-t border-slate-700">
+                            <button onclick="window.forceResetCoachDavid();" class="w-full bg-red-900/50 hover:bg-red-800/50 px-4 py-2 rounded-lg text-red-300 text-sm transition-colors border border-red-700/50">
+                                🔄 Reset Free Trial (Testing Only)
                             </button>
                         </div>
                     </div>
@@ -316,7 +297,7 @@
         }
         
         // SCENARIO 3: PAID USER modal (normal credit deduction)
-        function showPaidUserModal(creditCost) {
+        window.showPaidUserModal = function(creditCost) {
             const modal = document.createElement('div');
             modal.id = 'coach-david-confirmation-modal';
             modal.className = 'fixed inset-0 bg-black bg-opacity-95 flex items-center justify-center z-50 p-4';
@@ -386,28 +367,122 @@
             }, 4000);
         }
         
-        // ADMIN: Reset free trial (for testing or if user had issues)
+        // ADMIN: Reset free trial (for testing ONLY - use in console)
         window.resetCoachDavidFreeTrial = function() {
             console.log('🔄 ADMIN: Resetting Coach David free trial...');
+            
+            // Check current status
+            const before = {
+                firstUse: localStorage.getItem('coachDavidFirstUse'),
+                credits: localStorage.getItem('coachDavidTrialCredits'),
+                startTime: localStorage.getItem('coachDavidTrialStartTime'),
+                completed: localStorage.getItem('coachDavidTrialCompleted')
+            };
+            console.log('📊 BEFORE reset:', before);
+            
+            // Remove all trial flags
             localStorage.removeItem('coachDavidFirstUse');
             localStorage.removeItem('coachDavidTrialCredits');
-            console.log('✅ Free trial reset - user can use free trial again');
-            alert('✅ Coach David free trial has been reset!\n\nYou can now use the free trial again.');
+            localStorage.removeItem('coachDavidTrialStartTime');
+            localStorage.removeItem('coachDavidTrialCompleted');
+            
+            // Verify removal
+            const after = {
+                firstUse: localStorage.getItem('coachDavidFirstUse'),
+                credits: localStorage.getItem('coachDavidTrialCredits'),
+                startTime: localStorage.getItem('coachDavidTrialStartTime'),
+                completed: localStorage.getItem('coachDavidTrialCompleted')
+            };
+            console.log('📊 AFTER reset:', after);
+            
+            // Confirm all are null
+            const allCleared = Object.values(after).every(val => val === null);
+            if (allCleared) {
+                console.log('✅ All free trial flags successfully removed');
+                alert('✅ Coach David free trial reset successful!\n\nAll flags cleared:\n- coachDavidFirstUse\n- coachDavidTrialStartTime\n- coachDavidTrialCompleted\n\nPage will reload...');
+            } else {
+                console.error('❌ Some flags were not cleared:', after);
+                alert('⚠️ Reset incomplete. Check console for details.');
+            }
+            
+            // Reload page
+            setTimeout(() => {
+                location.reload();
+            }, 1000);
+        };
+        
+        // ADMIN: Check free trial status
+        window.checkFreeTrial = function() {
+            const status = {
+                hasUsedTrial: localStorage.getItem('coachDavidFirstUse'),
+                startTime: localStorage.getItem('coachDavidTrialStartTime'),
+                completed: localStorage.getItem('coachDavidTrialCompleted'),
+                credits: localStorage.getItem('coachDavidTrialCredits')
+            };
+            console.log('📊 Free Trial Status:', status);
+            if (status.hasUsedTrial) {
+                console.log('🔒 Trial used on:', new Date(parseInt(status.startTime)).toLocaleString());
+            } else {
+                console.log('✅ Trial available - user has not used it yet');
+            }
+            return status;
+        };
+        
+        // NUCLEAR OPTION: Force clear ALL Coach David related data
+        window.forceResetCoachDavid = function() {
+            console.log('💣 NUCLEAR RESET: Clearing ALL Coach David data...');
+            
+            // Get all localStorage keys
+            const allKeys = Object.keys(localStorage);
+            const coachDavidKeys = allKeys.filter(key => 
+                key.toLowerCase().includes('coach') || 
+                key.toLowerCase().includes('david') ||
+                key.toLowerCase().includes('trial')
+            );
+            
+            console.log('🔍 Found Coach David keys:', coachDavidKeys);
+            
+            // Remove each one
+            coachDavidKeys.forEach(key => {
+                localStorage.removeItem(key);
+                console.log('  ✅ Removed:', key);
+            });
+            
+            // Also manually remove the known keys
+            const knownKeys = [
+                'coachDavidFirstUse',
+                'coachDavidTrialCredits', 
+                'coachDavidTrialStartTime',
+                'coachDavidTrialCompleted'
+            ];
+            
+            knownKeys.forEach(key => {
+                localStorage.removeItem(key);
+            });
+            
+            console.log('💥 NUCLEAR RESET COMPLETE - All Coach David data cleared');
+            alert('💥 Nuclear Reset Complete!\n\nAll Coach David data has been cleared.\n\nPage will reload in 2 seconds...');
+            
+            setTimeout(() => {
+                location.reload();
+            }, 2000);
         };
         
         // Start FREE TRIAL session (first-time free users only)
         window.startFreeTrialSession = function() {
-            console.log('🎁 Starting FREE TRIAL session - marking as used...');
+            console.log('🎁 Starting FREE TRIAL session - PERMANENT marking...');
             
-            // Get current credits to track if session actually completes
-            const userPlan = JSON.parse(localStorage.getItem('userPlan') || '{"credits": 8, "plan": "free"}');
-            const currentCredits = userPlan.credits;
+            // Get current time for permanent record
+            const startTime = Date.now();
             
-            // Mark free trial as used BEFORE starting session
+            // Mark free trial as used - PERMANENT, NO RESETS
             localStorage.setItem('coachDavidFirstUse', 'true');
-            localStorage.setItem('coachDavidTrialCredits', currentCredits.toString());
-            localStorage.setItem('coachDavidTrialStartTime', Date.now().toString());
-            console.log(`✅ Free trial flag set - credits at start: ${currentCredits}`);
+            localStorage.setItem('coachDavidTrialStartTime', startTime.toString());
+            localStorage.setItem('coachDavidTrialCompleted', 'true'); // PERMANENT marker
+            
+            console.log('🔒 FREE TRIAL PERMANENTLY MARKED AS USED');
+            console.log(`   Timestamp: ${new Date(startTime).toLocaleString()}`);
+            console.log('   This flag will NEVER reset (even on refresh)');
             
             // Close confirmation modal
             closeCoachDavidConfirmation();
@@ -444,6 +519,36 @@
                 modal.remove();
                 console.log('✅ Coach David confirmation closed safely - credits preserved!');
             }
+        };
+        
+        // Navigate to pricing section (for upgrade button)
+        window.navigateToUpgrade = function() {
+            console.log('⭐ UPGRADE: Navigating to pricing section...');
+            
+            // Close modal first
+            window.closeCoachDavidConfirmation();
+            
+            // Wait for modal to close, then navigate to pricing section
+            setTimeout(() => {
+                console.log('📍 Switching to pricing section');
+                
+                // Use the app's navigation system to go to pricing section
+                if (typeof window.navigateToSection === 'function') {
+                    window.navigateToSection('pricing');
+                    console.log('✅ Navigated to pricing section');
+                } else {
+                    console.error('❌ navigateToSection function not found');
+                    // Fallback: try direct navigation
+                    const pricingSection = document.getElementById('pricing-section');
+                    if (pricingSection) {
+                        // Hide all sections
+                        document.querySelectorAll('.section-content').forEach(s => s.classList.remove('active'));
+                        // Show pricing
+                        pricingSection.classList.add('active');
+                        console.log('✅ Fallback navigation successful');
+                    }
+                }
+            }, 300);
         };
         
         // Confirm and start session (PAID USERS ONLY - deducts credits)
@@ -658,7 +763,7 @@
                                     class="flex-1 bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-lg text-white transition-colors">
                                 Use Desktop Instead
                             </button>
-                            <button onclick="this.closest('.fixed').remove(); window.navigateToSection('pricing')" 
+                            <button onclick="this.closest('.fixed').remove(); setTimeout(() => { window.location.href='#pricing'; document.getElementById('pricing')?.scrollIntoView({behavior: 'smooth'}); }, 100);" 
                                     class="flex-1 bg-orange-600 hover:bg-orange-700 px-4 py-2 rounded-lg text-white font-semibold transition-colors">
                                 Upgrade for Mobile
                             </button>
@@ -907,7 +1012,7 @@
                                         class="flex-1 bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-lg text-white transition-colors">
                                     Stay Free (One Device)
                                 </button>
-                                <button onclick="this.closest('.fixed').remove(); window.navigateToSection('pricing')" 
+                                <button onclick="this.closest('.fixed').remove(); setTimeout(() => { window.location.href='#pricing'; document.getElementById('pricing')?.scrollIntoView({behavior: 'smooth'}); }, 100);" 
                                         class="flex-1 bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-lg text-white font-semibold transition-colors">
                                     Upgrade for Sync
                                 </button>
@@ -1031,7 +1136,7 @@
                                     class="flex-1 bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-lg text-white transition-colors">
                                 Stay with 1
                             </button>
-                            <button onclick="this.closest('.fixed').remove(); window.navigateToSection('pricing')" 
+                            <button onclick="this.closest('.fixed').remove(); setTimeout(() => { window.location.href='#pricing'; document.getElementById('pricing')?.scrollIntoView({behavior: 'smooth'}); }, 100);" 
                                     class="flex-1 bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-lg text-white font-semibold transition-colors">
                                 Upgrade for More
                             </button>
@@ -3602,7 +3707,7 @@
             startCoachSession(coachName);
         }
         
-        function bookVoiceCoachSession(coachName, creditCost) {
+        window.bookVoiceCoachSession = function(coachName, creditCost) {
             console.log(`🎙️ Booking voice session with Coach ${coachName}`);
             
             // Legal documents now available via footer links - no blocking required
@@ -3646,7 +3751,7 @@
             // Credits will be deducted when user clicks "Connect" inside the modal
             if (coachName === 'david') {
                 console.log('🎙️ Showing Coach David confirmation modal (credits not deducted yet)...');
-                showCoachDavidConfirmationModal(creditCost);
+                window.showCoachDavidConfirmationModal(creditCost);
             } else {
                 // For other coaches, deduct credits and start session (original behavior)
                 const success = deductCredits(creditCost, `Voice Coach ${coachName} Session`);
@@ -5493,7 +5598,7 @@
                                 <button onclick="this.closest('.fixed').remove()" class="flex-1 bg-slate-600 hover:bg-slate-500 px-4 py-2 rounded-lg text-white transition-colors">
                                     Maybe Later
                                 </button>
-                                <button onclick="this.closest('.fixed').remove(); window.navigateToSection('pricing')" class="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 px-4 py-2 rounded-lg text-white font-medium transition-all">
+                                <button onclick="this.closest('.fixed').remove(); setTimeout(() => { window.location.href='#pricing'; document.getElementById('pricing')?.scrollIntoView({behavior: 'smooth'}); }, 100);" class="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 px-4 py-2 rounded-lg text-white font-medium transition-all">
                                     🎆 Upgrade Now
                                 </button>
                             </div>
@@ -6577,12 +6682,10 @@
                 }
             }, 1000);
             
-            // 🧪 TESTING MODE: Auto-reset free trial on every page load
-            localStorage.removeItem('coachDavidFirstUse');
-            localStorage.removeItem('coachDavidTrialCredits');
-            localStorage.removeItem('coachDavidTrialStartTime');
-            localStorage.removeItem('coachDavidTrialCompleted');
-            console.log('🔄 FREE TRIAL AUTO-RESET FOR TESTING - Unlimited Coach David access');
+            // ✅ PRODUCTION MODE: Free trial is ONE-TIME ONLY
+            // Trial flags are NEVER reset automatically
+            // To test, use console: window.resetCoachDavidFreeTrial()
+            console.log('✅ FREE TRIAL PRODUCTION MODE - One-time use only');
         });
         // NOTE: mediaRecorder variable is shared with Coach David implementation above
         
@@ -13518,7 +13621,7 @@
         // Functions will be assigned to window at end of script
         window.createDemoAssessmentData = createDemoAssessmentData;
         window.ensureTestCredits = ensureTestCredits;
-        window.bookVoiceCoachSession = bookVoiceCoachSession;
+        // REMOVED: Duplicate assignment that overwrites function
         window.requireLegalCompliance = checkLegalCompliance;
         window.acceptLegalTerms = acceptLegalTerms;
         
@@ -13734,7 +13837,7 @@
         window.refreshResearchDatabase = refreshResearchDatabase;
         window.loadResearchCategory = loadResearchCategory;
         window.bookCoachSession = bookCoachSession;
-        window.bookVoiceCoachSession = bookVoiceCoachSession;
+        // REMOVED: Duplicate assignment that overwrites function
         window.openNutritionCalculator = openNutritionCalculator;
         window.showCreditTopUpModal = showCreditTopUpModal;
         window.cleanCorruptedLocalStorage = cleanCorruptedLocalStorage;
@@ -14051,6 +14154,7 @@
             background: rgba(99, 102, 241, 0.8);
         }
     </style>
+
 
 </body>
 </html>
