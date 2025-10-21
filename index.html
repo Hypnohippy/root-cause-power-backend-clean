@@ -11632,92 +11632,44 @@
             const modal = document.createElement('div');
             modal.className = 'fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50';
             modal.innerHTML = `
-                <div class="bg-slate-800 rounded-lg shadow-2xl max-w-2xl w-full mx-4 border border-slate-600 max-h-[85vh] flex flex-col relative">
+                <div class="bg-slate-800 rounded-lg shadow-2xl max-w-md w-full mx-4 p-6 border border-slate-600 relative">
                     <!-- X Close Button -->
                     <button id="payment-modal-close" class="absolute top-2 right-2 text-white hover:text-red-400 text-4xl font-bold z-50 leading-none transition-colors bg-slate-900 rounded-full" 
                             style="width: 48px; height: 48px; padding: 0; display: flex; align-items: center; justify-content: center;">
                         ×
                     </button>
                     
-                    <!-- Content Wrapper with Scroll -->
-                    <div class="overflow-y-auto p-8 flex-1">
-                    <!-- Header -->
-                    <div class="text-center mb-8">
-                        <div class="text-4xl mb-4">🎯</div>
-                        <h3 class="text-3xl font-bold text-white mb-2">Enhanced Payment Experience</h3>
-                        <p class="text-slate-400">Streamlined checkout with progress tracking</p>
-                    </div>
-                    
-                    <!-- Plan Details -->
-                    <div class="bg-slate-700 rounded-lg p-6 mb-8">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <h4 class="text-xl font-bold text-white mb-1">${planName}</h4>
-                                <p class="text-slate-300">${price}</p>
-                            </div>
-                            <div class="text-2xl">💎</div>
-                        </div>
-                    </div>
-                    
-                    <!-- Progress Steps -->
-                    <div class="mb-8">
-                        <div class="flex items-center justify-between mb-6">
-                            <div class="flex flex-col items-center">
-                                <div id="step-1" class="step-indicator step-active w-12 h-12 rounded-full flex items-center justify-center text-white font-bold">1</div>
-                                <span class="text-xs text-slate-400 mt-2">Start</span>
-                            </div>
-                            <div id="progress-1" class="w-16 h-1 bg-slate-600 rounded progress-bar"></div>
-                            <div class="flex flex-col items-center">
-                                <div id="step-2" class="step-indicator w-12 h-12 rounded-full bg-slate-600 flex items-center justify-center text-white font-bold">2</div>
-                                <span class="text-xs text-slate-400 mt-2">Checkout</span>
-                            </div>
-                            <div id="progress-2" class="w-16 h-1 bg-slate-600 rounded progress-bar"></div>
-                            <div class="flex flex-col items-center">
-                                <div id="step-3" class="step-indicator w-12 h-12 rounded-full bg-slate-600 flex items-center justify-center text-white font-bold">3</div>
-                                <span class="text-xs text-slate-400 mt-2">Complete</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Current Step Display -->
-                    <div id="step-content" class="text-center">
-                        <div class="payment-pulse w-20 h-20 bg-green-600 rounded-full mx-auto mb-6 flex items-center justify-center">
-                            <i class="fas fa-credit-card text-white text-2xl"></i>
-                        </div>
-                        <h4 class="text-xl font-bold text-white mb-2">Ready to Continue</h4>
-                        <p class="text-slate-400 mb-6">Click below to proceed to secure Stripe checkout</p>
+                    <!-- Simple Centered Content -->
+                    <div class="text-center py-4">
+                        <div class="text-4xl mb-4">💳</div>
+                        <h3 class="text-2xl font-bold text-white mb-2">Upgrade Your Plan</h3>
+                        <p class="text-slate-400 mb-4">Proceed to secure checkout</p>
                         
-                        <!-- GDPR Email Consent -->
-                        <div class="bg-blue-900/20 border border-blue-500/30 rounded-lg p-4 mb-6">
-                            <label class="flex items-start space-x-3 cursor-pointer">
-                                <input type="checkbox" id="email-consent-checkbox" class="mt-1 w-5 h-5 text-blue-500">
-                                <span class="text-slate-300 text-sm">
-                                    <strong class="text-blue-400">Optional:</strong> I consent to receive email communications about platform updates, health tips, and promotional offers. You can unsubscribe at any time.
-                                    <div class="text-xs text-slate-400 mt-1">Required for GDPR compliance - this is separate from essential account notifications.</div>
-                                </span>
-                            </label>
+                        <!-- Plan Details -->
+                        <div class="bg-slate-700 rounded-lg p-4 mb-6">
+                            <h4 class="text-lg font-bold text-white">${planName}</h4>
+                            <p class="text-green-400 text-xl font-bold mt-1">${price}</p>
                         </div>
                         
-                        <div class="space-y-4 mb-6">
-                            <button onclick="proceedToStripeCheckout('${stripeUrl}', '${planName}')" 
-                                    class="w-full bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 px-8 py-4 rounded-lg text-white font-bold text-lg">
-                                <i class="fas fa-shield-alt mr-2"></i>
-                                Continue to Secure Checkout
-                            </button>
-                            
-                            <button onclick="openInNewTab('${stripeUrl}')" 
-                                    class="w-full bg-slate-600 hover:bg-slate-500 px-6 py-3 rounded-lg text-white">
-                                <i class="fas fa-external-link-alt mr-2"></i>
-                                Open in New Tab (Alternative)
-                            </button>
-                        </div>
+                        <!-- Main Checkout Button - CENTERED -->
+                        <button onclick="proceedToStripeCheckout('${stripeUrl}', '${planName}')" 
+                                class="w-full bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 px-8 py-4 rounded-lg text-white font-bold text-lg mb-3 shadow-lg">
+                            <i class="fas fa-shield-alt mr-2"></i>
+                            Continue to Secure Checkout
+                        </button>
                         
-                        <div class="text-center text-xs text-slate-400 pb-4">
-                            <i class="fas fa-lock mr-2"></i>
-                            Your payment is secured by Stripe's industry-leading encryption
+                        <!-- Alternative Option -->
+                        <button onclick="openInNewTab('${stripeUrl}')" 
+                                class="w-full bg-slate-600 hover:bg-slate-500 px-6 py-3 rounded-lg text-white text-sm">
+                            Open in New Tab
+                        </button>
+                        
+                        <!-- Security Notice -->
+                        <div class="mt-4 text-xs text-slate-400">
+                            <i class="fas fa-lock mr-1"></i>
+                            Secured by Stripe encryption
                         </div>
                     </div>
-                </div>
                 </div>
             `;
             
