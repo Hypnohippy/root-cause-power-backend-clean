@@ -12,6 +12,7 @@
 
 
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -11688,44 +11689,26 @@
             }
         }
 
-        // Proceed to Stripe Checkout with Enhanced Tracking
+        // Proceed to Stripe Checkout - SIMPLIFIED
         function proceedToStripeCheckout(stripeUrl, planName) {
-            console.log('🚀 Proceeding to Stripe checkout...');
+            console.log('🚀 Proceeding to Stripe checkout:', stripeUrl);
             
-            // Capture GDPR email consent
-            const emailConsentCheckbox = document.getElementById('email-consent-checkbox');
-            const emailConsent = emailConsentCheckbox ? emailConsentCheckbox.checked : false;
-            
-            // Store email consent preference
-            localStorage.setItem('emailConsentGiven', emailConsent.toString());
-            localStorage.setItem('emailConsentDate', new Date().toISOString());
-            
-            console.log(`📧 Email consent: ${emailConsent ? 'Given' : 'Not given'}`);
-            
-            // Update progress to step 2
-            updatePaymentProgress(2, 'Opening Stripe Checkout...');
-            
-            // Open Stripe in new tab
-            // Add referral code to Stripe URL if exists
+            // Add referral code if exists
             const referralCode = localStorage.getItem('referralCode');
             if (referralCode) {
                 const separator = stripeUrl.includes('?') ? '&' : '?';
                 stripeUrl = stripeUrl + separator + 'client_reference_id=' + referralCode;
-                console.log('✅ Added referral to checkout: ' + referralCode);
+                console.log('✅ Added referral code:', referralCode);
             }
             
-            paymentWindow = window.open(stripeUrl, 'stripe-checkout', 'width=800,height=700,scrollbars=yes,resizable=yes');
-            
-            if (paymentWindow) {
-                // Update to step 3 - monitoring
-                setTimeout(() => {
-                    updatePaymentProgress(3, 'Complete your payment in the Stripe window');
-                    startPaymentMonitoring(planName);
-                }, 1000);
-            } else {
-                // Popup blocked
-                updatePaymentProgress(1, 'Popup blocked - please allow popups and try again');
+            // Close modal and redirect
+            if (currentPaymentModal) {
+                currentPaymentModal.remove();
+                document.body.style.overflow = 'auto';
             }
+            
+            // Navigate to Stripe in same tab
+            window.location.href = stripeUrl;
         }
 
         // Open in new tab alternative
