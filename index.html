@@ -13,6 +13,7 @@
 
 
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -3683,9 +3684,7 @@
         function bookCoachSession(coachName, creditCost) {
             console.log(`🤖 Booking session with Coach ${coachName}`);
             
-            // Legal documents now available via footer links - no blocking required
-            
-            // ENFORCE CREDIT LIMITS - No more demo mode
+            // CHECK: Ensure user has enough credits BEFORE opening interface
             const userPlan = JSON.parse(localStorage.getItem('userPlan') || '{"credits": 8, "plan": "free"}');
             console.log(`💳 Current credits: ${userPlan.credits}, required: ${creditCost}`);
             
@@ -3696,18 +3695,13 @@
                     `You need ${creditCost} credits to chat with Coach ${coachName}. You currently have ${userPlan.credits} credits.`,
                     'coach_session'
                 );
-                return; // BLOCK ACCESS - no more demo mode
-            }
-            
-            // Deduct credits before starting session
-            const success = deductCredits(creditCost, `Coach ${coachName} Session`);
-            if (!success) {
-                console.log('❌ Credit deduction failed');
                 return;
             }
             
-            console.log(`✅ Credits deducted - starting Coach ${coachName} session`);
-            startCoachSession(coachName);
+            console.log(`✅ Credits available - opening interface (will deduct after interface opens)`);
+            
+            // OPEN INTERFACE FIRST, then deduct credits in startCoachSession
+            startCoachSession(coachName, creditCost);
         }
         
         window.bookVoiceCoachSession = function(coachName, creditCost) {
@@ -3767,7 +3761,18 @@
             }
         }
         
-        function startCoachSession(coachName) {
+        function startCoachSession(coachName, creditCost = 0) {
+            // Deduct credits AFTER interface opens
+            if (creditCost > 0) {
+                setTimeout(() => {
+                    const success = deductCredits(creditCost, `Coach ${coachName} Session`);
+                    if (success) {
+                        console.log(`✅ ${creditCost} credits deducted after interface opened`);
+                    } else {
+                        console.error('❌ Credit deduction failed after opening interface');
+                    }
+                }, 500); // Delay to ensure interface is visible
+            }
             showTextChatInterface(coachName);
         }
         
@@ -6732,105 +6737,124 @@
         function speakText(text) {
             if ('speechSynthesis' in window) {
                 console.log('🔊 speakText called with:', text.substring(0, 50) + '...');
+                console.log('📏 Text length:', text.length, 'characters');
                 
-                // Resume AudioContext if suspended (mobile requirement)
-                if (window.mobileAudioContext && window.mobileAudioContext.state === 'suspended') {
-                    console.log('🔊 Resuming suspended AudioContext...');
-                    window.mobileAudioContext.resume().then(() => {
-                        console.log('✅ AudioContext resumed for speech');
-                    }).catch(err => {
-                        console.error('❌ Failed to resume AudioContext:', err);
-                    });
-                }
-                
-                // Cancel any ongoing speech
+                // Cancel any ongoing speech FIRST
                 speechSynthesis.cancel();
                 
-                // Mobile-optimized speech settings
-                const utterance = new SpeechSynthesisUtterance(text);
-                utterance.rate = 0.9;    // Slightly faster for mobile
-                utterance.pitch = 1.0;
-                utterance.volume = 1.0;  // Full volume for mobile
+                // CHUNKING FIX: Browser has ~160 char limit before clipping
+                const MAX_CHUNK_LENGTH = 160;
                 
-                // Mobile-specific voice handling
-                const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-                console.log('📱 Is mobile device?', isMobile);
+                // Split by sentences first
+                let sentences = text.match(/[^.!?]+[.!?]+/g) || [text];
                 
-                if (isMobile) {
-                    // Wait for voices to load on mobile
-                    const speakWhenReady = () => {
-                        const voices = speechSynthesis.getVoices();
-                        console.log('🎤 Available voices:', voices.length);
-                        
-                        if (voices.length === 0) {
-                            // Voices not loaded yet, try again
-                            console.log('⏳ Voices not loaded, retrying...');
-                            setTimeout(speakWhenReady, 100);
-                            return;
-                        }
-                        
-                        // Mobile voice preferences
-                        const mobileVoice = voices.find(voice => 
-                            voice.name.includes('Google') ||
-                            voice.name.includes('Enhanced') ||
-                            (voice.lang.startsWith('en') && voice.localService)
-                        ) || voices[0];
-                        
-                        if (mobileVoice) {
-                            utterance.voice = mobileVoice;
-                            console.log('✅ Using mobile voice:', mobileVoice.name, '- Lang:', mobileVoice.lang);
-                        } else {
-                            console.warn('⚠️ No suitable voice found, using default');
-                        }
-                        
-                        // Mobile-specific events with detailed logging
-                        utterance.onstart = () => {
-                            console.log('✅ Speech STARTED playing');
-                            updateVoiceStatus('🔊 Coach David speaking...');
-                        };
-                        
-                        utterance.onend = () => {
-                            console.log('✅ Speech ENDED successfully');
-                            updateVoiceStatus('🎤 Your turn - speak now');
-                            // Auto-restart listening on mobile after speech
-                            setTimeout(() => {
-                                if (window.demoRecognition && isDemoVoiceMode) {
-                                    try {
-                                        console.log('🔄 Restarting recognition after speech...');
-                                        window.demoRecognition.start();
-                                        console.log('✅ Recognition restarted successfully');
-                                    } catch (error) {
-                                        console.error('❌ Recognition restart failed:', error.message);
-                                    }
-                                }
-                            }, 500);
-                        };
-                        
-                        utterance.onerror = (event) => {
-                            console.error('❌ Mobile speech error:', event.error, '- Message:', event.message);
-                            updateVoiceStatus('❌ Audio error - please check volume');
-                        };
-                        
-                        speechSynthesis.speak(utterance);
-                    };
-                    
-                    speakWhenReady();
-                    
-                } else {
-                    // Desktop version
+                // Further split any long sentences
+                let chunks = [];
+                sentences.forEach(sentence => {
+                    sentence = sentence.trim();
+                    if (sentence.length <= MAX_CHUNK_LENGTH) {
+                        chunks.push(sentence);
+                    } else {
+                        // Split by commas
+                        const parts = sentence.split(',');
+                        let currentChunk = '';
+                        parts.forEach((part, idx) => {
+                            const piece = part.trim() + (idx < parts.length - 1 ? ',' : '');
+                            if ((currentChunk + ' ' + piece).length <= MAX_CHUNK_LENGTH) {
+                                currentChunk += (currentChunk ? ' ' : '') + piece;
+                            } else {
+                                if (currentChunk) chunks.push(currentChunk);
+                                currentChunk = piece;
+                            }
+                        });
+                        if (currentChunk) chunks.push(currentChunk);
+                    }
+                });
+                
+                console.log('📝 Split into', chunks.length, 'chunks (max 160 chars each)');
+                
+                let currentIndex = 0;
+                
+                // SYNCHRONOUS voice getter (no async for mobile compatibility)
+                const getVoices = () => {
                     const voices = speechSynthesis.getVoices();
-                    const preferredVoice = voices.find(voice => 
-                        voice.name.includes('David') || 
-                        voice.name.includes('Google') || 
-                        voice.name.includes('Enhanced')
-                    ) || voices[0];
+                    return voices;
+                };
+                
+                let voices = getVoices();
+                
+                // Set up voice listener if not loaded yet
+                if (voices.length === 0) {
+                    speechSynthesis.addEventListener('voiceschanged', () => {
+                        voices = getVoices();
+                    }, { once: true });
+                }
+                
+                const speakNextChunk = () => {
+                    if (currentIndex >= chunks.length) {
+                        console.log('✅ All chunks spoken');
+                        updateVoiceStatus('🎤 Your turn - speak now');
+                        // Auto-restart listening after ALL chunks
+                        setTimeout(() => {
+                            if (window.demoRecognition && isDemoVoiceMode) {
+                                try {
+                                    console.log('🔄 Restarting recognition after speech...');
+                                    window.demoRecognition.start();
+                                    console.log('✅ Recognition restarted successfully');
+                                } catch (error) {
+                                    console.error('❌ Recognition restart failed:', error.message);
+                                }
+                            }
+                        }, 500);
+                        return;
+                    }
+                    
+                    const chunk = chunks[currentIndex].trim();
+                    console.log(`🔊 Speaking chunk ${currentIndex + 1}/${chunks.length} (${chunk.length} chars)`);
+                    
+                    const utterance = new SpeechSynthesisUtterance(chunk);
+                    utterance.rate = 0.9;
+                    utterance.pitch = 1.0;
+                    utterance.volume = 1.0;
+                    
+                    // Get best voice
+                    const currentVoices = getVoices();
+                    const preferredVoice = currentVoices.find(voice => 
+                        (voice.lang.startsWith('en-US') || voice.lang.startsWith('en-GB')) &&
+                        (voice.name.includes('Google') || 
+                         voice.name.includes('Enhanced') ||
+                         voice.name.includes('Premium'))
+                    ) || currentVoices.find(voice => voice.lang.startsWith('en')) || currentVoices[0];
                     
                     if (preferredVoice) {
                         utterance.voice = preferredVoice;
+                        console.log('🎤 Using voice:', preferredVoice.name);
                     }
                     
+                    utterance.onstart = () => {
+                        console.log(`✅ Chunk ${currentIndex + 1} STARTED`);
+                        updateVoiceStatus('🔊 Coach David speaking...');
+                    };
+                    
+                    utterance.onend = () => {
+                        console.log(`✅ Chunk ${currentIndex + 1} ENDED`);
+                        currentIndex++;
+                        // Small pause between chunks
+                        setTimeout(speakNextChunk, 50);
+                    };
+                    
+                    utterance.onerror = (event) => {
+                        console.error(`❌ Chunk ${currentIndex + 1} error:`, event.error);
+                        currentIndex++;
+                        setTimeout(speakNextChunk, 50);
+                    };
+                    
                     speechSynthesis.speak(utterance);
-                }
+                };
+                
+                // Start speaking
+                speakNextChunk();
+                
             } else {
                 console.warn('⚠️ Speech synthesis not available');
                 updateVoiceStatus('💬 Text mode only (no audio support)');
@@ -8057,16 +8081,6 @@
             }
             
             const userPlan = JSON.parse(localStorage.getItem('userPlan') || '{"credits": 8, "plan": "free"}');
-            
-            // NEW: Free users can only do ONE assessment total
-            if (userPlan.plan === 'free') {
-                const completedAssessments = Object.values(assessmentData).filter(data => data.completed).length;
-                if (completedAssessments >= 1) {
-                    console.log('🚫 FREE USER: Already completed 1 assessment - blocking further assessments');
-                    showAssessmentUpgradeModal();
-                    return;
-                }
-            }
             
             // CHECK IF ASSESSMENT PACKAGE HAS BEEN PAID FOR (3 credits for ENTIRE assessment once)
             const assessmentProgress = JSON.parse(localStorage.getItem('assessmentProgress') || '{}');
