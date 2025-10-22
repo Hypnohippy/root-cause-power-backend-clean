@@ -6708,105 +6708,131 @@
         function speakText(text) {
             if ('speechSynthesis' in window) {
                 console.log('🔊 speakText called with:', text.substring(0, 50) + '...');
+                console.log('📏 Text length:', text.length, 'characters');
                 
-                // Resume AudioContext if suspended (mobile requirement)
-                if (window.mobileAudioContext && window.mobileAudioContext.state === 'suspended') {
-                    console.log('🔊 Resuming suspended AudioContext...');
-                    window.mobileAudioContext.resume().then(() => {
-                        console.log('✅ AudioContext resumed for speech');
-                    }).catch(err => {
-                        console.error('❌ Failed to resume AudioContext:', err);
-                    });
-                }
-                
-                // Cancel any ongoing speech
+                // Cancel any ongoing speech FIRST
                 speechSynthesis.cancel();
                 
-                // Mobile-optimized speech settings
-                const utterance = new SpeechSynthesisUtterance(text);
-                utterance.rate = 0.9;    // Slightly faster for mobile
-                utterance.pitch = 1.0;
-                utterance.volume = 1.0;  // Full volume for mobile
+                // IMPROVED CHUNKING: Combine sentence AND character-based splitting
+                // speechSynthesis has ~160 char HARD LIMIT on some browsers
+                const MAX_CHUNK_LENGTH = 160;
                 
-                // Mobile-specific voice handling
-                const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-                console.log('📱 Is mobile device?', isMobile);
+                // First split by sentences
+                let sentences = text.match(/[^.!?]+[.!?]+/g) || [text];
                 
-                if (isMobile) {
-                    // Wait for voices to load on mobile
-                    const speakWhenReady = () => {
+                // Then further split any sentence longer than MAX_CHUNK_LENGTH
+                let chunks = [];
+                sentences.forEach(sentence => {
+                    sentence = sentence.trim();
+                    if (sentence.length <= MAX_CHUNK_LENGTH) {
+                        chunks.push(sentence);
+                    } else {
+                        // Split long sentence by commas, then by character limit
+                        const parts = sentence.split(',');
+                        let currentChunk = '';
+                        parts.forEach((part, idx) => {
+                            const piece = part.trim() + (idx < parts.length - 1 ? ',' : '');
+                            if ((currentChunk + ' ' + piece).length <= MAX_CHUNK_LENGTH) {
+                                currentChunk += (currentChunk ? ' ' : '') + piece;
+                            } else {
+                                if (currentChunk) chunks.push(currentChunk);
+                                currentChunk = piece;
+                            }
+                        });
+                        if (currentChunk) chunks.push(currentChunk);
+                    }
+                });
+                
+                console.log('📝 Split into', chunks.length, 'chunks (max 160 chars each)');
+                chunks.forEach((chunk, i) => console.log(`  Chunk ${i+1}: ${chunk.length} chars`));
+                
+                let currentIndex = 0;
+                
+                // Wait for voices to load before speaking
+                const waitForVoices = () => {
+                    return new Promise((resolve) => {
                         const voices = speechSynthesis.getVoices();
-                        console.log('🎤 Available voices:', voices.length);
-                        
-                        if (voices.length === 0) {
-                            // Voices not loaded yet, try again
-                            console.log('⏳ Voices not loaded, retrying...');
-                            setTimeout(speakWhenReady, 100);
-                            return;
-                        }
-                        
-                        // Mobile voice preferences
-                        const mobileVoice = voices.find(voice => 
-                            voice.name.includes('Google') ||
-                            voice.name.includes('Enhanced') ||
-                            (voice.lang.startsWith('en') && voice.localService)
-                        ) || voices[0];
-                        
-                        if (mobileVoice) {
-                            utterance.voice = mobileVoice;
-                            console.log('✅ Using mobile voice:', mobileVoice.name, '- Lang:', mobileVoice.lang);
+                        if (voices.length > 0) {
+                            resolve(voices);
                         } else {
-                            console.warn('⚠️ No suitable voice found, using default');
+                            speechSynthesis.addEventListener('voiceschanged', () => {
+                                resolve(speechSynthesis.getVoices());
+                            }, { once: true });
+                            // Fallback timeout
+                            setTimeout(() => resolve(speechSynthesis.getVoices()), 1000);
                         }
-                        
-                        // Mobile-specific events with detailed logging
-                        utterance.onstart = () => {
-                            console.log('✅ Speech STARTED playing');
-                            updateVoiceStatus('🔊 Coach David speaking...');
-                        };
-                        
-                        utterance.onend = () => {
-                            console.log('✅ Speech ENDED successfully');
-                            updateVoiceStatus('🎤 Your turn - speak now');
-                            // Auto-restart listening on mobile after speech
-                            setTimeout(() => {
-                                if (window.demoRecognition && isDemoVoiceMode) {
-                                    try {
-                                        console.log('🔄 Restarting recognition after speech...');
-                                        window.demoRecognition.start();
-                                        console.log('✅ Recognition restarted successfully');
-                                    } catch (error) {
-                                        console.error('❌ Recognition restart failed:', error.message);
-                                    }
+                    });
+                };
+                
+                const speakNextChunk = async () => {
+                    if (currentIndex >= chunks.length) {
+                        console.log('✅ All chunks spoken');
+                        updateVoiceStatus('🎤 Your turn - speak now');
+                        // Auto-restart listening after ALL chunks complete
+                        setTimeout(() => {
+                            if (window.demoRecognition && isDemoVoiceMode) {
+                                try {
+                                    console.log('🔄 Restarting recognition after speech...');
+                                    window.demoRecognition.start();
+                                    console.log('✅ Recognition restarted successfully');
+                                } catch (error) {
+                                    console.error('❌ Recognition restart failed:', error.message);
                                 }
-                            }, 500);
-                        };
-                        
-                        utterance.onerror = (event) => {
-                            console.error('❌ Mobile speech error:', event.error, '- Message:', event.message);
-                            updateVoiceStatus('❌ Audio error - please check volume');
-                        };
-                        
-                        speechSynthesis.speak(utterance);
-                    };
+                            }
+                        }, 500);
+                        return;
+                    }
                     
-                    speakWhenReady();
+                    const chunk = chunks[currentIndex].trim();
+                    console.log(`🔊 Speaking chunk ${currentIndex + 1}/${chunks.length} (${chunk.length} chars):`, chunk.substring(0, 50) + '...');
                     
-                } else {
-                    // Desktop version
-                    const voices = speechSynthesis.getVoices();
+                    const utterance = new SpeechSynthesisUtterance(chunk);
+                    utterance.rate = 0.9;     // Normal speed
+                    utterance.pitch = 1.0;
+                    utterance.volume = 1.0;
+                    
+                    // Get BEST voice available
+                    const voices = await waitForVoices();
                     const preferredVoice = voices.find(voice => 
-                        voice.name.includes('David') || 
-                        voice.name.includes('Google') || 
-                        voice.name.includes('Enhanced')
-                    ) || voices[0];
+                        (voice.lang.startsWith('en-US') || voice.lang.startsWith('en-GB')) &&
+                        (voice.name.includes('Google') || 
+                         voice.name.includes('Enhanced') ||
+                         voice.name.includes('Premium') ||
+                         voice.localService)
+                    ) || voices.find(voice => voice.lang.startsWith('en')) || voices[0];
                     
                     if (preferredVoice) {
                         utterance.voice = preferredVoice;
+                        console.log('🎤 Using voice:', preferredVoice.name, '- Lang:', preferredVoice.lang);
+                    } else {
+                        console.warn('⚠️ No voice selected, using browser default');
                     }
                     
+                    utterance.onstart = () => {
+                        console.log(`✅ Chunk ${currentIndex + 1} STARTED`);
+                        updateVoiceStatus('🔊 Coach David speaking...');
+                    };
+                    
+                    utterance.onend = () => {
+                        console.log(`✅ Chunk ${currentIndex + 1} ENDED successfully`);
+                        currentIndex++;
+                        // Tiny pause between chunks for smooth flow
+                        setTimeout(speakNextChunk, 50);
+                    };
+                    
+                    utterance.onerror = (event) => {
+                        console.error(`❌ Chunk ${currentIndex + 1} error:`, event.error, event.message);
+                        currentIndex++;
+                        // Continue to next chunk even on error
+                        setTimeout(speakNextChunk, 50);
+                    };
+                    
                     speechSynthesis.speak(utterance);
-                }
+                };
+                
+                // Start speaking chunks
+                speakNextChunk();
+                
             } else {
                 console.warn('⚠️ Speech synthesis not available');
                 updateVoiceStatus('💬 Text mode only (no audio support)');
