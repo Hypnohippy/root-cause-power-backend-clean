@@ -10,6 +10,9 @@
 
 
 
+
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -175,7 +178,7 @@
             modal.id = 'coach-david-confirmation-modal';
             modal.className = 'fixed inset-0 bg-black bg-opacity-95 flex items-center justify-center z-50 p-4';
             modal.innerHTML = `
-                <div class="bg-slate-900 rounded-2xl w-full max-w-md border border-green-500 shadow-2xl">
+                <div class="bg-slate-900 rounded-2xl w-full max-w-md border border-green-500 shadow-2xl max-h-[90vh] overflow-y-auto">
                     <div class="bg-gradient-to-r from-green-600 to-emerald-600 p-6 rounded-t-2xl">
                         <div class="flex justify-between items-center">
                             <div class="flex items-center">
@@ -234,7 +237,7 @@
             modal.id = 'coach-david-confirmation-modal';
             modal.className = 'fixed inset-0 bg-black bg-opacity-95 flex items-center justify-center z-50 p-4';
             modal.innerHTML = `
-                <div class="bg-slate-900 rounded-2xl w-full max-w-md border border-purple-500 shadow-2xl">
+                <div class="bg-slate-900 rounded-2xl w-full max-w-md border border-purple-500 shadow-2xl max-h-[90vh] overflow-y-auto">
                     <div class="bg-gradient-to-r from-purple-600 to-indigo-600 p-6 rounded-t-2xl">
                         <div class="flex justify-between items-center">
                             <div class="flex items-center">
@@ -281,6 +284,13 @@
                                 ⭐ Upgrade Now
                             </button>
                         </div>
+                        
+                        <!-- TESTING ONLY: Reset button -->
+                        <div class="mt-3 pt-3 border-t border-slate-700">
+                            <button onclick="window.forceResetCoachDavid();" class="w-full bg-red-900/50 hover:bg-red-800/50 px-4 py-2 rounded-lg text-red-300 text-sm transition-colors border border-red-700/50">
+                                🔄 Reset Free Trial (Testing Only)
+                            </button>
+                        </div>
                     </div>
                 </div>
             `;
@@ -295,7 +305,7 @@
             modal.id = 'coach-david-confirmation-modal';
             modal.className = 'fixed inset-0 bg-black bg-opacity-95 flex items-center justify-center z-50 p-4';
             modal.innerHTML = `
-                <div class="bg-slate-900 rounded-2xl w-full max-w-md border border-purple-500 shadow-2xl">
+                <div class="bg-slate-900 rounded-2xl w-full max-w-md border border-purple-500 shadow-2xl max-h-[90vh] overflow-y-auto">
                     <div class="brain-activity p-6 rounded-t-2xl">
                         <div class="flex justify-between items-center">
                             <div class="flex items-center">
@@ -587,7 +597,7 @@
             const modal = document.createElement('div');
             modal.className = 'fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4';
             modal.innerHTML = `
-                <div class="bg-slate-900 rounded-2xl w-full max-w-md border border-green-500 shadow-2xl">
+                <div class="bg-slate-900 rounded-2xl w-full max-w-md border border-green-500 shadow-2xl max-h-[90vh] overflow-y-auto">
                     <div class="bg-gradient-to-r from-green-600 to-emerald-600 p-6 rounded-t-2xl">
                         <div class="flex items-center">
                             <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mr-4">
@@ -718,7 +728,7 @@
             const modal = document.createElement('div');
             modal.className = 'fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4';
             modal.innerHTML = `
-                <div class="bg-slate-900 rounded-2xl w-full max-w-md border border-orange-500 shadow-2xl">
+                <div class="bg-slate-900 rounded-2xl w-full max-w-md border border-orange-500 shadow-2xl max-h-[90vh] overflow-y-auto">
                     <div class="bg-gradient-to-r from-orange-600 to-red-600 p-6 rounded-t-2xl">
                         <div class="flex items-center">
                             <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mr-4">
@@ -911,7 +921,7 @@
                 const modal = document.createElement('div');
                 modal.className = 'fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4';
                 modal.innerHTML = `
-                    <div class="bg-slate-900 rounded-2xl w-full max-w-md border border-blue-500 shadow-2xl">
+                    <div class="bg-slate-900 rounded-2xl w-full max-w-md border border-blue-500 shadow-2xl max-h-[90vh] overflow-y-auto">
                         <div class="bg-gradient-to-r from-blue-600 to-cyan-600 p-6 rounded-t-2xl">
                             <div class="flex items-center">
                                 <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mr-4">
@@ -967,7 +977,7 @@
                 const modal = document.createElement('div');
                 modal.className = 'fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4';
                 modal.innerHTML = `
-                    <div class="bg-slate-900 rounded-2xl w-full max-w-md border border-purple-500 shadow-2xl">
+                    <div class="bg-slate-900 rounded-2xl w-full max-w-md border border-purple-500 shadow-2xl max-h-[90vh] overflow-y-auto">
                         <div class="bg-gradient-to-r from-purple-600 to-pink-600 p-6 rounded-t-2xl">
                             <div class="flex items-center">
                                 <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mr-4">
@@ -1089,7 +1099,7 @@
             const modal = document.createElement('div');
             modal.className = 'fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4';
             modal.innerHTML = `
-                <div class="bg-slate-900 rounded-2xl w-full max-w-md border border-purple-500 shadow-2xl">
+                <div class="bg-slate-900 rounded-2xl w-full max-w-md border border-purple-500 shadow-2xl max-h-[90vh] overflow-y-auto">
                     <div class="bg-gradient-to-r from-purple-600 to-pink-600 p-6 rounded-t-2xl">
                         <div class="flex items-center">
                             <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mr-4">
@@ -4860,7 +4870,7 @@
             const modal = document.createElement('div');
             modal.className = 'fixed inset-0 bg-black bg-opacity-95 flex items-center justify-center z-50 p-4';
             modal.innerHTML = `
-                <div class="bg-slate-900 rounded-2xl w-full max-w-3xl border border-blue-500 shadow-2xl">
+                <div class="bg-slate-900 rounded-2xl w-full max-w-3xl border border-blue-500 shadow-2xl max-h-[90vh] overflow-y-auto">
                     <div class="bg-gradient-to-r from-blue-600 to-indigo-600 p-6 rounded-t-2xl">
                         <div class="flex justify-between items-center">
                             <div class="flex items-center">
@@ -5325,7 +5335,7 @@
             modal.id = 'coach-chat-modal';
             modal.className = 'fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 p-4';
             modal.innerHTML = `
-                <div class="bg-slate-900 rounded-2xl w-full max-w-4xl h-[85vh] border border-slate-700 shadow-2xl flex flex-col">
+                <div class="bg-slate-900 rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto border border-slate-700 shadow-2xl flex flex-col">
                     <div class="bg-gradient-to-r ${coach.color} p-4 rounded-t-2xl flex-shrink-0">
                         <div class="flex justify-between items-center">
                             <div class="flex items-center">
@@ -5508,7 +5518,7 @@
             if (isSubscriber) {
                 // Subscribers can buy credits
                 modal.innerHTML = `
-                    <div class="bg-slate-900 rounded-2xl w-full max-w-md border-2 border-blue-500 shadow-2xl">
+                    <div class="bg-slate-900 rounded-2xl w-full max-w-md border-2 border-blue-500 shadow-2xl max-h-[90vh] overflow-y-auto">
                         <div class="bg-gradient-to-r from-blue-600 to-indigo-600 p-6 rounded-t-2xl">
                             <div class="flex items-center">
                                 <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mr-4">
@@ -5550,7 +5560,7 @@
             } else {
                 // Free users must subscribe first
                 modal.innerHTML = `
-                    <div class="bg-slate-900 rounded-2xl w-full max-w-md border-2 border-purple-500 shadow-2xl">
+                    <div class="bg-slate-900 rounded-2xl w-full max-w-md border-2 border-purple-500 shadow-2xl max-h-[90vh] overflow-y-auto">
                         <div class="bg-gradient-to-r from-purple-600 to-pink-600 p-6 rounded-t-2xl">
                             <div class="flex items-center">
                                 <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mr-4">
@@ -5782,7 +5792,7 @@
             modal.id = 'voice-chat-modal';
             modal.className = 'fixed inset-0 bg-black bg-opacity-95 flex items-center justify-center z-50 p-4';
             modal.innerHTML = `
-                <div class="bg-slate-900 rounded-2xl w-full max-w-2xl border border-purple-500 shadow-2xl">
+                <div class="bg-slate-900 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto border border-purple-500 shadow-2xl max-h-[90vh] overflow-y-auto">
                     <div class="brain-activity p-6 rounded-t-2xl">
                         <div class="flex justify-between items-center">
                             <div class="flex items-center">
@@ -6375,19 +6385,33 @@
             }
             
             const audioUrl = URL.createObjectURL(audioBlob);
-            currentAudio = new Audio(audioUrl);
             
-            // MOBILE-OPTIMIZED audio playback
+            // MOBILE FIX: Reuse unlocked audio element (iOS blocks new Audio())
             const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+            
+            if (isMobile && window.globalAudioElement) {
+                // Reuse the unlocked element from "Start Voice Session" click
+                console.log('📱 MOBILE: Reusing unlocked audio element');
+                currentAudio = window.globalAudioElement;
+                currentAudio.pause(); // Stop any current playback
+                currentAudio.src = audioUrl; // Change source
+                currentAudio.load(); // Load new audio
+            } else {
+                // Desktop or fallback
+                console.log('💻 DESKTOP: Creating new Audio element');
+                currentAudio = new Audio(audioUrl);
+            }
+            
+            // Configure audio
             currentAudio.volume = 1.0;
             currentAudio.preload = 'auto';
-            currentAudio.autoplay = isMobile; // Enable autoplay on mobile
+            currentAudio.autoplay = isMobile;
             
             // Critical for iOS
             if (isMobile) {
                 currentAudio.setAttribute('playsinline', 'true');
                 currentAudio.setAttribute('webkit-playsinline', 'true');
-                console.log('📱 Mobile audio attributes set');
+                console.log('📱 Mobile playsinline attributes set');
             }
             
             // Event handlers BEFORE loading
@@ -6591,7 +6615,7 @@
             modal.id = 'voice-chat-modal';
             modal.className = 'fixed inset-0 bg-black bg-opacity-95 flex items-center justify-center z-50 p-4';
             modal.innerHTML = `
-                <div class="bg-slate-900 rounded-2xl w-full max-w-2xl border border-purple-500 shadow-2xl">
+                <div class="bg-slate-900 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto border border-purple-500 shadow-2xl max-h-[90vh] overflow-y-auto">
                     <div class="brain-activity p-6 rounded-t-2xl">
                         <div class="flex justify-between items-center">
                             <div class="flex items-center">
@@ -6708,131 +6732,105 @@
         function speakText(text) {
             if ('speechSynthesis' in window) {
                 console.log('🔊 speakText called with:', text.substring(0, 50) + '...');
-                console.log('📏 Text length:', text.length, 'characters');
                 
-                // Cancel any ongoing speech FIRST
+                // Resume AudioContext if suspended (mobile requirement)
+                if (window.mobileAudioContext && window.mobileAudioContext.state === 'suspended') {
+                    console.log('🔊 Resuming suspended AudioContext...');
+                    window.mobileAudioContext.resume().then(() => {
+                        console.log('✅ AudioContext resumed for speech');
+                    }).catch(err => {
+                        console.error('❌ Failed to resume AudioContext:', err);
+                    });
+                }
+                
+                // Cancel any ongoing speech
                 speechSynthesis.cancel();
                 
-                // IMPROVED CHUNKING: Combine sentence AND character-based splitting
-                // speechSynthesis has ~160 char HARD LIMIT on some browsers
-                const MAX_CHUNK_LENGTH = 160;
+                // Mobile-optimized speech settings
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.rate = 0.9;    // Slightly faster for mobile
+                utterance.pitch = 1.0;
+                utterance.volume = 1.0;  // Full volume for mobile
                 
-                // First split by sentences
-                let sentences = text.match(/[^.!?]+[.!?]+/g) || [text];
+                // Mobile-specific voice handling
+                const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+                console.log('📱 Is mobile device?', isMobile);
                 
-                // Then further split any sentence longer than MAX_CHUNK_LENGTH
-                let chunks = [];
-                sentences.forEach(sentence => {
-                    sentence = sentence.trim();
-                    if (sentence.length <= MAX_CHUNK_LENGTH) {
-                        chunks.push(sentence);
-                    } else {
-                        // Split long sentence by commas, then by character limit
-                        const parts = sentence.split(',');
-                        let currentChunk = '';
-                        parts.forEach((part, idx) => {
-                            const piece = part.trim() + (idx < parts.length - 1 ? ',' : '');
-                            if ((currentChunk + ' ' + piece).length <= MAX_CHUNK_LENGTH) {
-                                currentChunk += (currentChunk ? ' ' : '') + piece;
-                            } else {
-                                if (currentChunk) chunks.push(currentChunk);
-                                currentChunk = piece;
-                            }
-                        });
-                        if (currentChunk) chunks.push(currentChunk);
-                    }
-                });
-                
-                console.log('📝 Split into', chunks.length, 'chunks (max 160 chars each)');
-                chunks.forEach((chunk, i) => console.log(`  Chunk ${i+1}: ${chunk.length} chars`));
-                
-                let currentIndex = 0;
-                
-                // Wait for voices to load before speaking
-                const waitForVoices = () => {
-                    return new Promise((resolve) => {
+                if (isMobile) {
+                    // Wait for voices to load on mobile
+                    const speakWhenReady = () => {
                         const voices = speechSynthesis.getVoices();
-                        if (voices.length > 0) {
-                            resolve(voices);
-                        } else {
-                            speechSynthesis.addEventListener('voiceschanged', () => {
-                                resolve(speechSynthesis.getVoices());
-                            }, { once: true });
-                            // Fallback timeout
-                            setTimeout(() => resolve(speechSynthesis.getVoices()), 1000);
+                        console.log('🎤 Available voices:', voices.length);
+                        
+                        if (voices.length === 0) {
+                            // Voices not loaded yet, try again
+                            console.log('⏳ Voices not loaded, retrying...');
+                            setTimeout(speakWhenReady, 100);
+                            return;
                         }
-                    });
-                };
-                
-                const speakNextChunk = async () => {
-                    if (currentIndex >= chunks.length) {
-                        console.log('✅ All chunks spoken');
-                        updateVoiceStatus('🎤 Your turn - speak now');
-                        // Auto-restart listening after ALL chunks complete
-                        setTimeout(() => {
-                            if (window.demoRecognition && isDemoVoiceMode) {
-                                try {
-                                    console.log('🔄 Restarting recognition after speech...');
-                                    window.demoRecognition.start();
-                                    console.log('✅ Recognition restarted successfully');
-                                } catch (error) {
-                                    console.error('❌ Recognition restart failed:', error.message);
+                        
+                        // Mobile voice preferences
+                        const mobileVoice = voices.find(voice => 
+                            voice.name.includes('Google') ||
+                            voice.name.includes('Enhanced') ||
+                            (voice.lang.startsWith('en') && voice.localService)
+                        ) || voices[0];
+                        
+                        if (mobileVoice) {
+                            utterance.voice = mobileVoice;
+                            console.log('✅ Using mobile voice:', mobileVoice.name, '- Lang:', mobileVoice.lang);
+                        } else {
+                            console.warn('⚠️ No suitable voice found, using default');
+                        }
+                        
+                        // Mobile-specific events with detailed logging
+                        utterance.onstart = () => {
+                            console.log('✅ Speech STARTED playing');
+                            updateVoiceStatus('🔊 Coach David speaking...');
+                        };
+                        
+                        utterance.onend = () => {
+                            console.log('✅ Speech ENDED successfully');
+                            updateVoiceStatus('🎤 Your turn - speak now');
+                            // Auto-restart listening on mobile after speech
+                            setTimeout(() => {
+                                if (window.demoRecognition && isDemoVoiceMode) {
+                                    try {
+                                        console.log('🔄 Restarting recognition after speech...');
+                                        window.demoRecognition.start();
+                                        console.log('✅ Recognition restarted successfully');
+                                    } catch (error) {
+                                        console.error('❌ Recognition restart failed:', error.message);
+                                    }
                                 }
-                            }
-                        }, 500);
-                        return;
-                    }
+                            }, 500);
+                        };
+                        
+                        utterance.onerror = (event) => {
+                            console.error('❌ Mobile speech error:', event.error, '- Message:', event.message);
+                            updateVoiceStatus('❌ Audio error - please check volume');
+                        };
+                        
+                        speechSynthesis.speak(utterance);
+                    };
                     
-                    const chunk = chunks[currentIndex].trim();
-                    console.log(`🔊 Speaking chunk ${currentIndex + 1}/${chunks.length} (${chunk.length} chars):`, chunk.substring(0, 50) + '...');
+                    speakWhenReady();
                     
-                    const utterance = new SpeechSynthesisUtterance(chunk);
-                    utterance.rate = 0.9;     // Normal speed
-                    utterance.pitch = 1.0;
-                    utterance.volume = 1.0;
-                    
-                    // Get BEST voice available
-                    const voices = await waitForVoices();
+                } else {
+                    // Desktop version
+                    const voices = speechSynthesis.getVoices();
                     const preferredVoice = voices.find(voice => 
-                        (voice.lang.startsWith('en-US') || voice.lang.startsWith('en-GB')) &&
-                        (voice.name.includes('Google') || 
-                         voice.name.includes('Enhanced') ||
-                         voice.name.includes('Premium') ||
-                         voice.localService)
-                    ) || voices.find(voice => voice.lang.startsWith('en')) || voices[0];
+                        voice.name.includes('David') || 
+                        voice.name.includes('Google') || 
+                        voice.name.includes('Enhanced')
+                    ) || voices[0];
                     
                     if (preferredVoice) {
                         utterance.voice = preferredVoice;
-                        console.log('🎤 Using voice:', preferredVoice.name, '- Lang:', preferredVoice.lang);
-                    } else {
-                        console.warn('⚠️ No voice selected, using browser default');
                     }
                     
-                    utterance.onstart = () => {
-                        console.log(`✅ Chunk ${currentIndex + 1} STARTED`);
-                        updateVoiceStatus('🔊 Coach David speaking...');
-                    };
-                    
-                    utterance.onend = () => {
-                        console.log(`✅ Chunk ${currentIndex + 1} ENDED successfully`);
-                        currentIndex++;
-                        // Tiny pause between chunks for smooth flow
-                        setTimeout(speakNextChunk, 50);
-                    };
-                    
-                    utterance.onerror = (event) => {
-                        console.error(`❌ Chunk ${currentIndex + 1} error:`, event.error, event.message);
-                        currentIndex++;
-                        // Continue to next chunk even on error
-                        setTimeout(speakNextChunk, 50);
-                    };
-                    
                     speechSynthesis.speak(utterance);
-                };
-                
-                // Start speaking chunks
-                speakNextChunk();
-                
+                }
             } else {
                 console.warn('⚠️ Speech synthesis not available');
                 updateVoiceStatus('💬 Text mode only (no audio support)');
@@ -7838,7 +7836,7 @@
             const modal = document.createElement('div');
             modal.className = 'fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4';
             modal.innerHTML = `
-                <div class="bg-slate-900 rounded-2xl w-full max-w-2xl relative overflow-hidden">
+                <div class="bg-slate-900 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto relative max-h-[90vh] overflow-y-auto">
                     <div class="brain-activity p-8 text-center text-white">
                         <div class="text-6xl mb-4 neural-pulse">🧠</div>
                         <h2 class="text-3xl font-bold mb-2">LIVING SYSTEM ACTIVATED</h2>
@@ -8060,6 +8058,15 @@
             
             const userPlan = JSON.parse(localStorage.getItem('userPlan') || '{"credits": 8, "plan": "free"}');
             
+            // NEW: Free users can only do ONE assessment total
+            if (userPlan.plan === 'free') {
+                const completedAssessments = Object.values(assessmentData).filter(data => data.completed).length;
+                if (completedAssessments >= 1) {
+                    console.log('🚫 FREE USER: Already completed 1 assessment - blocking further assessments');
+                    showAssessmentUpgradeModal();
+                    return;
+                }
+            }
             
             // CHECK IF ASSESSMENT PACKAGE HAS BEEN PAID FOR (3 credits for ENTIRE assessment once)
             const assessmentProgress = JSON.parse(localStorage.getItem('assessmentProgress') || '{}');
@@ -8708,7 +8715,7 @@
             const modal = document.createElement('div');
             modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
             modal.innerHTML = `
-                <div class="bg-slate-900 rounded-2xl w-full max-w-lg">
+                <div class="bg-slate-900 rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
                     <div class="bg-gradient-to-r from-green-600 to-blue-600 p-6 rounded-t-2xl text-center">
                         <div class="text-4xl mb-2">✅</div>
                         <h3 class="text-2xl font-bold text-white">Assessment Complete!</h3>
@@ -9354,7 +9361,7 @@
             const modal = document.createElement('div');
             modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
             modal.innerHTML = `
-                <div class="bg-slate-900 rounded-2xl w-full max-w-2xl">
+                <div class="bg-slate-900 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
                     <div class="bg-gradient-to-r from-blue-600 to-purple-600 p-6 rounded-t-2xl">
                         <div class="flex justify-between items-center">
                             <div>
@@ -9431,7 +9438,7 @@
             const modal = document.createElement('div');
             modal.className = 'fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 p-4';
             modal.innerHTML = `
-                <div class="bg-slate-900 rounded-2xl w-full max-w-lg border border-red-500 shadow-2xl">
+                <div class="bg-slate-900 rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto border border-red-500 shadow-2xl">
                     <div class="bg-gradient-to-r from-red-600 to-pink-600 p-6 rounded-t-2xl">
                         <h3 class="text-2xl font-bold text-white">Insufficient Credits</h3>
                         <p class="text-white/80">You need more credits to access this feature</p>
@@ -9514,7 +9521,7 @@
             const modal = document.createElement('div');
             modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
             modal.innerHTML = `
-                <div class="bg-slate-900 rounded-lg p-8 max-w-md w-full mx-4">
+                <div class="bg-slate-900 rounded-lg p-8 max-w-md w-full mx-4 max-h-[90vh] overflow-y-auto">
                     <h3 class="text-2xl font-bold mb-4 text-cyan-400">Memory Enhancement Game</h3>
                     <div class="text-center">
                         <div id="memory-game-board" class="grid grid-cols-4 gap-2 mb-4"></div>
@@ -11447,7 +11454,7 @@
             const modal = document.createElement('div');
             modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
             modal.innerHTML = `
-                <div class="bg-slate-900 rounded-2xl w-full max-w-lg">
+                <div class="bg-slate-900 rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
                     <div class="bg-gradient-to-r from-purple-600 to-pink-600 p-6 rounded-t-2xl">
                         <h3 class="text-2xl font-bold text-white">AI Journal Prompt</h3>
                         <p class="text-white/80">Thoughtful questions to guide your reflection</p>
@@ -11626,7 +11633,15 @@
             const modal = document.createElement('div');
             modal.className = 'fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50';
             modal.innerHTML = `
-                <div class="bg-slate-800 rounded-lg shadow-2xl max-w-2xl w-full mx-4 p-8 border border-slate-600">
+                <div class="bg-slate-800 rounded-lg shadow-2xl max-w-2xl w-full mx-4 border border-slate-600 max-h-[85vh] flex flex-col relative">
+                    <!-- X Close Button -->
+                    <button id="payment-modal-close" class="absolute top-2 right-2 text-white hover:text-red-400 text-4xl font-bold z-50 leading-none transition-colors bg-slate-900 rounded-full" 
+                            style="width: 48px; height: 48px; padding: 0; display: flex; align-items: center; justify-content: center;">
+                        ×
+                    </button>
+                    
+                    <!-- Content Wrapper with Scroll -->
+                    <div class="overflow-y-auto p-8 flex-1">
                     <!-- Header -->
                     <div class="text-center mb-8">
                         <div class="text-4xl mb-4">🎯</div>
@@ -11699,9 +11714,10 @@
                         </div>
                     </div>
                     
-                    <div class="mt-8 text-center text-xs text-slate-400">
-                        <i class="fas fa-lock mr-2"></i>
-                        Your payment is secured by Stripe's industry-leading encryption
+                        <div class="mt-8 text-center text-xs text-slate-400">
+                            <i class="fas fa-lock mr-2"></i>
+                            Your payment is secured by Stripe's industry-leading encryption
+                        </div>
                     </div>
                 </div>
             `;
@@ -11709,6 +11725,16 @@
             document.body.appendChild(modal);
             document.body.style.overflow = 'hidden';
             currentPaymentModal = modal;
+            
+            // Add X button click handler after modal is in DOM
+            const closeBtn = document.getElementById('payment-modal-close');
+            if (closeBtn) {
+                closeBtn.onclick = function() {
+                    modal.remove();
+                    document.body.style.overflow = 'auto';
+                    currentPaymentModal = null;
+                };
+            }
         }
 
         // Proceed to Stripe Checkout with Enhanced Tracking
@@ -12065,7 +12091,7 @@
             modal.className = 'fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50';
             modal.id = 'subscriber-required-modal';
             modal.innerHTML = `
-                <div class="bg-slate-900 rounded-2xl w-full max-w-md border-2 border-red-500 shadow-2xl">
+                <div class="bg-slate-900 rounded-2xl w-full max-w-md border-2 border-red-500 shadow-2xl max-h-[90vh] overflow-y-auto">
                     <div class="bg-gradient-to-r from-red-600 to-pink-600 p-6 rounded-t-2xl">
                         <div class="flex items-center">
                             <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mr-4">
@@ -14164,6 +14190,7 @@
             background: rgba(99, 102, 241, 0.8);
         }
     </style>
+
 
 </body>
 </html>
