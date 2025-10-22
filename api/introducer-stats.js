@@ -262,3 +262,4 @@ function maskEmail(email) {
     if (username.length <= 2) return email;
     
     return username.substring(0, 2) + '***@' + domain;
+}
