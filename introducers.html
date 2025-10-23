@@ -968,6 +968,7 @@ Hey! Remember you mentioned [their health challenge]? I found something that's b
                 if (codeFromURL) {
                     localStorage.setItem('introducerReferralCode', codeFromURL);
                     state.referralCode = codeFromURL;
+                    state.referralLink = `https://roothealth.app/?ref=${codeFromURL}`;
                 } else {
                     generateReferralCode();
                 }
