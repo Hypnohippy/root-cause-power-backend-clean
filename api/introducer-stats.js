@@ -2,6 +2,7 @@
 // API ENDPOINT: /api/introducer-stats.js
 // ============================================
 // ES Module version for Vercel
+// FIXED: Updated to use introducer_code column
 // ============================================
 
 import pg from 'pg';
@@ -33,21 +34,21 @@ export default async function handler(req, res) {
 
         if (!code) {
             return res.status(400).json({ 
-                error: 'Missing referral code',
+                error: 'Missing introducer code',
                 message: 'Please provide ?code=INTRO_XXXXX'
             });
         }
 
-        // Get introducer info
+        // Get introducer info - FIXED: using introducer_code
         const introducerQuery = await pool.query(
-            'SELECT * FROM introducers WHERE referral_code = $1',
+            'SELECT * FROM introducers WHERE introducer_code = $1',
             [code]
         );
 
         if (introducerQuery.rows.length === 0) {
             return res.status(404).json({ 
                 error: 'Introducer not found',
-                message: 'No introducer found with this referral code'
+                message: 'No introducer found with this code'
             });
         }
 
@@ -78,14 +79,14 @@ export default async function handler(req, res) {
 
         const earnings = earningsQuery.rows[0];
 
-        // Get recruiter bonus stats
+        // Get recruiter bonus stats - FIXED: using introducer_code
         const recruiterBonusQuery = await pool.query(`
             SELECT 
                 COUNT(DISTINCT recruited.id) AS recruited_introducers,
                 COUNT(r.id) AS indirect_referrals,
                 COALESCE(SUM(CASE WHEN c.status = 'paid' THEN c.amount ELSE 0 END), 0) AS recruiter_earnings
             FROM introducers recruiter
-            LEFT JOIN introducers recruited ON recruited.recruiter_code = recruiter.referral_code
+            LEFT JOIN introducers recruited ON recruited.recruiter_code = recruiter.introducer_code
             LEFT JOIN referrals r ON r.introducer_id = recruited.id AND r.status = 'active'
             LEFT JOIN commissions c ON c.introducer_id = recruiter.id AND c.commission_type = 'recruiter_bonus'
             WHERE recruiter.id = $1
@@ -137,13 +138,13 @@ export default async function handler(req, res) {
 
         const nextPayout = nextPayoutQuery.rows[0];
 
-        // Return response
+        // Return response - FIXED: using introducer_code in response
         res.status(200).json({
             success: true,
             introducer: {
                 id: introducer.id,
                 email: introducer.email,
-                referralCode: introducer.referral_code,
+                referralCode: introducer.introducer_code,
                 firstName: introducer.first_name,
                 lastName: introducer.last_name,
                 status: introducer.status,
@@ -195,8 +196,8 @@ export default async function handler(req, res) {
 
             links: {
                 referralLink: `https://roothealth.app/?ref=${code}`,
-                demoLink: `https://roothealth.app/demo?ref=${code}`,
-                recruiterLink: `https://roothealth.app/introducers?recruiter=${code}`
+                demoLink: `https://roothealth.app/demo.html?ref=${code}`,
+                recruiterLink: `https://roothealth.app/introducer-landing.html?recruiter=${code}`
             }
         });
 
