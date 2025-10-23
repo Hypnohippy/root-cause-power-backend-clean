@@ -1,11 +1,11 @@
 // ============================================
 // API ENDPOINT: /api/introducer-stats.js
 // ============================================
-// Returns real-time statistics for an introducer
-// Replaces localStorage mock data with actual Stripe + DB data
+// ES Module version for Vercel
 // ============================================
 
-const { Pool } = require('pg');
+import pg from 'pg';
+const { Pool } = pg;
 
 // Create database connection pool
 const pool = new Pool({
@@ -29,7 +29,7 @@ export default async function handler(req, res) {
     }
 
     try {
-        const { code } = req.query; // Referral code: INTRO_ABC123
+        const { code } = req.query;
 
         if (!code) {
             return res.status(400).json({ 
@@ -38,9 +38,7 @@ export default async function handler(req, res) {
             });
         }
 
-        // ============================================
-        // STEP 1: Get introducer info from database
-        // ============================================
+        // Get introducer info
         const introducerQuery = await pool.query(
             'SELECT * FROM introducers WHERE referral_code = $1',
             [code]
@@ -55,9 +53,7 @@ export default async function handler(req, res) {
 
         const introducer = introducerQuery.rows[0];
 
-        // ============================================
-        // STEP 2: Get active referrals from database
-        // ============================================
+        // Get active referrals
         const activeReferralsQuery = await pool.query(`
             SELECT 
                 COUNT(*) AS active_count,
@@ -70,9 +66,7 @@ export default async function handler(req, res) {
 
         const activeStats = activeReferralsQuery.rows[0];
 
-        // ============================================
-        // STEP 3: Get total earnings (paid commissions)
-        // ============================================
+        // Get total earnings
         const earningsQuery = await pool.query(`
             SELECT 
                 COALESCE(SUM(CASE WHEN status = 'paid' THEN amount ELSE 0 END), 0) AS total_paid,
@@ -84,9 +78,7 @@ export default async function handler(req, res) {
 
         const earnings = earningsQuery.rows[0];
 
-        // ============================================
-        // STEP 4: Get recruiter bonus stats (if applicable)
-        // ============================================
+        // Get recruiter bonus stats
         const recruiterBonusQuery = await pool.query(`
             SELECT 
                 COUNT(DISTINCT recruited.id) AS recruited_introducers,
@@ -101,9 +93,7 @@ export default async function handler(req, res) {
 
         const recruiterStats = recruiterBonusQuery.rows[0];
 
-        // ============================================
-        // STEP 5: Get demo page stats
-        // ============================================
+        // Get demo page stats
         const demoStatsQuery = await pool.query(`
             SELECT 
                 COUNT(*) AS total_views,
@@ -115,16 +105,12 @@ export default async function handler(req, res) {
 
         const demoStats = demoStatsQuery.rows[0];
 
-        // ============================================
-        // STEP 6: Calculate 10-year projection
-        // ============================================
+        // Calculate projections
         const activeReferrals = parseInt(activeStats.active_count) || 0;
         const monthlyIncome = parseFloat(activeStats.monthly_income) || 0.00;
-        const tenYearProjection = monthlyIncome * 120; // 10 years = 120 months
+        const tenYearProjection = monthlyIncome * 120;
 
-        // ============================================
-        // STEP 7: Get recent referrals (last 5)
-        // ============================================
+        // Get recent referrals
         const recentReferralsQuery = await pool.query(`
             SELECT 
                 customer_email,
@@ -139,9 +125,7 @@ export default async function handler(req, res) {
             LIMIT 5
         `, [introducer.id]);
 
-        // ============================================
-        // STEP 8: Get pending payout amount
-        // ============================================
+        // Get pending payout
         const nextPayoutQuery = await pool.query(`
             SELECT 
                 COALESCE(SUM(amount), 0) AS next_payout_amount,
@@ -153,9 +137,7 @@ export default async function handler(req, res) {
 
         const nextPayout = nextPayoutQuery.rows[0];
 
-        // ============================================
-        // RESPONSE: Return comprehensive stats
-        // ============================================
+        // Return response
         res.status(200).json({
             success: true,
             introducer: {
@@ -170,7 +152,6 @@ export default async function handler(req, res) {
                 isRecruiter: parseInt(recruiterStats.recruited_introducers) > 0
             },
             
-            // Core Stats (replaces localStorage mock data)
             stats: {
                 activeReferrals: activeReferrals,
                 monthlyIncome: parseFloat(monthlyIncome).toFixed(2),
@@ -180,7 +161,6 @@ export default async function handler(req, res) {
                 totalPayments: parseInt(earnings.payment_count) || 0
             },
 
-            // Recruiter Stats (Three-Tier System)
             recruiter: {
                 recruitedIntroducers: parseInt(recruiterStats.recruited_introducers) || 0,
                 indirectReferrals: parseInt(recruiterStats.indirect_referrals) || 0,
@@ -189,7 +169,6 @@ export default async function handler(req, res) {
                 recruitedBy: introducer.recruiter_code || null
             },
 
-            // Demo Page Stats
             demo: {
                 totalViews: parseInt(demoStats.total_views) || 0,
                 conversions: parseInt(demoStats.conversions) || 0,
@@ -199,24 +178,21 @@ export default async function handler(req, res) {
                 avgDuration: Math.round(parseFloat(demoStats.avg_duration) || 0) + 's'
             },
 
-            // Next Payout Info
             nextPayout: {
                 amount: parseFloat(nextPayout.next_payout_amount || 0).toFixed(2),
                 commissionCount: parseInt(nextPayout.pending_commissions) || 0,
                 estimatedDate: getNextPayoutDate()
             },
 
-            // Recent Activity
             recentReferrals: recentReferralsQuery.rows.map(ref => ({
                 email: maskEmail(ref.customer_email),
                 plan: ref.plan_type,
-                commission: parseFloat(ref.commission_amount).toFixed(2),
+                commission: parseFloat(ref.commission_amount || 0).toFixed(2),
                 status: ref.status,
                 date: ref.converted_at,
                 source: ref.referral_source
             })),
 
-            // Links for introducer
             links: {
                 referralLink: `https://roothealth.app/?ref=${code}`,
                 demoLink: `https://roothealth.app/demo?ref=${code}`,
@@ -228,17 +204,12 @@ export default async function handler(req, res) {
         console.error('❌ Error fetching introducer stats:', error);
         res.status(500).json({ 
             error: 'Internal server error',
-            message: error.message,
-            stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+            message: error.message
         });
     }
 }
 
-// ============================================
-// HELPER FUNCTIONS
-// ============================================
-
-// Calculate next payout date (5th of next month)
+// Helper functions
 function getNextPayoutDate() {
     const now = new Date();
     const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 5);
@@ -250,7 +221,6 @@ function getNextPayoutDate() {
     }
 }
 
-// Mask email for privacy
 function maskEmail(email) {
     if (!email) return 'N/A';
     const parts = email.split('@');
