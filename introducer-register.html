@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Become an Introducer - Root Health Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #e2e8f0;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .logo {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 1) 0%, rgba(168, 85, 247, 1) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+        }
+
+        .subtitle {
+            color: #94a3b8;
+            font-size: 1.1rem;
+        }
+
+        .form-card {
+            background: rgba(30, 41, 59, 0.6);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 20px;
+            padding: 3rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .progress-bar {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 3rem;
+            position: relative;
+        }
+
+        .progress-bar::before {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: rgba(99, 102, 241, 0.2);
+            z-index: 0;
+        }
+
+        .progress-fill {
+            position: absolute;
+            top: 20px;
+            left: 0;
+            height: 2px;
+            background: linear-gradient(90deg, rgba(99, 102, 241, 1) 0%, rgba(168, 85, 247, 1) 100%);
+            z-index: 1;
+            transition: width 0.3s ease;
+        }
+
+        .progress-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            z-index: 2;
+            flex: 1;
+        }
+
+        .step-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(30, 41, 59, 1);
+            border: 2px solid rgba(99, 102, 241, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            color: #64748b;
+            transition: all 0.3s ease;
+            margin-bottom: 0.5rem;
+        }
+
+        .progress-step.active .step-circle {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 1) 0%, rgba(168, 85, 247, 1) 100%);
+            border-color: transparent;
+            color: white;
+        }
+
+        .progress-step.completed .step-circle {
+            background: rgba(16, 185, 129, 1);
+            border-color: transparent;
+            color: white;
+        }
+
+        .step-label {
+            font-size: 0.875rem;
+            color: #64748b;
+            text-align: center;
+        }
+
+        .progress-step.active .step-label {
+            color: #e2e8f0;
+            font-weight: 500;
+        }
+
+        .form-step {
+            display: none;
+        }
+
+        .form-step.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #cbd5e1;
+            font-weight: 500;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 10px;
+            color: #e2e8f0;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: rgba(99, 102, 241, 0.6);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: auto;
+            margin-top: 0.25rem;
+        }
+
+        .checkbox-group label {
+            margin-bottom: 0;
+            font-weight: 400;
+            font-size: 0.875rem;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        button {
+            flex: 1;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 1) 0%, rgba(168, 85, 247, 1) 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: rgba(71, 85, 105, 0.6);
+            color: #e2e8f0;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(71, 85, 105, 0.8);
+        }
+
+        .success-content {
+            text-align: center;
+        }
+
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, rgba(16, 185, 129, 1) 0%, rgba(5, 150, 105, 1) 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 2rem;
+            font-size: 2.5rem;
+        }
+
+        .success-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, rgba(16, 185, 129, 1) 0%, rgba(5, 150, 105, 1) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .success-message {
+            color: #94a3b8;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .referral-code-display {
+            background: rgba(15, 23, 42, 0.8);
+            border: 2px solid rgba(99, 102, 241, 0.3);
+            border-radius: 15px;
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+
+        .code-label {
+            color: #94a3b8;
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .code-value {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 1) 0%, rgba(168, 85, 247, 1) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 0.1em;
+            margin-bottom: 1rem;
+        }
+
+        .copy-button {
+            background: rgba(99, 102, 241, 0.2);
+            color: #a5b4fc;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            border: 1px solid rgba(99, 102, 241, 0.3);
+        }
+
+        .copy-button:hover {
+            background: rgba(99, 102, 241, 0.3);
+        }
+
+        .next-steps {
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 15px;
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+
+        .next-steps h3 {
+            color: #e2e8f0;
+            margin-bottom: 1rem;
+        }
+
+        .next-steps ol {
+            color: #94a3b8;
+            padding-left: 1.5rem;
+            line-height: 1.8;
+        }
+
+        .error-message {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #fca5a5;
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+
+            .form-card {
+                padding: 2rem 1.5rem;
+            }
+
+            .step-label {
+                font-size: 0.75rem;
+            }
+
+            .code-value {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">Root Health Platform</div>
+            <div class="subtitle">Join Our Introducer Program</div>
+        </div>
+
+        <div class="form-card">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+                <div class="progress-step active" data-step="1">
+                    <div class="step-circle">1</div>
+                    <div class="step-label">Personal Details</div>
+                </div>
+                <div class="progress-step" data-step="2">
+                    <div class="step-circle">2</div>
+                    <div class="step-label">Community Info</div>
+                </div>
+                <div class="progress-step" data-step="3">
+                    <div class="step-circle">3</div>
+                    <div class="step-label">Complete</div>
+                </div>
+            </div>
+
+            <div class="error-message" id="errorMessage"></div>
+
+            <form id="registrationForm">
+                <!-- Step 1: Personal Details -->
+                <div class="form-step active" data-step="1">
+                    <div class="form-group">
+                        <label for="firstName">First Name *</label>
+                        <input type="text" id="firstName" name="firstName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="lastName">Last Name *</label>
+                        <input type="text" id="lastName" name="lastName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email Address *</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+                    <div class="button-group">
+                        <button type="button" class="btn-primary" onclick="nextStep()">Continue</button>
+                    </div>
+                </div>
+
+                <!-- Step 2: Community Info -->
+                <div class="form-step" data-step="2">
+                    <div class="form-group">
+                        <label for="communityName">Community Name *</label>
+                        <input type="text" id="communityName" name="communityName" placeholder="e.g., Anxiety Support Group UK" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="platform">Platform *</label>
+                        <select id="platform" name="platform" required>
+                            <option value="">Select platform...</option>
+                            <option value="facebook">Facebook Group</option>
+                            <option value="reddit">Reddit</option>
+                            <option value="discord">Discord Server</option>
+                            <option value="forum">Online Forum</option>
+                            <option value="whatsapp">WhatsApp Group</option>
+                            <option value="telegram">Telegram</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="communitySize">Approximate Community Size *</label>
+                        <select id="communitySize" name="communitySize" required>
+                            <option value="">Select size...</option>
+                            <option value="50-200">50-200 members</option>
+                            <option value="200-500">200-500 members</option>
+                            <option value="500-1000">500-1,000 members</option>
+                            <option value="1000-5000">1,000-5,000 members</option>
+                            <option value="5000+">5,000+ members</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="motivation">Why are you interested in introducing Root Health Platform? *</label>
+                        <textarea id="motivation" name="motivation" placeholder="Tell us about your community and why you think Root Health Platform would benefit your members..." required></textarea>
+                    </div>
+                    <div class="form-group checkbox-group">
+                        <input type="checkbox" id="ethicalGuidelines" name="ethicalGuidelines" required>
+                        <label for="ethicalGuidelines">I commit to introducing Root Health Platform only to communities where mental health support is genuinely needed, and will never use pushy sales tactics or misleading claims.</label>
+                    </div>
+                    <div class="button-group">
+                        <button type="button" class="btn-secondary" onclick="prevStep()">Back</button>
+                        <button type="submit" class="btn-primary">Submit Application</button>
+                    </div>
+                </div>
+
+                <!-- Step 3: Success -->
+                <div class="form-step" data-step="3">
+                    <div class="success-content">
+                        <div class="success-icon">✓</div>
+                        <h2 class="success-title">Registration Complete!</h2>
+                        <p class="success-message">
+                            Congratulations! Your introducer account has been created successfully.
+                        </p>
+
+                        <div class="referral-code-display">
+                            <div class="code-label">Your Unique Referral Code</div>
+                            <div class="code-value" id="referralCodeDisplay">INTRO_XXXX0000</div>
+                            <button type="button" class="copy-button" onclick="copyReferralCode()">
+                                📋 Copy Code
+                            </button>
+                        </div>
+
+                        <div class="next-steps">
+                            <h3>Next Steps:</h3>
+                            <ol>
+                                <li><strong>Set up Stripe Connect</strong> - Complete your payment account setup to receive commissions</li>
+                                <li><strong>Preview the demo</strong> - See what your community members will experience</li>
+                                <li><strong>Share your demo link</strong> - Start introducing Root Health Platform to your community</li>
+                            </ol>
+                        </div>
+
+                        <div class="button-group">
+                            <button type="button" class="btn-primary" id="stripeConnectBtn">
+                                Set Up Payment Account
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let currentStep = 1;
+        let referralCode = '';
+        let stripeConnectUrl = '';
+
+        function updateProgress() {
+            const steps = document.querySelectorAll('.progress-step');
+            const progressFill = document.getElementById('progressFill');
+            
+            steps.forEach((step, index) => {
+                const stepNum = index + 1;
+                if (stepNum < currentStep) {
+                    step.classList.add('completed');
+                    step.classList.remove('active');
+                } else if (stepNum === currentStep) {
+                    step.classList.add('active');
+                    step.classList.remove('completed');
+                } else {
+                    step.classList.remove('active', 'completed');
+                }
+            });
+
+            const progressPercent = ((currentStep - 1) / (steps.length - 1)) * 100;
+            progressFill.style.width = progressPercent + '%';
+        }
+
+        function showStep(stepNum) {
+            document.querySelectorAll('.form-step').forEach(step => {
+                step.classList.remove('active');
+            });
+            document.querySelector(`.form-step[data-step="${stepNum}"]`).classList.add('active');
+            currentStep = stepNum;
+            updateProgress();
+        }
+
+        function nextStep() {
+            const currentStepEl = document.querySelector(`.form-step[data-step="${currentStep}"]`);
+            const inputs = currentStepEl.querySelectorAll('input[required], select[required], textarea[required]');
+            
+            let isValid = true;
+            inputs.forEach(input => {
+                if (!input.value || (input.type === 'checkbox' && !input.checked)) {
+                    isValid = false;
+                    input.focus();
+                    return;
+                }
+            });
+
+            if (isValid) {
+                showStep(currentStep + 1);
+                hideError();
+            }
+        }
+
+        function prevStep() {
+            showStep(currentStep - 1);
+            hideError();
+        }
+
+        function showError(message) {
+            const errorEl = document.getElementById('errorMessage');
+            errorEl.textContent = message;
+            errorEl.classList.add('show');
+        }
+
+        function hideError() {
+            const errorEl = document.getElementById('errorMessage');
+            errorEl.classList.remove('show');
+        }
+
+        function copyReferralCode() {
+            navigator.clipboard.writeText(referralCode).then(() => {
+                const copyBtn = document.querySelector('.copy-button');
+                const originalText = copyBtn.textContent;
+                copyBtn.textContent = '✓ Copied!';
+                setTimeout(() => {
+                    copyBtn.textContent = originalText;
+                }, 2000);
+            });
+        }
+
+        document.getElementById('registrationForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            hideError();
+
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Submitting...';
+
+            try {
+                const formData = {
+                    firstName: document.getElementById('firstName').value,
+                    lastName: document.getElementById('lastName').value,
+                    email: document.getElementById('email').value,
+                    communityName: document.getElementById('communityName').value,
+                    platform: document.getElementById('platform').value,
+                    communitySize: document.getElementById('communitySize').value,
+                    motivation: document.getElementById('motivation').value
+                };
+
+                // Call API to register introducer
+                const response = await fetch('/api/introducer-register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+
+                if (!response.ok) {
+                    throw new Error('Registration failed. Please try again.');
+                }
+
+                const data = await response.json();
+
+                if (!data.success) {
+                    throw new Error(data.error || 'Registration failed. Please try again.');
+                }
+
+                // Store referral code and Stripe Connect URL
+                referralCode = data.referralCode;
+                stripeConnectUrl = data.stripeConnectUrl;
+
+                // Update success page
+                document.getElementById('referralCodeDisplay').textContent = referralCode;
+                document.getElementById('stripeConnectBtn').onclick = () => {
+                    window.location.href = stripeConnectUrl;
+                };
+
+                // Show success step
+                showStep(3);
+
+            } catch (error) {
+                showError(error.message);
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Submit Application';
+            }
+        });
+    </script>
+</body>
+</html>
