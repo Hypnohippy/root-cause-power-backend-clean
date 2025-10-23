@@ -1,13 +1,16 @@
 // ============================================
-// API ENDPOINT: /api/stripe/connect.js
+// API ENDPOINT: /api/stripe-connect.js
 // ============================================
 // Handles Stripe Connect onboarding for introducers
 // POST - Create Connect account and onboarding link
 // GET - Check Connect account status
 // ============================================
 
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
-const { Pool } = require('pg');
+import Stripe from 'stripe';
+import pkg from 'pg';
+const { Pool } = pkg;
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
@@ -39,9 +42,9 @@ export default async function handler(req, res) {
                 });
             }
 
-            // Find introducer in database
+            // Find introducer in database (FIXED: using introducer_code)
             const introducerQuery = await pool.query(
-                'SELECT * FROM introducers WHERE referral_code = $1',
+                'SELECT * FROM introducers WHERE introducer_code = $1',
                 [referralCode]
             );
 
@@ -87,8 +90,8 @@ export default async function handler(req, res) {
             // Create account link for onboarding
             const accountLink = await stripe.accountLinks.create({
                 account: accountId,
-                refresh_url: `https://roothealth.app/introducers?refresh=true`,
-                return_url: `https://roothealth.app/introducers?connected=true`,
+                refresh_url: `https://roothealth.app/introducers.html?refresh=true`,
+                return_url: `https://roothealth.app/introducers.html?connected=true`,
                 type: 'account_onboarding'
             });
 
@@ -105,16 +108,17 @@ export default async function handler(req, res) {
         // GET: Check Stripe Connect Status
         // ============================================
         else if (req.method === 'GET') {
-            const { referralCode } = req.query;
+            const { code, referralCode } = req.query;
+            const introducerCode = code || referralCode;
 
-            if (!referralCode) {
-                return res.status(400).json({ error: 'Missing referral code' });
+            if (!introducerCode) {
+                return res.status(400).json({ error: 'Missing introducer code' });
             }
 
-            // Find introducer
+            // Find introducer (FIXED: using introducer_code)
             const introducerQuery = await pool.query(
-                'SELECT * FROM introducers WHERE referral_code = $1',
-                [referralCode]
+                'SELECT * FROM introducers WHERE introducer_code = $1',
+                [introducerCode]
             );
 
             if (introducerQuery.rows.length === 0) {
@@ -124,10 +128,42 @@ export default async function handler(req, res) {
             const introducer = introducerQuery.rows[0];
 
             if (!introducer.stripe_account_id) {
-                return res.status(200).json({
-                    connected: false,
-                    onboardingComplete: false
+                // If no Stripe account yet, create one and redirect
+                const account = await stripe.accounts.create({
+                    type: 'express',
+                    country: 'GB',
+                    email: introducer.email,
+                    business_type: 'individual',
+                    individual: {
+                        first_name: introducer.first_name,
+                        last_name: introducer.last_name,
+                        email: introducer.email
+                    },
+                    capabilities: {
+                        transfers: { requested: true }
+                    },
+                    metadata: {
+                        introducer_code: introducerCode,
+                        introducer_id: introducer.id.toString()
+                    }
                 });
+
+                // Save to database
+                await pool.query(
+                    'UPDATE introducers SET stripe_account_id = $1 WHERE id = $2',
+                    [account.id, introducer.id]
+                );
+
+                // Create account link for onboarding
+                const accountLink = await stripe.accountLinks.create({
+                    account: account.id,
+                    refresh_url: `https://roothealth.app/api/stripe-connect?code=${introducerCode}`,
+                    return_url: `https://roothealth.app/introducers.html?code=${introducerCode}&setup=complete`,
+                    type: 'account_onboarding'
+                });
+
+                // Redirect to Stripe onboarding
+                return res.redirect(302, accountLink.url);
             }
 
             // Fetch Stripe account details
@@ -140,6 +176,17 @@ export default async function handler(req, res) {
                     'UPDATE introducers SET stripe_onboarding_complete = true WHERE id = $1',
                     [introducer.id]
                 );
+            }
+
+            // If GET request with code param, redirect to onboarding
+            if (code && !isComplete) {
+                const accountLink = await stripe.accountLinks.create({
+                    account: introducer.stripe_account_id,
+                    refresh_url: `https://roothealth.app/api/stripe-connect?code=${introducerCode}`,
+                    return_url: `https://roothealth.app/introducers.html?code=${introducerCode}&setup=complete`,
+                    type: 'account_onboarding'
+                });
+                return res.redirect(302, accountLink.url);
             }
 
             res.status(200).json({
