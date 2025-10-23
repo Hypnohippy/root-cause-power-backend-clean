@@ -1,28 +1,25 @@
 // ============================================
 // API ENDPOINT: /api/stripe-webhook.js
 // ============================================
-// Listens for Stripe events and automatically tracks:
-// - New subscriptions (create referral record)
-// - Subscription updates
-// - Subscription cancellations
-// - Monthly invoices (calculate commissions)
-// - THREE-TIER COMMISSIONS (Direct + Recruiter Bonus)
+// ES Module version for Vercel
 // ============================================
 
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
-const { Pool } = require('pg');
+import Stripe from 'stripe';
+import pg from 'pg';
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+const { Pool } = pg;
 
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
     ssl: { rejectUnauthorized: false }
 });
 
-// Webhook signing secret
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
 export const config = {
     api: {
-        bodyParser: false, // Must disable for Stripe webhook signature verification
+        bodyParser: false,
     },
 };
 
@@ -34,7 +31,6 @@ export default async function handler(req, res) {
     const sig = req.headers['stripe-signature'];
     let event;
 
-    // Get raw body
     const rawBody = await getRawBody(req);
 
     try {
@@ -51,40 +47,32 @@ export default async function handler(req, res) {
             case 'checkout.session.completed':
                 await handleCheckoutCompleted(event.data.object);
                 break;
-
             case 'customer.subscription.created':
                 await handleSubscriptionCreated(event.data.object);
                 break;
-
             case 'customer.subscription.updated':
                 await handleSubscriptionUpdated(event.data.object);
                 break;
-
             case 'customer.subscription.deleted':
                 await handleSubscriptionCancelled(event.data.object);
                 break;
-
             case 'invoice.payment_succeeded':
                 await handleInvoicePaid(event.data.object);
                 break;
-
             case 'invoice.payment_failed':
                 await handleInvoiceFailed(event.data.object);
                 break;
-
             default:
                 console.log(`ℹ️ Unhandled event type: ${event.type}`);
         }
 
         res.json({ received: true, event: event.type });
-
     } catch (error) {
         console.error('❌ Error processing webhook:', error);
         res.status(500).json({ error: 'Webhook processing failed' });
     }
 }
 
-// Get raw body for signature verification
 async function getRawBody(req) {
     const chunks = [];
     for await (const chunk of req) {
@@ -93,28 +81,18 @@ async function getRawBody(req) {
     return Buffer.concat(chunks).toString('utf8');
 }
 
-// ============================================
-// WEBHOOK HANDLERS
-// ============================================
-
 async function handleCheckoutCompleted(session) {
     console.log('🎯 Checkout completed:', session.id);
 
     const referralCode = session.client_reference_id;
-    if (!referralCode) {
-        console.log('ℹ️ No referral code in checkout session');
-        return;
-    }
+    if (!referralCode) return;
 
     const introducerQuery = await pool.query(
         'SELECT * FROM introducers WHERE referral_code = $1',
         [referralCode]
     );
 
-    if (introducerQuery.rows.length === 0) {
-        console.warn('⚠️ Referral code not found:', referralCode);
-        return;
-    }
+    if (introducerQuery.rows.length === 0) return;
 
     const introducer = introducerQuery.rows[0];
 
@@ -145,15 +123,11 @@ async function handleSubscriptionCreated(subscription) {
         RETURNING *
     `, [planAmount, commissionAmount, subscription.id]);
 
-    if (updateResult.rows.length === 0) {
-        console.warn('⚠️ No referral found for subscription:', subscription.id);
-        return;
-    }
+    if (updateResult.rows.length === 0) return;
 
     const referral = updateResult.rows[0];
     console.log('✅ Referral activated:', referral.introducer_code);
 
-    // Process recruiter bonus
     await processRecruiterBonus(referral.introducer_id, referral.id, subscription.id);
 }
 
@@ -173,10 +147,7 @@ async function processRecruiterBonus(introducerId, referralId, subscriptionId) {
         [recruiterCode]
     );
 
-    if (recruiterQuery.rows.length === 0) {
-        console.warn('⚠️ Recruiter not found:', recruiterCode);
-        return;
-    }
+    if (recruiterQuery.rows.length === 0) return;
 
     const recruiterId = recruiterQuery.rows[0].id;
     const recruiterBonusAmount = 2.00;
