@@ -436,7 +436,7 @@
                     </div>
                     <div class="button-group">
                         <button type="button" class="btn-secondary" onclick="prevStep()">Back</button>
-                        <button type="button" onclick="submitForm()" class="btn-primary">Submit Application</button>
+                        <button type="button" class="btn-primary" onclick="document.getElementById('registrationForm').dispatchEvent(new Event('submit'))">Submit Application</button>
                     </div>
                 </div>
 
@@ -558,11 +558,11 @@
             });
         }
 
-        async function submitForm() {
-            // Form submission via button click
+        document.getElementById('registrationForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
             hideError();
 
-            const submitBtn = document.querySelector('button[onclick="submitForm()"]');
+            const submitBtn = e.target.querySelector('button[type="submit"]');
             submitBtn.disabled = true;
             submitBtn.textContent = 'Submitting...';
 
@@ -582,10 +582,7 @@
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(formData)
-                }
-
-        // Keep form element but prevent default submission
-        document.getElementById('registrationForm').addEventListener('submit', (e) => e.preventDefault());
+                });
 
                 if (!response.ok) {
                     throw new Error('Registration failed. Please try again.');
