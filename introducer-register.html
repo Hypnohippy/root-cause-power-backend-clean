@@ -562,7 +562,7 @@
             e.preventDefault();
             hideError();
 
-            const submitBtn = e.target.querySelector('button[type="submit"]');
+            const submitBtn = document.querySelector('.btn-primary[onclick]');
             submitBtn.disabled = true;
             submitBtn.textContent = 'Submitting...';
 
