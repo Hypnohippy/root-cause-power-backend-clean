@@ -3,6 +3,10 @@
     {
       "source": "/introducers",
       "destination": "/introducers.html"
+    },
+    {
+      "source": "/glass/(.*)",
+      "destination": "https://glass-human-diagnostic.vercel.app/$1"
     }
   ],
   "crons": [
