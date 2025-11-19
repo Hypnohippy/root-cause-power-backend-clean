@@ -14208,27 +14208,43 @@
 
     <!-- Supabase auth gate: require login before using the app -->
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-    <script>
-      (function () {
-        const supabaseUrl = "https://bechmxbywqhsauhctewo.supabase.co";
-        const supabaseAnonKey =
-          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJlY2hteGJ5d3Foc2F1aGN0ZXdvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM0ODE0OTcsImV4cCI6MjA3OTA1NzQ5N30.kE3AfgQLI4WWq7je8_0noTvjpObVuW9hPMRUwwxRiFo";
+<script>
+  (function () {
+    const supabaseUrl = "https://bechmxbywqhsauhctewo.supabase.co";
+    const supabaseAnonKey =
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJlY2hteGJ5d3Foc2F1aGN0ZXdvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM0ODE0OTcsImV4cCI6MjA3OTA1NzQ5N30.kE3AfgQLI4WWq7je8_0noTvjpObVuW9hPMRUwwxRiFo"; // same anon key as in login.html
 
-        const { createClient } = window.supabase;
-        const client = createClient(supabaseUrl, supabaseAnonKey);
+    const { createClient } = window.supabase;
+    const client = createClient(supabaseUrl, supabaseAnonKey);
 
-        // Check if there is a logged-in user
-        client.auth.getUser().then(({ data, error }) => {
-          if (error || !data || !data.user) {
-            // Not logged in → send to login page
-            window.location.href = "/login.html";
-          } else {
-            // Logged in → do nothing, app continues as normal
-            console.log("Logged in as:", data.user.email);
-          }
+    client.auth.getUser().then(async ({ data, error }) => {
+      if (error || !data || !data.user) {
+        // Not logged in -> send to login
+        window.location.href = "/login.html";
+        return;
+      }
+
+      const user = data.user;
+      console.log("Logged in as:", user.email);
+
+      // NEW: ensure this user has a user_credits row and that you are VIP
+      try {
+        await fetch("/api/ensure-user-credits", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            user_id: user.id,
+            email: user.email,
+          }),
         });
-      })();
-    </script>
+      } catch (e) {
+        console.warn("Could not ensure user credits:", e);
+        // We won't block the app, just log the issue
+      }
+    });
+  })();
+</script>
+
 
 </body>
 </html>
