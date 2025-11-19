@@ -120,68 +120,78 @@
     </div>
 
     <!-- Supabase client via CDN -->
-      <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+         <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <script>
+      // DEBUG: show when script loads
+      alert("Root Health login script loaded");
+
       (function () {
-        // Safety: wait until DOM and Supabase are ready
-        document.addEventListener("DOMContentLoaded", function () {
-          if (!window.supabase) {
-            alert("Supabase library failed to load. Check your connection or ad blockers.");
+        if (!window.supabase) {
+          alert("Supabase failed to load (CDN blocked?)");
+          return;
+        }
+
+        const { createClient } = window.supabase;
+
+        // IMPORTANT: your real values here
+        const supabaseUrl = "https://bechmxbywqhsauhctewo.supabase.co";
+        const supabaseAnonKey =
+          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJlY2hteGJ5d3Foc2F1aGN0ZXdvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM0ODE0OTcsImV4cCI6MjA3OTA1NzQ5N30.kE3AfgQLI4WWq7je8_0noTvjpObVuW9hPMRUwwxRiFo";
+
+        const client = createClient(supabaseUrl, supabaseAnonKey);
+
+        const form = document.getElementById("login-form");
+        const emailInput = document.getElementById("email");
+        const statusEl = document.getElementById("status");
+        const button = document.getElementById("login-button");
+
+        // DEBUG: show if elements are missing
+        if (!form || !emailInput || !statusEl || !button) {
+          alert("Login elements not found in DOM");
+          return;
+        }
+
+        form.addEventListener("submit", async function (e) {
+          e.preventDefault();
+
+          // DEBUG: prove submit handler is firing
+          alert("Login form submitted – trying to send magic link…");
+
+          statusEl.textContent = "Sending magic link…";
+          statusEl.className = "status";
+          button.disabled = true;
+
+          const email = emailInput.value.trim();
+          if (!email) {
+            statusEl.textContent = "Please enter your email.";
+            statusEl.className = "status error";
+            button.disabled = false;
             return;
           }
 
-          const { createClient } = supabase;
+          try {
+            const { error } = await client.auth.signInWithOtp({
+              email,
+              // use Supabase default redirect (Site URL)
+            });
 
-          // IMPORTANT: your own Supabase URL & anon key
-          const supabaseUrl = "https://bechmxbywqhsauhctewo.supabase.co";
-          const supabaseAnonKey =
-            eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJlY2hteGJ5d3Foc2F1aGN0ZXdvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM0ODE0OTcsImV4cCI6MjA3OTA1NzQ5N30.kE3AfgQLI4WWq7je8_0noTvjpObVuW9hPMRUwwxRiFo;
-
-          const client = createClient(supabaseUrl, supabaseAnonKey);
-
-          const form = document.getElementById("login-form");
-          const emailInput = document.getElementById("email");
-          const statusEl = document.getElementById("status");
-          const button = document.getElementById("login-button");
-
-          form.addEventListener("submit", async function (e) {
-            e.preventDefault();
-            statusEl.textContent = "Sending magic link…";
-            statusEl.className = "status";
-            button.disabled = true;
-
-            const email = emailInput.value.trim();
-            if (!email) {
-              statusEl.textContent = "Please enter your email.";
+            if (error) {
+              console.error("Supabase error:", error);
+              statusEl.textContent = error.message || "Error sending magic link.";
               statusEl.className = "status error";
-              button.disabled = false;
-              return;
-            }
-
-            try {
-              const { error } = await client.auth.signInWithOtp({
-                email,
-                // Let Supabase use its default redirect (Site URL)
-              });
-
-              if (error) {
-                console.error("Supabase error:", error);
-                statusEl.textContent = error.message || "Error sending magic link.";
-                statusEl.className = "status error";
-              } else {
-                statusEl.textContent =
-                  "Magic link sent! Check your email to finish logging in.";
-                statusEl.className = "status ok";
-              }
-            } catch (err) {
-              console.error("JS error:", err);
+            } else {
               statusEl.textContent =
-                "Something went wrong sending the link. Please try again.";
-              statusEl.className = "status error";
-            } finally {
-              button.disabled = false;
+                "Magic link sent! Check your email to finish logging in.";
+              statusEl.className = "status ok";
             }
-          });
+          } catch (err) {
+            console.error("JS error:", err);
+            statusEl.textContent =
+              "Something went wrong sending the link. Please try again.";
+            statusEl.className = "status error";
+          } finally {
+            button.disabled = false;
+          }
         });
       })();
     </script>
