@@ -9,12 +9,11 @@
     "test": "echo 'Tests not configured yet'"
   },
   "dependencies": {
-  "pg": "^8.11.3",
-  "stripe": "^14.10.0",
-  "groq-sdk": "^0.3.2",
-  "@supabase/supabase-js": "^2.48.0"
-}
-
+    "pg": "^8.11.3",
+    "stripe": "^14.10.0",
+    "groq-sdk": "^0.3.2",
+    "@supabase/supabase-js": "^2.48.0"
+  },
   "engines": {
     "node": ">=18.0.0"
   },
