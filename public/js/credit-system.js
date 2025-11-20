@@ -1,19 +1,12 @@
-/**
- * Credit System for Root Cause Power Platform
- * Handles daily credits, voice credits, and Stripe payments
- * + Simple VIP override for founder (no Supabase needed)
- */
-
 class CreditSystem {
     constructor() {
-        // 🔑 Founder VIP toggle — set to true for your account while we build proper backend credits
-        this.isVip = true; // change to false later when Supabase-based credits are fully wired
-
+        // Check if the user is VIP by looking in localStorage (VIP stays true for this session)
+        this.isVip = this.loadVipStatus(); // Load VIP status from localStorage
         this.dailyCredits = this.loadDailyCredits();
         this.voiceCredits = this.loadVoiceCredits();
         this.stripe = null;
 
-        // If VIP, give huge balances straight away
+        // If VIP, provide infinite credits
         if (this.isVip) {
             this.dailyCredits.count = 999999;
             this.dailyCredits.maxDaily = 999999;
@@ -23,6 +16,18 @@ class CreditSystem {
         this.initStripe();
         this.updateCreditDisplays();
         this.startDailyReset();
+    }
+
+    // Load VIP status (true for VIP, false for non-VIP)
+    loadVipStatus() {
+        const stored = localStorage.getItem('isVip');
+        return stored === 'true'; // Returns true if 'isVip' is stored as 'true', else false
+    }
+
+    // Set VIP status (called when admin or user is granted VIP status)
+    setVipStatus(isVip) {
+        localStorage.setItem('isVip', isVip ? 'true' : 'false');
+        this.isVip = isVip;
     }
 
     // Initialize Stripe
@@ -54,8 +59,8 @@ class CreditSystem {
         
         const credits = JSON.parse(stored);
         
-        // Check if we need to reset daily credits
-        if (credits.lastReset !== new Date().toDateString()) {
+        // Check if we need to reset daily credits (skip if VIP)
+        if (!this.isVip && credits.lastReset !== new Date().toDateString()) {
             credits.count = credits.maxDaily;
             credits.lastReset = new Date().toDateString();
             this.saveDailyCredits(credits);
@@ -86,15 +91,13 @@ class CreditSystem {
 
     // Update all credit displays in the UI
     updateCreditDisplays() {
-        // Daily credits counter
         const dailyCounter = document.getElementById('daily-credit-count');
         if (dailyCounter) {
             const displayText = this.isVip
-                ? '∞'
+                ? '∞'  // VIP users get infinite credits
                 : `${this.dailyCredits.count}/${this.dailyCredits.maxDaily}`;
             dailyCounter.textContent = displayText;
             
-            // Add warning styling if low (only matters for non-VIP)
             const dailyContainer = document.getElementById('daily-credit-counter');
             if (dailyContainer) {
                 if (!this.isVip && this.dailyCredits.count <= 1) {
@@ -105,21 +108,16 @@ class CreditSystem {
             }
         }
 
-        // Voice credits counter
         const voiceCounter = document.getElementById('voice-credit-count');
         if (voiceCounter) {
             voiceCounter.textContent = this.isVip ? '∞' : this.voiceCredits;
         }
 
-        // Voice session credits display
         const sessionCredits = document.getElementById('voice-session-credits');
         if (sessionCredits) {
-            sessionCredits.textContent = this.isVip
-                ? '∞ minutes'
-                : `${this.voiceCredits} minutes`;
+            sessionCredits.textContent = this.isVip ? '∞ minutes' : `${this.voiceCredits} minutes`;
         }
 
-        // Current balance in modal
         const currentBalance = document.getElementById('current-voice-balance');
         if (currentBalance) {
             currentBalance.textContent = this.isVip ? '∞' : this.voiceCredits;
@@ -128,10 +126,9 @@ class CreditSystem {
 
     // Use a daily credit
     useDailyCredit(purpose = 'AI interaction') {
-        // VIP: never deduct, always allow
         if (this.isVip) {
             console.log(`👑 VIP: daily credit request for ${purpose} – no deduction applied`);
-            return true;
+            return true;  // VIP users always have infinite credits, no deduction
         }
 
         if (this.dailyCredits.count <= 0) {
@@ -148,10 +145,9 @@ class CreditSystem {
 
     // Use voice credits (in minutes)
     useVoiceCredits(minutes, purpose = 'Voice AI session') {
-        // VIP: never deduct, always allow
         if (this.isVip) {
             console.log(`👑 VIP: voice credit request for ${minutes} minutes (${purpose}) – no deduction applied`);
-            return true;
+            return true;  // VIP users always have infinite voice credits
         }
 
         if (this.voiceCredits < minutes) {
@@ -164,16 +160,6 @@ class CreditSystem {
         
         console.log(`🎤 Voice credits used: ${minutes} minutes for ${purpose}. Remaining: ${this.voiceCredits}`);
         return true;
-    }
-
-    // Add voice credits (after purchase)
-    addVoiceCredits(minutes) {
-        this.voiceCredits += minutes;
-        this.saveVoiceCredits(this.voiceCredits);
-        
-        // Show success message
-        this.showCreditSuccess('voice', minutes);
-        console.log(`✅ Added ${minutes} voice minutes. Total: ${this.voiceCredits}`);
     }
 
     // Show credit warning modal
@@ -257,247 +243,7 @@ class CreditSystem {
             }, 300);
         }, 4000);
     }
-
-    // Purchase voice credits via Stripe
-    async purchaseVoiceCredits(packageType, amount, minutes) {
-        if (!this.stripe) {
-            alert('Payment system not available. Please try again later.');
-            return;
-        }
-
-        try {
-            console.log(`💳 Initiating purchase: ${packageType} - £${amount} for ${minutes} minutes`);
-            
-            // Show loading state
-            this.showPaymentLoading();
-            
-            // Create payment session on server
-            const response = await fetch('/api/create-payment-session', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    packageType,
-                    amount: amount * 100, // Convert to pence
-                    minutes,
-                    productName: `Voice Credits - ${packageType.charAt(0).toUpperCase() + packageType.slice(1)}`,
-                    description: `${minutes} minutes of AI voice coaching`
-                })
-            });
-
-            const session = await response.json();
-            
-            if (session.error) {
-                throw new Error(session.error);
-            }
-
-            // Redirect to Stripe Checkout
-            const { error } = await this.stripe.redirectToCheckout({
-                sessionId: session.sessionId
-            });
-
-            if (error) {
-                throw error;
-            }
-
-        } catch (error) {
-            console.error('❌ Payment failed:', error);
-            this.hidePaymentLoading();
-            
-            // Show error message
-            alert(`Payment failed: ${error.message || 'Unknown error occurred'}`);
-        }
-    }
-
-    // Show payment loading overlay
-    showPaymentLoading() {
-        const overlay = document.createElement('div');
-        overlay.id = 'payment-loading';
-        overlay.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
-        overlay.innerHTML = `
-            <div class="bg-white rounded-lg p-8 text-center">
-                <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-purple-600 mx-auto mb-4"></div>
-                <h3 class="text-lg font-semibold text-gray-800 mb-2">Processing Payment</h3>
-                <p class="text-gray-600">Redirecting to secure payment...</p>
-            </div>
-        `;
-        
-        document.body.appendChild(overlay);
-    }
-
-    // Hide payment loading
-    hidePaymentLoading() {
-        const overlay = document.getElementById('payment-loading');
-        if (overlay) {
-            overlay.remove();
-        }
-    }
-
-    // Handle successful payment (called from success page or webhook)
-    handlePaymentSuccess(sessionData) {
-        if (sessionData.minutes) {
-            this.addVoiceCredits(sessionData.minutes);
-        }
-        
-        // Close any open modals
-        this.closeAllModals();
-        
-        // Show success message
-        this.showCreditSuccess('voice', sessionData.minutes);
-    }
-
-    // Close modal helper
-    closeModal(element) {
-        const modal = element.closest('.fixed');
-        if (modal) {
-            modal.remove();
-        }
-    }
-
-    // Close all credit-related modals
-    closeAllModals() {
-        const modals = document.querySelectorAll('#voice-credit-modal, #payment-loading');
-        modals.forEach(modal => {
-            modal.classList.add('hidden');
-        });
-    }
-
-    // Start daily reset timer
-    startDailyReset() {
-        // For VIP, we don't really care about resets, but we still keep it in case you toggle VIP off later
-        setInterval(() => {
-            const today = new Date().toDateString();
-            if (this.dailyCredits.lastReset !== today && !this.isVip) {
-                this.dailyCredits.count = this.dailyCredits.maxDaily;
-                this.dailyCredits.lastReset = today;
-                this.saveDailyCredits(this.dailyCredits);
-                
-                console.log('🔄 Daily credits reset!');
-                
-                // Show notification if user is active
-                if (document.visibilityState === 'visible') {
-                    this.showCreditSuccess('daily', this.dailyCredits.maxDaily);
-                }
-            }
-        }, 60000 * 60); // Check every hour
-    }
-
-    // Get credit status for API calls
-    getCreditStatus() {
-        return {
-            daily: {
-                available: this.isVip ? Infinity : this.dailyCredits.count,
-                max: this.isVip ? Infinity : this.dailyCredits.maxDaily,
-                resetsAt: this.getNextResetTime()
-            },
-            voice: {
-                available: this.isVip ? Infinity : this.voiceCredits,
-                unit: 'minutes'
-            }
-        };
-    }
-
-    // Get next reset time
-    getNextResetTime() {
-        const now = new Date();
-        const tomorrow = new Date(now);
-        tomorrow.setDate(tomorrow.getDate() + 1);
-        tomorrow.setHours(0, 0, 0, 0);
-        return tomorrow.toISOString();
-    }
-
-    // Show credit info modal
-    showCreditInfo() {
-        const modal = document.createElement('div');
-        modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
-        
-        const nextReset = this.getNextResetTime();
-        const timeUntilReset = new Date(nextReset) - new Date();
-        const hoursUntilReset = Math.ceil(timeUntilReset / (1000 * 60 * 60));
-        
-        modal.innerHTML = `
-            <div class="bg-white rounded-lg p-6 max-w-md w-full shadow-2xl">
-                <div class="text-center mb-6">
-                    <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i class="fas fa-info-circle text-blue-500 text-2xl"></i>
-                    </div>
-                    <h3 class="text-xl font-bold text-gray-800 mb-2">Your Credits</h3>
-                </div>
-                
-                <div class="space-y-4">
-                    <div class="bg-green-50 p-4 rounded-lg">
-                        <div class="flex justify-between items-center mb-2">
-                            <span class="font-semibold text-green-800">Daily Credits</span>
-                            <span class="text-2xl font-bold text-green-600">
-                                ${this.isVip ? '∞' : `${this.dailyCredits.count}/${this.dailyCredits.maxDaily}`}
-                            </span>
-                        </div>
-                        <div class="text-sm text-green-700">
-                            ${this.isVip ? 'VIP mode – unlimited daily credits' : `Resets in ${hoursUntilReset} hours • Used for AI interactions`}
-                        </div>
-                    </div>
-                    
-                    <div class="bg-purple-50 p-4 rounded-lg">
-                        <div class="flex justify-between items-center mb-2">
-                            <span class="font-semibold text-purple-800">Voice Credits</span>
-                            <span class="text-2xl font-bold text-purple-600">${this.isVip ? '∞' : `${this.voiceCredits} min`}</span>
-                        </div>
-                        <div class="text-sm text-purple-700">
-                            ${this.isVip ? 'VIP mode – unlimited voice coaching' : 'Never expire • Used for voice AI coaching'}
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="mt-6 space-y-3">
-                    <button onclick="creditSystem.closeModal(this); window.app.showVoiceCreditStore();" 
-                            class="w-full bg-purple-500 text-white py-3 rounded-lg hover:bg-purple-600 transition-colors">
-                        <i class="fas fa-microphone mr-2"></i>Buy Voice Credits
-                    </button>
-                    <button onclick="creditSystem.closeModal(this)" 
-                            class="w-full border border-gray-300 text-gray-700 py-3 rounded-lg hover:bg-gray-50 transition-colors">
-                        Close
-                    </button>
-                </div>
-            </div>
-        `;
-        
-        document.body.appendChild(modal);
-    }
-
-    // Check if user has enough credits for an action
-    canAfford(type, amount = 1) {
-        if (this.isVip) return true;
-
-        if (type === 'daily') {
-            return this.dailyCredits.count >= amount;
-        } else if (type === 'voice') {
-            return this.voiceCredits >= amount;
-        }
-        return false;
-    }
-
-    // Get friendly time until reset
-    getTimeUntilReset() {
-        const nextReset = this.getNextResetTime();
-        const timeUntil = new Date(nextReset) - new Date();
-        const hours = Math.floor(timeUntil / (1000 * 60 * 60));
-        const minutes = Math.floor((timeUntil % (1000 * 60 * 60)) / (1000 * 60));
-        
-        if (hours > 0) {
-            return `${hours}h ${minutes}m`;
-        } else {
-            return `${minutes}m`;
-        }
-    }
 }
 
 // Initialize credit system
 window.creditSystem = new CreditSystem();
-
-// Export for use in other modules
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = CreditSystem;
-}
-
-console.log('💰 Credit System initialized successfully!');
