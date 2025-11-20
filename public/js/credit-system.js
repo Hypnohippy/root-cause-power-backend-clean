@@ -1,13 +1,25 @@
 /**
  * Credit System for Root Cause Power Platform
  * Handles daily credits, voice credits, and Stripe payments
+ * + Simple VIP override for founder (no Supabase needed)
  */
 
 class CreditSystem {
     constructor() {
+        // 🔑 Founder VIP toggle — set to true for your account while we build proper backend credits
+        this.isVip = true; // change to false later when Supabase-based credits are fully wired
+
         this.dailyCredits = this.loadDailyCredits();
         this.voiceCredits = this.loadVoiceCredits();
         this.stripe = null;
+
+        // If VIP, give huge balances straight away
+        if (this.isVip) {
+            this.dailyCredits.count = 999999;
+            this.dailyCredits.maxDaily = 999999;
+            this.voiceCredits = 999999;
+        }
+
         this.initStripe();
         this.updateCreditDisplays();
         this.startDailyReset();
@@ -77,38 +89,51 @@ class CreditSystem {
         // Daily credits counter
         const dailyCounter = document.getElementById('daily-credit-count');
         if (dailyCounter) {
-            dailyCounter.textContent = `${this.dailyCredits.count}/${this.dailyCredits.maxDaily}`;
+            const displayText = this.isVip
+                ? '∞'
+                : `${this.dailyCredits.count}/${this.dailyCredits.maxDaily}`;
+            dailyCounter.textContent = displayText;
             
-            // Add warning styling if low
+            // Add warning styling if low (only matters for non-VIP)
             const dailyContainer = document.getElementById('daily-credit-counter');
-            if (this.dailyCredits.count <= 1) {
-                dailyContainer.classList.add('credit-low');
-            } else {
-                dailyContainer.classList.remove('credit-low');
+            if (dailyContainer) {
+                if (!this.isVip && this.dailyCredits.count <= 1) {
+                    dailyContainer.classList.add('credit-low');
+                } else {
+                    dailyContainer.classList.remove('credit-low');
+                }
             }
         }
 
         // Voice credits counter
         const voiceCounter = document.getElementById('voice-credit-count');
         if (voiceCounter) {
-            voiceCounter.textContent = this.voiceCredits;
+            voiceCounter.textContent = this.isVip ? '∞' : this.voiceCredits;
         }
 
         // Voice session credits display
         const sessionCredits = document.getElementById('voice-session-credits');
         if (sessionCredits) {
-            sessionCredits.textContent = `${this.voiceCredits} minutes`;
+            sessionCredits.textContent = this.isVip
+                ? '∞ minutes'
+                : `${this.voiceCredits} minutes`;
         }
 
         // Current balance in modal
         const currentBalance = document.getElementById('current-voice-balance');
         if (currentBalance) {
-            currentBalance.textContent = this.voiceCredits;
+            currentBalance.textContent = this.isVip ? '∞' : this.voiceCredits;
         }
     }
 
     // Use a daily credit
     useDailyCredit(purpose = 'AI interaction') {
+        // VIP: never deduct, always allow
+        if (this.isVip) {
+            console.log(`👑 VIP: daily credit request for ${purpose} – no deduction applied`);
+            return true;
+        }
+
         if (this.dailyCredits.count <= 0) {
             this.showCreditWarning('daily');
             return false;
@@ -123,6 +148,12 @@ class CreditSystem {
 
     // Use voice credits (in minutes)
     useVoiceCredits(minutes, purpose = 'Voice AI session') {
+        // VIP: never deduct, always allow
+        if (this.isVip) {
+            console.log(`👑 VIP: voice credit request for ${minutes} minutes (${purpose}) – no deduction applied`);
+            return true;
+        }
+
         if (this.voiceCredits < minutes) {
             this.showCreditWarning('voice');
             return false;
@@ -334,10 +365,10 @@ class CreditSystem {
 
     // Start daily reset timer
     startDailyReset() {
-        // Check every hour if we need to reset
+        // For VIP, we don't really care about resets, but we still keep it in case you toggle VIP off later
         setInterval(() => {
             const today = new Date().toDateString();
-            if (this.dailyCredits.lastReset !== today) {
+            if (this.dailyCredits.lastReset !== today && !this.isVip) {
                 this.dailyCredits.count = this.dailyCredits.maxDaily;
                 this.dailyCredits.lastReset = today;
                 this.saveDailyCredits(this.dailyCredits);
@@ -356,12 +387,12 @@ class CreditSystem {
     getCreditStatus() {
         return {
             daily: {
-                available: this.dailyCredits.count,
-                max: this.dailyCredits.maxDaily,
+                available: this.isVip ? Infinity : this.dailyCredits.count,
+                max: this.isVip ? Infinity : this.dailyCredits.maxDaily,
                 resetsAt: this.getNextResetTime()
             },
             voice: {
-                available: this.voiceCredits,
+                available: this.isVip ? Infinity : this.voiceCredits,
                 unit: 'minutes'
             }
         };
@@ -398,20 +429,22 @@ class CreditSystem {
                     <div class="bg-green-50 p-4 rounded-lg">
                         <div class="flex justify-between items-center mb-2">
                             <span class="font-semibold text-green-800">Daily Credits</span>
-                            <span class="text-2xl font-bold text-green-600">${this.dailyCredits.count}/${this.dailyCredits.maxDaily}</span>
+                            <span class="text-2xl font-bold text-green-600">
+                                ${this.isVip ? '∞' : `${this.dailyCredits.count}/${this.dailyCredits.maxDaily}`}
+                            </span>
                         </div>
                         <div class="text-sm text-green-700">
-                            Resets in ${hoursUntilReset} hours • Used for AI interactions
+                            ${this.isVip ? 'VIP mode – unlimited daily credits' : `Resets in ${hoursUntilReset} hours • Used for AI interactions`}
                         </div>
                     </div>
                     
                     <div class="bg-purple-50 p-4 rounded-lg">
                         <div class="flex justify-between items-center mb-2">
                             <span class="font-semibold text-purple-800">Voice Credits</span>
-                            <span class="text-2xl font-bold text-purple-600">${this.voiceCredits} min</span>
+                            <span class="text-2xl font-bold text-purple-600">${this.isVip ? '∞' : `${this.voiceCredits} min`}</span>
                         </div>
                         <div class="text-sm text-purple-700">
-                            Never expire • Used for voice AI coaching
+                            ${this.isVip ? 'VIP mode – unlimited voice coaching' : 'Never expire • Used for voice AI coaching'}
                         </div>
                     </div>
                 </div>
@@ -434,6 +467,8 @@ class CreditSystem {
 
     // Check if user has enough credits for an action
     canAfford(type, amount = 1) {
+        if (this.isVip) return true;
+
         if (type === 'daily') {
             return this.dailyCredits.count >= amount;
         } else if (type === 'voice') {
