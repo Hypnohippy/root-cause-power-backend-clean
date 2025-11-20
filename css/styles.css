@@ -1,0 +1,503 @@
+/* Root Cause Power PWA Styles */
+:root {
+  --primary-color: #10b981;
+  --secondary-color: #8b5cf6;
+  --accent-color: #3b82f6;
+  --danger-color: #ef4444;
+  --warning-color: #f59e0b;
+  --success-color: #10b981;
+  --dark-color: #1f2937;
+  --light-color: #f9fafb;
+  --text-color: #374151;
+  --border-radius: 0.5rem;
+  --box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --transition: all 0.3s ease;
+}
+
+/* Base styles */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  line-height: 1.6;
+  color: var(--text-color);
+}
+
+/* Hide sections by default */
+.section {
+  display: none;
+  min-height: calc(100vh - 80px);
+}
+
+.section.active {
+  display: block;
+}
+
+/* Navigation styles */
+.nav-item {
+  cursor: pointer;
+  transition: var(--transition);
+  user-select: none;
+}
+
+.nav-item:hover {
+  background-color: var(--dark-color);
+  transform: translateY(-1px);
+}
+
+.nav-item.active {
+  background-color: var(--dark-color);
+  color: var(--primary-color);
+  font-weight: 600;
+}
+
+/* Mobile navigation */
+#mobile-nav {
+  background-color: rgba(31, 41, 55, 0.95);
+  backdrop-filter: blur(10px);
+}
+
+/* Gradient backgrounds */
+.gradient-bg {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.coach-card {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  transition: var(--transition);
+}
+
+.coach-card:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.trauma-safe {
+  background: linear-gradient(135deg, #a78bfa 0%, #8b5cf6 100%);
+}
+
+.health-metric {
+  background: linear-gradient(135deg, var(--primary-color) 0%, #059669 100%);
+}
+
+.crisis-alert {
+  background: linear-gradient(135deg, var(--warning-color) 0%, #d97706 100%);
+  border: 2px solid #d97706;
+  animation: pulse 2s infinite;
+}
+
+/* Feature cards */
+.feature-card {
+  transition: var(--transition);
+}
+
+.feature-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+/* Food cards */
+.food-card {
+  transition: var(--transition);
+  cursor: pointer;
+}
+
+.food-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--box-shadow);
+}
+
+/* Journal styles */
+.journal-entry {
+  background: #f8fafc;
+  border-left: 4px solid var(--secondary-color);
+  transition: var(--transition);
+}
+
+.journal-entry:hover {
+  background: #f1f5f9;
+  transform: translateX(4px);
+}
+
+/* Coping technique cards */
+.coping-technique {
+  background: #f0f9ff;
+  border: 1px solid #0ea5e9;
+  transition: var(--transition);
+  cursor: pointer;
+}
+
+.coping-technique:hover {
+  background: #e0f2fe;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
+}
+
+/* EMDR technique cards */
+.emdr-technique {
+  background: #f0fdf4;
+  border: 1px solid var(--primary-color);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.emdr-technique:hover {
+  background: #dcfce7;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+/* Educational cards */
+.educational-card {
+  background: #fefce8;
+  border: 1px solid #eab308;
+  transition: var(--transition);
+}
+
+.educational-card:hover {
+  background: #fef3c7;
+  transform: translateY(-1px);
+}
+
+/* Community cards */
+.community-card {
+  background: linear-gradient(135deg, var(--accent-color) 0%, #1d4ed8 100%);
+}
+
+/* Breathing animation */
+.breathing-circle {
+  transition: all 4s ease-in-out;
+  position: relative;
+  overflow: hidden;
+}
+
+.breathing-inhale {
+  transform: scale(1.3);
+  background-color: rgba(139, 92, 246, 0.2);
+}
+
+.breathing-hold {
+  background-color: rgba(139, 92, 246, 0.3);
+}
+
+.breathing-exhale {
+  transform: scale(0.8);
+  background-color: rgba(139, 92, 246, 0.1);
+}
+
+/* Progress circle */
+.progress-circle {
+  position: relative;
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  background: conic-gradient(var(--secondary-color) 0deg, var(--secondary-color) 180deg, #e5e7eb 180deg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.progress-circle::before {
+  content: '';
+  position: absolute;
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  background: white;
+}
+
+/* Assessment styles */
+.assessment-step {
+  transition: var(--transition);
+}
+
+.assessment-step.active {
+  border-color: var(--primary-color);
+  background-color: #f0fdf4;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+/* Button styles */
+.cta-button {
+  transition: var(--transition);
+  position: relative;
+  overflow: hidden;
+}
+
+.cta-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transition: left 0.5s;
+}
+
+.cta-button:hover::before {
+  left: 100%;
+}
+
+.quick-action {
+  transition: var(--transition);
+}
+
+.quick-action:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--box-shadow);
+}
+
+/* Modal styles */
+.modal {
+  backdrop-filter: blur(4px);
+  animation: fadeIn 0.3s ease-out;
+}
+
+.modal > div {
+  animation: slideUp 0.3s ease-out;
+}
+
+/* Media filter buttons */
+.media-filter-btn {
+  transition: var(--transition);
+}
+
+.media-filter-btn:hover {
+  transform: translateY(-1px);
+}
+
+/* FAQ styles */
+.faq-item {
+  transition: var(--transition);
+}
+
+.faq-item:hover {
+  background-color: #f9fafb;
+}
+
+.faq-answer {
+  transition: all 0.3s ease;
+}
+
+/* Video grid */
+#video-grid > div {
+  transition: var(--transition);
+}
+
+#video-grid > div:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1);
+}
+
+/* Loading states */
+.loading {
+  position: relative;
+  overflow: hidden;
+}
+
+.loading::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  animation: loading 1.5s infinite;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { 
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+@keyframes loading {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+  40% { transform: translateY(-10px); }
+  60% { transform: translateY(-5px); }
+}
+
+/* PWA specific styles */
+@media (display-mode: standalone) {
+  body {
+    padding-top: env(safe-area-inset-top);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  
+  #main-nav {
+    padding-top: calc(1rem + env(safe-area-inset-top));
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --light-color: #1f2937;
+    --text-color: #f9fafb;
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .coach-card,
+  .health-metric,
+  .trauma-safe {
+    background: var(--primary-color);
+    border: 2px solid #000;
+  }
+  
+  .crisis-alert {
+    background: var(--danger-color);
+    border: 3px solid #000;
+  }
+}
+
+/* Print styles */
+@media print {
+  .section:not(.active) {
+    display: none !important;
+  }
+  
+  #main-nav,
+  .modal,
+  button {
+    display: none !important;
+  }
+  
+  .crisis-alert {
+    background: white !important;
+    border: 2px solid #000 !important;
+    color: #000 !important;
+  }
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  .grid {
+    gap: 1rem;
+  }
+  
+  .text-5xl {
+    font-size: 2.5rem;
+  }
+  
+  .text-4xl {
+    font-size: 2rem;
+  }
+  
+  .coach-card,
+  .feature-card {
+    padding: 1rem;
+  }
+  
+  .modal > div {
+    margin: 1rem;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+}
+
+/* Tablet optimizations */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .grid-cols-3 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .grid-cols-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Large screen optimizations */
+@media (min-width: 1200px) {
+  .container {
+    max-width: 1200px;
+  }
+}
+
+/* Focus management for accessibility */
+:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
+/* Screen reader only content */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--primary-color);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #059669;
+}
+
+/* Selection styling */
+::selection {
+  background-color: var(--primary-color);
+  color: white;
+}
