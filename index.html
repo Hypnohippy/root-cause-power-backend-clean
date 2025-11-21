@@ -14238,14 +14238,16 @@
           }),
         });
       } catch (e) {
-        console.warn("Could not ensure user credits:", e);
-        // We won't block the app, just log the issue
-      }
-    });
-  })();
-</script<script src="/js/vip-override.js"></script>
->
+    console.warn("Could not ensure user credits:", e);
+    // We won't block the app, just log the issue
+  }
+});
+})();
+</script>
 
+<!-- VIP override MUST be last so it wins -->
+<script src="/js/vip-override.js"></script>
 
 </body>
 </html>
+
