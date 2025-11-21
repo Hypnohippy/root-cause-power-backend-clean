@@ -14247,6 +14247,52 @@
 
 <!-- VIP override MUST be last so it wins -->
   <script src="/js/founder-vip.js" defer></script>
+      <!-- your other scripts are above here -->
+
+  <!-- Founder VIP override -->
+  <script>
+    (function () {
+      try {
+        const params = new URLSearchParams(window.location.search);
+
+        // Only run when you visit roothealth.app/?founderVip=1
+        if (params.get("founderVip") === "1") {
+          const bigDaily = {
+            count: 999999,
+            maxDaily: 999999,
+            lastReset: new Date().toDateString(),
+          };
+
+          // 1) Override localStorage
+          localStorage.setItem("dailyCredits", JSON.stringify(bigDaily));
+          localStorage.setItem("voiceCredits", "999999");
+
+          // 2) If the existing creditSystem object is there, override it too
+          if (window.creditSystem) {
+            try {
+              window.creditSystem.isVip = true;
+              window.creditSystem.dailyCredits = bigDaily;
+              window.creditSystem.voiceCredits = 999999;
+
+              if (typeof window.creditSystem.updateCreditDisplays === "function") {
+                window.creditSystem.updateCreditDisplays();
+              }
+            } catch (e) {
+              console.warn("Could not sync VIP into creditSystem:", e);
+            }
+          }
+
+          console.log("👑 Founder VIP override applied – huge credits set.");
+        }
+      } catch (e) {
+        console.warn("Founder VIP override failed:", e);
+      }
+    })();
+  </script>
+
+</body>
+</html>
+
 </body>
 </html>
 
