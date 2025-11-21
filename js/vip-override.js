@@ -2,57 +2,77 @@
 (function () {
   console.log("🛠 VIP override script loaded");
 
+  // Stub for the missing Stripe helper so it stops crashing
+  if (typeof window !== "undefined" && typeof window.openEmbeddedStripeCheckout === "undefined") {
+    window.openEmbeddedStripeCheckout = function () {
+      console.log(
+        "openEmbeddedStripeCheckout called (stub) – full Stripe embed not wired in this build."
+      );
+    };
+  }
+
   function applyVipOverride() {
     try {
-      if (!window.creditSystem) {
-        console.warn("creditSystem not ready yet, retrying…");
-        return false;
+      const today = new Date().toDateString();
+
+      // 1) Force huge credits into localStorage
+      const daily = {
+        count: 999999,
+        maxDaily: 999999,
+        lastReset: today,
+      };
+      localStorage.setItem("dailyCredits", JSON.stringify(daily));
+      localStorage.setItem("voiceCredits", "999999");
+
+      // 2) Update UI elements directly (ignore internal logic)
+      const dailyCounter = document.getElementById("daily-credit-count");
+      if (dailyCounter) {
+        dailyCounter.textContent = "∞";
       }
 
-      // Force VIP mode and huge balances
-      window.creditSystem.isVip = true;
-
-      if (!window.creditSystem.dailyCredits) {
-        window.creditSystem.dailyCredits = {};
+      const dailyContainer = document.getElementById("daily-credit-counter");
+      if (dailyContainer) {
+        dailyContainer.classList.remove("credit-low");
       }
 
-      window.creditSystem.dailyCredits.count = 999999;
-      window.creditSystem.dailyCredits.maxDaily = 999999;
-      window.creditSystem.dailyCredits.lastReset = new Date().toDateString();
-
-      window.creditSystem.voiceCredits = 999999;
-
-      // Save + update UI
-      if (typeof window.creditSystem.saveDailyCredits === "function") {
-        window.creditSystem.saveDailyCredits(window.creditSystem.dailyCredits);
-      }
-      if (typeof window.creditSystem.saveVoiceCredits === "function") {
-        window.creditSystem.saveVoiceCredits(window.creditSystem.voiceCredits);
-      }
-      if (typeof window.creditSystem.updateCreditDisplays === "function") {
-        window.creditSystem.updateCreditDisplays();
+      const voiceCounter = document.getElementById("voice-credit-count");
+      if (voiceCounter) {
+        voiceCounter.textContent = "∞";
       }
 
-      console.log("👑 VIP override applied – credits set to ∞");
+      const sessionCredits = document.getElementById("voice-session-credits");
+      if (sessionCredits) {
+        sessionCredits.textContent = "∞ minutes";
+      }
+
+      const currentBalance = document.getElementById("current-voice-balance");
+      if (currentBalance) {
+        currentBalance.textContent = "∞";
+      }
+
+      console.log("👑 VIP override applied via localStorage + DOM");
       return true;
     } catch (e) {
-      console.error("VIP override failed:", e);
+      console.warn("VIP override failed:", e);
       return false;
     }
   }
 
-  // Try a few times while scripts load
+  // Try repeatedly while the page and main scripts finish loading
   let attempts = 0;
-  const maxAttempts = 20;
+  const maxAttempts = 30;
   const interval = setInterval(() => {
     attempts++;
-    if (applyVipOverride() || attempts >= maxAttempts) {
+    const ok = applyVipOverride();
+
+    // Give it a few successful passes, then stop
+    if ((ok && attempts > 5) || attempts >= maxAttempts) {
       clearInterval(interval);
     }
-  }, 300);
+  }, 400);
 
-  // One more try on full window load
+  // One more pass after full load
   window.addEventListener("load", () => {
-    applyVipOverride();
+    setTimeout(applyVipOverride, 500);
   });
 })();
