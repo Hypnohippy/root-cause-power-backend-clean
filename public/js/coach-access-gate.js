@@ -1,100 +1,139 @@
 // public/js/coach-access-gate.js
-// Wraps Coach David start to go through /api/coach-access (Supabase)
-
+// Wraps Coach David so voice credits are actually used
 (function () {
   console.log("🔐 Coach access gate script loaded");
 
-  function wrapBookVoiceCoach() {
-    if (!window.bookVoiceCoachSession) {
+  // Smooth-scroll to the pricing section
+  function scrollToPricing() {
+    try {
+      const el =
+        document.getElementById("pricing") ||
+        document.querySelector('[data-section="pricing"]');
+
+      if (el && typeof el.scrollIntoView === "function") {
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+      } else {
+        // Fallback: at least change the hash
+        window.location.hash = "#pricing";
+      }
+    } catch (e) {
+      console.warn("Could not scroll to pricing:", e);
+    }
+  }
+
+  // Fix upgrade modal buttons: when user clicks "Get More Credits" etc,
+  // make sure they actually go to pricing.
+  document.addEventListener("click", (e) => {
+    const btn = e.target.closest("button");
+    if (!btn) return;
+
+    const txt = (btn.textContent || "").toLowerCase();
+
+    if (
+      txt.includes("get more credits") ||
+      txt.includes("buy voice credits") ||
+      txt.includes("upgrade")
+    ) {
+      // Let any existing logic run, then nudge user to pricing
+      setTimeout(scrollToPricing, 50);
+    }
+  });
+
+  // Wrap bookVoiceCoachSession so it uses voice credits
+  function wrapCoachOnce() {
+    if (!window.creditSystem) {
+      console.log("⏳ Waiting for creditSystem to exist...");
+      return false;
+    }
+    if (typeof window.bookVoiceCoachSession !== "function") {
       console.log("⏳ Waiting for bookVoiceCoachSession to exist...");
       return false;
     }
 
-    if (window._bookVoiceCoachSessionWrapped) {
+    const original = window.bookVoiceCoachSession;
+
+    // Avoid double-wrapping
+    if (original.__wrappedByCredits) {
+      console.log("✅ Coach session already wrapped by gate; skipping");
       return true;
     }
 
-    console.log("✅ Wrapping bookVoiceCoachSession with Supabase gate");
-
-    window._bookVoiceCoachSessionWrapped = true;
-    window._originalBookVoiceCoachSession = window.bookVoiceCoachSession;
-
     window.bookVoiceCoachSession = async function (...args) {
       try {
-        console.log("💵 Checking Coach David access via /api/coach-access...");
+        const costMinutes = 5; // cost per Coach David session
 
-        // If you later set window.currentUserEmail from Supabase Auth,
-        // it will use that. For now, backend will default to your founder email.
-        const email = window.currentUserEmail || null;
-
-        const res = await fetch("/api/coach-access", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email }),
-        });
-
-        const data = await res.json();
-        console.log("📊 Supabase coach access result:", data);
-
-        if (!res.ok || !data.allow) {
-          // Handle "no credits" cleanly
-          if (data.mode === "no_credits") {
-            alert(
-              "You’re out of voice credits for Coach David. Please top up in the pricing section."
-            );
-            return;
-          }
-
-          // Generic block
-          alert(
-            "Sorry, you can’t start a voice session right now (no credits / no access)."
+        if (!window.creditSystem) {
+          console.warn(
+            "⚠️ No creditSystem present, falling back to original session"
           );
+          return original.apply(this, args);
+        }
+
+        // If creditSystem has a canAfford helper, use it
+        if (
+          typeof window.creditSystem.canAfford === "function" &&
+          !window.creditSystem.canAfford("voice", costMinutes)
+        ) {
+          console.log("🚫 Not enough voice credits for Coach David");
+          if (
+            typeof window.creditSystem.showCreditWarning === "function"
+          ) {
+            window.creditSystem.showCreditWarning("voice");
+          } else {
+            alert(
+              "You need more credits to use Coach David. Scroll down to the pricing section to add more."
+            );
+          }
+          scrollToPricing();
           return;
         }
 
-        // Nice UX message for free trial
-        if (data.mode === "free_trial") {
-          alert(
-            "🎁 Enjoy your free Coach David session – this one is on us. Future sessions will use your voice credits."
+        // Deduct credits before starting the session
+        if (
+          typeof window.creditSystem.useVoiceCredits === "function"
+        ) {
+          const ok = window.creditSystem.useVoiceCredits(
+            costMinutes,
+            "Coach David voice session"
           );
-        }
-
-        // If we want, update the on-screen credit display
-        if (window.creditSystem && typeof window.creditSystem.updateCreditDisplays === "function") {
-          if (typeof data.voice_credits_remaining === "number") {
-            window.creditSystem.voiceCredits = data.voice_credits_remaining;
+          if (!ok) {
+            console.log("🚫 useVoiceCredits() blocked the session");
+            scrollToPricing();
+            return;
           }
-          window.creditSystem.updateCreditDisplays();
         }
 
-        // All good → call the original function
-        return window._originalBookVoiceCoachSession.apply(this, args);
+        console.log("✅ Credits ok, starting Coach David session");
+        return original.apply(this, args);
       } catch (err) {
-        console.error("❌ Coach access gate failed, falling back:", err);
-        // Fail-open: if the gate breaks, we don't brick the app
-        return window._originalBookVoiceCoachSession.apply(this, args);
+        console.error("❌ Error in Coach David gate wrapper:", err);
+        // In case of any error, don't block therapy – let original run
+        return original.apply(this, args);
       }
     };
 
+    window.bookVoiceCoachSession.__wrappedByCredits = true;
+    console.log("✅ Coach David session wrapped with credit gate");
     return true;
   }
 
-  // Run after DOM ready & retry a few times until the function exists
-  document.addEventListener("DOMContentLoaded", () => {
+  // Retry a few times until both creditSystem and bookVoiceCoachSession exist
+  function tryWrapLoop() {
+    if (wrapCoachOnce()) return;
     let attempts = 0;
-    const maxAttempts = 20;
-
-    const timer = setInterval(() => {
-      attempts += 1;
-      const ok = wrapBookVoiceCoach();
-      if (ok || attempts >= maxAttempts) {
-        clearInterval(timer);
-        if (!ok) {
-          console.warn(
-            "⚠️ Coach access gate could not wrap bookVoiceCoachSession (function never appeared)."
-          );
-        }
+    const id = setInterval(() => {
+      attempts++;
+      if (wrapCoachOnce() || attempts > 40) {
+        clearInterval(id);
       }
-    }, 500);
-  });
+    }, 250);
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", tryWrapLoop, {
+      once: true,
+    });
+  } else {
+    tryWrapLoop();
+  }
 })();
