@@ -14176,7 +14176,7 @@
       ... (unchanged)
     </style>
 
-         <!-- Supabase auth gate: require login + apply VIP plan -->
+    <!-- Supabase auth gate: require login + apply VIP plan and sync old system -->
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <script>
       (function () {
@@ -14241,11 +14241,14 @@
 
             // 3) Apply VIP mode if plan is vip
             if (creditsRow && creditsRow.plan === "vip") {
-              console.log("👑 VIP plan detected for this user – applying infinite credits");
+              console.log(
+                "👑 VIP plan detected for this user – applying infinite credits"
+              );
 
               const cs = await waitForCreditSystem();
 
               try {
+                // --- New creditSystem VIP setup ---
                 cs.isVip = true;
                 cs.dailyCredits = {
                   count: 999999,
@@ -14264,7 +14267,36 @@
                   cs.updateCreditDisplays();
                 }
 
-                console.log("✅ VIP credits applied from Supabase");
+                // --- 🔗 Sync the OLD localStorage-based system (Coach David etc.) ---
+                try {
+                  localStorage.setItem("userPlan", "vip");
+                  localStorage.setItem("userCredits", "999999");
+                  localStorage.setItem("coachDavidFreeTrialUsed", "false");
+
+                  if (typeof window.userPlan !== "undefined") {
+                    window.userPlan = "vip";
+                  }
+                  if (typeof window.userCredits !== "undefined") {
+                    window.userCredits = 999999;
+                  }
+
+                  // Force the visible counter, just in case anything is stale
+                  const dailyCounter = document.getElementById(
+                    "daily-credit-count"
+                  );
+                  if (dailyCounter) {
+                    dailyCounter.textContent = "∞";
+                  }
+
+                  console.log(
+                    "✅ Synced VIP into legacy userPlan/userCredits + UI"
+                  );
+                } catch (syncErr) {
+                  console.warn(
+                    "Could not sync VIP into legacy localStorage system:",
+                    syncErr
+                  );
+                }
               } catch (e) {
                 console.warn("Failed to sync VIP into creditSystem:", e);
               }
@@ -14277,6 +14309,7 @@
         });
       })();
     </script>
+
 
 </body>
 </html>
