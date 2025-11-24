@@ -14176,27 +14176,108 @@
       ... (unchanged)
     </style>
 
-       <!-- Supabase auth gate: require login before using the app -->
+         <!-- Supabase auth gate: require login + apply VIP plan -->
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <script>
       (function () {
-        ... ensure-user-credits code ...
+        const supabaseUrl = "https://bechmxbywqhsauhctewo.supabase.co";
+        const supabaseAnonKey =
+          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJlY2hteGJ5d3Foc2F1aGN0ZXdvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM0ODE0OTcsImV4cCI6MjA3OTA1NzQ5N30.kE3AfgQLI4WWq7je8_0noTvjpObVuW9hPMRUwwxRiFo"; // your anon key
+
+        const { createClient } = window.supabase;
+        const client = createClient(supabaseUrl, supabaseAnonKey);
+
+        // Helper: wait until creditSystem exists
+        function waitForCreditSystem() {
+          return new Promise((resolve) => {
+            if (window.creditSystem) return resolve(window.creditSystem);
+            const iv = setInterval(() => {
+              if (window.creditSystem) {
+                clearInterval(iv);
+                resolve(window.creditSystem);
+              }
+            }, 200);
+          });
+        }
+
+        client.auth.getUser().then(async ({ data, error }) => {
+          if (error || !data || !data.user) {
+            // Not logged in -> send to login page
+            window.location.href = "/login.html";
+            return;
+          }
+
+          const user = data.user;
+          console.log("🔐 Supabase logged in as:", user.email);
+
+          // 1) Ensure user_credits row exists on the backend
+          try {
+            await fetch("/api/ensure-user-credits", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                user_id: user.id,
+                email: user.email,
+              }),
+            });
+          } catch (e) {
+            console.warn("Could not ensure user credits:", e);
+          }
+
+          // 2) Fetch this user's credits + plan from Supabase
+          try {
+            const { data: creditsRow, error: creditsError } = await client
+              .from("user_credits")
+              .select("*")
+              .eq("user_id", user.id)
+              .single();
+
+            if (creditsError) {
+              console.warn("Failed to load user_credits:", creditsError);
+              return;
+            }
+
+            console.log("📊 user_credits row:", creditsRow);
+
+            // 3) Apply VIP mode if plan is vip
+            if (creditsRow && creditsRow.plan === "vip") {
+              console.log("👑 VIP plan detected for this user – applying infinite credits");
+
+              const cs = await waitForCreditSystem();
+
+              try {
+                cs.isVip = true;
+                cs.dailyCredits = {
+                  count: 999999,
+                  maxDaily: 999999,
+                  lastReset: new Date().toDateString(),
+                };
+                cs.voiceCredits = creditsRow.voice_credits || 999999;
+
+                if (typeof cs.saveDailyCredits === "function") {
+                  cs.saveDailyCredits(cs.dailyCredits);
+                }
+                if (typeof cs.saveVoiceCredits === "function") {
+                  cs.saveVoiceCredits(cs.voiceCredits);
+                }
+                if (typeof cs.updateCreditDisplays === "function") {
+                  cs.updateCreditDisplays();
+                }
+
+                console.log("✅ VIP credits applied from Supabase");
+              } catch (e) {
+                console.warn("Failed to sync VIP into creditSystem:", e);
+              }
+            } else {
+              console.log("🧾 Non-VIP plan, using normal credit behaviour");
+            }
+          } catch (e) {
+            console.warn("Error while applying plan from Supabase:", e);
+          }
+        });
       })();
     </script>
 
-    <!-- NEW: Coach David credit gate -->
-    <script src="/js/coach-access-gate.js" defer></script>
-
-    <!-- VIP override MUST be last so it wins -->
-    <script src="/js/founder-vip.js" defer></script>
-      <!-- your other scripts are above here -->
-
-    <!-- Founder VIP override -->
-    <script>
-      (function () {
-        ...
-      })();
-    </script>
 </body>
 </html>
 
