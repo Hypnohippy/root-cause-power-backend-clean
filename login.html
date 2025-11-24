@@ -1,200 +1,365 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="utf-8" />
-    <title>Log in | Root Health</title>
+    <meta charset="UTF-8" />
+    <title>Sign in – Root Health</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <!-- You can tweak this later to match your main styling -->
-    <link rel="stylesheet" href="/css/styles.css">
+    <!-- Tailwind CDN (no build step needed) -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
+
     <style>
       body {
         min-height: 100vh;
         margin: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: radial-gradient(circle at top, #1f2937, #020617);
-        color: #e5e7eb;
-        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+        background: radial-gradient(circle at top, #1e293b 0, #020617 55%);
       }
-      .card {
-        width: 100%;
-        max-width: 380px;
-        border-radius: 20px;
-        padding: 24px 20px;
-        background: rgba(15, 23, 42, 0.85);
-        border: 1px solid rgba(148, 163, 184, 0.35);
+
+      .glass-card {
         backdrop-filter: blur(18px);
-        box-shadow: 0 18px 45px rgba(0, 0, 0, 0.6);
+        -webkit-backdrop-filter: blur(18px);
+        background: linear-gradient(
+          135deg,
+          rgba(15, 23, 42, 0.9),
+          rgba(30, 64, 175, 0.65)
+        );
+        border: 1px solid rgba(148, 163, 184, 0.5);
+        box-shadow: 0 20px 60px rgba(15, 23, 42, 0.85);
       }
-      .card h1 {
-        font-size: 1.25rem;
-        margin: 0 0 4px;
-        text-align: center;
+
+      .glass-input {
+        background: rgba(15, 23, 42, 0.7);
+        border-color: rgba(148, 163, 184, 0.6);
       }
-      .card p.subtitle {
-        font-size: 0.75rem;
-        color: #9ca3af;
-        margin: 0 0 16px;
-        text-align: center;
+
+      .glass-input:focus {
+        border-color: #38bdf8;
+        box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.4);
       }
-      form {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-        margin-top: 4px;
+
+      .glass-human-bg {
+        background-image: url("/img/glass-human-login.png");
+        background-repeat: no-repeat;
+        background-position: center;
+        background-size: contain;
+        opacity: 0.25;
+        pointer-events: none;
       }
-      input[type="email"] {
-        border-radius: 999px;
-        border: 1px solid rgba(148, 163, 184, 0.4);
-        background: rgba(15, 23, 42, 0.85);
-        color: #e5e7eb;
-        padding: 8px 12px;
-        font-size: 0.85rem;
-        outline: none;
-      }
-      input[type="email"]:focus {
-        border-color: #22c55e;
-      }
-      button {
-        border-radius: 999px;
-        border: none;
-        background: #22c55e;
-        color: #020617;
-        padding: 8px 12px;
-        margin-top: 4px;
-        font-size: 0.85rem;
-        font-weight: 600;
-        cursor: pointer;
-      }
-      button:disabled {
-        opacity: 0.6;
-        cursor: default;
-      }
-      .status {
-        margin-top: 10px;
-        font-size: 0.75rem;
-        text-align: center;
-      }
-      .status.ok {
-        color: #6ee7b7;
-      }
-      .status.error {
-        color: #fca5a5;
-      }
-      .back-link {
-        margin-top: 12px;
-        font-size: 0.75rem;
-        text-align: center;
-      }
-      .back-link a {
-        color: #93c5fd;
-        text-decoration: none;
-      }
-      .back-link a:hover {
-        text-decoration: underline;
+
+      @media (min-width: 1024px) {
+        .glass-human-bg {
+          opacity: 0.45;
+        }
       }
     </style>
   </head>
-  <body>
-    <div class="card">
-      <h1>Log in to Root Health</h1>
-      <p class="subtitle">
-        Enter your email. We&apos;ll send you a magic login link.
-      </p>
-      <form id="login-form">
-        <input
-          type="email"
-          id="email"
-          required
-          placeholder="you@example.com"
-          autocomplete="email"
-        />
-        <button type="submit" id="login-button">Send magic link</button>
-      </form>
-      <div id="status" class="status"></div>
-      <div class="back-link">
-        <a href="/">← Back to app</a>
+
+  <body class="text-slate-50">
+    <div
+      class="relative min-h-screen flex items-center justify-center px-4 py-8 lg:px-12"
+    >
+      <!-- Glass human background on the right -->
+      <div
+        class="glass-human-bg hidden md:block absolute inset-y-0 right-0 w-1/2"
+      ></div>
+
+      <!-- Subtle gradient overlay -->
+      <div
+        class="pointer-events-none absolute inset-0 bg-gradient-to-tr from-slate-950 via-slate-900/80 to-transparent"
+      ></div>
+
+      <!-- Main content wrapper -->
+      <div class="relative z-10 flex flex-col lg:flex-row gap-10 max-w-6xl w-full">
+        <!-- Left: Brand & copy -->
+        <div class="flex-1 flex flex-col justify-center space-y-6">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-400/40 text-xs text-emerald-200 w-max">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+            Secure access to your Root Health coach
+          </div>
+
+          <div>
+            <h1 class="text-3xl md:text-4xl font-bold tracking-tight">
+              Welcome back to
+              <span class="bg-gradient-to-r from-emerald-300 via-cyan-300 to-sky-400 bg-clip-text text-transparent">
+                Root Health
+              </span>
+            </h1>
+            <p class="mt-3 text-sm md:text-base text-slate-300 max-w-xl">
+              Log in to continue your guided journey through stress, burnout and
+              recovery. Your assessments, sessions and progress dashboards are
+              all waiting for you.
+            </p>
+          </div>
+
+          <div class="hidden lg:flex items-center gap-4 text-xs text-slate-400">
+            <div class="flex items-center gap-2">
+              <span class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-emerald-500/10 border border-emerald-400/40 text-emerald-300 text-xs">
+                1
+              </span>
+              <div>
+                <div class="font-medium text-slate-100">
+                  Sign in securely
+                </div>
+                <div>Use your email and password. No codes, no fuss.</div>
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-sky-500/10 border border-sky-400/40 text-sky-300 text-xs">
+                2
+              </span>
+              <div>
+                <div class="font-medium text-slate-100">
+                  Pick up where you left off
+                </div>
+                <div>Your credits, coach history and body map are saved.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Login card -->
+        <div class="flex-1 max-w-md mx-auto">
+          <div class="glass-card rounded-3xl p-6 md:p-8">
+            <div class="flex items-center justify-between mb-4">
+              <div>
+                <h2 class="text-xl font-semibold">Sign in to continue</h2>
+                <p class="text-xs text-slate-300 mt-1">
+                  Use the same email you used when you first tried the app.
+                </p>
+              </div>
+              <div
+                class="h-10 w-10 rounded-2xl bg-gradient-to-tr from-emerald-400 to-sky-400 flex items-center justify-center text-slate-900 text-lg font-bold shadow-lg"
+              >
+                RH
+              </div>
+            </div>
+
+            <!-- Message area -->
+            <div id="login-message" class="hidden mb-4 text-sm"></div>
+
+            <form id="login-form" class="space-y-4">
+              <div>
+                <label
+                  for="email"
+                  class="block text-xs font-medium text-slate-200 mb-1.5"
+                  >Email</label
+                >
+                <input
+                  type="email"
+                  id="email"
+                  required
+                  autocomplete="email"
+                  class="glass-input w-full rounded-lg border px-3 py-2.5 text-sm text-slate-50 placeholder-slate-400 focus:outline-none"
+                  placeholder="you@example.com"
+                />
+              </div>
+
+              <div>
+                <label
+                  for="password"
+                  class="block text-xs font-medium text-slate-200 mb-1.5"
+                  >Password</label
+                >
+                <input
+                  type="password"
+                  id="password"
+                  required
+                  autocomplete="current-password"
+                  class="glass-input w-full rounded-lg border px-3 py-2.5 text-sm text-slate-50 placeholder-slate-400 focus:outline-none"
+                  placeholder="••••••••"
+                />
+                <p class="mt-1 text-[11px] text-slate-400">
+                  New here? If the email doesn’t have an account yet, we’ll
+                  create one for you automatically.
+                </p>
+              </div>
+
+              <button
+                type="submit"
+                id="login-button"
+                class="w-full mt-2 inline-flex items-center justify-center rounded-lg bg-gradient-to-r from-emerald-400 to-sky-400 px-4 py-2.5 text-sm font-semibold text-slate-950 shadow-lg hover:from-emerald-300 hover:to-sky-300 focus:outline-none focus:ring-2 focus:ring-emerald-300 focus:ring-offset-2 focus:ring-offset-slate-900 transition"
+              >
+                <span id="login-button-text">Sign in</span>
+                <svg
+                  id="login-spinner"
+                  class="hidden ml-2 h-4 w-4 animate-spin"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    class="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    stroke-width="4"
+                  ></circle>
+                  <path
+                    class="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8v4l3.5-3.5L12 0v4a8 8 0 00-8 8h4z"
+                  ></path>
+                </svg>
+              </button>
+            </form>
+
+            <p class="mt-4 text-[11px] text-slate-400">
+              By signing in you agree to the Root Health
+              <a href="/legal/terms-of-service.html" class="underline"
+                >Terms of Service</a
+              >
+              and
+              <a href="/legal/privacy-policy.html" class="underline"
+                >Privacy Policy</a
+              >.
+            </p>
+          </div>
+
+          <p class="mt-4 text-[10px] text-slate-500 text-center">
+            Having trouble? Email
+            <span class="text-sky-300">support@roothealth.app</span> and we’ll
+            get you back in.
+          </p>
+        </div>
       </div>
     </div>
 
-    <!-- Supabase client via CDN -->
-         <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <!-- Supabase + simple email/password auth -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <script>
-      // DEBUG: show when script loads
-      alert("Root Health login script loaded");
-
       (function () {
-        if (!window.supabase) {
-          alert("Supabase failed to load (CDN blocked?)");
-          return;
-        }
+        const supabaseUrl = "https://bechmxbywqhsauhctewo.supabase.co"; // ← replace
+        const supabaseAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJlY2hteGJ5d3Foc2F1aGN0ZXdvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM0ODE0OTcsImV4cCI6MjA3OTA1NzQ5N30.kE3AfgQLI4WWq7je8_0noTvjpObVuW9hPMRUwwxRiFo"; // ← replace
 
         const { createClient } = window.supabase;
-
-        // IMPORTANT: your real values here
-        const supabaseUrl = "https://bechmxbywqhsauhctewo.supabase.co";
-        const supabaseAnonKey =
-          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJlY2hteGJ5d3Foc2F1aGN0ZXdvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM0ODE0OTcsImV4cCI6MjA3OTA1NzQ5N30.kE3AfgQLI4WWq7je8_0noTvjpObVuW9hPMRUwwxRiFo";
-
-        const client = createClient(supabaseUrl, supabaseAnonKey);
+        const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
         const form = document.getElementById("login-form");
-        const emailInput = document.getElementById("email");
-        const statusEl = document.getElementById("status");
-        const button = document.getElementById("login-button");
+        const msg = document.getElementById("login-message");
+        const btn = document.getElementById("login-button");
+        const btnText = document.getElementById("login-button-text");
+        const spinner = document.getElementById("login-spinner");
 
-        // DEBUG: show if elements are missing
-        if (!form || !emailInput || !statusEl || !button) {
-          alert("Login elements not found in DOM");
-          return;
+        function setMessage(text, type) {
+          msg.textContent = text;
+          msg.classList.remove("hidden");
+          msg.classList.remove(
+            "text-emerald-200",
+            "bg-emerald-500/10",
+            "border-emerald-400/40",
+            "text-red-200",
+            "bg-red-500/10",
+            "border-red-400/40"
+          );
+
+          if (type === "success") {
+            msg.classList.add(
+              "text-emerald-200",
+              "bg-emerald-500/10",
+              "border",
+              "border-emerald-400/40",
+              "rounded-lg",
+              "px-3",
+              "py-2"
+            );
+          } else if (type === "error") {
+            msg.classList.add(
+              "text-red-200",
+              "bg-red-500/10",
+              "border",
+              "border-red-400/40",
+              "rounded-lg",
+              "px-3",
+              "py-2"
+            );
+          } else {
+            msg.classList.add("text-slate-200");
+          }
+        }
+
+        function setLoading(isLoading) {
+          btn.disabled = isLoading;
+          btnText.textContent = isLoading ? "Signing you in..." : "Sign in";
+          spinner.classList.toggle("hidden", !isLoading);
         }
 
         form.addEventListener("submit", async function (e) {
           e.preventDefault();
+          setLoading(true);
+          setMessage("", "neutral");
+          msg.classList.add("hidden");
 
-          // DEBUG: prove submit handler is firing
-          alert("Login form submitted – trying to send magic link…");
+          const email = document.getElementById("email").value.trim();
+          const password = document.getElementById("password").value;
 
-          statusEl.textContent = "Sending magic link…";
-          statusEl.className = "status";
-          button.disabled = true;
-
-          const email = emailInput.value.trim();
-          if (!email) {
-            statusEl.textContent = "Please enter your email.";
-            statusEl.className = "status error";
-            button.disabled = false;
+          if (!email || !password) {
+            setMessage("Please enter both email and password.", "error");
+            setLoading(false);
             return;
           }
 
           try {
-            const { error } = await client.auth.signInWithOtp({
-              email,
-              // use Supabase default redirect (Site URL)
-            });
+            // First try to sign in
+            const { data: signInData, error: signInError } =
+              await supabase.auth.signInWithPassword({
+                email,
+                password,
+              });
 
-            if (error) {
-              console.error("Supabase error:", error);
-              statusEl.textContent = error.message || "Error sending magic link.";
-              statusEl.className = "status error";
-            } else {
-              statusEl.textContent =
-                "Magic link sent! Check your email to finish logging in.";
-              statusEl.className = "status ok";
+            if (signInError && signInError.message.includes("Invalid login")) {
+              // If invalid login, try to sign up instead
+              const { data: signUpData, error: signUpError } =
+                await supabase.auth.signUp({
+                  email,
+                  password,
+                });
+
+              if (signUpError) {
+                setMessage(signUpError.message, "error");
+                setLoading(false);
+                return;
+              }
+
+              setMessage(
+                "Account created and signed in. Redirecting you to the app…",
+                "success"
+              );
+              setTimeout(() => {
+                window.location.href = "/";
+              }, 800);
+              return;
             }
+
+            if (signInError) {
+              setMessage(signInError.message, "error");
+              setLoading(false);
+              return;
+            }
+
+            setMessage(
+              "Welcome back. Redirecting you to your dashboard…",
+              "success"
+            );
+            setTimeout(() => {
+              window.location.href = "/";
+            }, 600);
           } catch (err) {
-            console.error("JS error:", err);
-            statusEl.textContent =
-              "Something went wrong sending the link. Please try again.";
-            statusEl.className = "status error";
+            console.error(err);
+            setMessage(
+              "Something went wrong signing you in. Please try again.",
+              "error"
+            );
           } finally {
-            button.disabled = false;
+            setLoading(false);
           }
         });
       })();
     </script>
-
   </body>
 </html>
