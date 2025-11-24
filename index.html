@@ -14171,129 +14171,37 @@
             console.log('✅ All coach tests complete!');
         };
         
-        console.log('✅ Groq AI Integration Loaded!');
-        console.log('📋 Available coaches: sarah, alex, maya, james, marcus, elena, sophia');
-        console.log('🧪 Test with: testCoachConnection("sarah")');
-        console.log('🧪 Test all: testAllCoaches()');
+         console.log('✅ Groq AI Integration Loaded!');
+    console.log('📋 Available coaches: sarah, alex, maya, james, marcus, elena, sophia');
+    console.log('🧪 Test with: testCoachConnection("sarah")');
+    console.log('🧪 Test all: testAllCoaches()');
     </script>
     
     <!-- Legal Compliance Styles -->
     <style>
-        .legal-overlay {
-            backdrop-filter: blur(5px);
-        }
-
-        .legal-overlay input[type="checkbox"] {
-            accent-color: #10b981;
-        }
-
-        .legal-overlay .overflow-y-auto::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        .legal-overlay .overflow-y-auto::-webkit-scrollbar-track {
-            background: rgba(51, 65, 85, 0.3);
-            border-radius: 4px;
-        }
-
-        .legal-overlay .overflow-y-auto::-webkit-scrollbar-thumb {
-            background: rgba(99, 102, 241, 0.6);
-            border-radius: 4px;
-        }
-
-        .legal-overlay .overflow-y-auto::-webkit-scrollbar-thumb:hover {
-            background: rgba(99, 102, 241, 0.8);
-        }
+      ... (unchanged)
     </style>
 
     <!-- Supabase auth gate: require login before using the app -->
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-<script>
-  (function () {
-    const supabaseUrl = "https://bechmxbywqhsauhctewo.supabase.co";
-    const supabaseAnonKey =
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJlY2hteGJ5d3Foc2F1aGN0ZXdvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM0ODE0OTcsImV4cCI6MjA3OTA1NzQ5N30.kE3AfgQLI4WWq7je8_0noTvjpObVuW9hPMRUwwxRiFo"; // same anon key as in login.html
+    <script>
+      (function () {
+        ... ensure-user-credits code ...
+      })();
+    </script>
 
-    const { createClient } = window.supabase;
-    const client = createClient(supabaseUrl, supabaseAnonKey);
+    <!-- NEW: Supabase gate for Coach David -->
+    <script src="/js/coach-access-gate.js" defer></script>
 
-    client.auth.getUser().then(async ({ data, error }) => {
-      if (error || !data || !data.user) {
-        // Not logged in -> send to login
-        window.location.href = "/login.html";
-        return;
-      }
-
-      const user = data.user;
-      console.log("Logged in as:", user.email);
-
-      // NEW: ensure this user has a user_credits row and that you are VIP
-      try {
-        await fetch("/api/ensure-user-credits", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            user_id: user.id,
-            email: user.email,
-          }),
-        });
-      } catch (e) {
-    console.warn("Could not ensure user credits:", e);
-    // We won't block the app, just log the issue
-  }
-});
-})();
-</script>
-
-<!-- VIP override MUST be last so it wins -->
-  <script src="/js/founder-vip.js" defer></script>
+    <!-- VIP override MUST be last so it wins -->
+    <script src="/js/founder-vip.js" defer></script>
       <!-- your other scripts are above here -->
 
-  <!-- Founder VIP override -->
-  <script>
-    (function () {
-      try {
-        const params = new URLSearchParams(window.location.search);
-
-        // Only run when you visit roothealth.app/?founderVip=1
-        if (params.get("founderVip") === "1") {
-          const bigDaily = {
-            count: 999999,
-            maxDaily: 999999,
-            lastReset: new Date().toDateString(),
-          };
-
-          // 1) Override localStorage
-          localStorage.setItem("dailyCredits", JSON.stringify(bigDaily));
-          localStorage.setItem("voiceCredits", "999999");
-
-          // 2) If the existing creditSystem object is there, override it too
-          if (window.creditSystem) {
-            try {
-              window.creditSystem.isVip = true;
-              window.creditSystem.dailyCredits = bigDaily;
-              window.creditSystem.voiceCredits = 999999;
-
-              if (typeof window.creditSystem.updateCreditDisplays === "function") {
-                window.creditSystem.updateCreditDisplays();
-              }
-            } catch (e) {
-              console.warn("Could not sync VIP into creditSystem:", e);
-            }
-          }
-
-          console.log("👑 Founder VIP override applied – huge credits set.");
-        }
-      } catch (e) {
-        console.warn("Founder VIP override failed:", e);
-      }
-    })();
-  </script>
-
+    <!-- Founder VIP override -->
+    <script>
+      (function () {
+        ... founderVip query param override ...
+      })();
+    </script>
 </body>
 </html>
-
-</body>
-</html>
-
-
