@@ -5,8 +5,8 @@
     <title>Root Health – Login</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <!-- Optional: reuse your existing styles if you want -->
-    <link rel="stylesheet" href="/public/css/styles.css" />
+    <!-- Use whatever paths exist in your repo; these should both be valid from your tree -->
+    <link rel="stylesheet" href="/css/styles.css" />
     <link rel="stylesheet" href="/public/css/improved-ui.css" />
 
     <style>
@@ -123,7 +123,7 @@
 
       .toggle-switch {
         position: relative;
-        width: 150px;
+        width: 160px;
         height: 26px;
         border-radius: 999px;
         background: rgba(15, 23, 42, 0.95);
@@ -140,7 +140,7 @@
         position: absolute;
         top: 2px;
         left: 2px;
-        width: 72px;
+        width: 78px; /* half width minus padding */
         height: 20px;
         border-radius: 999px;
         background: linear-gradient(to right, #22c55e, #0ea5e9);
@@ -149,7 +149,7 @@
       }
 
       .toggle-switch[data-mode="signup"] .toggle-pill {
-        transform: translateX(72px);
+        transform: translateX(80px);
       }
 
       .toggle-option {
@@ -352,9 +352,16 @@
       </div>
     </div>
 
-    <!-- Auth logic -->
+    <!-- Auth logic: all-in-one, no external supabaseClient.js -->
     <script type="module">
-      import { supabase } from "/js/supabaseClient.js";
+      import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+      // Your existing Supabase project details:
+      const SUPABASE_URL = "https://bechmxbywqhsauhctewo.supabase.co";
+      const SUPABASE_ANON_KEY =
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJlY2hteGJ5d3Foc2F1aGN0ZXdvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM0ODE0OTcsImV4cCI6MjA3OTA1NzQ5N30.kE3AfgQLI4WWq7je8_0noTvjpObVuW9hPMRUwwxRiFo";
+
+      const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
       const modeSwitch = document.getElementById("modeSwitch");
       const authForm = document.getElementById("authForm");
@@ -409,31 +416,25 @@
               password
             });
 
-            if (error) {
-              throw error;
-            }
+            if (error) throw error;
 
-            // Login success → go to glass wrapper
-            statusBox.textContent = "Logged in. Redirecting to your diagnostic…";
+            statusBox.textContent =
+              "Logged in. Redirecting to your diagnostic…";
             statusBox.classList.add("active");
 
             window.location.href = "/glass-diagnostic.html";
           } else {
-            // Create account
             const { data, error } = await supabase.auth.signUp({
               email,
               password
             });
 
-            if (error) {
-              throw error;
-            }
+            if (error) throw error;
 
             statusBox.textContent =
-              "Account created. Check your email if required, then we&apos;ll take you to your diagnostic.";
+              "Account created. Redirecting to your diagnostic…";
             statusBox.classList.add("active");
 
-            // For now, send them straight on.
             window.location.href = "/glass-diagnostic.html";
           }
         } catch (err) {
