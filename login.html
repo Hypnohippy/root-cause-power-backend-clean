@@ -2,425 +2,386 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Root Health – Sign In</title>
+  <title>Root Health Login</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="icon" href="/favicon.ico" />
 
-  <!-- Simple internal styles so this page looks good on its own -->
+  <!-- Main styles (your existing styles.css) -->
+  <link rel="stylesheet" href="/css/styles.css" />
+
   <style>
-    :root {
-      color-scheme: dark;
-    }
-
-    * {
-      box-sizing: border-box;
+    body {
       margin: 0;
       padding: 0;
-    }
-
-    body {
       min-height: 100vh;
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: radial-gradient(circle at top, #1f2937, #020617);
+      background: radial-gradient(circle at top, #1f2937 0, #020617 55%, #000 100%);
       color: #e5e7eb;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 16px;
     }
 
-    .shell {
-      max-width: 960px;
+    .login-shell {
+      position: relative;
       width: 100%;
-      display: grid;
-      grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
-      gap: 0;
+      max-width: 960px;
+      min-height: 520px;
       border-radius: 24px;
       overflow: hidden;
-      box-shadow: 0 25px 60px rgba(15, 23, 42, 0.8);
-      background: radial-gradient(circle at top left, rgba(56, 189, 248, 0.1), transparent 60%),
-                  radial-gradient(circle at bottom right, rgba(129, 140, 248, 0.12), #020617);
-      border: 1px solid rgba(148, 163, 184, 0.25);
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      background: radial-gradient(circle at top left, rgba(56, 189, 248, 0.2), transparent 55%),
+                  radial-gradient(circle at bottom right, rgba(147, 51, 234, 0.25), transparent 55%),
+                  rgba(15, 23, 42, 0.95);
+      box-shadow:
+        0 20px 60px rgba(15, 23, 42, 0.9),
+        0 0 0 1px rgba(15, 23, 42, 0.9);
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
     }
 
-    /* Left panel with Glass Human */
-    .hero {
+    /* Left: Glass human / branding */
+    .login-visual {
       position: relative;
-      display: none; /* hidden on small screens */
-      background: radial-gradient(circle at top, #0f172a, #020617);
-    }
-
-    .hero-img {
-      position: absolute;
-      inset: 0;
-      background-image: url("/public/img/glass-human-login.png");
-      background-size: cover;
-      background-position: center;
-      opacity: 0.12;
-      filter: saturate(1.4);
-    }
-
-    .hero-content {
-      position: relative;
-      z-index: 1;
-      padding: 32px 28px;
-      height: 100%;
+      padding: 32px 32px 32px 32px;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
+      overflow: hidden;
     }
 
-    .hero-badge {
+    .login-visual::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image: url("/img/glass-human-login.png");
+      background-size: cover;
+      background-position: center;
+      opacity: 0.4;
+      filter: saturate(1.2) contrast(1.05);
+      z-index: 0;
+    }
+
+    .login-visual-overlay {
+      position: relative;
+      z-index: 1;
+      backdrop-filter: blur(10px);
+      border-radius: 18px;
+      padding: 16px 18px;
+      background: linear-gradient(
+        135deg,
+        rgba(15, 23, 42, 0.9),
+        rgba(15, 23, 42, 0.6)
+      );
+      border: 1px solid rgba(148, 163, 184, 0.4);
+    }
+
+    .login-badge {
       display: inline-flex;
       align-items: center;
-      gap: 8px;
+      gap: 0.4rem;
       padding: 4px 10px;
       border-radius: 999px;
-      background: rgba(15, 23, 42, 0.7);
-      border: 1px solid rgba(94, 234, 212, 0.4);
-      font-size: 11px;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: #a5f3fc;
-    }
-
-    .hero-title {
-      margin-top: 20px;
-      font-size: 26px;
-      line-height: 1.2;
-      font-weight: 650;
-      color: #f9fafb;
-    }
-
-    .hero-sub {
-      margin-top: 10px;
-      font-size: 14px;
-      color: #cbd5f5;
-    }
-
-    .hero-list {
-      margin-top: 20px;
-      font-size: 13px;
-      color: #e5e7eb;
-      display: grid;
-      gap: 6px;
-    }
-
-    .hero-list span {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .hero-list span i {
-      font-style: normal;
-      color: #22c55e;
-    }
-
-    .hero-footer {
-      font-size: 11px;
-      color: #9ca3af;
-      opacity: 0.9;
-    }
-
-    /* Right panel: login form */
-    .panel {
-      padding: 28px 26px 26px;
-      backdrop-filter: blur(20px);
-      background: radial-gradient(circle at top, rgba(15, 23, 42, 0.9), rgba(15, 23, 42, 0.98));
-    }
-
-    .logo-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 18px;
-    }
-
-    .logo {
-      font-weight: 650;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      font-size: 11px;
-      color: #a5b4fc;
-    }
-
-    .logo span {
-      color: #4ade80;
-    }
-
-    .beta-pill {
-      padding: 3px 8px;
-      border-radius: 999px;
-      background: rgba(56, 189, 248, 0.15);
+      background: rgba(8, 47, 73, 0.85);
       border: 1px solid rgba(56, 189, 248, 0.5);
-      font-size: 10px;
+      font-size: 11px;
       color: #e0f2fe;
+      margin-bottom: 8px;
     }
 
-    .panel h1 {
-      font-size: 22px;
-      font-weight: 650;
-      color: #f9fafb;
-      margin-bottom: 6px;
-    }
-
-    .panel p.subtext {
-      font-size: 13px;
-      color: #9ca3af;
-      margin-bottom: 18px;
-    }
-
-    .panel p.subtext strong {
+    .login-title {
+      font-size: 1.4rem;
+      font-weight: 700;
       color: #e5e7eb;
-      font-weight: 500;
-    }
-
-    form {
-      display: grid;
-      gap: 12px;
-      margin-bottom: 16px;
-    }
-
-    label {
-      font-size: 12px;
-      color: #e5e7eb;
-      display: block;
       margin-bottom: 4px;
     }
 
-    input[type="email"],
-    input[type="password"] {
-      width: 100%;
-      border-radius: 10px;
-      border: 1px solid rgba(148, 163, 184, 0.5);
-      padding: 9px 11px;
-      background: rgba(15, 23, 42, 0.9);
-      color: #f9fafb;
-      font-size: 13px;
-      outline: none;
-      transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+    .login-subtitle {
+      font-size: 0.85rem;
+      color: #cbd5f5;
     }
 
-    input[type="email"]::placeholder,
-    input[type="password"]::placeholder {
-      color: #64748b;
-    }
-
-    input[type="email"]:focus,
-    input[type="password"]:focus {
-      border-color: #6366f1;
-      box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.5);
-      background: rgba(15, 23, 42, 1);
-    }
-
-    .buttons-row {
+    .login-highlight {
       display: flex;
-      gap: 8px;
-      margin-top: 4px;
+      flex-direction: column;
+      gap: 4px;
+      margin-top: 18px;
+      font-size: 0.82rem;
+      color: #d1fae5;
     }
 
-    .btn {
-      flex: 1;
+    .login-highlight span {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .login-highlight span::before {
+      content: "•";
+      font-size: 0.9rem;
+      color: #a5b4fc;
+    }
+
+    .login-footnote {
+      position: relative;
+      z-index: 1;
+      margin-top: auto;
+      margin-bottom: 6px;
+      font-size: 0.7rem;
+      color: #9ca3af;
+    }
+
+    /* Right: Auth form */
+    .login-form-panel {
+      padding: 32px 28px;
+      background: linear-gradient(
+        145deg,
+        rgba(15, 23, 42, 0.95),
+        rgba(15, 23, 42, 0.98)
+      );
+      border-left: 1px solid rgba(30, 64, 175, 0.6);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .login-form-header {
+      margin-bottom: 18px;
+    }
+
+    .login-form-header h1 {
+      margin: 0;
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #e5e7eb;
+    }
+
+    .login-form-header p {
+      margin: 4px 0 0 0;
+      font-size: 0.85rem;
+      color: #9ca3af;
+    }
+
+    .login-toggle {
+      display: inline-flex;
+      padding: 3px;
       border-radius: 999px;
-      border: 1px solid transparent;
-      padding: 9px 12px;
-      font-size: 13px;
-      font-weight: 550;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(55, 65, 81, 0.9);
+      margin-bottom: 18px;
+    }
+
+    .login-toggle button {
+      border: none;
+      background: none;
+      padding: 6px 16px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 500;
       cursor: pointer;
-      transition: background 0.15s, transform 0.05s, box-shadow 0.15s, border-color 0.15s;
+      color: #9ca3af;
+    }
+
+    .login-toggle button.active {
+      background: linear-gradient(135deg, #6366f1, #7c3aed);
+      color: white;
+      box-shadow: 0 0 0 1px rgba(129, 140, 248, 0.7);
+    }
+
+    form#auth-form {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .form-field {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .form-field label {
+      font-size: 0.78rem;
+      color: #e5e7eb;
+    }
+
+    .form-field input {
+      padding: 9px 11px;
+      border-radius: 9px;
+      border: 1px solid rgba(55, 65, 81, 0.9);
+      background: rgba(15, 23, 42, 0.95);
+      color: #e5e7eb;
+      font-size: 0.85rem;
+      outline: none;
+    }
+
+    .form-field input:focus {
+      border-color: #6366f1;
+      box-shadow: 0 0 0 1px rgba(129, 140, 248, 0.7);
+    }
+
+    .auth-message {
+      margin-top: 4px;
+      font-size: 0.78rem;
+      border-radius: 8px;
+      padding: 6px 8px;
+      display: none;
+    }
+
+    .auth-message.error {
+      display: block;
+      background: rgba(220, 38, 38, 0.1);
+      border: 1px solid rgba(248, 113, 113, 0.7);
+      color: #fecaca;
+    }
+
+    .auth-message.success {
+      display: block;
+      background: rgba(22, 163, 74, 0.1);
+      border: 1px solid rgba(52, 211, 153, 0.7);
+      color: #bbf7d0;
+    }
+
+    .submit-button {
+      margin-top: 6px;
+      border-radius: 999px;
+      border: none;
+      padding: 9px 12px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #0f172a;
+      background: linear-gradient(135deg, #22c55e, #a3e635);
+      cursor: pointer;
       display: inline-flex;
       align-items: center;
       justify-content: center;
       gap: 6px;
+      box-shadow: 0 12px 30px rgba(22, 163, 74, 0.5);
     }
 
-    .btn-primary {
-      background: linear-gradient(135deg, #4f46e5, #22c55e);
-      color: #f9fafb;
-      box-shadow: 0 10px 25px rgba(79, 70, 229, 0.45);
+    .submit-button:disabled {
+      opacity: 0.7;
+      cursor: default;
+      box-shadow: none;
     }
 
-    .btn-primary:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 14px 32px rgba(79, 70, 229, 0.6);
-    }
-
-    .btn-secondary {
-      background: rgba(15, 23, 42, 0.9);
-      color: #e5e7eb;
-      border-color: rgba(148, 163, 184, 0.6);
-    }
-
-    .btn-secondary:hover {
-      background: rgba(15, 23, 42, 1);
-      border-color: #6366f1;
-    }
-
-    .hint {
-      font-size: 11px;
+    .legal-text {
+      margin-top: 8px;
+      font-size: 0.7rem;
       color: #9ca3af;
-      margin-bottom: 8px;
-    }
-
-    .hint strong {
-      color: #e5e7eb;
-      font-weight: 500;
-    }
-
-    .status {
-      font-size: 12px;
-      margin-top: 4px;
-      min-height: 18px;
-    }
-
-    .status.ok {
-      color: #4ade80;
-    }
-
-    .status.err {
-      color: #f97373;
-    }
-
-    .footer-text {
-      font-size: 11px;
-      color: #6b7280;
-      margin-top: 14px;
       line-height: 1.4;
     }
 
-    .footer-text a {
+    .legal-text a {
       color: #a5b4fc;
-      text-decoration: none;
-    }
-
-    .footer-text a:hover {
       text-decoration: underline;
+      text-decoration-thickness: 1px;
+      text-underline-offset: 2px;
     }
 
-    @media (min-width: 840px) {
-      .hero {
-        display: block;
+    @media (max-width: 900px) {
+      .login-shell {
+        grid-template-columns: minmax(0, 1fr);
+        max-width: 520px;
+      }
+
+      .login-visual {
+        display: none;
       }
     }
 
     @media (max-width: 600px) {
-      .shell {
-        border-radius: 18px;
-      }
-      .panel {
-        padding: 20px 18px 18px;
-      }
-      .panel h1 {
-        font-size: 20px;
+      .login-shell {
+        margin: 16px;
       }
     }
   </style>
 </head>
 <body>
-  <div class="shell">
-    <!-- Left side: Glass Human / story -->
-    <div class="hero">
-      <div class="hero-img"></div>
-      <div class="hero-content">
-        <div>
-          <div class="hero-badge">
-            <span>ROOT HEALTH • BETA</span>
-          </div>
-          <h2 class="hero-title">
-            Take control of your health,<br />
-            one small step at a time.
-          </h2>
-          <p class="hero-sub">
-            Root Cause Power gently maps symptoms, stress, sleep and habits,
-            and turns them into a clear, visual story of what's really going on.
-          </p>
-
-          <div class="hero-list">
-            <span><i>●</i> Glass Human body map to explore your symptoms</span>
-            <span><i>●</i> AI coaches to help you unpack stress & triggers</span>
-            <span><i>●</i> PTSD tools, neural journaling & nutrition insights</span>
-            <span><i>●</i> Start free, then upgrade only if it truly helps</span>
-          </div>
+  <div class="login-shell">
+    <!-- LEFT: Glass Human / Brand side -->
+    <div class="login-visual">
+      <div class="login-visual-overlay">
+        <div class="login-badge">
+          <span>🧠 Root Cause Power</span>
+          <span>AI-guided PTSD & wellness support</span>
+        </div>
+        <div class="login-title">One place for your healing journey</div>
+        <div class="login-subtitle">
+          Log in to unlock your AI coaches, PTSD tools, and the Living Intelligence System.
         </div>
 
-        <div class="hero-footer">
-          This is not an emergency service and does not replace your doctor or
-          mental health team. If you are in crisis, please contact your local
-          emergency services or crisis helpline immediately.
+        <div class="login-highlight">
+          <span>Glass Human Diagnostics & body mapping</span>
+          <span>Root-cause assessments & daily routines</span>
+          <span>AI voice coach sessions with Coach David</span>
         </div>
+      </div>
+
+      <div class="login-footnote">
+        This is not a crisis service. If you are in immediate danger, please contact emergency services or local crisis support.
       </div>
     </div>
 
-    <!-- Right side: login / signup -->
-    <div class="panel">
-      <div class="logo-row">
-        <div class="logo">
-          ROOT <span>HEALTH</span>
-        </div>
-        <div class="beta-pill">
-          Early access · You’re in
-        </div>
+    <!-- RIGHT: Auth form -->
+    <div class="login-form-panel">
+      <div class="login-form-header">
+        <h1 id="auth-title">Welcome back</h1>
+        <p id="auth-subtitle">Log in to continue your Root Health journey.</p>
       </div>
 
-      <h1>Sign in to Root Health</h1>
-      <p class="subtext">
-        Use your <strong>email and a password you’ll remember</strong>.  
-        New here? Create an account in a couple of taps.
-      </p>
-
-      <p class="hint">
-        <strong>Tip:</strong> Depressed brains hate admin.  
-        Just enter your email & password once – next time it’s one quick login.
-      </p>
+      <div class="login-toggle" aria-label="Login or create account">
+        <button type="button" id="toggle-login" class="active">Log in</button>
+        <button type="button" id="toggle-signup">Create account</button>
+      </div>
 
       <form id="auth-form">
-        <div>
+        <div class="form-field">
           <label for="email">Email address</label>
           <input
             id="email"
             name="email"
             type="email"
             autocomplete="email"
-            placeholder="you@example.com"
             required
+            placeholder="you@example.com"
           />
         </div>
 
-        <div>
+        <div class="form-field">
           <label for="password">Password</label>
           <input
             id="password"
             name="password"
             type="password"
             autocomplete="current-password"
-            placeholder="Create something you’ll remember"
             required
+            minlength="6"
+            placeholder="Minimum 6 characters"
           />
         </div>
 
-        <div class="buttons-row">
-          <button type="button" class="btn btn-primary" id="btn-login">
-            Log in
-          </button>
-          <button type="button" class="btn btn-secondary" id="btn-signup">
-            Create account
-          </button>
+        <div id="auth-message" class="auth-message"></div>
+
+        <button
+          type="submit"
+          class="submit-button"
+          id="auth-submit"
+          data-mode="login"
+        >
+          <span id="submit-text">Log in</span>
+        </button>
+
+        <div class="legal-text">
+          By continuing you agree to our
+          <a href="/legal/terms-of-service.html" target="_blank" rel="noopener">Terms of Service</a>
+          and
+          <a href="/legal/privacy-policy.html" target="_blank" rel="noopener">Privacy Policy</a>.
         </div>
       </form>
-
-      <div id="status" class="status"></div>
-
-      <div class="footer-text">
-        By continuing you agree to the Root Health
-        <a href="/legal/terms-of-service.html" target="_blank">Terms</a> and
-        <a href="/legal/content-admin.html" target="_blank">Privacy</a>.  
-        You can close this page at any time and come back when you have more energy.
-      </div>
     </div>
   </div>
 
-  <!-- Supabase auth logic -->
+  <!-- Supabase auth (v2) -->
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
   <script>
     (function () {
@@ -431,118 +392,118 @@
       const { createClient } = window.supabase;
       const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-      const statusEl = document.getElementById("status");
-      const emailEl = document.getElementById("email");
-      const passwordEl = document.getElementById("password");
-      const btnLogin = document.getElementById("btn-login");
-      const btnSignup = document.getElementById("btn-signup");
+      const form = document.getElementById("auth-form");
+      const messageBox = document.getElementById("auth-message");
+      const submitBtn = document.getElementById("auth-submit");
+      const submitText = document.getElementById("submit-text");
+      const toggleLogin = document.getElementById("toggle-login");
+      const toggleSignup = document.getElementById("toggle-signup");
+      const titleEl = document.getElementById("auth-title");
+      const subtitleEl = document.getElementById("auth-subtitle");
 
-      function setStatus(message, type = "ok") {
-        statusEl.textContent = message || "";
-        statusEl.className = "status " + (type === "err" ? "err" : "ok");
+      function setMode(mode) {
+        // mode: "login" or "signup"
+        submitBtn.dataset.mode = mode;
+
+        if (mode === "login") {
+          toggleLogin.classList.add("active");
+          toggleSignup.classList.remove("active");
+          titleEl.textContent = "Welcome back";
+          subtitleEl.textContent = "Log in to continue your Root Health journey.";
+          submitText.textContent = "Log in";
+        } else {
+          toggleSignup.classList.add("active");
+          toggleLogin.classList.remove("active");
+          titleEl.textContent = "Create your Root Health account";
+          subtitleEl.textContent = "Start with your email and a password you can remember.";
+          submitText.textContent = "Create account";
+        }
+
+        messageBox.style.display = "none";
+        messageBox.textContent = "";
+        messageBox.className = "auth-message";
       }
 
-      // If already logged in, go straight to app
-      supabase.auth.getUser().then(({ data, error }) => {
-        if (data && data.user) {
-          console.log("Already logged in as:", data.user.email);
-          window.location.href = "/";
-        }
-      });
+      toggleLogin.addEventListener("click", () => setMode("login"));
+      toggleSignup.addEventListener("click", () => setMode("signup"));
 
-      async function handleLogin() {
-        const email = emailEl.value.trim();
-        const password = passwordEl.value;
-
-        if (!email || !password) {
-          setStatus("Please enter both email and password.", "err");
-          return;
-        }
-
-        setStatus("Logging you in…", "ok");
-        btnLogin.disabled = true;
-        btnSignup.disabled = true;
-
-        try {
-          const { data, error } = await supabase.auth.signInWithPassword({
-            email,
-            password,
-          });
-
-          if (error) {
-            console.error(error);
-            setStatus("Login failed. Check your details and try again.", "err");
-          } else {
-            setStatus("Welcome back. Redirecting…", "ok");
-            window.location.href = "/";
-          }
-        } catch (e) {
-          console.error(e);
-          setStatus("Something went wrong. Please try again.", "err");
-        } finally {
-          btnLogin.disabled = false;
-          btnSignup.disabled = false;
-        }
+      function showMessage(text, type) {
+        messageBox.textContent = text;
+        messageBox.className = "auth-message " + type;
       }
 
-      async function handleSignup() {
-        const email = emailEl.value.trim();
-        const password = passwordEl.value;
+      form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const email = (form.email.value || "").trim();
+        const password = form.password.value || "";
+        const mode = submitBtn.dataset.mode || "login";
 
         if (!email || !password) {
-          setStatus("Please enter both email and a password.", "err");
+          showMessage("Please enter both email and password.", "error");
           return;
         }
 
         if (password.length < 6) {
-          setStatus("Password needs at least 6 characters.", "err");
+          showMessage("Password must be at least 6 characters.", "error");
           return;
         }
 
-        setStatus("Creating your account…", "ok");
-        btnLogin.disabled = true;
-        btnSignup.disabled = true;
+        submitBtn.disabled = true;
+        submitText.textContent = mode === "login" ? "Logging in..." : "Creating account...";
 
         try {
-          const { data, error } = await supabase.auth.signUp({
-            email,
-            password,
-          });
-
-          if (error) {
-            console.error(error);
-            setStatus(error.message || "Sign up failed. Try another email.", "err");
-          } else {
-            setStatus("Account created. Now logging you in…", "ok");
-            // Immediately log in with the same credentials
-            const { error: loginError } = await supabase.auth.signInWithPassword({
+          if (mode === "login") {
+            const { data, error } = await supabase.auth.signInWithPassword({
               email,
               password,
             });
-            if (loginError) {
-              console.error(loginError);
-              setStatus("Account created, but login failed. Try logging in manually.", "err");
+
+            if (error) {
+              console.error("Login error:", error);
+              showMessage(error.message || "Login failed. Please check your details.", "error");
             } else {
-              window.location.href = "/";
+              showMessage("Login successful. Redirecting...", "success");
+              setTimeout(() => {
+                window.location.href = "/";
+              }, 600);
+            }
+          } else {
+            // SIGN UP
+            const { data, error } = await supabase.auth.signUp({
+              email,
+              password,
+            });
+
+            if (error) {
+              console.error("Sign-up error:", error);
+              if (error.message && error.message.toLowerCase().includes("already registered")) {
+                showMessage("That email is already registered. Try logging in instead.", "error");
+              } else {
+                showMessage(error.message || "Sign-up failed. Please try again.", "error");
+              }
+            } else {
+              // If email confirmations are OFF, session will exist and we can log straight in.
+              if (data.session) {
+                showMessage("Account created. Signing you in...", "success");
+                setTimeout(() => {
+                  window.location.href = "/";
+                }, 600);
+              } else {
+                // If confirmations are ON, user must click link in email.
+                showMessage(
+                  "Account created. Please check your email to confirm your address, then log in.",
+                  "success"
+                );
+              }
             }
           }
         } catch (e) {
-          console.error(e);
-          setStatus("Something went wrong. Please try again.", "err");
+          console.error("Auth error:", e);
+          showMessage("Something went wrong. Please try again.", "error");
         } finally {
-          btnLogin.disabled = false;
-          btnSignup.disabled = false;
+          submitBtn.disabled = false;
+          submitText.textContent = submitBtn.dataset.mode === "login" ? "Log in" : "Create account";
         }
-      }
-
-      btnLogin.addEventListener("click", (e) => {
-        e.preventDefault();
-        handleLogin();
-      });
-
-      btnSignup.addEventListener("click", (e) => {
-        e.preventDefault();
-        handleSignup();
       });
     })();
   </script>
