@@ -1,31 +1,49 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>Root Health – Your Glass Diagnostic</title>
+    <title>Glass Human Diagnostic – Root Health</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-
-    <!-- Reuse your existing CSS if you like -->
-    <link rel="stylesheet" href="/css/styles.css" />
-    <link rel="stylesheet" href="/css/improved-ui.css" />
-
     <style>
-      body {
-        margin: 0;
-        min-height: 100vh;
-        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-          sans-serif;
-        background: radial-gradient(circle at top, #041016 0, #010508 40%, #000 100%);
-        color: #f9fafb;
-        display: flex;
-        flex-direction: column;
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
       }
 
-      .rh-container {
-        max-width: 1100px;
-        margin: 0 auto;
+      :root {
+        color-scheme: dark;
+        --bg: #020617;
+        --panel: rgba(15, 23, 42, 0.96);
+        --panel-soft: rgba(15, 23, 42, 0.9);
+        --border: rgba(148, 163, 184, 0.5);
+        --accent: #22c55e;
+        --accent-soft: rgba(34, 197, 94, 0.15);
+        --accent-2: #0ea5e9;
+        --text: #e5e7eb;
+        --muted: #9ca3af;
+      }
+
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        min-height: 100%;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+        background: radial-gradient(circle at top, #0b1120 0, #000 55%, #020617 100%);
+        color: var(--text);
+      }
+
+      body {
+        display: flex;
+        justify-content: center;
+      }
+
+      .page {
+        width: 100%;
+        max-width: 1200px;
         padding: 1.5rem;
-        flex: 1;
         display: flex;
         flex-direction: column;
         gap: 1.5rem;
@@ -33,512 +51,1054 @@
 
       .rh-header {
         text-align: center;
+        max-width: 720px;
+        margin: 0 auto;
+      }
+
+      .rh-tag {
+        display: inline-flex;
+        padding: 0.25rem 0.8rem;
+        border-radius: 999px;
+        border: 1px solid var(--accent-soft);
+        background: radial-gradient(circle at top left, var(--accent-soft), #020617);
+        color: #a7f3d0;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin-bottom: 0.5rem;
       }
 
       .rh-header h1 {
-        font-size: 1.8rem;
-        margin-bottom: 0.25rem;
+        font-size: clamp(1.6rem, 2.6vw, 2.2rem);
+        margin: 0 0 0.4rem;
       }
 
       .rh-header p {
-        opacity: 0.8;
-        max-width: 620px;
-        margin: 0.25rem auto 0;
+        margin: 0;
         font-size: 0.95rem;
-      }
-
-      .rh-step-tag {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.35rem;
-        padding: 0.25rem 0.7rem;
-        border-radius: 999px;
-        background: rgba(16, 185, 129, 0.14);
-        color: #6ee7b7;
-        font-size: 0.75rem;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.06em;
+        color: var(--muted);
       }
 
       .rh-main {
         display: grid;
-        grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+        grid-template-columns: minmax(0, 3fr) minmax(0, 2.4fr);
         gap: 1.5rem;
+        align-items: start;
       }
 
-      .rh-panel {
-        background: rgba(15, 23, 42, 0.85);
+      .figure-panel {
+        background: radial-gradient(
+          circle at top,
+          rgba(34, 197, 94, 0.18),
+          #020617
+        );
+        border-radius: 1.25rem;
+        border: 1px solid rgba(45, 212, 191, 0.25);
+        padding: 1rem;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
+      }
+
+      .figure-wrapper {
+        position: relative;
+        background: radial-gradient(circle at center, #020617, #000 70%);
         border-radius: 1rem;
-        border: 1px solid rgba(45, 212, 191, 0.18);
-        box-shadow: 0 18px 45px rgba(0, 0, 0, 0.7);
+        padding: 1rem;
+        border: 1px solid rgba(30, 64, 175, 0.6);
         overflow: hidden;
       }
 
-      .rh-panel-header {
-        padding: 0.85rem 1.1rem;
-        border-bottom: 1px solid rgba(148, 163, 184, 0.25);
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 1rem;
-      }
-
-      .rh-panel-header h2 {
-        font-size: 0.95rem;
-        margin: 0;
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
-        opacity: 0.85;
-      }
-
-      .rh-panel-header span {
-        font-size: 0.8rem;
-        opacity: 0.7;
-      }
-
-      .rh-iframe-wrap {
-        position: relative;
-        padding: 0.75rem;
-        background: radial-gradient(
-            circle at top,
-            rgba(16, 185, 129, 0.2),
-            transparent 55%
-          ),
-          radial-gradient(circle at bottom, rgba(56, 189, 248, 0.2), #020617 65%);
-      }
-
-      .rh-iframe {
+      .glass-image {
+        display: block;
         width: 100%;
-        height: min(600px, 70vh);
-        border-radius: 0.9rem;
-        border: 1px solid rgba(148, 163, 184, 0.45);
-        background: #020617;
+        max-width: 420px;
+        margin: 0 auto;
+        opacity: 0.88;
+        filter: drop-shadow(0 0 18px rgba(59, 130, 246, 0.6));
       }
 
-      .rh-iframe iframe {
-        width: 100%;
-        height: 100%;
-        border: none;
+      .marker-layer {
+        position: absolute;
+        inset: 1rem;
+        pointer-events: none;
+      }
+
+      .marker {
+        position: absolute;
+        width: 14px;
+        height: 14px;
+        border-radius: 999px;
+        background: radial-gradient(circle at 30% 30%, #f9fafb, #22c55e 55%, #064e3b);
+        box-shadow: 0 0 12px rgba(34, 197, 94, 0.9);
+        transform: translate(-50%, -50%);
+        cursor: pointer;
+        pointer-events: auto;
+        border: 1px solid rgba(15, 23, 42, 0.8);
+      }
+
+      .marker::after {
+        content: "";
+        position: absolute;
+        inset: -6px;
         border-radius: inherit;
+        border: 1px solid rgba(34, 197, 94, 0.6);
+        opacity: 0.8;
       }
 
-      .rh-note {
+      .marker:hover {
+        transform: translate(-50%, -50%) scale(1.05);
+      }
+
+      .hint {
+        margin: 0.75rem 0 0;
         font-size: 0.8rem;
-        opacity: 0.75;
-        margin-top: 0.4rem;
+        color: var(--muted);
         text-align: center;
       }
 
-      .rh-side {
+      .side-panel {
         display: flex;
         flex-direction: column;
         gap: 1rem;
       }
 
-      .rh-card {
-        background: rgba(15, 23, 42, 0.95);
-        border-radius: 1rem;
-        border: 1px solid rgba(148, 163, 184, 0.35);
+      .card {
+        background: var(--panel);
+        border-radius: 1.1rem;
+        border: 1px solid var(--border);
         padding: 1rem;
+        box-shadow: 0 18px 40px rgba(0, 0, 0, 0.8);
       }
 
-      .rh-card h3 {
-        font-size: 0.95rem;
+      .card h2 {
+        margin: 0 0 0.4rem;
+        font-size: 1rem;
+      }
+
+      .card p {
         margin: 0 0 0.5rem;
-      }
-
-      .rh-card p {
         font-size: 0.85rem;
-        opacity: 0.85;
-        margin: 0.25rem 0;
+        color: var(--muted);
       }
 
-      .pill-row {
+      .card-sub {
+        margin-top: 0;
+        margin-bottom: 0.5rem;
+      }
+
+      .area-list {
+        list-style: none;
+        padding: 0;
+        margin: 0.4rem 0 0.6rem;
+        max-height: 200px;
+        overflow-y: auto;
+        font-size: 0.85rem;
+      }
+
+      .area-item {
+        padding: 0.35rem 0.45rem;
+        border-radius: 0.6rem;
+        background: var(--panel-soft);
+        border: 1px solid rgba(148, 163, 184, 0.4);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0.35rem;
+      }
+
+      .area-label {
+        color: #e5e7eb;
+      }
+
+      .area-meta {
+        font-size: 0.75rem;
+        color: var(--muted);
+      }
+
+      .area-remove {
+        border: none;
+        background: transparent;
+        color: var(--muted);
+        cursor: pointer;
+        font-size: 0.9rem;
+      }
+
+      .area-remove:hover {
+        color: #fecaca;
+      }
+
+      .clear-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.45rem 0.8rem;
+        border-radius: 999px;
+        border: 1px solid rgba(248, 250, 252, 0.1);
+        background: rgba(15, 23, 42, 0.9);
+        color: var(--muted);
+        font-size: 0.8rem;
+        cursor: pointer;
+        margin-bottom: 0.5rem;
+      }
+
+      .clear-btn:hover {
+        border-color: rgba(248, 250, 252, 0.25);
+        color: #e5e7eb;
+      }
+
+      .detail-panel {
+        border-top: 1px solid rgba(148, 163, 184, 0.3);
+        padding-top: 0.6rem;
+      }
+
+      .detail-panel h3 {
+        margin: 0 0 0.3rem;
+        font-size: 0.9rem;
+      }
+
+      .detail-hint {
+        margin: 0 0 0.4rem;
+        font-size: 0.8rem;
+        color: var(--muted);
+      }
+
+      .detail-region-bar {
         display: flex;
         flex-wrap: wrap;
-        gap: 0.4rem;
-        margin-top: 0.5rem;
+        gap: 0.3rem;
+        margin-bottom: 0.45rem;
       }
 
-      .pill {
-        font-size: 0.8rem;
-        padding: 0.38rem 0.7rem;
+      .detail-region-btn {
+        font-size: 0.75rem;
+        padding: 0.25rem 0.55rem;
         border-radius: 999px;
         border: 1px solid rgba(148, 163, 184, 0.6);
         background: rgba(15, 23, 42, 0.95);
         cursor: pointer;
-        transition: background 0.15s ease, border-color 0.15s ease,
-          transform 0.08s ease;
+        color: var(--muted);
         user-select: none;
+        transition: background 0.15s ease, border-color 0.15s ease,
+          color 0.15s ease, transform 0.08s ease;
       }
 
-      .pill.active {
+      .detail-region-btn.active {
         background: linear-gradient(to right, #22c55e, #0ea5e9);
-        color: #020617;
         border-color: transparent;
+        color: #020617;
         transform: translateY(-1px);
       }
 
-      .pill span {
-        opacity: 0.9;
-      }
-
-      .summary-box {
-        margin-top: 0.7rem;
-        padding: 0.75rem 0.8rem;
-        border-radius: 0.7rem;
-        background: rgba(15, 23, 42, 0.95);
-        border: 1px solid rgba(45, 212, 191, 0.35);
-        font-size: 0.85rem;
-        line-height: 1.4;
-        max-height: 220px;
-        overflow-y: auto;
-      }
-
-      .summary-box h4 {
-        margin: 0 0 0.4rem;
-        font-size: 0.85rem;
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
-        opacity: 0.9;
-      }
-
-      .summary-box ul {
-        margin: 0.3rem 0 0;
-        padding-left: 1.2rem;
-      }
-
-      .summary-box li {
-        margin: 0.15rem 0;
-      }
-
-      .cta-area {
-        margin-top: 0.6rem;
+      .detail-options {
         display: flex;
-        flex-direction: column;
+        flex-wrap: wrap;
         gap: 0.35rem;
       }
 
+      .detail-option {
+        font-size: 0.78rem;
+        padding: 0.3rem 0.55rem;
+        border-radius: 999px;
+        border: 1px solid rgba(148, 163, 184, 0.6);
+        background: rgba(15, 23, 42, 0.95);
+        cursor: pointer;
+        color: var(--muted);
+        user-select: none;
+        transition: background 0.15s ease, border-color 0.15s ease,
+          color 0.15s ease, transform 0.08s ease;
+      }
+
+      .detail-option.active {
+        background: linear-gradient(to right, #22c55e, #0ea5e9);
+        border-color: transparent;
+        color: #020617;
+        transform: translateY(-1px);
+      }
+
+      .summary {
+        padding: 0.6rem 0.7rem;
+        border-radius: 0.75rem;
+        background: radial-gradient(
+          circle at top left,
+          var(--accent-soft),
+          #020617
+        );
+        border: 1px solid rgba(45, 212, 191, 0.3);
+        font-size: 0.85rem;
+        line-height: 1.4;
+        max-height: 260px;
+        overflow-y: auto;
+      }
+
+      .summary ul {
+        margin: 0.4rem 0 0;
+        padding-left: 1.1rem;
+      }
+
+      .summary li {
+        margin: 0.15rem 0;
+      }
+
       .cta-btn {
+        margin-top: 0.4rem;
         display: inline-flex;
         align-items: center;
         justify-content: center;
         gap: 0.45rem;
-        padding: 0.7rem 1rem;
+        padding: 0.65rem 1rem;
         border-radius: 999px;
         border: none;
         background: linear-gradient(to right, #22c55e, #0ea5e9);
         color: #020617;
         font-weight: 600;
         font-size: 0.9rem;
-        cursor: pointer;
+        cursor: not-allowed;
         text-decoration: none;
         box-shadow: 0 14px 35px rgba(16, 185, 129, 0.4);
         transition: transform 0.08s ease, box-shadow 0.08s ease;
+        opacity: 0.7;
       }
 
-      .cta-btn:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 18px 40px rgba(16, 185, 129, 0.55);
-      }
-
-      .cta-btn span.icon {
-        font-size: 1rem;
-      }
-
-      .cta-note {
+      .cta-caption {
+        margin: 0.5rem 0 0;
         font-size: 0.78rem;
-        opacity: 0.8;
+        color: var(--muted);
       }
 
       .rh-footer {
+        margin-top: 0.5rem;
         text-align: center;
         font-size: 0.75rem;
-        opacity: 0.6;
-        padding: 0.5rem 1rem 1rem;
+        color: var(--muted);
+        opacity: 0.7;
       }
 
       @media (max-width: 900px) {
         .rh-main {
           grid-template-columns: minmax(0, 1fr);
         }
-      }
 
-      @media (max-width: 768px) {
-        .rh-iframe-wrap {
-          padding: 0.5rem;
+        .figure-panel {
+          order: 1;
         }
 
-        .rh-iframe {
-          height: 420px;
+        .side-panel {
+          order: 2;
+        }
+      }
+
+      @media (max-width: 600px) {
+        .page {
+          padding: 1rem;
+        }
+
+        .figure-panel {
+          padding: 0.75rem;
+        }
+
+        .figure-wrapper {
+          padding: 0.75rem;
+        }
+
+        .glass-image {
+          max-width: 340px;
         }
       }
     </style>
   </head>
-
   <body>
-    <div class="rh-container">
+    <div class="page">
       <header class="rh-header">
-        <div class="rh-step-tag">
-          <span>Step 1 of 2</span>
-          <span>Glass Human Diagnostic</span>
-        </div>
-        <h1>Map what your body and mind are asking for</h1>
+        <div class="rh-tag">Glass Human · Root Health</div>
+        <h1>Glass Human</h1>
         <p>
-          Use the Glass Human to highlight key areas – joints, gut, chest, mind.
-          Then we&apos;ll suggest how to use Root Health to work with those
-          patterns over time.
+          Tap where your body and mind are calling for help. Use the glass body
+          to drop pins on joints, muscles, gut and mind. Then refine each area
+          so we can build a clear, detailed picture of what&apos;s going on.
         </p>
       </header>
 
       <main class="rh-main">
-        <!-- LEFT: Glass iframe -->
-        <section class="rh-panel">
-          <div class="rh-panel-header">
-            <h2>Glass Human</h2>
-            <span>Tap, refine, and build your map</span>
+        <section class="figure-panel">
+          <div class="figure-wrapper">
+            <img
+              id="glass-image"
+              class="glass-image"
+              src="Glassbody.png"
+              alt="Glass human body outline"
+            />
+            <div id="marker-layer" class="marker-layer"></div>
           </div>
-          <div class="rh-iframe-wrap">
-            <div class="rh-iframe">
-              <!-- 👇 Your upgraded glass app -->
-              <iframe
-                src="/glass"
-                title="Glass Human Diagnostic"
-              ></iframe>
-            </div>
-            <p class="rh-note">
-              Take 2–3 minutes to add dots and refine each one into the exact
-              structure (for example: heart, IBS-type gut, knees, pelvic load).
-              When you&apos;re ready, choose your main focus areas on the right
-              and continue into Root Health.
-            </p>
-          </div>
+          <p class="hint">
+            Click anywhere on the glass body to drop a dot. Each dot can be
+            refined into the exact structure affected (for example: heart,
+            ribs, bowels / IBS, shoulder blades). Click a dot again to remove
+            it.
+          </p>
         </section>
 
-        <!-- RIGHT: Focus & summary + CTA -->
-        <aside class="rh-side">
-          <section class="rh-card">
-            <h3>What are you mainly working on right now?</h3>
-            <p>Select 1–3 so we can tailor your starting plan inside Root Health.</p>
-            <div class="pill-row" id="goal-pills">
-              <button class="pill" data-goal="stress">
-                <span>Stress &amp; anxiety</span>
-              </button>
-              <button class="pill" data-goal="mood">
-                <span>Low mood / trauma</span>
-              </button>
-              <button class="pill" data-goal="joints">
-                <span>Joints, tendons &amp; pain</span>
-              </button>
-              <button class="pill" data-goal="weight">
-                <span>Weight &amp; metabolism</span>
-              </button>
-              <button class="pill" data-goal="sleep">
-                <span>Sleep &amp; recovery</span>
-              </button>
-              <button class="pill" data-goal="energy">
-                <span>Energy &amp; focus</span>
-              </button>
-              <button class="pill" data-goal="gut">
-                <span>Gut &amp; digestion / IBS</span>
-              </button>
-              <button class="pill" data-goal="mind">
-                <span>Overthinking / mind load</span>
-              </button>
+        <aside class="side-panel">
+          <section class="card">
+            <h2>Selected areas</h2>
+            <p class="card-sub">
+              Each dot becomes a line in your story. Tap different regions, then
+              narrow down which structures are truly involved.
+            </p>
+            <button id="clear-btn" class="clear-btn" type="button">
+              Clear all dots
+            </button>
+            <ul id="areas-list" class="area-list"></ul>
+            <div id="detail-panel" class="detail-panel">
+              <h3>Refine this area</h3>
+              <p id="detail-hint" class="detail-hint">
+                Click on the glass body, then use these options to remove what
+                doesn&apos;t fit until only the most accurate structures remain.
+              </p>
+              <div id="detail-options" class="detail-options"></div>
             </div>
           </section>
 
-          <section class="rh-card">
-            <h3>Your personalised suggestions inside Root Health</h3>
-            <p>
-              As you choose your focus areas, we&apos;ll outline where to start:
-              assessments, coaches, routines and journalling.
+          <section class="card">
+            <h2>Diagnostic themes (lifestyle, not medical)</h2>
+            <p class="card-sub">
+              This isn&apos;t a diagnosis. It&apos;s a lifestyle and load map —
+              patterns Root Health can help you work with over time. For new,
+              severe or worrying symptoms (especially chest pain, breathing
+              issues or sudden changes), seek urgent medical care.
+            </p>
+            <div id="summary-text" class="summary">
+              Tap on the glass human to begin. As you refine each dot, we&apos;ll
+              highlight detailed themes (for example: IBS-type gut load, joint
+              strain, stress-driven tension, or heart/chest workload).
+            </div>
+          </section>
+
+          <section class="card">
+            <h2>Move into the Root Health app</h2>
+            <p class="card-sub">
+              Once you&apos;ve mapped where the load is, this will connect into
+              the full Root Health app so you can build assessments, routines
+              and coaching around it.
             </p>
 
-            <div class="summary-box" id="summary-box">
-              <h4>Waiting for your selections</h4>
-              <p>
-                Tap on the options above. We&apos;ll suggest how to use Root
-                Health for what you&apos;ve just mapped with the Glass Human –
-                for example stress spikes, IBS patterns, joint load or sleep
-                recovery.
-              </p>
-            </div>
+            <button type="button" class="cta-btn" disabled>
+              <span>Full Root Health app connection coming soon</span>
+            </button>
 
-            <div class="cta-area">
-              <a
-                id="continue-btn"
-                class="cta-btn"
-                href="https://roothealth.app"
-              >
-                <span>Continue to Root Health App</span>
-                <span class="icon">→</span>
-              </a>
-              <p class="cta-note">
-                Inside the app you&apos;ll get 8 free credits. We recommend you
-                start with a full assessment, meet your coach, and begin
-                journalling progress against the areas you highlighted here.
-              </p>
-            </div>
+            <p class="cta-caption">
+              For now, you can use this Glass map alongside your current Root
+              Health tools or with a practitioner. The deeper app connection is
+              on the way.
+            </p>
           </section>
         </aside>
       </main>
+
+      <footer class="rh-footer">
+        Root Health · Helping you work with root causes over time.
+      </footer>
     </div>
 
-    <footer class="rh-footer">
-      Root Health · Lifestyle, mindset and recovery — all in one place.
-    </footer>
-
     <script>
-      const GOAL_COPY = {
-        stress: {
-          label: "Stress & anxiety",
-          bullets: [
-            "Use the Stress Coach and panic-support tracks when your system spikes.",
-            "Build a short daily calming routine using breathing, bilateral audio and grounding.",
-            "Journal triggers and wins so you can see what genuinely helps you settle."
-          ],
-          tags: ["stress", "anxiety"]
-        },
-        mood: {
-          label: "Low mood / trauma",
-          bullets: [
-            "Start with a full assessment to map mood, sleep, energy and coping habits.",
-            "Use guided sessions to work alongside therapy or support, without rushing.",
-            "Track emotional load and stabilisers so you can see gradual change over weeks."
-          ],
-          tags: ["mood", "trauma"]
-        },
-        joints: {
-          label: "Joints, tendons & pain",
-          bullets: [
-            "Use pacing tools and gentle movement plans to reload joints without overwhelm.",
-            "Track flares, stiffness and load so patterns around use, stress and sleep are clear.",
-            "Layer in strength, support and recovery routines at a speed your body can handle."
-          ],
-          tags: ["pain", "joints", "inflammation"]
-        },
-        weight: {
-          label: "Weight & metabolism",
-          bullets: [
-            "Look at sleep, stress, movement and cravings – not just calories – in your assessment.",
-            "Build simple routines around meals, movement and non-food rewards you actually enjoy.",
-            "Use the journal to explore emotional eating and kinder strategies over time."
-          ],
-          tags: ["weight", "metabolism"]
-        },
-        sleep: {
-          label: "Sleep & recovery",
-          bullets: [
-            "Design an evening routine using breathing, bilateral sounds and wind-down prompts.",
-            "Track bedtimes, wake-ups and morning energy to see what tweaks really help.",
-            "Use coaching to manage racing thoughts and night-time stress patterns."
-          ],
-          tags: ["sleep", "recovery"]
-        },
-        energy: {
-          label: "Energy & focus",
-          bullets: [
-            "Map your daily energy curve and spot where you regularly crash.",
-            "Build small focus blocks and recovery breaks instead of all-or-nothing days.",
-            "Use journalling to notice what boosts vs drains your mental clarity."
-          ],
-          tags: ["energy", "focus"]
-        },
-        gut: {
-          label: "Gut & digestion / IBS",
-          bullets: [
-            "Track meals, symptoms and stress to uncover patterns in IBS-type flares.",
-            "Experiment with gentle routines around mealtimes, fibre, hydration and wind-down.",
-            "Use coaching prompts to reduce gut-focused anxiety and hypervigilance."
-          ],
-          tags: ["gut", "ibs", "digestion"]
-        },
-        mind: {
-          label: "Overthinking / mind load",
-          bullets: [
-            "Use thought-unloading and grounding tools to stop loops from spiralling.",
-            "Schedule brief 'mental reset' blocks across your day with breathing and bilateral tools.",
-            "Journal your biggest mental loads and gradually turn them into plans, boundaries or support steps."
-          ],
-          tags: ["mind", "overthinking"]
-        }
-      };
+      const glassImage = document.getElementById("glass-image");
+      const markerLayer = document.getElementById("marker-layer");
+      const areasList = document.getElementById("areas-list");
+      const summaryBox = document.getElementById("summary-text");
+      const clearBtn = document.getElementById("clear-btn");
+      const detailOptionsEl = document.getElementById("detail-options");
+      const detailHintEl = document.getElementById("detail-hint");
 
-      const pillRow = document.getElementById("goal-pills");
-      const summaryBox = document.getElementById("summary-box");
-      const continueBtn = document.getElementById("continue-btn");
+      const markers = [];
+      let activeMarker = null;
 
-      let activeGoals = new Set();
+      const REGION_DEFS = [
+        { id: "head", label: "Head / brain / face" },
+        { id: "neck_shoulders", label: "Neck & shoulders" },
+        { id: "chest", label: "Chest / upper ribs" },
+        { id: "upper_abdomen", label: "Upper abdomen" },
+        { id: "lower_abdomen_pelvis", label: "Lower abdomen / pelvis" },
+        { id: "knees", label: "Knees" },
+        { id: "lower_legs_feet", label: "Lower legs / feet" }
+      ];
 
-      pillRow.addEventListener("click", (e) => {
-        const pill = e.target.closest(".pill");
-        if (!pill) return;
+      function classifyRegion(xPercent, yPercent) {
+        let side;
+        if (xPercent < 0.33) side = "left";
+        else if (xPercent > 0.67) side = "right";
+        else side = "central";
 
-        const goalKey = pill.dataset.goal;
-        if (!goalKey) return;
+        let regionId;
+        let regionLabel;
 
-        if (activeGoals.has(goalKey)) {
-          activeGoals.delete(goalKey);
-          pill.classList.remove("active");
+        if (yPercent < 0.16) {
+          regionId = "head";
+          regionLabel = "Head / brain / face";
+        } else if (yPercent < 0.25) {
+          regionId = "neck_shoulders";
+          regionLabel = "Neck & shoulders";
+        } else if (yPercent < 0.38) {
+          regionId = "chest";
+          regionLabel = "Chest / upper ribs";
+        } else if (yPercent < 0.52) {
+          regionId = "upper_abdomen";
+          regionLabel = "Upper abdomen";
+        } else if (yPercent < 0.66) {
+          regionId = "lower_abdomen_pelvis";
+          regionLabel = "Lower abdomen / pelvis";
+        } else if (yPercent < 0.82) {
+          regionId = "knees";
+          regionLabel = "Knees";
         } else {
-          if (activeGoals.size >= 3) {
-            const firstKey = activeGoals.values().next().value;
-            activeGoals.delete(firstKey);
-            const firstPill = pillRow.querySelector(
-              \`.pill[data-goal="\${firstKey}"]\`
-            );
-            if (firstPill) firstPill.classList.remove("active");
-          }
-          activeGoals.add(goalKey);
-          pill.classList.add("active");
+          regionId = "lower_legs_feet";
+          regionLabel = "Lower legs / ankles / feet";
         }
 
-        renderSummary();
-        updateContinueLink();
-      });
+        return { regionId, regionLabel, side };
+      }
 
-      function renderSummary() {
-        if (activeGoals.size === 0) {
-          summaryBox.innerHTML =
-            '<h4>Waiting for your selections</h4><p>Tap on the options above. We&apos;ll suggest how to use Root Health for what you&apos;ve just mapped with the Glass Human – for example stress spikes, IBS patterns, joint load or sleep recovery.</p>';
+      function getOptionsForRegion(regionId, side) {
+        const sideWord =
+          side === "left" ? "Left " : side === "right" ? "Right " : "Either ";
+
+        switch (regionId) {
+          case "head":
+            return [
+              {
+                id: "headache_migraine",
+                label: "Headache / migraine pain",
+                tags: ["mind", "tension", "headache"]
+              },
+              {
+                id: "jaw_tension",
+                label: "Jaw / clenching / TMJ",
+                tags: ["jaw", "tension", "stress"]
+              },
+              {
+                id: "sinus_congestion",
+                label: "Sinuses / facial pressure",
+                tags: ["sinus", "inflammation"]
+              },
+              {
+                id: "brain_fog",
+                label: "Brain fog / overthinking",
+                tags: ["mind", "overthinking", "fatigue"]
+              }
+            ];
+
+          case "neck_shoulders":
+            return [
+              {
+                id: "neck_muscles",
+                label: "Neck muscles / tightness",
+                tags: ["tension", "posture", "stress"]
+              },
+              {
+                id: "upper_traps",
+                label: "Top of shoulders / upper traps",
+                tags: ["tension", "load", "stress"]
+              },
+              {
+                id: "throat_area",
+                label: "Front of neck / throat area",
+                tags: ["throat", "stress"]
+              },
+              {
+                id: "collarbone",
+                label: "Collarbone / upper chest edge",
+                tags: ["posture", "bones"]
+              }
+            ];
+
+          case "chest":
+            return [
+              {
+                id: "heart_centre",
+                label: "Heart area / centre of chest",
+                tags: ["heart", "cardio", "chest"]
+              },
+              {
+                id: "lung_side",
+                label: `${sideWord}lung / side of chest`,
+                tags: ["lungs", "respiratory", "chest"]
+              },
+              {
+                id: "breast_tissue",
+                label: `${sideWord}chest / breast tissue`,
+                tags: ["breast", "chest"]
+              },
+              {
+                id: "sternum",
+                label: "Sternum / front of rib cage",
+                tags: ["bones", "chest"]
+              },
+              {
+                id: "ribs_front",
+                label: "Ribs (front)",
+                tags: ["ribs", "chest"]
+              },
+              {
+                id: "shoulder_blades",
+                label: `${sideWord}shoulder blade / upper back`,
+                tags: ["upper_back", "posture", "tension"]
+              }
+            ];
+
+          case "upper_abdomen":
+            return [
+              {
+                id: "stomach_upper",
+                label: "Stomach / upper abdomen (acid, nausea, reflux)",
+                tags: ["stomach", "gut", "digestion"]
+              },
+              {
+                id: "liver_gallbladder",
+                label: `${side === "right" ? "Right " : ""}liver / gallbladder area`,
+                tags: ["liver", "gallbladder", "digestion"]
+              },
+              {
+                id: "pancreas_central",
+                label: "Pancreas area / central upper abdomen",
+                tags: ["pancreas", "metabolism", "digestion"]
+              },
+              {
+                id: "diaphragm_solar",
+                label: "Diaphragm / solar plexus tightness",
+                tags: ["breathing", "stress", "diaphragm"]
+              }
+            ];
+
+          case "lower_abdomen_pelvis":
+            return [
+              {
+                id: "colon_ibs",
+                label: "Colon / bowels (IBS-type cramps, urgency or bloating)",
+                tags: ["gut", "colon", "ibs", "digestion"]
+              },
+              {
+                id: "general_gut",
+                label: "General gut / bloating / cramping",
+                tags: ["gut", "digestion"]
+              },
+              {
+                id: "bladder",
+                label: "Bladder / urinary discomfort",
+                tags: ["bladder", "pelvis"]
+              },
+              {
+                id: "reproductive_organs",
+                label: `${sideWord}reproductive organs (period pain, pelvic load)`,
+                tags: ["reproductive", "pelvis", "hormones"]
+              }
+            ];
+
+          case "knees":
+            return [
+              {
+                id: "kneecap_front",
+                label: `${sideWord}front of knee / kneecap`,
+                tags: ["joints", "knees", "impact"]
+              },
+              {
+                id: "knee_inside",
+                label: `${sideWord}inside of knee joint`,
+                tags: ["joints", "knees", "ligaments"]
+              },
+              {
+                id: "knee_outside",
+                label: `${sideWord}outside of knee joint`,
+                tags: ["joints", "knees", "tendons"]
+              },
+              {
+                id: "knee_back",
+                label: `${sideWord}back of knee`,
+                tags: ["joints", "knees"]
+              }
+            ];
+
+          case "lower_legs_feet":
+            return [
+              {
+                id: "calves",
+                label: `${sideWord}calf muscles`,
+                tags: ["muscles", "load", "legs"]
+              },
+              {
+                id: "shins",
+                label: `${sideWord}shins / front of legs`,
+                tags: ["muscles", "impact", "legs"]
+              },
+              {
+                id: "ankles",
+                label: `${sideWord}ankle joint`,
+                tags: ["joints", "ankles", "balance"]
+              },
+              {
+                id: "feet_arches",
+                label: `${sideWord}foot arches / plantar surface`,
+                tags: ["feet", "support", "gait"]
+              }
+            ];
+
+          default:
+            return [
+              {
+                id: "general_area",
+                label: "General load in this area",
+                tags: ["mixed"]
+              }
+            ];
+        }
+      }
+
+      function addMarker(xPercent, yPercent) {
+        const { regionId, regionLabel, side } = classifyRegion(xPercent, yPercent);
+        const options = getOptionsForRegion(regionId, side);
+
+        const markerEl = document.createElement("div");
+        markerEl.className = "marker";
+        markerEl.style.left = `${xPercent * 100}%`;
+        markerEl.style.top = `${yPercent * 100}%`;
+
+        const markerObj = {
+          xPercent,
+          yPercent,
+          regionId,
+          regionLabel,
+          side,
+          options,
+          selectedOptionIds: options.map((o) => o.id),
+          el: markerEl
+        };
+
+        markerEl.addEventListener("click", (e) => {
+          e.stopPropagation();
+          setActiveMarker(markerObj);
+        });
+
+        markerLayer.appendChild(markerEl);
+        markers.push(markerObj);
+        setActiveMarker(markerObj);
+        renderMarkers();
+      }
+
+      function removeMarker(markerObj) {
+        const index = markers.indexOf(markerObj);
+        if (index !== -1) {
+          markers.splice(index, 1);
+        }
+        if (markerObj.el && markerObj.el.parentNode) {
+          markerObj.el.parentNode.removeChild(markerObj.el);
+        }
+
+        if (activeMarker === markerObj) {
+          activeMarker = markers.length ? markers[markers.length - 1] : null;
+        }
+
+        renderMarkers();
+      }
+
+      function clearMarkers() {
+        markers.splice(0, markers.length);
+        while (markerLayer.firstChild) {
+          markerLayer.removeChild(markerLayer.firstChild);
+        }
+        activeMarker = null;
+        renderMarkers();
+      }
+
+      function setActiveMarker(markerObj) {
+        activeMarker = markerObj;
+        renderMarkers();
+      }
+
+      function renderMarkers() {
+        areasList.innerHTML = "";
+
+        markers.forEach((m, idx) => {
+          const li = document.createElement("li");
+          li.className = "area-item";
+
+          const info = document.createElement("div");
+          const title = document.createElement("div");
+          title.className = "area-label";
+
+          const selectedLabels = m.options
+            .filter((o) => m.selectedOptionIds.includes(o.id))
+            .map((o) => o.label);
+
+          const labelText =
+            selectedLabels.length > 0
+              ? selectedLabels.join(", ")
+              : m.regionLabel + " (no specific structures selected)";
+
+          title.textContent = `${idx + 1}. ${labelText}`;
+
+          const meta = document.createElement("div");
+          meta.className = "area-meta";
+          meta.textContent = `${m.regionLabel} · X: ${(
+            m.xPercent * 100
+          ).toFixed(0)}%, Y: ${(m.yPercent * 100).toFixed(0)}%`;
+
+          info.appendChild(title);
+          info.appendChild(meta);
+
+          const removeBtn = document.createElement("button");
+          removeBtn.className = "area-remove";
+          removeBtn.type = "button";
+          removeBtn.textContent = "×";
+          removeBtn.title = "Remove this dot";
+          removeBtn.addEventListener("click", () => removeMarker(m));
+
+          li.appendChild(info);
+          li.appendChild(removeBtn);
+
+          li.addEventListener("click", () => {
+            setActiveMarker(m);
+          });
+
+          areasList.appendChild(li);
+        });
+
+        renderDetailPanel();
+        renderSummary();
+      }
+
+      function renderDetailPanel() {
+        if (!activeMarker) {
+          detailOptionsEl.innerHTML = "";
+          detailHintEl.textContent =
+            "Click on the glass body to add a dot. Then remove the structures that don&apos;t fit until only the most accurate ones remain.";
           return;
         }
 
-        const keys = Array.from(activeGoals);
-        const labels = keys.map((k) => GOAL_COPY[k].label);
-        const allBullets = keys.flatMap((k) => GOAL_COPY[k].bullets);
+        detailOptionsEl.innerHTML = "";
+        detailHintEl.innerHTML =
+          "You&apos;re refining a dot in the area: <strong>" +
+          activeMarker.regionLabel +
+          "</strong>. If this doesn&apos;t match, choose another region below, then turn off structures that don&apos;t fit. At least one structure should remain.";
 
-        let html = "<h4>Based on what you selected</h4>";
-        html += \`<p>You highlighted: <strong>\${labels.join(
-          ", "
-        )}</strong>. Inside Root Health, we recommend:</p>\`;
+        const bar = document.createElement("div");
+        bar.className = "detail-region-bar";
+
+        REGION_DEFS.forEach((r) => {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "detail-region-btn";
+          btn.textContent = r.label;
+
+          if (r.id === activeMarker.regionId) {
+            btn.classList.add("active");
+          }
+
+          btn.addEventListener("click", () => {
+            overrideRegionForActiveMarker(r.id);
+          });
+
+          bar.appendChild(btn);
+        });
+
+        detailOptionsEl.appendChild(bar);
+
+        const optionsWrap = document.createElement("div");
+        optionsWrap.className = "detail-options";
+
+        activeMarker.options.forEach((opt) => {
+          const optBtn = document.createElement("button");
+          optBtn.type = "button";
+          optBtn.className = "detail-option";
+          optBtn.textContent = opt.label;
+
+          if (activeMarker.selectedOptionIds.includes(opt.id)) {
+            optBtn.classList.add("active");
+          }
+
+          optBtn.addEventListener("click", () => {
+            toggleOptionForActiveMarker(opt.id);
+          });
+
+          optionsWrap.appendChild(optBtn);
+        });
+
+        detailOptionsEl.appendChild(optionsWrap);
+      }
+
+      function overrideRegionForActiveMarker(newRegionId) {
+        if (!activeMarker) return;
+
+        const def = REGION_DEFS.find((r) => r.id === newRegionId);
+        if (!def) return;
+
+        activeMarker.regionId = def.id;
+        activeMarker.regionLabel = def.label;
+
+        const newOptions = getOptionsForRegion(def.id, activeMarker.side);
+        activeMarker.options = newOptions;
+        activeMarker.selectedOptionIds = newOptions.map((o) => o.id);
+
+        renderMarkers();
+      }
+
+      function toggleOptionForActiveMarker(optionId) {
+        if (!activeMarker) return;
+
+        const current = new Set(activeMarker.selectedOptionIds);
+
+        if (current.has(optionId)) {
+          if (current.size === 1) {
+            return;
+          }
+          current.delete(optionId);
+        } else {
+          current.add(optionId);
+        }
+
+        activeMarker.selectedOptionIds = Array.from(current);
+        renderMarkers();
+      }
+
+      function renderSummary() {
+        if (markers.length === 0) {
+          summaryBox.innerHTML =
+            "Tap on the glass human to begin. As you refine each dot, we&apos;ll highlight detailed themes (for example: IBS-type gut load, joint strain, stress-driven tension, or heart/chest workload).";
+          return;
+        }
+
+        const chosenStructures = [];
+        const tagCounts = {};
+
+        markers.forEach((m) => {
+          m.options
+            .filter((o) => m.selectedOptionIds.includes(o.id))
+            .forEach((opt) => {
+              chosenStructures.push(opt.label);
+              opt.tags.forEach((t) => {
+                if (!tagCounts[t]) tagCounts[t] = 0;
+                tagCounts[t] += 1;
+              });
+            });
+        });
+
+        const uniqueStructures = Array.from(new Set(chosenStructures));
+
+        const hasAnyTag = (...tags) => tags.some((t) => tagCounts[t]);
+
+        const themes = [];
+
+        if (hasAnyTag("heart", "cardio")) {
+          themes.push({
+            title: "Heart and central chest workload",
+            text:
+              "You&apos;ve highlighted the heart / central chest area. Root Health can&apos;t replace medical assessment, but it can help you work on the lifestyle load around your heart: stress levels, sleep, movement, breathing patterns and long-term pacing. New, severe or worsening chest symptoms should always be checked by a doctor urgently."
+          });
+        }
+
+        if (hasAnyTag("lungs", "respiratory", "breathing", "diaphragm")) {
+          themes.push({
+            title: "Breathing mechanics and respiratory load",
+            text:
+              "Dots around the lungs, ribs or diaphragm suggest that breathing mechanics, posture, fitness level or stress may be creating extra load. Inside Root Health you can use breathing tools, pacing strategies and gradual movement plans to support this system."
+          });
+        }
+
+        if (
+          hasAnyTag(
+            "ibs",
+            "colon",
+            "gut",
+            "digestion",
+            "stomach",
+            "liver",
+            "gallbladder",
+            "pancreas"
+          )
+        ) {
+          themes.push({
+            title: "Gut, digestion and IBS-type load",
+            text:
+              "Focus on the gut, bowels and upper abdomen often points to a mix of food triggers, stress, sleep, pacing and nervous system sensitivity. Root Health can help you track patterns (IBS flares, bloating, bowel changes), experiment with routines and support the gut–brain axis over time."
+          });
+        }
+
+        if (
+          hasAnyTag("joints", "knees", "ankles", "hips", "feet", "ribs", "bones")
+        ) {
+          themes.push({
+            title: "Joints, impact and long-term load",
+            text:
+              "Joints and supporting structures (knees, ankles, hips, ribs) carry mechanical load. Repeated dots here suggest that load management, strength, movement patterns and rest windows all matter. Root Health can help you design pacing plans, movement experiments and recovery routines."
+          });
+        }
+
+        if (hasAnyTag("tension", "upper_back", "posture", "jaw")) {
+          themes.push({
+            title: "Muscle tension, posture and stored stress",
+            text:
+              "Neck, shoulders, jaw and upper back markers point to how you hold stress and load in the body. With Root Health you can explore micro-breaks, relaxation tools, posture tweaks and routines that gradually reduce this background tension."
+          });
+        }
+
+        if (hasAnyTag("mind", "overthinking", "headache", "fatigue")) {
+          themes.push({
+            title: "Mind, overthinking and nervous system load",
+            text:
+              "Markers linked to brain fog, overthinking or headaches suggest that your nervous system and mind are carrying a lot. Root Health can support you with stress coaches, wind-down routines, thought-unloading prompts and tracking what genuinely helps you settle over weeks and months."
+          });
+        }
+
+        if (hasAnyTag("reproductive", "hormones", "pelvis")) {
+          themes.push({
+            title: "Pelvic and hormonal load",
+            text:
+              "Pelvic and reproductive markers often relate to hormonal cycles, chronic pelvic pain, or how stress and posture interact with these systems. Root Health can help you map symptoms against sleep, stress, movement and cycles, then build routines that respect those rhythms."
+          });
+        }
+
+        if (hasAnyTag("feet", "support", "gait", "legs", "impact")) {
+          themes.push({
+            title: "Foundations, movement patterns and impact",
+            text:
+              "Feet, ankles and lower legs act as your foundations. Dots here can signal that footwear, surface, movement style and general conditioning are part of the picture. Root Health can support experiments around pacing, footwear, walking patterns and recovery."
+          });
+        }
+
+        if (themes.length === 0) {
+          themes.push({
+            title: "Mixed pattern of load",
+            text:
+              "You&apos;ve highlighted a mix of structures. That&apos;s common. Root Health helps you pick a sensible starting point, then layer changes over time instead of trying to fix everything at once."
+          });
+        }
+
+        let html = "";
+        html += `<p>You&apos;ve identified these specific structures:</p>`;
+        html += `<p><strong>${uniqueStructures.join(", ")}</strong></p>`;
         html += "<ul>";
-        allBullets.forEach((b) => {
-          html += \`<li>\${b}</li>\`;
+        themes.forEach((t) => {
+          html += `<li><strong>${t.title}:</strong> ${t.text}</li>`;
         });
         html += "</ul>";
+        html +=
+          "<p>This map is a starting point, not a diagnosis. Inside Root Health, you can turn these themes into assessments, coaching sessions, routines and journalling so you can track real change over time.</p>";
 
         summaryBox.innerHTML = html;
       }
 
-      function updateContinueLink() {
-        if (activeGoals.size === 0) {
-          continueBtn.href = "https://roothealth.app";
-          return;
-        }
+      glassImage.addEventListener("click", (event) => {
+        const rect = glassImage.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
 
-        const keys = Array.from(activeGoals);
-        const tags = Array.from(
-          new Set(keys.flatMap((k) => GOAL_COPY[k].tags))
-        );
-        const qs = encodeURIComponent(tags.join(","));
-        continueBtn.href = \`https://roothealth.app?goals=\${qs}\`;
-      }
+        const xPercent = x / rect.width;
+        const yPercent = y / rect.height;
 
-      renderSummary();
-      updateContinueLink();
+        addMarker(xPercent, yPercent);
+      });
+
+      clearBtn.addEventListener("click", () => {
+        clearMarkers();
+      });
+
+      renderMarkers();
     </script>
   </body>
 </html>
