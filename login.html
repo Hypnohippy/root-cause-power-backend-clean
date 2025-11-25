@@ -354,7 +354,7 @@
 
     <!-- Auth logic -->
     <script type="module">
-      import { supabase } from "./supabaseClient.js";
+      import { supabase } from "/js/supabaseClient.js";
 
       const modeSwitch = document.getElementById("modeSwitch");
       const authForm = document.getElementById("authForm");
@@ -433,7 +433,7 @@
               "Account created. Check your email if required, then we&apos;ll take you to your diagnostic.";
             statusBox.classList.add("active");
 
-            // For now, send them straight on. You can later require email confirm if you want.
+            // For now, send them straight on.
             window.location.href = "/glass-diagnostic.html";
           }
         } catch (err) {
