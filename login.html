@@ -1,484 +1,453 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title>Root Health Login</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <head>
+    <meta charset="UTF-8" />
+    <title>Root Health – Login</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-  <!-- Main styles (your existing styles.css) -->
-  <link rel="stylesheet" href="/css/styles.css" />
+    <!-- Optional: reuse your existing styles if you want -->
+    <link rel="stylesheet" href="/public/css/styles.css" />
+    <link rel="stylesheet" href="/public/css/improved-ui.css" />
 
-  <style>
-    body {
-      margin: 0;
-      padding: 0;
-      min-height: 100vh;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: radial-gradient(circle at top, #1f2937 0, #020617 55%, #000 100%);
-      color: #e5e7eb;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .login-shell {
-      position: relative;
-      width: 100%;
-      max-width: 960px;
-      min-height: 520px;
-      border-radius: 24px;
-      overflow: hidden;
-      border: 1px solid rgba(148, 163, 184, 0.35);
-      background: radial-gradient(circle at top left, rgba(56, 189, 248, 0.2), transparent 55%),
-                  radial-gradient(circle at bottom right, rgba(147, 51, 234, 0.25), transparent 55%),
-                  rgba(15, 23, 42, 0.95);
-      box-shadow:
-        0 20px 60px rgba(15, 23, 42, 0.9),
-        0 0 0 1px rgba(15, 23, 42, 0.9);
-      display: grid;
-      grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
-    }
-
-    /* Left: Glass human / branding */
-    .login-visual {
-      position: relative;
-      padding: 32px 32px 32px 32px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      overflow: hidden;
-    }
-
-    .login-visual::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background-image: url("/img/glass-human-login.png");
-      background-size: cover;
-      background-position: center;
-      opacity: 0.4;
-      filter: saturate(1.2) contrast(1.05);
-      z-index: 0;
-    }
-
-    .login-visual-overlay {
-      position: relative;
-      z-index: 1;
-      backdrop-filter: blur(10px);
-      border-radius: 18px;
-      padding: 16px 18px;
-      background: linear-gradient(
-        135deg,
-        rgba(15, 23, 42, 0.9),
-        rgba(15, 23, 42, 0.6)
-      );
-      border: 1px solid rgba(148, 163, 184, 0.4);
-    }
-
-    .login-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-      padding: 4px 10px;
-      border-radius: 999px;
-      background: rgba(8, 47, 73, 0.85);
-      border: 1px solid rgba(56, 189, 248, 0.5);
-      font-size: 11px;
-      color: #e0f2fe;
-      margin-bottom: 8px;
-    }
-
-    .login-title {
-      font-size: 1.4rem;
-      font-weight: 700;
-      color: #e5e7eb;
-      margin-bottom: 4px;
-    }
-
-    .login-subtitle {
-      font-size: 0.85rem;
-      color: #cbd5f5;
-    }
-
-    .login-highlight {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      margin-top: 18px;
-      font-size: 0.82rem;
-      color: #d1fae5;
-    }
-
-    .login-highlight span {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .login-highlight span::before {
-      content: "•";
-      font-size: 0.9rem;
-      color: #a5b4fc;
-    }
-
-    .login-footnote {
-      position: relative;
-      z-index: 1;
-      margin-top: auto;
-      margin-bottom: 6px;
-      font-size: 0.7rem;
-      color: #9ca3af;
-    }
-
-    /* Right: Auth form */
-    .login-form-panel {
-      padding: 32px 28px;
-      background: linear-gradient(
-        145deg,
-        rgba(15, 23, 42, 0.95),
-        rgba(15, 23, 42, 0.98)
-      );
-      border-left: 1px solid rgba(30, 64, 175, 0.6);
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-    }
-
-    .login-form-header {
-      margin-bottom: 18px;
-    }
-
-    .login-form-header h1 {
-      margin: 0;
-      font-size: 1.4rem;
-      font-weight: 700;
-      color: #e5e7eb;
-    }
-
-    .login-form-header p {
-      margin: 4px 0 0 0;
-      font-size: 0.85rem;
-      color: #9ca3af;
-    }
-
-    .login-toggle {
-      display: inline-flex;
-      padding: 3px;
-      border-radius: 999px;
-      background: rgba(15, 23, 42, 0.9);
-      border: 1px solid rgba(55, 65, 81, 0.9);
-      margin-bottom: 18px;
-    }
-
-    .login-toggle button {
-      border: none;
-      background: none;
-      padding: 6px 16px;
-      border-radius: 999px;
-      font-size: 0.8rem;
-      font-weight: 500;
-      cursor: pointer;
-      color: #9ca3af;
-    }
-
-    .login-toggle button.active {
-      background: linear-gradient(135deg, #6366f1, #7c3aed);
-      color: white;
-      box-shadow: 0 0 0 1px rgba(129, 140, 248, 0.7);
-    }
-
-    form#auth-form {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .form-field {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    .form-field label {
-      font-size: 0.78rem;
-      color: #e5e7eb;
-    }
-
-    .form-field input {
-      padding: 9px 11px;
-      border-radius: 9px;
-      border: 1px solid rgba(55, 65, 81, 0.9);
-      background: rgba(15, 23, 42, 0.95);
-      color: #e5e7eb;
-      font-size: 0.85rem;
-      outline: none;
-    }
-
-    .form-field input:focus {
-      border-color: #6366f1;
-      box-shadow: 0 0 0 1px rgba(129, 140, 248, 0.7);
-    }
-
-    .auth-message {
-      margin-top: 4px;
-      font-size: 0.78rem;
-      border-radius: 8px;
-      padding: 6px 8px;
-      display: none;
-    }
-
-    .auth-message.error {
-      display: block;
-      background: rgba(220, 38, 38, 0.1);
-      border: 1px solid rgba(248, 113, 113, 0.7);
-      color: #fecaca;
-    }
-
-    .auth-message.success {
-      display: block;
-      background: rgba(22, 163, 74, 0.1);
-      border: 1px solid rgba(52, 211, 153, 0.7);
-      color: #bbf7d0;
-    }
-
-    .submit-button {
-      margin-top: 6px;
-      border-radius: 999px;
-      border: none;
-      padding: 9px 12px;
-      font-size: 0.9rem;
-      font-weight: 600;
-      color: #0f172a;
-      background: linear-gradient(135deg, #22c55e, #a3e635);
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      box-shadow: 0 12px 30px rgba(22, 163, 74, 0.5);
-    }
-
-    .submit-button:disabled {
-      opacity: 0.7;
-      cursor: default;
-      box-shadow: none;
-    }
-
-    .legal-text {
-      margin-top: 8px;
-      font-size: 0.7rem;
-      color: #9ca3af;
-      line-height: 1.4;
-    }
-
-    .legal-text a {
-      color: #a5b4fc;
-      text-decoration: underline;
-      text-decoration-thickness: 1px;
-      text-underline-offset: 2px;
-    }
-
-    @media (max-width: 900px) {
-      .login-shell {
-        grid-template-columns: minmax(0, 1fr);
-        max-width: 520px;
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #020617;
+        --panel: rgba(15, 23, 42, 0.95);
+        --panel-soft: rgba(15, 23, 42, 0.9);
+        --border: rgba(148, 163, 184, 0.55);
+        --accent: #22c55e;
+        --accent-2: #0ea5e9;
+        --text: #e5e7eb;
+        --muted: #9ca3af;
       }
 
-      .login-visual {
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+        color: var(--text);
+        background: radial-gradient(circle at top, #020617 0, #000 55%, #020617 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
+      }
+
+      /* Glass human background */
+      .bg-glass {
+        position: absolute;
+        inset: 0;
+        background:
+          radial-gradient(circle at top, rgba(34, 197, 94, 0.18), transparent 55%),
+          radial-gradient(circle at bottom, rgba(56, 189, 248, 0.2), transparent 55%),
+          #020617;
+        z-index: 0;
+      }
+
+      .bg-glass::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: url("/public/img/glass-human-login.png") center/contain
+          no-repeat;
+        opacity: 0.22;
+        filter: drop-shadow(0 0 24px rgba(59, 130, 246, 0.6));
+        pointer-events: none;
+      }
+
+      .login-shell {
+        position: relative;
+        z-index: 1;
+        width: 100%;
+        max-width: 420px;
+        padding: 1.5rem;
+      }
+
+      .login-card {
+        background: var(--panel);
+        border-radius: 1.3rem;
+        border: 1px solid var(--border);
+        box-shadow: 0 24px 70px rgba(0, 0, 0, 0.9);
+        padding: 1.4rem 1.3rem 1.1rem;
+      }
+
+      .brand {
+        text-align: center;
+        margin-bottom: 0.75rem;
+      }
+
+      .brand-tag {
+        display: inline-flex;
+        padding: 0.22rem 0.7rem;
+        border-radius: 999px;
+        border: 1px solid rgba(34, 197, 94, 0.25);
+        background: radial-gradient(circle at top left, rgba(34, 197, 94, 0.18), #020617);
+        color: #a7f3d0;
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin-bottom: 0.35rem;
+      }
+
+      .brand h1 {
+        margin: 0;
+        font-size: 1.35rem;
+      }
+
+      .brand p {
+        margin: 0.35rem 0 0;
+        font-size: 0.85rem;
+        color: var(--muted);
+      }
+
+      /* Toggle */
+      .toggle-row {
+        margin-top: 0.9rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.8rem;
+        font-size: 0.8rem;
+      }
+
+      .toggle-label {
+        color: var(--muted);
+      }
+
+      .toggle-switch {
+        position: relative;
+        width: 150px;
+        height: 26px;
+        border-radius: 999px;
+        background: rgba(15, 23, 42, 0.95);
+        border: 1px solid rgba(148, 163, 184, 0.7);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 6px;
+        cursor: pointer;
+        font-size: 0.75rem;
+      }
+
+      .toggle-pill {
+        position: absolute;
+        top: 2px;
+        left: 2px;
+        width: 72px;
+        height: 20px;
+        border-radius: 999px;
+        background: linear-gradient(to right, #22c55e, #0ea5e9);
+        box-shadow: 0 12px 30px rgba(16, 185, 129, 0.45);
+        transition: transform 0.18s ease;
+      }
+
+      .toggle-switch[data-mode="signup"] .toggle-pill {
+        transform: translateX(72px);
+      }
+
+      .toggle-option {
+        position: relative;
+        z-index: 1;
+        flex: 1;
+        text-align: center;
+        color: var(--muted);
+        user-select: none;
+      }
+
+      .toggle-switch[data-mode="login"] .toggle-option.login {
+        color: #020617;
+        font-weight: 600;
+      }
+
+      .toggle-switch[data-mode="signup"] .toggle-option.signup {
+        color: #020617;
+        font-weight: 600;
+      }
+
+      /* Form */
+      form {
+        margin-top: 1rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+
+      .field {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+      }
+
+      .field label {
+        font-size: 0.8rem;
+        color: var(--muted);
+      }
+
+      .field input {
+        width: 100%;
+        border-radius: 0.75rem;
+        border: 1px solid rgba(148, 163, 184, 0.6);
+        padding: 0.55rem 0.7rem;
+        background: rgba(15, 23, 42, 0.9);
+        color: var(--text);
+        font-size: 0.9rem;
+      }
+
+      .field input:focus {
+        outline: none;
+        border-color: #22c55e;
+        box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.3);
+      }
+
+      .helper {
+        font-size: 0.75rem;
+        color: var(--muted);
+      }
+
+      .error-box {
         display: none;
+        margin-top: 0.4rem;
+        font-size: 0.78rem;
+        color: #fecaca;
       }
-    }
 
-    @media (max-width: 600px) {
-      .login-shell {
-        margin: 16px;
+      .error-box.active {
+        display: block;
       }
-    }
-  </style>
-</head>
-<body>
-  <div class="login-shell">
-    <!-- LEFT: Glass Human / Brand side -->
-    <div class="login-visual">
-      <div class="login-visual-overlay">
-        <div class="login-badge">
-          <span>🧠 Root Cause Power</span>
-          <span>AI-guided PTSD & wellness support</span>
-        </div>
-        <div class="login-title">One place for your healing journey</div>
-        <div class="login-subtitle">
-          Log in to unlock your AI coaches, PTSD tools, and the Living Intelligence System.
+
+      .status-box {
+        display: none;
+        margin-top: 0.4rem;
+        font-size: 0.78rem;
+        color: #bbf7d0;
+      }
+
+      .status-box.active {
+        display: block;
+      }
+
+      .submit-btn {
+        margin-top: 0.2rem;
+        border-radius: 999px;
+        border: none;
+        width: 100%;
+        padding: 0.65rem 0.8rem;
+        font-size: 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+        background: linear-gradient(to right, #22c55e, #0ea5e9);
+        color: #020617;
+        box-shadow: 0 18px 40px rgba(16, 185, 129, 0.5);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.4rem;
+      }
+
+      .submit-btn[disabled] {
+        opacity: 0.7;
+        cursor: default;
+        box-shadow: none;
+      }
+
+      .submit-btn span.icon {
+        font-size: 1rem;
+      }
+
+      .footnote {
+        margin-top: 0.7rem;
+        font-size: 0.76rem;
+        color: var(--muted);
+        text-align: center;
+      }
+
+      .footnote strong {
+        color: #e5e7eb;
+      }
+
+      @media (max-width: 600px) {
+        .login-shell {
+          padding: 1rem;
+        }
+
+        .login-card {
+          padding: 1.1rem 1rem 0.9rem;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="bg-glass"></div>
+
+    <div class="login-shell">
+      <div class="login-card">
+        <div class="brand">
+          <div class="brand-tag">Root Health · Early access</div>
+          <h1>Welcome back</h1>
+          <p>
+            Log in or create your Root Health account to continue your recovery
+            journey.
+          </p>
         </div>
 
-        <div class="login-highlight">
-          <span>Glass Human Diagnostics & body mapping</span>
-          <span>Root-cause assessments & daily routines</span>
-          <span>AI voice coach sessions with Coach David</span>
+        <div class="toggle-row">
+          <span class="toggle-label">Mode:</span>
+          <div class="toggle-switch" id="modeSwitch" data-mode="login">
+            <div class="toggle-pill"></div>
+            <div class="toggle-option login">Log in</div>
+            <div class="toggle-option signup">Create account</div>
+          </div>
         </div>
-      </div>
 
-      <div class="login-footnote">
-        This is not a crisis service. If you are in immediate danger, please contact emergency services or local crisis support.
+        <form id="authForm">
+          <div class="field">
+            <label for="email">Email</label>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              autocomplete="email"
+              required
+              placeholder="you@example.com"
+            />
+          </div>
+
+          <div class="field">
+            <label for="password">Password</label>
+            <input
+              id="password"
+              name="password"
+              type="password"
+              autocomplete="current-password"
+              required
+              minlength="6"
+              placeholder="At least 6 characters"
+            />
+            <div class="helper">
+              For security, don&apos;t reuse a password from elsewhere.
+            </div>
+          </div>
+
+          <div id="errorBox" class="error-box"></div>
+          <div id="statusBox" class="status-box"></div>
+
+          <button type="submit" id="submitBtn" class="submit-btn">
+            <span id="submitLabel">Log in</span>
+            <span class="icon">→</span>
+          </button>
+        </form>
+
+        <div class="footnote">
+          Step 1: Login · Step 2: Glass Human diagnostic · Step 3: Use your
+          <strong>8 free credits</strong> inside the Root Health app.
+        </div>
       </div>
     </div>
 
-    <!-- RIGHT: Auth form -->
-    <div class="login-form-panel">
-      <div class="login-form-header">
-        <h1 id="auth-title">Welcome back</h1>
-        <p id="auth-subtitle">Log in to continue your Root Health journey.</p>
-      </div>
+    <!-- Auth logic -->
+    <script type="module">
+      import { supabase } from "./supabaseClient.js";
 
-      <div class="login-toggle" aria-label="Login or create account">
-        <button type="button" id="toggle-login" class="active">Log in</button>
-        <button type="button" id="toggle-signup">Create account</button>
-      </div>
+      const modeSwitch = document.getElementById("modeSwitch");
+      const authForm = document.getElementById("authForm");
+      const submitBtn = document.getElementById("submitBtn");
+      const submitLabel = document.getElementById("submitLabel");
+      const errorBox = document.getElementById("errorBox");
+      const statusBox = document.getElementById("statusBox");
 
-      <form id="auth-form">
-        <div class="form-field">
-          <label for="email">Email address</label>
-          <input
-            id="email"
-            name="email"
-            type="email"
-            autocomplete="email"
-            required
-            placeholder="you@example.com"
-          />
-        </div>
-
-        <div class="form-field">
-          <label for="password">Password</label>
-          <input
-            id="password"
-            name="password"
-            type="password"
-            autocomplete="current-password"
-            required
-            minlength="6"
-            placeholder="Minimum 6 characters"
-          />
-        </div>
-
-        <div id="auth-message" class="auth-message"></div>
-
-        <button
-          type="submit"
-          class="submit-button"
-          id="auth-submit"
-          data-mode="login"
-        >
-          <span id="submit-text">Log in</span>
-        </button>
-
-        <div class="legal-text">
-          By continuing you agree to our
-          <a href="/legal/terms-of-service.html" target="_blank" rel="noopener">Terms of Service</a>
-          and
-          <a href="/legal/privacy-policy.html" target="_blank" rel="noopener">Privacy Policy</a>.
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- Supabase auth (v2) -->
- <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-<script>
-  (function () {
-    const supabaseUrl = "https://bechmxbywqhsauhctewo.supabase.co";
-    const supabaseAnonKey =
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJlY2hteGJ5d3Foc2F1aGN0ZXdvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM0ODE0OTcsImV4cCI6MjA3OTA1NzQ5N30.kE3AfgQLI4WWq7je8_0noTvjpObVuW9hPMRUwwxRiFo";
-
-    const { createClient } = window.supabase;
-    const supabase = createClient(supabaseUrl, supabaseAnonKey);
-
-    const loginForm = document.getElementById("login-form");
-    const signupForm = document.getElementById("signup-form");
-    const messageBox = document.getElementById("auth-message");
-
-    function showMessage(text, isError = false) {
-      if (!messageBox) return;
-      messageBox.textContent = text;
-      messageBox.className =
-        "mt-3 text-xs " + (isError ? "text-red-400" : "text-emerald-300");
-    }
-
-    // ✅ On page load, if already logged in, go straight to /glass
-    supabase.auth.getUser().then(({ data, error }) => {
-      if (data && data.user && !error) {
-        window.location.href = "/glass";
+      function getMode() {
+        return modeSwitch.dataset.mode === "signup" ? "signup" : "login";
       }
-    });
 
-    // 🔐 LOGIN
-    if (loginForm) {
-      loginForm.addEventListener("submit", async (e) => {
-        e.preventDefault();
-        const email = loginForm.querySelector('input[type="email"]').value;
-        const password = loginForm.querySelector('input[type="password"]').value;
-
-        showMessage("Signing you in…");
-
-        const { data, error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-
-        if (error) {
-          console.error("Login error:", error);
-          showMessage(error.message || "Login failed", true);
-          return;
+      function setMode(mode) {
+        modeSwitch.dataset.mode = mode;
+        errorBox.classList.remove("active");
+        statusBox.classList.remove("active");
+        if (mode === "login") {
+          submitLabel.textContent = "Log in";
+        } else {
+          submitLabel.textContent = "Create account";
         }
+      }
 
-        // ✅ SUCCESS → go to Glass Human first
-        showMessage("Signed in. Taking you to your Glass Diagnostic…");
-        window.location.href = "/glass";
+      // Toggle click behaviour
+      modeSwitch.addEventListener("click", () => {
+        const mode = getMode();
+        setMode(mode === "login" ? "signup" : "login");
       });
-    }
 
-    // 🧾 SIGNUP
-    if (signupForm) {
-      signupForm.addEventListener("submit", async (e) => {
-        e.preventDefault();
-        const email = signupForm.querySelector('input[type="email"]').value;
-        const password = signupForm.querySelector('input[type="password"]').value;
+      async function handleAuth(event) {
+        event.preventDefault();
+        errorBox.classList.remove("active");
+        statusBox.classList.remove("active");
 
-        showMessage("Creating your account…");
+        const formData = new FormData(authForm);
+        const email = (formData.get("email") || "").toString().trim();
+        const password = (formData.get("password") || "").toString();
 
-        const { data, error } = await supabase.auth.signUp({
-          email,
-          password,
-        });
-
-        if (error) {
-          console.error("Signup error:", error);
-          showMessage(error.message || "Signup failed", true);
+        if (!email || !password) {
+          errorBox.textContent = "Please enter both email and password.";
+          errorBox.classList.add("active");
           return;
         }
 
-        // We immediately sign them in after signup so they can move on
-        showMessage("Account created. Signing you in…");
+        submitBtn.disabled = true;
+        const mode = getMode();
 
-        const { error: loginError } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
+        try {
+          if (mode === "login") {
+            const { data, error } = await supabase.auth.signInWithPassword({
+              email,
+              password
+            });
 
-        if (loginError) {
-          console.error("Login after signup failed:", loginError);
-          showMessage(
-            "Account created, but login failed. Try logging in manually.",
-            true
-          );
-          return;
+            if (error) {
+              throw error;
+            }
+
+            // Login success → go to glass wrapper
+            statusBox.textContent = "Logged in. Redirecting to your diagnostic…";
+            statusBox.classList.add("active");
+
+            window.location.href = "/glass-diagnostic.html";
+          } else {
+            // Create account
+            const { data, error } = await supabase.auth.signUp({
+              email,
+              password
+            });
+
+            if (error) {
+              throw error;
+            }
+
+            statusBox.textContent =
+              "Account created. Check your email if required, then we&apos;ll take you to your diagnostic.";
+            statusBox.classList.add("active");
+
+            // For now, send them straight on. You can later require email confirm if you want.
+            window.location.href = "/glass-diagnostic.html";
+          }
+        } catch (err) {
+          console.error("Auth error", err);
+          errorBox.textContent =
+            err?.message ||
+            "Something went wrong while authenticating. Please try again.";
+          errorBox.classList.add("active");
+        } finally {
+          submitBtn.disabled = false;
         }
+      }
 
-        // ✅ NEW USER → go straight to Glass Human
-        showMessage("Account ready. Taking you to your Glass Diagnostic…");
-        window.location.href = "/glass";
-      });
-    }
-  })();
-</script>
-</body>
+      authForm.addEventListener("submit", handleAuth);
+    </script>
+  </body>
 </html>
