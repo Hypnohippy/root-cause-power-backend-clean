@@ -382,130 +382,103 @@
   </div>
 
   <!-- Supabase auth (v2) -->
-  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-  <script>
-    (function () {
-      const supabaseUrl = "https://bechmxbywqhsauhctewo.supabase.co";
-      const supabaseAnonKey =
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJlY2hteGJ5d3Foc2F1aGN0ZXdvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM0ODE0OTcsImV4cCI6MjA3OTA1NzQ5N30.kE3AfgQLI4WWq7je8_0noTvjpObVuW9hPMRUwwxRiFo";
+ <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script>
+  (function () {
+    const supabaseUrl = "https://bechmxbywqhsauhctewo.supabase.co";
+    const supabaseAnonKey =
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJlY2hteGJ5d3Foc2F1aGN0ZXdvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM0ODE0OTcsImV4cCI6MjA3OTA1NzQ5N30.kE3AfgQLI4WWq7je8_0noTvjpObVuW9hPMRUwwxRiFo";
 
-      const { createClient } = window.supabase;
-      const supabase = createClient(supabaseUrl, supabaseAnonKey);
+    const { createClient } = window.supabase;
+    const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-      const form = document.getElementById("auth-form");
-      const messageBox = document.getElementById("auth-message");
-      const submitBtn = document.getElementById("auth-submit");
-      const submitText = document.getElementById("submit-text");
-      const toggleLogin = document.getElementById("toggle-login");
-      const toggleSignup = document.getElementById("toggle-signup");
-      const titleEl = document.getElementById("auth-title");
-      const subtitleEl = document.getElementById("auth-subtitle");
+    const loginForm = document.getElementById("login-form");
+    const signupForm = document.getElementById("signup-form");
+    const messageBox = document.getElementById("auth-message");
 
-      function setMode(mode) {
-        // mode: "login" or "signup"
-        submitBtn.dataset.mode = mode;
+    function showMessage(text, isError = false) {
+      if (!messageBox) return;
+      messageBox.textContent = text;
+      messageBox.className =
+        "mt-3 text-xs " + (isError ? "text-red-400" : "text-emerald-300");
+    }
 
-        if (mode === "login") {
-          toggleLogin.classList.add("active");
-          toggleSignup.classList.remove("active");
-          titleEl.textContent = "Welcome back";
-          subtitleEl.textContent = "Log in to continue your Root Health journey.";
-          submitText.textContent = "Log in";
-        } else {
-          toggleSignup.classList.add("active");
-          toggleLogin.classList.remove("active");
-          titleEl.textContent = "Create your Root Health account";
-          subtitleEl.textContent = "Start with your email and a password you can remember.";
-          submitText.textContent = "Create account";
-        }
-
-        messageBox.style.display = "none";
-        messageBox.textContent = "";
-        messageBox.className = "auth-message";
+    // ✅ On page load, if already logged in, go straight to /glass
+    supabase.auth.getUser().then(({ data, error }) => {
+      if (data && data.user && !error) {
+        window.location.href = "/glass";
       }
+    });
 
-      toggleLogin.addEventListener("click", () => setMode("login"));
-      toggleSignup.addEventListener("click", () => setMode("signup"));
+    // 🔐 LOGIN
+    if (loginForm) {
+      loginForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const email = loginForm.querySelector('input[type="email"]').value;
+        const password = loginForm.querySelector('input[type="password"]').value;
 
-      function showMessage(text, type) {
-        messageBox.textContent = text;
-        messageBox.className = "auth-message " + type;
-      }
+        showMessage("Signing you in…");
 
-      form.addEventListener("submit", async (event) => {
-        event.preventDefault();
-        const email = (form.email.value || "").trim();
-        const password = form.password.value || "";
-        const mode = submitBtn.dataset.mode || "login";
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
 
-        if (!email || !password) {
-          showMessage("Please enter both email and password.", "error");
+        if (error) {
+          console.error("Login error:", error);
+          showMessage(error.message || "Login failed", true);
           return;
         }
 
-        if (password.length < 6) {
-          showMessage("Password must be at least 6 characters.", "error");
-          return;
-        }
-
-        submitBtn.disabled = true;
-        submitText.textContent = mode === "login" ? "Logging in..." : "Creating account...";
-
-        try {
-          if (mode === "login") {
-            const { data, error } = await supabase.auth.signInWithPassword({
-              email,
-              password,
-            });
-
-            if (error) {
-              console.error("Login error:", error);
-              showMessage(error.message || "Login failed. Please check your details.", "error");
-            } else {
-              showMessage("Login successful. Redirecting...", "success");
-              setTimeout(() => {
-                window.location.href = "/";
-              }, 600);
-            }
-          } else {
-            // SIGN UP
-            const { data, error } = await supabase.auth.signUp({
-              email,
-              password,
-            });
-
-            if (error) {
-              console.error("Sign-up error:", error);
-              if (error.message && error.message.toLowerCase().includes("already registered")) {
-                showMessage("That email is already registered. Try logging in instead.", "error");
-              } else {
-                showMessage(error.message || "Sign-up failed. Please try again.", "error");
-              }
-            } else {
-              // If email confirmations are OFF, session will exist and we can log straight in.
-              if (data.session) {
-                showMessage("Account created. Signing you in...", "success");
-                setTimeout(() => {
-                  window.location.href = "/";
-                }, 600);
-              } else {
-                // If confirmations are ON, user must click link in email.
-                showMessage(
-                  "Account created. Please check your email to confirm your address, then log in.",
-                  "success"
-                );
-              }
-            }
-          }
-        } catch (e) {
-          console.error("Auth error:", e);
-          showMessage("Something went wrong. Please try again.", "error");
-        } finally {
-          submitBtn.disabled = false;
-          submitText.textContent = submitBtn.dataset.mode === "login" ? "Log in" : "Create account";
-        }
+        // ✅ SUCCESS → go to Glass Human first
+        showMessage("Signed in. Taking you to your Glass Diagnostic…");
+        window.location.href = "/glass";
       });
-    })();
-  </script>
+    }
+
+    // 🧾 SIGNUP
+    if (signupForm) {
+      signupForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const email = signupForm.querySelector('input[type="email"]').value;
+        const password = signupForm.querySelector('input[type="password"]').value;
+
+        showMessage("Creating your account…");
+
+        const { data, error } = await supabase.auth.signUp({
+          email,
+          password,
+        });
+
+        if (error) {
+          console.error("Signup error:", error);
+          showMessage(error.message || "Signup failed", true);
+          return;
+        }
+
+        // We immediately sign them in after signup so they can move on
+        showMessage("Account created. Signing you in…");
+
+        const { error: loginError } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+
+        if (loginError) {
+          console.error("Login after signup failed:", loginError);
+          showMessage(
+            "Account created, but login failed. Try logging in manually.",
+            true
+          );
+          return;
+        }
+
+        // ✅ NEW USER → go straight to Glass Human
+        showMessage("Account ready. Taking you to your Glass Diagnostic…");
+        window.location.href = "/glass";
+      });
+    }
+  })();
+</script>
 </body>
 </html>
