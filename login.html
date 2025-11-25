@@ -365,6 +365,13 @@
       const errorBox = document.getElementById("errorBox");
       const statusBox = document.getElementById("statusBox");
 
+      // 🔍 Look at the URL to see where to go after login
+      const params = new URLSearchParams(window.location.search);
+      const goto = params.get("goto"); // "rootapp" or null
+
+      // Root Health main app (assumed index.html at root)
+      const ROOT_APP_PATH = "/index.html";
+
       function getMode() {
         return modeSwitch.dataset.mode === "signup" ? "signup" : "login";
       }
@@ -380,9 +387,15 @@
         }
       }
 
-      // Always send user to /glass/ after successful auth
+      // Decide where to send user after auth:
+      // - normal login → /glass/
+      // - login with ?goto=rootapp → /index.html
       function redirectAfterAuth() {
-        window.location.href = "/glass/";
+        if (goto === "rootapp") {
+          window.location.href = ROOT_APP_PATH;
+        } else {
+          window.location.href = "/glass/";
+        }
       }
 
       modeSwitch.addEventListener("click", () => {
@@ -416,7 +429,7 @@
             });
             if (error) throw error;
 
-            statusBox.textContent = "Logged in. Loading your Glass map…";
+            statusBox.textContent = "Logged in. Loading your journey…";
             statusBox.classList.add("active");
 
             redirectAfterAuth();
@@ -440,7 +453,7 @@
               }
             } else {
               statusBox.textContent =
-                "Account created. Loading your first Glass diagnostic…";
+                "Account created. Loading your first step…";
               statusBox.classList.add("active");
 
               redirectAfterAuth();
