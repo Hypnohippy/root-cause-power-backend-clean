@@ -2,138 +2,549 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <title>Root Health – Sign In</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Root Health – Login</title>
+  <link rel="icon" href="/favicon.ico" />
 
+  <!-- Simple internal styles so this page looks good on its own -->
   <style>
-    body {
+    :root {
+      color-scheme: dark;
+    }
+
+    * {
+      box-sizing: border-box;
       margin: 0;
       padding: 0;
-      height: 100vh;
+    }
+
+    body {
+      min-height: 100vh;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #1f2937, #020617);
+      color: #e5e7eb;
       display: flex;
-      justify-content: center;
       align-items: center;
-      background: #0a1029;
-      font-family: system-ui, sans-serif;
+      justify-content: center;
+      padding: 16px;
     }
 
-    /* 🌟 Full-screen background glass human */
-    .background {
-      position: fixed;
+    .shell {
+      max-width: 960px;
+      width: 100%;
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+      gap: 0;
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: 0 25px 60px rgba(15, 23, 42, 0.8);
+      background: radial-gradient(circle at top left, rgba(56, 189, 248, 0.1), transparent 60%),
+                  radial-gradient(circle at bottom right, rgba(129, 140, 248, 0.12), #020617);
+      border: 1px solid rgba(148, 163, 184, 0.25);
+    }
+
+    /* Left panel with Glass Human */
+    .hero {
+      position: relative;
+      display: none; /* hidden on small screens */
+      background: radial-gradient(circle at top, #0f172a, #020617);
+    }
+
+    .hero-img {
+      position: absolute;
       inset: 0;
-      background: url("/img/glass-human-login.png") center/contain no-repeat;
-      opacity: 0.18;
-      z-index: -1;
+      background-image: url("/public/img/glass-human-login.png");
+      background-size: cover;
+      background-position: center;
+      opacity: 0.12;
+      filter: saturate(1.4);
     }
 
-    /* Frosted login panel */
-    .login-box {
-      width: 360px;
-      padding: 40px;
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      border-radius: 20px;
-      backdrop-filter: blur(12px);
-      box-shadow: 0 0 40px rgba(0, 0, 0, 0.3);
-      color: white;
-      text-align: center;
+    .hero-content {
+      position: relative;
+      z-index: 1;
+      padding: 32px 28px;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
     }
 
-    .login-box h2 {
-      margin-bottom: 25px;
-      font-size: 24px;
-      font-weight: 700;
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid rgba(94, 234, 212, 0.4);
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #a5f3fc;
     }
 
-    input {
-      width: 100%;
-      padding: 12px;
-      margin-bottom: 15px;
-      border: none;
-      border-radius: 8px;
-      font-size: 16px;
+    .hero-title {
+      margin-top: 20px;
+      font-size: 26px;
+      line-height: 1.2;
+      font-weight: 650;
+      color: #f9fafb;
     }
 
-    .btn {
-      width: 100%;
-      padding: 12px;
-      background: linear-gradient(135deg, #7c3aed, #3b82f6);
-      border: none;
-      color: white;
-      font-size: 18px;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: 0.2s;
+    .hero-sub {
+      margin-top: 10px;
+      font-size: 14px;
+      color: #cbd5f5;
     }
 
-    .btn:hover {
+    .hero-list {
+      margin-top: 20px;
+      font-size: 13px;
+      color: #e5e7eb;
+      display: grid;
+      gap: 6px;
+    }
+
+    .hero-list span {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .hero-list span i {
+      font-style: normal;
+      color: #22c55e;
+    }
+
+    .hero-footer {
+      font-size: 11px;
+      color: #9ca3af;
       opacity: 0.9;
     }
 
-    .link {
-      margin-top: 15px;
-      font-size: 14px;
-      cursor: pointer;
-      color: #60a5fa;
+    /* Right panel: login form */
+    .panel {
+      padding: 28px 26px 26px;
+      backdrop-filter: blur(20px);
+      background: radial-gradient(circle at top, rgba(15, 23, 42, 0.9), rgba(15, 23, 42, 0.98));
     }
-  </style>
 
-  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-</head>
+    .logo-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
+    }
 
-<body>
+    .logo {
+      font-weight: 650;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      font-size: 11px;
+      color: #a5b4fc;
+    }
 
-  <div class="background"></div>
+    .logo span {
+      color: #4ade80;
+    }
 
-  <div class="login-box">
-    <h2>Welcome to Root Health</h2>
+    .beta-pill {
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: rgba(56, 189, 248, 0.15);
+      border: 1px solid rgba(56, 189, 248, 0.5);
+      font-size: 10px;
+      color: #e0f2fe;
+    }
 
-    <input id="email" type="email" placeholder="Email" />
-    <input id="password" type="password" placeholder="Password" />
+    .panel h1 {
+      font-size: 22px;
+      font-weight: 650;
+      color: #f9fafb;
+      margin-bottom: 6px;
+    }
 
-    <button class="btn" onclick="login()">Sign In</button>
+    .panel p.subtext {
+      font-size: 13px;
+      color: #9ca3af;
+      margin-bottom: 18px;
+    }
 
-    <div class="link" onclick="signup()">Create an Account</div>
-  </div>
+    .panel p.subtext strong {
+      color: #e5e7eb;
+      font-weight: 500;
+    }
 
-  <script>
-    const supabase = supabase.createClient(
-      "https://bechmxbywqhsauhctewo.supabase.co",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJlY2hteGJ5d3Foc2F1aGN0ZXdvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM0ODE0OTcsImV4cCI6MjA3OTA1NzQ5N30.kE3AfgQLI4WWq7je8_0noTvjpObVuW9hPMRUwwxRiFo
-"
-    );
+    form {
+      display: grid;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
 
-    async function login() {
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
+    label {
+      font-size: 12px;
+      color: #e5e7eb;
+      display: block;
+      margin-bottom: 4px;
+    }
 
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+    input[type="email"],
+    input[type="password"] {
+      width: 100%;
+      border-radius: 10px;
+      border: 1px solid rgba(148, 163, 184, 0.5);
+      padding: 9px 11px;
+      background: rgba(15, 23, 42, 0.9);
+      color: #f9fafb;
+      font-size: 13px;
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+    }
 
-      if (error) {
-        alert("❌ " + error.message);
-      } else {
-        window.location.href = "/index.html";
+    input[type="email"]::placeholder,
+    input[type="password"]::placeholder {
+      color: #64748b;
+    }
+
+    input[type="email"]:focus,
+    input[type="password"]:focus {
+      border-color: #6366f1;
+      box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.5);
+      background: rgba(15, 23, 42, 1);
+    }
+
+    .buttons-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .btn {
+      flex: 1;
+      border-radius: 999px;
+      border: 1px solid transparent;
+      padding: 9px 12px;
+      font-size: 13px;
+      font-weight: 550;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.05s, box-shadow 0.15s, border-color 0.15s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #4f46e5, #22c55e);
+      color: #f9fafb;
+      box-shadow: 0 10px 25px rgba(79, 70, 229, 0.45);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 14px 32px rgba(79, 70, 229, 0.6);
+    }
+
+    .btn-secondary {
+      background: rgba(15, 23, 42, 0.9);
+      color: #e5e7eb;
+      border-color: rgba(148, 163, 184, 0.6);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(15, 23, 42, 1);
+      border-color: #6366f1;
+    }
+
+    .hint {
+      font-size: 11px;
+      color: #9ca3af;
+      margin-bottom: 8px;
+    }
+
+    .hint strong {
+      color: #e5e7eb;
+      font-weight: 500;
+    }
+
+    .status {
+      font-size: 12px;
+      margin-top: 4px;
+      min-height: 18px;
+    }
+
+    .status.ok {
+      color: #4ade80;
+    }
+
+    .status.err {
+      color: #f97373;
+    }
+
+    .footer-text {
+      font-size: 11px;
+      color: #6b7280;
+      margin-top: 14px;
+      line-height: 1.4;
+    }
+
+    .footer-text a {
+      color: #a5b4fc;
+      text-decoration: none;
+    }
+
+    .footer-text a:hover {
+      text-decoration: underline;
+    }
+
+    @media (min-width: 840px) {
+      .hero {
+        display: block;
       }
     }
 
-    async function signup() {
-      const email = prompt("Enter your email:");
-      const password = prompt("Create a password:");
+    @media (max-width: 600px) {
+      .shell {
+        border-radius: 18px;
+      }
+      .panel {
+        padding: 20px 18px 18px;
+      }
+      .panel h1 {
+        font-size: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <!-- Left side: Glass Human / story -->
+    <div class="hero">
+      <div class="hero-img"></div>
+      <div class="hero-content">
+        <div>
+          <div class="hero-badge">
+            <span>ROOT HEALTH • BETA</span>
+          </div>
+          <h2 class="hero-title">
+            Take control of your health,<br />
+            one small step at a time.
+          </h2>
+          <p class="hero-sub">
+            Root Cause Power gently maps symptoms, stress, sleep and habits,
+            and turns them into a clear, visual story of what's really going on.
+          </p>
 
-      if (!email || !password) return;
+          <div class="hero-list">
+            <span><i>●</i> Glass Human body map to explore your symptoms</span>
+            <span><i>●</i> AI coaches to help you unpack stress & triggers</span>
+            <span><i>●</i> PTSD tools, neural journaling & nutrition insights</span>
+            <span><i>●</i> Start free, then upgrade only if it truly helps</span>
+          </div>
+        </div>
 
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
+        <div class="hero-footer">
+          This is not an emergency service and does not replace your doctor or
+          mental health team. If you are in crisis, please contact your local
+          emergency services or crisis helpline immediately.
+        </div>
+      </div>
+    </div>
+
+    <!-- Right side: login / signup -->
+    <div class="panel">
+      <div class="logo-row">
+        <div class="logo">
+          ROOT <span>HEALTH</span>
+        </div>
+        <div class="beta-pill">
+          Early access · You’re in
+        </div>
+      </div>
+
+      <h1>Sign in to Root Health</h1>
+      <p class="subtext">
+        Use your <strong>email and a password you’ll remember</strong>.  
+        New here? Create an account in a couple of taps.
+      </p>
+
+      <p class="hint">
+        <strong>Tip:</strong> Depressed brains hate admin.  
+        Just enter your email & password once – next time it’s one quick login.
+      </p>
+
+      <form id="auth-form">
+        <div>
+          <label for="email">Email address</label>
+          <input
+            id="email"
+            name="email"
+            type="email"
+            autocomplete="email"
+            placeholder="you@example.com"
+            required
+          />
+        </div>
+
+        <div>
+          <label for="password">Password</label>
+          <input
+            id="password"
+            name="password"
+            type="password"
+            autocomplete="current-password"
+            placeholder="Create something you’ll remember"
+            required
+          />
+        </div>
+
+        <div class="buttons-row">
+          <button type="button" class="btn btn-primary" id="btn-login">
+            Log in
+          </button>
+          <button type="button" class="btn btn-secondary" id="btn-signup">
+            Create account
+          </button>
+        </div>
+      </form>
+
+      <div id="status" class="status"></div>
+
+      <div class="footer-text">
+        By continuing you agree to the Root Health
+        <a href="/legal/terms-of-service.html" target="_blank">Terms</a> and
+        <a href="/legal/content-admin.html" target="_blank">Privacy</a>.  
+        You can close this page at any time and come back when you have more energy.
+      </div>
+    </div>
+  </div>
+
+  <!-- Supabase auth logic -->
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <script>
+    (function () {
+      const supabaseUrl = "https://bechmxbywqhsauhctewo.supabase.co";
+      const supabaseAnonKey =
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJlY2hteGJ5d3Foc2F1aGN0ZXdvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM0ODE0OTcsImV4cCI6MjA3OTA1NzQ5N30.kE3AfgQLI4WWq7je8_0noTvjpObVuW9hPMRUwwxRiFo";
+
+      const { createClient } = window.supabase;
+      const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+      const statusEl = document.getElementById("status");
+      const emailEl = document.getElementById("email");
+      const passwordEl = document.getElementById("password");
+      const btnLogin = document.getElementById("btn-login");
+      const btnSignup = document.getElementById("btn-signup");
+
+      function setStatus(message, type = "ok") {
+        statusEl.textContent = message || "";
+        statusEl.className = "status " + (type === "err" ? "err" : "ok");
+      }
+
+      // If already logged in, go straight to app
+      supabase.auth.getUser().then(({ data, error }) => {
+        if (data && data.user) {
+          console.log("Already logged in as:", data.user.email);
+          window.location.href = "/";
+        }
       });
 
-      if (error) alert("❌ " + error.message);
-      else alert("✅ Account created! You can now log in.");
-    }
-  </script>
+      async function handleLogin() {
+        const email = emailEl.value.trim();
+        const password = passwordEl.value;
 
+        if (!email || !password) {
+          setStatus("Please enter both email and password.", "err");
+          return;
+        }
+
+        setStatus("Logging you in…", "ok");
+        btnLogin.disabled = true;
+        btnSignup.disabled = true;
+
+        try {
+          const { data, error } = await supabase.auth.signInWithPassword({
+            email,
+            password,
+          });
+
+          if (error) {
+            console.error(error);
+            setStatus("Login failed. Check your details and try again.", "err");
+          } else {
+            setStatus("Welcome back. Redirecting…", "ok");
+            window.location.href = "/";
+          }
+        } catch (e) {
+          console.error(e);
+          setStatus("Something went wrong. Please try again.", "err");
+        } finally {
+          btnLogin.disabled = false;
+          btnSignup.disabled = false;
+        }
+      }
+
+      async function handleSignup() {
+        const email = emailEl.value.trim();
+        const password = passwordEl.value;
+
+        if (!email || !password) {
+          setStatus("Please enter both email and a password.", "err");
+          return;
+        }
+
+        if (password.length < 6) {
+          setStatus("Password needs at least 6 characters.", "err");
+          return;
+        }
+
+        setStatus("Creating your account…", "ok");
+        btnLogin.disabled = true;
+        btnSignup.disabled = true;
+
+        try {
+          const { data, error } = await supabase.auth.signUp({
+            email,
+            password,
+          });
+
+          if (error) {
+            console.error(error);
+            setStatus(error.message || "Sign up failed. Try another email.", "err");
+          } else {
+            setStatus("Account created. Now logging you in…", "ok");
+            // Immediately log in with the same credentials
+            const { error: loginError } = await supabase.auth.signInWithPassword({
+              email,
+              password,
+            });
+            if (loginError) {
+              console.error(loginError);
+              setStatus("Account created, but login failed. Try logging in manually.", "err");
+            } else {
+              window.location.href = "/";
+            }
+          }
+        } catch (e) {
+          console.error(e);
+          setStatus("Something went wrong. Please try again.", "err");
+        } finally {
+          btnLogin.disabled = false;
+          btnSignup.disabled = false;
+        }
+      }
+
+      btnLogin.addEventListener("click", (e) => {
+        e.preventDefault();
+        handleLogin();
+      });
+
+      btnSignup.addEventListener("click", (e) => {
+        e.preventDefault();
+        handleSignup();
+      });
+    })();
+  </script>
 </body>
 </html>
