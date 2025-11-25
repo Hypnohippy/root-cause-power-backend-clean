@@ -5,7 +5,7 @@
     <title>Root Health – Login</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <!-- Use paths that exist in your repo -->
+    <!-- Keep your existing CSS includes -->
     <link rel="stylesheet" href="/css/styles.css" />
     <link rel="stylesheet" href="/public/css/improved-ui.css" />
 
@@ -14,7 +14,6 @@
         color-scheme: dark;
         --bg: #020617;
         --panel: rgba(15, 23, 42, 0.95);
-        --panel-soft: rgba(15, 23, 42, 0.9);
         --border: rgba(148, 163, 184, 0.55);
         --accent: #22c55e;
         --accent-2: #0ea5e9;
@@ -40,7 +39,6 @@
         overflow: hidden;
       }
 
-      /* Glass human background */
       .bg-glass {
         position: absolute;
         inset: 0;
@@ -107,7 +105,6 @@
         color: var(--muted);
       }
 
-      /* Toggle */
       .toggle-row {
         margin-top: 0.9rem;
         display: flex;
@@ -123,7 +120,7 @@
 
       .toggle-switch {
         position: relative;
-        width: 180px; /* wider so text fits inside nicely */
+        width: 180px;
         height: 28px;
         border-radius: 999px;
         background: rgba(15, 23, 42, 0.95);
@@ -140,7 +137,7 @@
         position: absolute;
         top: 3px;
         left: 3px;
-        width: 84px; /* half the width minus padding */
+        width: 84px;
         height: 22px;
         border-radius: 999px;
         background: linear-gradient(to right, #22c55e, #0ea5e9);
@@ -172,7 +169,6 @@
         font-weight: 600;
       }
 
-      /* Form */
       form {
         margin-top: 1rem;
         display: flex;
@@ -277,7 +273,6 @@
         .login-shell {
           padding: 1rem;
         }
-
         .login-card {
           padding: 1.1rem 1rem 0.9rem;
         }
@@ -353,11 +348,10 @@
       </div>
     </div>
 
-    <!-- Auth logic (all inline, same Supabase as before) -->
     <script type="module">
       import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-      // Your Supabase project (same as you pasted earlier)
+      // Your Supabase project (same as before)
       const SUPABASE_URL = "https://bechmxbywqhsauhctewo.supabase.co";
       const SUPABASE_ANON_KEY =
         "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJlY2hteGJ5d3Foc2F1aGN0ZXdvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM0ODE0OTcsImV4cCI6MjA3OTA1NzQ5N30.kE3AfgQLI4WWq7je8_0noTvjpObVuW9hPMRUwwxRiFo";
@@ -370,6 +364,13 @@
       const submitLabel = document.getElementById("submitLabel");
       const errorBox = document.getElementById("errorBox");
       const statusBox = document.getElementById("statusBox");
+
+      // Read where we should go AFTER login
+      const params = new URLSearchParams(window.location.search);
+      const goto = params.get("goto"); // "rootapp" or null
+
+      // 👇 CHANGE THIS if your main app home is not "/"
+      const ROOT_APP_PATH = "/"; // e.g. "/dashboard" if that’s your main app route
 
       function getMode() {
         return modeSwitch.dataset.mode === "signup" ? "signup" : "login";
@@ -386,7 +387,31 @@
         }
       }
 
-      // Toggle click behaviour
+      function redirectAfterAuth() {
+        if (goto === "rootapp") {
+          // Coming from Glass CTA → go into main app
+          window.location.href = ROOT_APP_PATH;
+        } else {
+          // Normal login / signup → go to Glass diagnostic
+          window.location.href = "/glass/";
+        }
+      }
+
+      // If we already have a session and someone hits /login?goto=rootapp,
+      // skip the form and just send them on.
+      async function maybeSkipLoginIfAlreadySignedIn() {
+        try {
+          const {
+            data: { session }
+          } = await supabase.auth.getSession();
+          if (session && goto === "rootapp") {
+            redirectAfterAuth();
+          }
+        } catch (e) {
+          console.warn("Session check failed", e);
+        }
+      }
+
       modeSwitch.addEventListener("click", () => {
         const mode = getMode();
         setMode(mode === "login" ? "signup" : "login");
@@ -418,24 +443,36 @@
             });
             if (error) throw error;
 
-            statusBox.textContent = "Logged in. Loading your Glass map…";
+            statusBox.textContent = "Logged in. Loading your journey…";
             statusBox.classList.add("active");
 
-            // ✅ Single front-door: go straight to /glass
-            window.location.href = "/glass";
+            redirectAfterAuth();
           } else {
             const { error } = await supabase.auth.signUp({
               email,
               password
             });
-            if (error) throw error;
 
-            statusBox.textContent =
-              "Account created. Loading your first Glass diagnostic…";
-            statusBox.classList.add("active");
+            if (error) {
+              // If user already exists, flip them to login mode
+              if (
+                error.message &&
+                error.message.toLowerCase().includes("exists")
+              ) {
+                setMode("login");
+                errorBox.textContent =
+                  "That email is already registered. Please log in instead.";
+                errorBox.classList.add("active");
+              } else {
+                throw error;
+              }
+            } else {
+              statusBox.textContent =
+                "Account created. Loading your first step…";
+              statusBox.classList.add("active");
 
-            // ✅ Same: after sign-up, go to /glass
-            window.location.href = "/glass";
+              redirectAfterAuth();
+            }
           }
         } catch (err) {
           console.error("Auth error", err);
@@ -449,6 +486,9 @@
       }
 
       authForm.addEventListener("submit", handleAuth);
+
+      // Run the auto-redirect check on load
+      maybeSkipLoginIfAlreadySignedIn();
     </script>
   </body>
 </html>
