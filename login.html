@@ -348,147 +348,114 @@
       </div>
     </div>
 
-    <script type="module">
-      import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+   <script type="module">
+  import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-      // Your Supabase project (same as before)
-      const SUPABASE_URL = "https://bechmxbywqhsauhctewo.supabase.co";
-      const SUPABASE_ANON_KEY =
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJlY2hteGJ5d3Foc2F1aGN0ZXdvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM0ODE0OTcsImV4cCI6MjA3OTA1NzQ5N30.kE3AfgQLI4WWq7je8_0noTvjpObVuW9hPMRUwwxRiFo";
+  // Your Supabase project (same as before)
+  const SUPABASE_URL = "https://bechmxbywqhsauhctewo.supabase.co";
+  const SUPABASE_ANON_KEY =
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJlY2hteGJ5d3Foc2F1aGN0ZXdvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM0ODE0OTcsImV4cCI6MjA3OTA1NzQ5N30.kE3AfgQLI4WWq7je8_0noTvjpObVuW9hPMRUwwxRiFo";
 
-      const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-      const modeSwitch = document.getElementById("modeSwitch");
-      const authForm = document.getElementById("authForm");
-      const submitBtn = document.getElementById("submitBtn");
-      const submitLabel = document.getElementById("submitLabel");
-      const errorBox = document.getElementById("errorBox");
-      const statusBox = document.getElementById("statusBox");
+  const modeSwitch = document.getElementById("modeSwitch");
+  const authForm = document.getElementById("authForm");
+  const submitBtn = document.getElementById("submitBtn");
+  const submitLabel = document.getElementById("submitLabel");
+  const errorBox = document.getElementById("errorBox");
+  const statusBox = document.getElementById("statusBox");
 
-      // Read where we should go AFTER login
-      const params = new URLSearchParams(window.location.search);
-      const goto = params.get("goto"); // "rootapp" or null
+  function getMode() {
+    return modeSwitch.dataset.mode === "signup" ? "signup" : "login";
+  }
 
-      // 👇 CHANGE THIS if your main app home is not "/"
-      const ROOT_APP_PATH = "/"; // e.g. "/dashboard" if that’s your main app route
+  function setMode(mode) {
+    modeSwitch.dataset.mode = mode;
+    errorBox.classList.remove("active");
+    statusBox.classList.remove("active");
+    if (mode === "login") {
+      submitLabel.textContent = "Log in";
+    } else {
+      submitLabel.textContent = "Create account";
+    }
+  }
 
-      function getMode() {
-        return modeSwitch.dataset.mode === "signup" ? "signup" : "login";
-      }
+  // 👉 For now, ALWAYS go to Glass after login/signup
+  function redirectAfterAuth() {
+    window.location.href = "/glass/";
+  }
 
-      function setMode(mode) {
-        modeSwitch.dataset.mode = mode;
-        errorBox.classList.remove("active");
-        statusBox.classList.remove("active");
-        if (mode === "login") {
-          submitLabel.textContent = "Log in";
-        } else {
-          submitLabel.textContent = "Create account";
-        }
-      }
+  modeSwitch.addEventListener("click", () => {
+    const mode = getMode();
+    setMode(mode === "login" ? "signup" : "login");
+  });
 
-      function redirectAfterAuth() {
-        if (goto === "rootapp") {
-          // Coming from Glass CTA → go into main app
-          window.location.href = ROOT_APP_PATH;
-        } else {
-          // Normal login / signup → go to Glass diagnostic
-          window.location.href = "/glass/";
-        }
-      }
+  async function handleAuth(event) {
+    event.preventDefault();
+    errorBox.classList.remove("active");
+    statusBox.classList.remove("active");
 
-      // If we already have a session and someone hits /login?goto=rootapp,
-      // skip the form and just send them on.
-      async function maybeSkipLoginIfAlreadySignedIn() {
-        try {
-          const {
-            data: { session }
-          } = await supabase.auth.getSession();
-          if (session && goto === "rootapp") {
-            redirectAfterAuth();
-          }
-        } catch (e) {
-          console.warn("Session check failed", e);
-        }
-      }
+    const formData = new FormData(authForm);
+    const email = (formData.get("email") || "").toString().trim();
+    const password = (formData.get("password") || "").toString();
 
-      modeSwitch.addEventListener("click", () => {
-        const mode = getMode();
-        setMode(mode === "login" ? "signup" : "login");
-      });
+    if (!email || !password) {
+      errorBox.textContent = "Please enter both email and password.";
+      errorBox.classList.add("active");
+      return;
+    }
 
-      async function handleAuth(event) {
-        event.preventDefault();
-        errorBox.classList.remove("active");
-        statusBox.classList.remove("active");
+    submitBtn.disabled = true;
+    const mode = getMode();
 
-        const formData = new FormData(authForm);
-        const email = (formData.get("email") || "").toString().trim();
-        const password = (formData.get("password") || "").toString();
+    try {
+      if (mode === "login") {
+        const { error } = await supabase.auth.signInWithPassword({
+          email,
+          password
+        });
+        if (error) throw error;
 
-        if (!email || !password) {
-          errorBox.textContent = "Please enter both email and password.";
-          errorBox.classList.add("active");
-          return;
-        }
+        statusBox.textContent = "Logged in. Loading your Glass map…";
+        statusBox.classList.add("active");
 
-        submitBtn.disabled = true;
-        const mode = getMode();
+        redirectAfterAuth();
+      } else {
+        const { error } = await supabase.auth.signUp({
+          email,
+          password
+        });
 
-        try {
-          if (mode === "login") {
-            const { error } = await supabase.auth.signInWithPassword({
-              email,
-              password
-            });
-            if (error) throw error;
-
-            statusBox.textContent = "Logged in. Loading your journey…";
-            statusBox.classList.add("active");
-
-            redirectAfterAuth();
+        if (error) {
+          // If user already exists, flip them to login mode instead of dead-end
+          if (error.message && error.message.toLowerCase().includes("exists")) {
+            setMode("login");
+            errorBox.textContent =
+              "That email is already registered. Please log in instead.";
+            errorBox.classList.add("active");
           } else {
-            const { error } = await supabase.auth.signUp({
-              email,
-              password
-            });
-
-            if (error) {
-              // If user already exists, flip them to login mode
-              if (
-                error.message &&
-                error.message.toLowerCase().includes("exists")
-              ) {
-                setMode("login");
-                errorBox.textContent =
-                  "That email is already registered. Please log in instead.";
-                errorBox.classList.add("active");
-              } else {
-                throw error;
-              }
-            } else {
-              statusBox.textContent =
-                "Account created. Loading your first step…";
-              statusBox.classList.add("active");
-
-              redirectAfterAuth();
-            }
+            throw error;
           }
-        } catch (err) {
-          console.error("Auth error", err);
-          errorBox.textContent =
-            err?.message ||
-            "Something went wrong while authenticating. Please try again.";
-          errorBox.classList.add("active");
-        } finally {
-          submitBtn.disabled = false;
+        } else {
+          statusBox.textContent =
+            "Account created. Loading your first Glass diagnostic…";
+          statusBox.classList.add("active");
+
+          redirectAfterAuth();
         }
       }
+    } catch (err) {
+      console.error("Auth error", err);
+      errorBox.textContent =
+        err?.message ||
+        "Something went wrong while authenticating. Please try again.";
+      errorBox.classList.add("active");
+    } finally {
+      submitBtn.disabled = false;
+    }
+  }
 
-      authForm.addEventListener("submit", handleAuth);
-
-      // Run the auto-redirect check on load
-      maybeSkipLoginIfAlreadySignedIn();
-    </script>
+  authForm.addEventListener("submit", handleAuth);
+</script>
   </body>
 </html>
