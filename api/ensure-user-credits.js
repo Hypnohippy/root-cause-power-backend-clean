@@ -31,7 +31,7 @@ export default async function handler(req, res) {
 
     // Decide default plan & credits
     let plan = "free";
-    let credits = 8;
+    let credits = 30;
 
     // Special case: YOU are VIP with huge credits for demos
     const founderEmail = "david@fuelgeist.co.uk"; // change if needed
