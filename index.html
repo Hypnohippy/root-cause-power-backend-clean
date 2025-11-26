@@ -14309,7 +14309,71 @@
         });
       })();
     </script>
+<!-- Persistent Credits Badge -->
+<div
+  id="rh-credits-badge"
+  class="fixed top-4 right-4 z-40 px-3 py-1 rounded-full bg-slate-900/80 text-emerald-300 text-xs border border-emerald-500/40 shadow"
+>
+  Credits: <span id="rh-credits-count">8</span>
+</div>
 
+<script>
+  (function () {
+    const KEY = "roothealth_credits";
+    const INITIAL = 8;
+    const el = document.getElementById("rh-credits-count");
+    if (!el) return;
+
+    let credits = INITIAL;
+    const stored = localStorage.getItem(KEY);
+    const parsed = parseInt(stored, 10);
+    if (!Number.isNaN(parsed)) {
+      credits = parsed;
+    }
+
+    function render() {
+      el.textContent = String(credits);
+    }
+
+    function save() {
+      localStorage.setItem(KEY, String(credits));
+    }
+
+    window.RootHealthCredits = {
+      get() {
+        return credits;
+      },
+      set(v) {
+        credits = Math.max(0, parseInt(v, 10) || 0);
+        save();
+        render();
+      },
+      spend(amount) {
+        const n = parseInt(amount, 10) || 1;
+        if (credits < n) return false;
+        credits -= n;
+        save();
+        render();
+        return true;
+      },
+      reset() {
+        credits = INITIAL;
+        save();
+        render();
+      }
+    };
+
+    render();
+  })();
+</script>
+
+<!-- Floating Glass Human Diagnostic button -->
+<a
+  href="/glass/"
+  class="fixed bottom-4 right-4 z-50 px-4 py-2 rounded-full bg-emerald-500 text-white text-sm shadow-lg hover:bg-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:ring-offset-2 focus:ring-offset-slate-900"
+>
+  Open Glass Human Diagnostic
+</a>
 
 </body>
 </html>
