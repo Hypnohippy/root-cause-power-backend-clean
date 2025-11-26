@@ -26,7 +26,7 @@ async function ensureUserCredits(userId) {
     .insert({
       user_id: userId,
       plan: "free",
-      credits_remaining: 8,
+      credits_remaining: 30,
       voice_credits_remaining: 0,
       last_reset_at: new Date().toISOString(),
     })
