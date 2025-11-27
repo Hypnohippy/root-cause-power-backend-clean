@@ -6687,24 +6687,7 @@
         // Initialize demo mode flag globally
         window.isDemoVoiceMode = false;
         
-        // AUTO-CHECK: Ensure proper credit initialization on page load
-        window.addEventListener('DOMContentLoaded', function() {
-            setTimeout(() => {
-                const userPlan = JSON.parse(localStorage.getItem('userPlan') || '{"credits": 8, "plan": "free"}');
-                if (userPlan.credits < 8) {
-                    console.log('⚠️ Auto-fixing low credits:', userPlan.credits, '-> 8');
-                    userPlan.credits = 8;
-                    localStorage.setItem('userPlan', JSON.stringify(userPlan));
-                    location.reload();
-                }
-            }, 1000);
-            
-            // ✅ PRODUCTION MODE: Free trial is ONE-TIME ONLY
-            // Trial flags are NEVER reset automatically
-            // To test, use console: window.resetCoachDavidFreeTrial()
-            console.log('✅ FREE TRIAL PRODUCTION MODE - One-time use only');
-        });
-        // NOTE: mediaRecorder variable is shared with Coach David implementation above
+              // NOTE: mediaRecorder variable is shared with Coach David implementation above
         
         // DEPRECATED: Demo voice session no longer used - all users get real Hume AI
         async function initializeDemoVoiceSession() {
