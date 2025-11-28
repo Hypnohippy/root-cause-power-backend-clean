@@ -123,7 +123,8 @@
         
         // DEBUG: Check current credits function
         window.checkCurrentCredits = function() {
-            const userPlan = JSON.parse(localStorage.getItem('userPlan') || '{"credits": 8, "plan": "free"}');
+            const userPlan = JSON.parse(localStorage.getItem('userPlan') || '{"credits": 0, "plan": "free"}'
+);
             console.log('📊 Current credits:', userPlan.credits);
             console.log('📊 Full user plan:', userPlan);
             return userPlan;
@@ -134,7 +135,8 @@
             console.log('💵 Checking Coach David access level...');
             
             // Check user plan and free trial status
-            const userPlan = JSON.parse(localStorage.getItem('userPlan') || '{"credits": 8, "plan": "free"}');
+            const userPlan = JSON.parse(localStorage.getItem('userPlan') || '{"credits": 0, "plan": "free"}'
+);
             let hasUsedFreeTrial = localStorage.getItem('coachDavidFirstUse');
             
             // ZERO TOLERANCE: Once free trial flag is set, it NEVER resets
@@ -802,7 +804,8 @@
                     const syncEmail = email || this.getSyncEmail();
                     if (!syncEmail) return false;
                     
-                    const userPlan = JSON.parse(localStorage.getItem('userPlan') || '{"credits": 8, "plan": "free"}');
+                    const userPlan = JSON.parse(localStorage.getItem('userPlan') || '{"credits": 0, "plan": "free"}'
+);
                     
                     console.log(`🔄 Syncing ${userPlan.credits} credits to server for ${syncEmail}...`);
                     
@@ -871,7 +874,8 @@
                 if (!syncEmail) return; // No email = no sync
                 
                 // CHECK: Only paid subscribers get cross-device sync
-                const userPlan = JSON.parse(localStorage.getItem('userPlan') || '{"credits": 8, "plan": "free"}');
+                const userPlan = JSON.parse(localStorage.getItem('userPlan') || '{"credits": 0, "plan": "free"}'
+);
                 if (userPlan.plan === 'free') {
                     console.log('🚫 FREE USER: Cross-device sync disabled - upgrade to sync!');
                     return; // Block sync for free users
@@ -882,7 +886,7 @@
                 // Try to get latest credits from server
                 const serverData = await this.getCreditsFromServer();
                 if (serverData) {
-                    const localPlan = JSON.parse(localStorage.getItem('userPlan') || '{"credits": 8, "plan": "free"}');
+                    const localPlan = JSON.parse(localStorage.getItem('userPlan') || '{"credits": 0, "plan": "free"}');
                     
                     // Use higher credit count (local vs server)
                     if (serverData.credits > localPlan.credits) {
@@ -901,7 +905,7 @@
             // Show sync prompt (only when needed)
             showSyncPrompt(reason = 'general') {
                 // CHECK: Only show sync to paid subscribers
-                const userPlan = JSON.parse(localStorage.getItem('userPlan') || '{"credits": 8, "plan": "free"}');
+                const userPlan = JSON.parse(localStorage.getItem('userPlan') || '{"credits": 0, "plan": "free"}');
                 if (userPlan.plan === 'free') {
                     console.log('🚫 FREE USER: Sync prompt blocked - showing upgrade modal instead');
                     this.showUpgradeForSyncModal();
@@ -1037,7 +1041,7 @@
                 
                 // Get server credits
                 const serverData = await this.getCreditsFromServer(email);
-                const localPlan = JSON.parse(localStorage.getItem('userPlan') || '{"credits": 8, "plan": "free"}');
+                const localPlan = JSON.parse(localStorage.getItem('userPlan') || '{"credits": 0, "plan": "free"}');
                 
                 if (serverData && serverData.credits > localPlan.credits) {
                     // Server has more credits
@@ -3683,7 +3687,7 @@ const currentCredits = (typeof userPlan.credits === "number") ? userPlan.credits
             console.log(`🤖 Booking session with Coach ${coachName}`);
             
             // CHECK: Ensure user has enough credits BEFORE opening interface
-            const userPlan = JSON.parse(localStorage.getItem('userPlan') || '{"credits": 8, "plan": "free"}');
+            const userPlan = JSON.parse(localStorage.getItem('userPlan') || '{"credits": 0, "plan": "free"}');
             console.log(`💳 Current credits: ${userPlan.credits}, required: ${creditCost}`);
             
             if (userPlan.credits < creditCost) {
@@ -3708,7 +3712,7 @@ const currentCredits = (typeof userPlan.credits === "number") ? userPlan.credits
             // Legal documents now available via footer links - no blocking required
             
             // ENFORCE CREDIT LIMITS - No more demo mode
-            const userPlan = JSON.parse(localStorage.getItem('userPlan') || '{"credits": 8, "plan": "free"}');
+            const userPlan = JSON.parse(localStorage.getItem('userPlan') || '{"credits": 0, "plan": "free"}');
             console.log(`💳 Current credits: ${userPlan.credits}, required: ${creditCost}`);
             
             if (userPlan.credits < creditCost) {
@@ -3718,7 +3722,7 @@ const currentCredits = (typeof userPlan.credits === "number") ? userPlan.credits
                 if (typeof SeamlessSync !== 'undefined' && SeamlessSync.getSyncEmail()) {
                     console.log('🔄 Checking synced devices for more credits...');
                     SeamlessSync.autoSync().then(() => {
-                        const updatedPlan = JSON.parse(localStorage.getItem('userPlan') || '{"credits": 8, "plan": "free"}');
+                        const updatedPlan = JSON.parse(localStorage.getItem('userPlan') || '{"credits": 0, "plan": "free"}');
                         if (updatedPlan.credits >= creditCost) {
                             console.log('✅ Found synced credits! Retrying...');
                             bookVoiceCoachSession(coachName, creditCost); // Retry
@@ -5666,7 +5670,7 @@ const currentCredits = (typeof userPlan.credits === "number") ? userPlan.credits
         
         // Enhanced credit checking for all features
         function checkCreditsBeforeAction(actionName, creditCost, contextData = {}) {
-            const userPlan = JSON.parse(localStorage.getItem('userPlan') || '{"credits": 8, "plan": "free"}');
+            const userPlan = JSON.parse(localStorage.getItem('userPlan') || '{"credits": 0, "plan": "free"}');
             
             console.log(`💰 Checking credits for ${actionName}: needs ${creditCost}, has ${userPlan.credits}`);
             
@@ -8061,7 +8065,7 @@ const currentCredits = (typeof userPlan.credits === "number") ? userPlan.credits
                 return;
             }
             
-            const userPlan = JSON.parse(localStorage.getItem('userPlan') || '{"credits": 8, "plan": "free"}');
+            const userPlan = JSON.parse(localStorage.getItem('userPlan') || '{"credits": 0, "plan": "free"}');
             
             // CHECK IF ASSESSMENT PACKAGE HAS BEEN PAID FOR (3 credits for ENTIRE assessment once)
             const assessmentProgress = JSON.parse(localStorage.getItem('assessmentProgress') || '{}');
@@ -12054,7 +12058,7 @@ const currentCredits = (typeof userPlan.credits === "number") ? userPlan.credits
             console.log(`🛒 Starting credit purchase: ${packageType}, ${credits} credits, £${price}`);
             
             // Check if user is a subscriber (credit top-ups are for subscribers only)
-            const userPlan = JSON.parse(localStorage.getItem('userPlan') || '{"credits": 8, "plan": "free"}');
+            const userPlan = JSON.parse(localStorage.getItem('userPlan') || '{"credits": 0, "plan": "free"}');
             
             if (userPlan.plan === 'free') {
                 // Free users must subscribe first
@@ -12326,7 +12330,7 @@ const currentCredits = (typeof userPlan.credits === "number") ? userPlan.credits
             const newTotal = currentCredits + credits;
             
             // Update credits in user plan properly
-            const userPlan = JSON.parse(localStorage.getItem('userPlan') || '{"credits": 8, "plan": "free"}');
+            const userPlan = JSON.parse(localStorage.getItem('userPlan') || '{"credits": 0, "plan": "free"}');
             userPlan.credits = (userPlan.credits || 0) + credits;
             if (packageType === 'vip') {
                 userPlan.plan = 'vip';
@@ -12483,7 +12487,7 @@ const currentCredits = (typeof userPlan.credits === "number") ? userPlan.credits
             console.log('💳 Attempting to purchase credit pack:', { packType, credits, priceGBP });
             
             // BLOCK FREE USERS FROM BUYING CREDITS - FORCE SUBSCRIPTION FIRST
-            const userPlan = JSON.parse(localStorage.getItem('userPlan') || '{"credits": 8, "plan": "free"}');
+            const userPlan = JSON.parse(localStorage.getItem('userPlan') || '{"credits": 0, "plan": "free"}');
             
             if (userPlan.plan === 'free') {
                 console.log('❌ BLOCKED: Free users cannot buy credits - subscription required');
