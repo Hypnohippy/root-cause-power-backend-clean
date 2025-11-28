@@ -3623,22 +3623,25 @@
                     return defaultPlan;
                 }
                 const userPlan = JSON.parse(storedPlan);
-            } catch (error) {
-                console.log('🔧 JSON parsing error in deductCredits, resetting...', error);
-                const defaultPlan = {"credits": 8, "plan": "free"};
-                localStorage.setItem('userPlan', JSON.stringify(defaultPlan));
-                return defaultPlan;
-            }
-            const userPlan = getCurrentCredits();
-            
-            // VIP users have unlimited credits - don't deduct
-            if (userPlan.plan === 'vip') {
-                console.log('👑 VIP user - unlimited credits, no deduction needed');
-                return 999999; // Return unlimited
-            }
-            
-            const currentCredits = userPlan.credits || 8;
-            
+           } catch (error) {
+    console.log('🔧 JSON parsing error in deductCredits, resetting...', error);
+
+    // 👉 IMPORTANT: default to 0, NOT 8
+    const defaultPlan = { credits: 0, plan: "free" };
+    localStorage.setItem('userPlan', JSON.stringify(defaultPlan));
+    return defaultPlan;
+}
+const userPlan = getCurrentCredits();
+
+// VIP users have unlimited credits - don't deduct
+if (userPlan.plan === 'vip') {
+    console.log('👑 VIP user - unlimited credits, no deduction needed');
+    return 999999; // Return unlimited
+}
+
+// 👉 IMPORTANT: no more hidden “8” fallback
+const currentCredits = (typeof userPlan.credits === "number") ? userPlan.credits : 0;
+ 
             if (currentCredits < amount) {
                 showInsufficientCreditsModal(feature, amount);
                 return false;
