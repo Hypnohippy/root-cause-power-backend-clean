@@ -1,106 +1,11 @@
-// Vercel Serverless Function - Groq AI Chat for All Text-Based Coaches
-// Handles: Sarah, Marcus, Elena, Alex, Sophia, and other text coaches
-// Coach David uses Hume AI (separate hume-token.js file)
+// api/groq-chat.js
+// Groq AI Chat for all text-based coaches (Sarah, Marcus, Elena, Alex, Sophia, etc.)
+// NOW WITH SUPABASE CREDIT GATING: 30-credit trial for free users, VIP unlimited.
 
 import Groq from "groq-sdk";
 import { supabaseServer } from "./supabaseClient.js";
 
-// =========================
-// Credit system integration
-// =========================
-
-const FREE_TRIAL_CREDITS = 30; // default credits for new users
-const COST_PER_CHAT = 2;       // cost in credits per AI message
-
-async function ensureUserCreditsRow(userId) {
-  // Try to load existing row
-  const { data, error } = await supabaseServer
-    .from("user_credits")
-    .select("*")
-    .eq("user_id", userId)
-    .maybeSingle();
-
-  // PGRST116 = no rows found
-  if (error && error.code !== "PGRST116") {
-    console.error("[Credits] Supabase select error:", error);
-    throw new Error("Failed to load credits");
-  }
-
-  if (data) {
-    return data;
-  }
-
-  // No row yet -> create a free trial row
-  const { data: inserted, error: insertError } = await supabaseServer
-    .from("user_credits")
-    .insert({
-      user_id: userId,
-      plan: "free",
-      credits_remaining: FREE_TRIAL_CREDITS,
-      last_reset_at: new Date().toISOString()
-    })
-    .select()
-    .single();
-
-  if (insertError) {
-    console.error("[Credits] Supabase insert error:", insertError);
-    throw new Error("Failed to create credits row");
-  }
-
-  return inserted;
-}
-
-async function checkAndSpendCredits(userId) {
-  const creditsRow = await ensureUserCreditsRow(userId);
-
-  // VIP users: do not decrement, effectively unlimited
-  if (creditsRow.plan === "vip") {
-    return {
-      plan: creditsRow.plan,
-      creditsRemaining: creditsRow.credits_remaining ?? FREE_TRIAL_CREDITS,
-      spent: 0
-    };
-  }
-
-  const current = creditsRow.credits_remaining ?? 0;
-
-  if (current <= 0) {
-    return {
-      plan: creditsRow.plan,
-      creditsRemaining: current,
-      spent: 0,
-      outOfCredits: true
-    };
-  }
-
-  const newCredits = Math.max(0, current - COST_PER_CHAT);
-
-  const { data: updated, error: updateError } = await supabaseServer
-    .from("user_credits")
-    .update({
-      credits_remaining: newCredits
-    })
-    .eq("user_id", userId)
-    .select()
-    .single();
-
-  if (updateError) {
-    console.error("[Credits] Supabase update error:", updateError);
-    throw new Error("Failed to update credits");
-  }
-
-  return {
-    plan: updated.plan,
-    creditsRemaining: updated.credits_remaining,
-    spent: COST_PER_CHAT,
-    outOfCredits: false
-  };
-}
-
-// =========================
-// Coach personalities
-// =========================
-
+// ---------- Coach personalities (as before) ----------
 const COACH_PROMPTS = {
   sarah: {
     name: "Coach Sarah",
@@ -307,7 +212,7 @@ Keep responses calming, practical, and 150-250 words.`
   }
 };
 
-// Rate limiting (simple in-memory - upgrade to Redis for production scale)
+// ---------- Simple in-memory rate limit (unchanged) ----------
 const rateLimitStore = new Map();
 
 function checkRateLimit(userId, maxRequests = 100, windowMs = 3600000) {
@@ -338,8 +243,88 @@ function checkRateLimit(userId, maxRequests = 100, windowMs = 3600000) {
   return { allowed: true, remaining: maxRequests - userLimit.count };
 }
 
+// ---------- Supabase credit helpers (NEW) ----------
+
+const TEXT_COACH_COST = 1; // 1 credit per message for now
+
+async function ensureUserCredits(userId) {
+  const { data, error } = await supabaseServer
+    .from("user_credits")
+    .select("*")
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  // PGRST116 = no rows
+  if (error && error.code !== "PGRST116") {
+    throw error;
+  }
+
+  if (data) return data;
+
+  const { data: inserted, error: insertError } = await supabaseServer
+    .from("user_credits")
+    .insert({
+      user_id: userId,
+      plan: "free",
+      credits_remaining: 30,
+      voice_credits_remaining: 0,
+      last_reset_at: new Date().toISOString()
+    })
+    .select()
+    .single();
+
+  if (insertError) throw insertError;
+  return inserted;
+}
+
+async function debitTextCoachCredit(userId) {
+  // 1) Ensure row exists
+  let creditsRow = await ensureUserCredits(userId);
+
+  // 2) VIP users: unlimited
+  if (creditsRow.plan === "vip") {
+    return {
+      ok: true,
+      plan: "vip",
+      credits_remaining: creditsRow.credits_remaining ?? 999999,
+      skipped_decrement: true
+    };
+  }
+
+  // 3) Not enough credits?
+  if ((creditsRow.credits_remaining ?? 0) < TEXT_COACH_COST) {
+    return {
+      ok: false,
+      plan: creditsRow.plan,
+      credits_remaining: creditsRow.credits_remaining ?? 0,
+      insufficient: true
+    };
+  }
+
+  const newCredits = (creditsRow.credits_remaining ?? 0) - TEXT_COACH_COST;
+
+  const { data: updated, error: updateError } = await supabaseServer
+    .from("user_credits")
+    .update({
+      credits_remaining: newCredits
+    })
+    .eq("user_id", userId)
+    .select()
+    .single();
+
+  if (updateError) throw updateError;
+
+  return {
+    ok: true,
+    plan: updated.plan,
+    credits_remaining: updated.credits_remaining ?? newCredits
+  };
+}
+
+// ---------- Main handler ----------
+
 export default async function handler(req, res) {
-  // CORS headers
+  // CORS
   res.setHeader("Access-Control-Allow-Credentials", true);
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET,OPTIONS,POST");
@@ -361,11 +346,11 @@ export default async function handler(req, res) {
       coach,
       message,
       conversationHistory,
-      userId,
+      userId,          // IMPORTANT: must be passed from frontend
       assessmentData
     } = req.body;
 
-    // Validation
+    // Basic validation
     if (!message || typeof message !== "string") {
       return res.status(400).json({
         success: false,
@@ -388,14 +373,13 @@ export default async function handler(req, res) {
     }
 
     if (!userId) {
-      // To prevent abuse, require a logged-in user for now
       return res.status(401).json({
         success: false,
-        error: "Login required to use AI coaches"
+        error: "User ID required for credit-controlled access"
       });
     }
 
-    // Rate limiting
+    // Rate limit
     const rateLimit = checkRateLimit(userId);
     if (!rateLimit.allowed) {
       return res.status(429).json({
@@ -405,28 +389,28 @@ export default async function handler(req, res) {
       });
     }
 
-    // Check credits before calling AI
+    // CREDIT GATING (NEW)
     let creditInfo;
     try {
-      creditInfo = await checkAndSpendCredits(userId);
-    } catch (creditErr) {
-      console.error("❌ Credit check error:", creditErr);
+      creditInfo = await debitTextCoachCredit(userId);
+    } catch (err) {
+      console.error("❌ Credit debit error:", err);
       return res.status(500).json({
         success: false,
-        error: "Unable to check credits. Please try again shortly."
+        error: "Credit system error"
       });
     }
 
-    if (creditInfo.outOfCredits) {
+    if (!creditInfo.ok && creditInfo.insufficient) {
       return res.status(402).json({
         success: false,
-        error: "You are out of credits. Please upgrade or top up.",
+        error: "Not enough credits for this coach",
         plan: creditInfo.plan,
-        credits_remaining: creditInfo.creditsRemaining
+        credits_remaining: creditInfo.credits_remaining
       });
     }
 
-    // Check API key
+    // Check Groq API key
     if (!process.env.GROQ_API_KEY) {
       console.error("❌ GROQ_API_KEY not configured");
       return res.status(500).json({
@@ -435,16 +419,15 @@ export default async function handler(req, res) {
       });
     }
 
-    // Initialize Groq
     const groq = new Groq({
       apiKey: process.env.GROQ_API_KEY
     });
 
-    // Get coach config (case insensitive)
+    // Coach config
     const coachKey = coach.toLowerCase();
     const coachConfig = COACH_PROMPTS[coachKey] || COACH_PROMPTS.sarah;
 
-    // Build messages array
+    // Build messages
     const messages = [
       {
         role: "system",
@@ -452,7 +435,6 @@ export default async function handler(req, res) {
       }
     ];
 
-    // Add assessment data context if provided
     if (assessmentData && Object.keys(assessmentData).length > 0) {
       const contextMessage = `User's Health Assessment Data: ${JSON.stringify(
         assessmentData,
@@ -465,13 +447,11 @@ export default async function handler(req, res) {
       });
     }
 
-    // Add conversation history (last 10 messages to avoid token limits)
     if (conversationHistory && Array.isArray(conversationHistory)) {
       const recentHistory = conversationHistory.slice(-10);
       messages.push(...recentHistory);
     }
 
-    // Add current message
     messages.push({
       role: "user",
       content: message
@@ -481,10 +461,9 @@ export default async function handler(req, res) {
       `🤖 Groq API call for ${coachConfig.name} (${messages.length} messages) - userId=${userId}`
     );
 
-    // Call Groq API
     const completion = await groq.chat.completions.create({
       model: "llama-3.1-8b-instant",
-      messages: messages,
+      messages,
       temperature: 0.7,
       max_tokens: 600,
       top_p: 0.9,
@@ -494,7 +473,9 @@ export default async function handler(req, res) {
     const aiResponse = completion.choices[0].message.content;
 
     console.log(
-      `✅ ${coachConfig.name} response: ${aiResponse.length} chars (userId=${userId})`
+      `✅ ${coachConfig.name} response: ${aiResponse.length} chars, credits_remaining=${
+        creditInfo.credits_remaining
+      }`
     );
 
     return res.status(200).json({
@@ -502,12 +483,12 @@ export default async function handler(req, res) {
       coach: coachConfig.name,
       specialty: coachConfig.specialty,
       response: aiResponse,
-      rateLimit: {
-        remaining: rateLimit.remaining
-      },
       credits: {
         plan: creditInfo.plan,
-        remaining: creditInfo.creditsRemaining
+        remaining: creditInfo.credits_remaining
+      },
+      rateLimit: {
+        remaining: rateLimit.remaining
       }
     });
   } catch (error) {
