@@ -14044,79 +14044,145 @@ const currentCredits = (typeof userPlan.credits === "number") ? userPlan.credits
         // =========================================
         // SEND COACH MESSAGE (Enhanced)
         // =========================================
-        
-        window.sendCoachMessage = async function(coachName) {
-            const messageInput = document.getElementById('coach-message-input');
-            const chatContainer = document.getElementById('coach-chat-messages');
-            
-            if (!messageInput || !chatContainer) {
-                console.error('❌ Chat elements not found');
-                return;
-            }
-            
-            const userMessage = messageInput.value.trim();
-            
-            if (!userMessage) {
-                console.log('Empty message, ignoring');
-                return;
-            }
-            
-            // Clear input immediately
-            messageInput.value = '';
-            
-            // Add user message to chat
-            addMessageToChat('user', userMessage, chatContainer);
-            
-            // Show typing indicator
-            const typingIndicator = addTypingIndicator(chatContainer);
-            
-            try {
-                // Get conversation history
-                const conversationHistory = window[`${coachName}ConversationHistory`] || [];
-                
-                // Get assessment data if available
-                const assessmentData = localStorage.getItem('assessmentResults') 
-                    ? JSON.parse(localStorage.getItem('assessmentResults')) 
-                    : null;
-                
-                // Send to backend
-                const result = await sendMessageToCoach(
-                    coachName, 
-                    userMessage, 
-                    conversationHistory,
-                    assessmentData
-                );
-                
-                // Remove typing indicator
-                typingIndicator.remove();
-                
-                if (result.success) {
-                    // Add AI response to chat
-                    addMessageToChat('assistant', result.response, chatContainer);
-                    
-                    // Update conversation history
-                    conversationHistory.push(
-                        { role: 'user', content: userMessage },
-                        { role: 'assistant', content: result.response }
-                    );
-                    window[`${coachName}ConversationHistory`] = conversationHistory;
-                    
-                    // Deduct credit after successful response
-                    if (typeof deductCredits === 'function') {
-                        deductCredits(1, `Coach ${coachName} Chat`);
-                    }
-                    
-                } else {
-                    // Show error in chat
-                    addMessageToChat('system', `Error: ${result.error}`, chatContainer);
-                }
-                
-            } catch (error) {
-                console.error('Send message error:', error);
-                typingIndicator.remove();
-                addMessageToChat('system', 'Failed to send message. Please try again.', chatContainer);
-            }
-        };
+        // =========================================
+// SEND COACH MESSAGE (with Supabase credits)
+// =========================================
+
+window.sendCoachMessage = async function (coachName) {
+  const messageInput = document.getElementById("coach-message-input");
+  const chatContainer = document.getElementById("coach-chat-messages");
+
+  if (!messageInput || !chatContainer) {
+    console.error("❌ Chat elements not found");
+    return;
+  }
+
+  const userMessage = messageInput.value.trim();
+  if (!userMessage) return;
+
+  // Clear input
+  messageInput.value = "";
+
+  // Add user message to UI
+  addMessageToChat("user", userMessage, chatContainer);
+
+  // Typing indicator
+  const typingIndicator = addTypingIndicator(chatContainer);
+
+  try {
+    // Conversation history
+    const historyKey = `${coachName}ConversationHistory`;
+    const conversationHistory = window[historyKey] || [];
+
+    if (!conversationHistory.length && typeof getCoachSystemPrompt === "function") {
+      conversationHistory.push({
+        role: "system",
+        content: getCoachSystemPrompt(coachName),
+      });
+    }
+
+    // Load assessment data if present
+    const assessmentData = localStorage.getItem("assessmentResults")
+      ? JSON.parse(localStorage.getItem("assessmentResults"))
+      : null;
+
+    // Load email for credits
+    const email =
+      localStorage.getItem("syncEmail") ||
+      localStorage.getItem("userEmail") ||
+      localStorage.getItem("user_email");
+
+    if (!email) {
+      typingIndicator.remove();
+      addMessageToChat(
+        "system",
+        "We couldn't identify your account. Please log out and log back in.",
+        chatContainer
+      );
+      return;
+    }
+
+    // ---- CREDIT CHECK (before sending to AI) ----
+    const creditRes = await fetch("/api/credits", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email,
+        type: "daily",
+        cost: 1, // 1 credit per message
+      }),
+    });
+
+    // Not enough credits
+    if (creditRes.status === 402) {
+      const creditData = await creditRes.json().catch(() => ({}));
+      typingIndicator.remove();
+
+      const remaining =
+        creditData.credits_remaining != null
+          ? creditData.credits_remaining
+          : 0;
+
+      addMessageToChat(
+        "system",
+        `You've run out of chat credits. Remaining: ${remaining}. Please upgrade to continue.`,
+        chatContainer
+      );
+      return;
+    }
+
+    // Other server error
+    if (!creditRes.ok) {
+      typingIndicator.remove();
+      addMessageToChat(
+        "system",
+        "We had a problem checking your credits. Try again in a moment.",
+        chatContainer
+      );
+      return;
+    }
+
+    const creditData = await creditRes.json().catch(() => ({}));
+    console.log(
+      `[credits] ✔ Charged 1 credit. Remaining = ${creditData.credits_remaining}`
+    );
+
+    // ---- AI REQUEST ----
+    const result = await sendMessageToCoach(
+      coachName,
+      userMessage,
+      conversationHistory,
+      assessmentData
+    );
+
+    typingIndicator.remove();
+
+    if (result && result.success) {
+      addMessageToChat("assistant", result.response, chatContainer);
+
+      conversationHistory.push(
+        { role: "user", content: userMessage },
+        { role: "assistant", content: result.response }
+      );
+      window[historyKey] = conversationHistory;
+    } else {
+      addMessageToChat(
+        "system",
+        `Error: ${result?.error || "Unknown AI error"}`,
+        chatContainer
+      );
+    }
+  } catch (error) {
+    typingIndicator.remove();
+    console.error("Send message error:", error);
+    addMessageToChat(
+      "system",
+      "Failed to send message. Please try again.",
+      chatContainer
+    );
+  }
+};
+
         
         // =========================================
         // TESTING FUNCTIONS
