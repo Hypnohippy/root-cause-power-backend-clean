@@ -421,56 +421,70 @@
     submitBtn.disabled = true;
     const mode = getMode();
 
-    try {
-      if (mode === "login") {
-        const { error } = await supabase.auth.signInWithPassword({
-          email,
-          password
-        });
-        if (error) throw error;
+     try {
+    if (mode === "login") {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
+      if (error) throw error;
 
-        statusBox.textContent = "Logged in. Loading your journey…";
+      // 🔹 NEW: remember which email is logged in (for credits)
+      try {
+        localStorage.setItem("syncEmail", email);
+      } catch (e) {
+        console.warn("Could not store syncEmail", e);
+      }
+
+      statusBox.textContent = "Logged in. Loading your journey…";
+      statusBox.classList.add("active");
+
+      redirectAfterAuth();
+    } else {
+      const { error } = await supabase.auth.signUp({
+        email,
+        password
+      });
+
+      if (error) {
+        if (
+          error.message &&
+          error.message.toLowerCase().includes("exists")
+        ) {
+          setMode("login");
+          errorBox.textContent =
+            "That email is already registered. Please log in instead.";
+          errorBox.classList.add("active");
+        } else {
+          throw error;
+        }
+      } else {
+        // 🔹 NEW: remember email on successful sign-up too
+        try {
+          localStorage.setItem("syncEmail", email);
+        } catch (e) {
+          console.warn("Could not store syncEmail", e);
+        }
+
+        statusBox.textContent =
+          "Account created. Loading your first step…";
         statusBox.classList.add("active");
 
         redirectAfterAuth();
-      } else {
-        const { error } = await supabase.auth.signUp({
-          email,
-          password
-        });
-
-        if (error) {
-          if (
-            error.message &&
-            error.message.toLowerCase().includes("exists")
-          ) {
-            setMode("login");
-            errorBox.textContent =
-              "That email is already registered. Please log in instead.";
-            errorBox.classList.add("active");
-          } else {
-            throw error;
-          }
-        } else {
-          statusBox.textContent =
-            "Account created. Loading your first step…";
-          statusBox.classList.add("active");
-
-          redirectAfterAuth();
-        }
       }
-    } catch (err) {
-      console.error("Auth error", err);
-      errorBox.textContent =
-        err?.message ||
-        "Something went wrong while authenticating. Please try again.";
-      errorBox.classList.add("active");
-    } finally {
-      submitBtn.disabled = false;
     }
+  } catch (err) {
+    console.error("Auth error", err);
+    errorBox.textContent =
+      err?.message ||
+      "Something went wrong while authenticating. Please try again.";
+    errorBox.classList.add("active");
+  } finally {
+    submitBtn.disabled = false;
   }
 
   authForm.addEventListener("submit", handleAuth);
+
 </script>
 
   </body>
