@@ -1,70 +1,82 @@
 // api/credits.js
-import { supabaseServer } from "./supabaseClient.js";
+// Central credit system for Root Health
+// - Uses Supabase service role
+// - 30 text credits by default
+// - Daily credits ("daily") and voice credits ("voice")
 
-/**
- * Ensure a user_credits row exists for this user.
- * - Default plan: "free"
- * - Default daily credits: 8
- * - Voice credits default: 0
- */
+import { createClient } from "@supabase/supabase-js";
+
+// 🔐 Supabase admin client (server-side only)
+const SUPABASE_URL = "https://bechmxbywqhsauhctewo.supabase.co";
+const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+if (!SERVICE_ROLE_KEY) {
+  console.error("[credits] Missing SUPABASE_SERVICE_ROLE_KEY in environment");
+}
+
+const supabaseAdmin = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
+
+// Default starting credits
+const DEFAULT_DAILY_CREDITS = 30;
+const DEFAULT_VOICE_CREDITS = 0;
+
+// Helper: find auth user by email
+async function getUserByEmail(email) {
+  const { data, error } = await supabaseAdmin.auth.admin.listUsers({
+    email,
+    perPage: 1,
+  });
+
+  if (error) {
+    console.error("[credits] listUsers error:", error);
+    throw error;
+  }
+
+  if (!data || !data.users || data.users.length === 0) {
+    return null;
+  }
+
+  return data.users[0];
+}
+
+// Helper: ensure a user_credits row exists for this user_id
 async function ensureUserCredits(userId) {
-  const { data, error } = await supabaseServer
+  // Try to fetch existing row
+  const { data, error } = await supabaseAdmin
     .from("user_credits")
     .select("*")
     .eq("user_id", userId)
     .maybeSingle();
 
-  // PGRST116 = no rows found in maybeSingle
+  // PGRST116 = no rows found
   if (error && error.code !== "PGRST116") {
+    console.error("[credits] select user_credits error:", error);
     throw error;
   }
 
   if (data) return data;
 
-  const { data: inserted, error: insertError } = await supabaseServer
+  // No row yet → create one
+  const { data: inserted, error: insertError } = await supabaseAdmin
     .from("user_credits")
     .insert({
       user_id: userId,
       plan: "free",
-     credits_remaining: 30,
-voice_credits_remaining: 0,
-
+      credits_remaining: DEFAULT_DAILY_CREDITS,
+      voice_credits_remaining: DEFAULT_VOICE_CREDITS,
       last_reset_at: new Date().toISOString(),
     })
     .select()
     .single();
 
-  if (insertError) throw insertError;
+  if (insertError) {
+    console.error("[credits] insert user_credits error:", insertError);
+    throw insertError;
+  }
+
   return inserted;
 }
 
-/**
- * Helper: get Supabase user from an email.
- */
-async function getUserByEmail(email) {
-  const {
-    data: { users },
-    error,
-  } = await supabaseServer.auth.admin.listUsers({
-    email,
-    perPage: 1,
-  });
-
-  if (error) throw error;
-  if (!users || users.length === 0) return null;
-  return users[0];
-}
-
-/**
- * API handler:
- *
- * GET /api/credits?email=...
- *   → returns current credits + plan
- *
- * POST /api/credits
- *   body: { email, type: "daily" | "voice", cost: number }
- *   → decrements credits (unless plan === "vip")
- */
 export default async function handler(req, res) {
   try {
     // Basic CORS
@@ -77,6 +89,13 @@ export default async function handler(req, res) {
 
     res.setHeader("Access-Control-Allow-Origin", "*");
 
+    if (!SERVICE_ROLE_KEY) {
+      return res
+        .status(500)
+        .json({ error: "Server misconfigured: missing service role key" });
+    }
+
+    // ---------- GET = check credits ----------
     if (req.method === "GET") {
       const email = req.query.email;
       if (!email) {
@@ -91,6 +110,7 @@ export default async function handler(req, res) {
       const creditsRow = await ensureUserCredits(user.id);
 
       return res.status(200).json({
+        ok: true,
         user_id: user.id,
         email,
         plan: creditsRow.plan,
@@ -100,6 +120,7 @@ export default async function handler(req, res) {
       });
     }
 
+    // ---------- POST = consume credits ----------
     if (req.method === "POST") {
       const { email, type, cost } = req.body || {};
 
@@ -116,7 +137,7 @@ export default async function handler(req, res) {
 
       let creditsRow = await ensureUserCredits(user.id);
 
-      // VIP users: no decrement, always allowed
+      // VIP users never decremented
       if (creditsRow.plan === "vip") {
         return res.status(200).json({
           ok: true,
@@ -127,54 +148,58 @@ export default async function handler(req, res) {
         });
       }
 
-      let updated = { ...creditsRow };
+      let nextDaily = creditsRow.credits_remaining ?? DEFAULT_DAILY_CREDITS;
+      let nextVoice = creditsRow.voice_credits_remaining ?? DEFAULT_VOICE_CREDITS;
 
       if (type === "daily") {
-        if (creditsRow.credits_remaining < cost) {
+        if (nextDaily < cost) {
           return res.status(402).json({
             error: "Not enough daily credits",
-            credits_remaining: creditsRow.credits_remaining,
+            credits_remaining: nextDaily,
           });
         }
-        updated.credits_remaining = creditsRow.credits_remaining - cost;
+        nextDaily -= cost;
       } else if (type === "voice") {
-        const currentVoice = creditsRow.voice_credits_remaining ?? 0;
-        if (currentVoice < cost) {
+        if (nextVoice < cost) {
           return res.status(402).json({
             error: "Not enough voice credits",
-            voice_credits_remaining: currentVoice,
+            voice_credits_remaining: nextVoice,
           });
         }
-        updated.voice_credits_remaining = currentVoice - cost;
+        nextVoice -= cost;
       } else {
         return res.status(400).json({ error: "Unknown credit type" });
       }
 
-      const { data: saved, error: updateError } = await supabaseServer
+      const { data: updated, error: updateError } = await supabaseAdmin
         .from("user_credits")
         .update({
-          credits_remaining: updated.credits_remaining,
-          voice_credits_remaining: updated.voice_credits_remaining,
+          credits_remaining: nextDaily,
+          voice_credits_remaining: nextVoice,
         })
         .eq("user_id", user.id)
         .select()
         .single();
 
-      if (updateError) throw updateError;
+      if (updateError) {
+        console.error("[credits] update user_credits error:", updateError);
+        throw updateError;
+      }
 
       return res.status(200).json({
         ok: true,
-        plan: saved.plan,
-        credits_remaining: saved.credits_remaining,
-        voice_credits_remaining: saved.voice_credits_remaining ?? 0,
+        plan: updated.plan,
+        credits_remaining: updated.credits_remaining,
+        voice_credits_remaining: updated.voice_credits_remaining ?? 0,
       });
     }
 
+    // Any other method
     return res.status(405).json({ error: "Method not allowed" });
   } catch (err) {
-    console.error("Credits handler error:", err);
+    console.error("[credits] Handler error:", err);
     return res
       .status(500)
-      .json({ error: err.message || "Unexpected server error" });
+      .json({ error: err?.message || "Unexpected server error" });
   }
 }
